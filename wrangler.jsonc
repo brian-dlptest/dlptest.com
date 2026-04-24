@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dlptest",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-04-01",
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "env": {
+    "staging": {
+      "name": "dlptest-staging",
+      "vars": {
+        "ENVIRONMENT": "staging"
+      }
+    }
+  }
+}
