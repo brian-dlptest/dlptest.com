@@ -1,6 +1,7 @@
 # Local FTP / file backups (may contain wp-config.php, uploads, secrets)
 backup/
 
+.DS_Store
 node_modules/
 .wrangler/
 .dev.vars
