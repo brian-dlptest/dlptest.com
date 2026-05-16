@@ -8,7 +8,7 @@
   },
   "env": {
     "staging": {
-      "name": "dlptest-staging",
+      "name": "dlptest-com-staging",
       "vars": {
         "ENVIRONMENT": "staging"
       }
