@@ -1,18 +1,26 @@
 {
   "name": "dlptest.com",
   "private": true,
-  "version": "0.0.1",
-  "description": "DLP Test site — Cloudflare Workers (staging via wrangler env)",
+  "version": "0.1.0",
+  "description": "DLP Test site — Astro on Cloudflare Workers (prod + staging via wrangler env)",
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "dev:staging": "wrangler dev --env staging",
-    "check": "wrangler check",
-    "deploy": "wrangler deploy --env=\"\"",
-    "deploy:staging": "wrangler deploy --env staging"
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:staging": "CLOUDFLARE_ENV=staging astro build",
+    "preview": "wrangler dev --config dist/server/wrangler.json",
+    "check": "tsc --noEmit",
+    "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
+    "deploy:staging": "npm run build:staging && wrangler deploy --config dist/server/wrangler.json --env staging",
+    "r2:create": "wrangler r2 bucket create dlptest-downloads"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.5.1",
+    "astro": "^6.3.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250425.0",
     "typescript": "^5.8.3",
-    "wrangler": "^4.19.0"
+    "wrangler": "^4.92.0"
   }
 }

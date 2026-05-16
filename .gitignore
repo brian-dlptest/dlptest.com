@@ -5,4 +5,10 @@ backup/
 node_modules/
 .wrangler/
 .dev.vars
+.env
+.env.*
+!.env.example
+
+# Astro build output and cache
 dist/
+.astro/

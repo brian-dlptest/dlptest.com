@@ -1,0 +1,45 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+export const prerender = true;
+
+// The FTP test server lives on a separate host (ftp.dlptest.com) outside of
+// Cloudflare. The password rotates and is published on this page. This file
+// is a static placeholder during the rebuild — replace the password below
+// with the current rotating value (or wire a build-time fetch later).
+const ftpHost = "ftp.dlptest.com";
+const ftpUser = "dlpuser";
+const ftpPassword = "REPLACE_BEFORE_LAUNCH";
+const retentionMinutes = 10;
+---
+<BaseLayout title="FTP Test" description="Public FTP server credentials for testing DLP. Files are kept for 10 minutes then deleted.">
+  <h1>FTP Test</h1>
+  <p>
+    Public FTP test server for uploading DLP test files. Uploaded files are
+    deleted after about {retentionMinutes} minutes.
+  </p>
+
+  <table>
+    <tbody>
+      <tr><th>FTP host</th><td><code>{ftpHost}</code></td></tr>
+      <tr><th>User</th><td><code>{ftpUser}</code></td></tr>
+      <tr><th>Password</th><td><code>{ftpPassword}</code></td></tr>
+      <tr><th>Mode</th><td>Passive (active is not supported)</td></tr>
+      <tr><th>Retention</th><td>{retentionMinutes} minutes</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    On Windows, use a client like
+    <a href="https://filezilla-project.org/">FileZilla</a>; the active FTP
+    transport built into <code>cmd.exe</code> does not support passive mode.
+    Import our pre-configured FileZilla profile:
+    <a href="/DLP_Test_FTP_FileZilla.xml">DLP_Test_FTP_FileZilla.xml</a>.
+  </p>
+
+  <h2>IP block list</h2>
+  <p class="muted">
+    To limit hosting costs from automated upload abuse, an IP block list is
+    enforced. If you believe your address has been blocked in error, use the
+    <a href="/contact/">contact page</a>.
+  </p>
+</BaseLayout>

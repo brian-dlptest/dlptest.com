@@ -1,0 +1,88 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { sampleData, downloadFiles, humanSize } from "@/data/sample-data";
+export const prerender = true;
+
+const byGroup = {
+  sample: downloadFiles.filter((f) => f.group === "sample"),
+  office: downloadFiles.filter((f) => f.group === "office"),
+  csv: downloadFiles.filter((f) => f.group === "csv"),
+  ftp: downloadFiles.filter((f) => f.group === "ftp"),
+  state: downloadFiles.filter((f) => f.group === "state"),
+};
+---
+<BaseLayout title="Sample Data" description="Sample PII and PCI test data — names, SSNs, credit card numbers — plus downloadable sample files for DLP testing.">
+  <h1>Sample Data</h1>
+  <p>
+    Copy-paste the table below, or grab one of the prepared files. All values
+    are fabricated test data and should be safe to use as DLP detection
+    targets. Some DLP systems may not trigger on every row depending on the
+    pattern checks they run.
+  </p>
+  <p class="muted small">
+    More variants: <a href="/sample-data/namessndob/">Names + SSN + DOB</a> ·
+    <a href="/sample-data/nameccnzip/">Names + CCN + ZIP + expiry</a> ·
+    <a href="/sample-data/namedobemail/">Names + DOB + email</a>
+  </p>
+
+  <h2>PII + PCI — names, SSNs, credit card numbers</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>First and Last Name</th>
+        <th>SSN</th>
+        <th>Credit Card Number (Visa / MC / AMEX)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sampleData.map((row) => (
+        <tr>
+          <td>{row.name}</td>
+          <td><code>{row.ssn}</code></td>
+          <td><code>{row.ccn}</code></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2>Sample files</h2>
+  <h3>Sample SSN &amp; CCN files</h3>
+  <ul class="download-list">
+    {byGroup.sample.map((f) => (
+      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+    ))}
+  </ul>
+
+  <h3>Larger Word &amp; Excel files</h3>
+  <ul class="download-list">
+    {byGroup.office.map((f) => (
+      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+    ))}
+  </ul>
+
+  <h3>Larger CSV files</h3>
+  <ul class="download-list">
+    {byGroup.csv.map((f) => (
+      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+    ))}
+  </ul>
+
+  <h3>State-by-state PII / PCI / Bank / PHI bundle</h3>
+  <ul class="download-list">
+    {byGroup.state.map((f) => (
+      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span> — sourced from <a href="https://github.com/dev2prog/DLP/tree/main/DLPTestData">dev2prog/DLP</a></li>
+    ))}
+  </ul>
+
+  <h3>FTP test profile</h3>
+  <ul class="download-list">
+    {byGroup.ftp.map((f) => (
+      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+    ))}
+  </ul>
+
+  <p class="muted small">
+    Basic "Hello World" sample source code is also hosted on
+    <a href="https://github.com/brian-dlptest/dlptest">GitHub — brian-dlptest/dlptest</a>.
+  </p>
+</BaseLayout>

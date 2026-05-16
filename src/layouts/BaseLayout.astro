@@ -1,0 +1,91 @@
+---
+import "@/styles/global.css";
+import { env } from "cloudflare:workers";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** When true, force noindex even outside staging (e.g. a thank-you page). */
+  noindex?: boolean;
+}
+
+const { title, description = "DLP Test — a resource for testing Data Loss Prevention software.", noindex = false } = Astro.props;
+
+// `env.ENVIRONMENT` is set per-Worker via wrangler.jsonc (`production` vs
+// `staging`). Pages prerendered at build time bake in this value, so a
+// staging build correctly shows the banner and emits noindex tags.
+const isStaging = env.ENVIRONMENT === "staging";
+const shouldNoindex = noindex || isStaging;
+const canonical = new URL(Astro.url.pathname, "https://dlptest.com").toString();
+const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
+
+const nav: Array<{ href: string; label: string }> = [
+  { href: "/", label: "Home" },
+  { href: "/sample-data/", label: "Sample Data" },
+  { href: "/http-post/", label: "HTTP Post" },
+  { href: "/https-post/", label: "HTTPS Post" },
+  { href: "/ftp-test/", label: "FTP Test" },
+  { href: "/blog/", label: "Blog" },
+  { href: "/contact/", label: "Contact" },
+];
+
+function isActive(href: string) {
+  const normHref = href.replace(/\/+$/, "") || "/";
+  return normHref === currentPath;
+}
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — DLP Test</title>
+    <meta name="description" content={description} />
+    {shouldNoindex ? (
+      <>
+        <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate" />
+        <meta name="googlebot" content="noindex, nofollow" />
+      </>
+    ) : (
+      <link rel="canonical" href={canonical} />
+    )}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    {isStaging && (
+      <div class="staging-banner">
+        STAGING — content is not indexed and may differ from production.
+      </div>
+    )}
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a href="/" class="site-brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>DLP Test</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>&copy; {new Date().getFullYear()} DLP Test. Created by Brian Hileman.</div>
+        <div>
+          <a href="/privacy-policy/">Privacy</a>
+          {" · "}
+          <a href="/terms-and-conditions/">Terms</a>
+          {" · "}
+          <a href="/contact/">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

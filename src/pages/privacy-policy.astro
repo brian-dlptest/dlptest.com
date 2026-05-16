@@ -1,0 +1,35 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+export const prerender = true;
+---
+<BaseLayout title="Privacy Policy">
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated: <em>placeholder — rewrite before launch</em>.</p>
+  <p>
+    DLPTest.com is a free testing resource. The site is intentionally designed
+    to handle as little of your data as possible:
+  </p>
+  <ul>
+    <li>
+      The HTTP and HTTPS post endpoints accept request bodies and immediately
+      discard them. We do not log, store, or forward the contents of those
+      submissions.
+    </li>
+    <li>
+      The contact form is delivered by email to the site owner and is not
+      retained beyond that.
+    </li>
+    <li>
+      The FTP server stores uploaded files for approximately 10 minutes, after
+      which they are deleted.
+    </li>
+    <li>
+      Cloudflare, our hosting provider, processes routine HTTP request metadata
+      (IP address, user agent, URL, timestamp) on our behalf.
+    </li>
+  </ul>
+  <p class="muted">
+    This text is placeholder content from the WordPress site’s legal generator
+    and should be reviewed and rewritten before launch.
+  </p>
+</BaseLayout>

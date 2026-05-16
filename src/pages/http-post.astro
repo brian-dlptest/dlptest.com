@@ -1,0 +1,32 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostTestForm from "@/components/PostTestForm.astro";
+export const prerender = true;
+---
+<BaseLayout title="HTTP Post Test" description="Submit text and files over HTTP to a safe endpoint that immediately discards them. Use it to verify your DLP can block sensitive data in transit.">
+  <h1>HTTP Post Test</h1>
+  <p>
+    Use the form below to send a test message and/or a file to dlptest.com over
+    plain HTTP. The server accepts the request and discards the body. No data
+    is logged, stored, or forwarded. This is intended as a tripwire so your DLP
+    can detect — and ideally block — sensitive content as it leaves the
+    endpoint.
+  </p>
+  <p>
+    Need TLS instead? Use the <a href="/https-post/">HTTPS Post test</a>.
+  </p>
+
+  <PostTestForm scheme="http" />
+
+  <h2>What is an HTTP POST?</h2>
+  <p>
+    HTTP POST is one of the request methods supported by the HTTP protocol. By
+    design, a POST asks a server to accept the data enclosed in the body of the
+    request, most often so it can store or process it. POSTs are how browsers
+    upload files and submit forms.
+  </p>
+  <p>
+    On dlptest.com we don’t do either — we accept the request, read enough of
+    the body to satisfy the client, then drop it. Other sites will not.
+  </p>
+</BaseLayout>

@@ -1,0 +1,90 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+export const prerender = true;
+---
+<BaseLayout title="Contact" description="Get in touch with DLP Test.">
+  <h1>Contact</h1>
+  <p>
+    Drop a note about the site, a feature request, or to ask about an IP
+    that’s been blocked from the FTP server.
+  </p>
+
+  <form id="contact-form" method="POST" action="/api/contact/">
+    <div class="field">
+      <label for="c-name">Name</label>
+      <input id="c-name" name="name" type="text" autocomplete="name" required />
+    </div>
+    <div class="field">
+      <label for="c-email">Email</label>
+      <input id="c-email" name="email" type="email" autocomplete="email" required />
+    </div>
+    <div class="field">
+      <label for="c-subject">Subject</label>
+      <input id="c-subject" name="subject" type="text" required />
+    </div>
+    <div class="field">
+      <label for="c-message">Message</label>
+      <textarea id="c-message" name="message" required></textarea>
+    </div>
+    <div class="field honeypot" aria-hidden="true">
+      <label>If you are human, leave this field blank.
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
+    <button type="submit">Send</button>
+    <p class="result" role="status"></p>
+  </form>
+
+  <hr />
+
+  <h2>About the author</h2>
+  <p>
+    DLP Test is created and maintained by <strong>Brian Hileman</strong> —
+    Director of Solutions Engineering at Cyberhaven, with over a decade in
+    data protection (Palo Alto Networks, Digital Guardian, InteliSecure →
+    Proofpoint).
+  </p>
+
+  <style>
+    #contact-form { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+    #contact-form .field { margin-bottom: 1rem; }
+    #contact-form label { display: block; font-weight: 500; margin-bottom: 0.35rem; }
+    #contact-form .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+    #contact-form .result { margin-top: 0.75rem; min-height: 1.5rem; }
+    #contact-form .result.success { color: var(--success); }
+    #contact-form .result.error { color: var(--danger); }
+  </style>
+
+  <script>
+    const form = document.getElementById("contact-form") as HTMLFormElement | null;
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const result = form.querySelector<HTMLElement>(".result");
+      if (result) {
+        result.textContent = "Sending…";
+        result.className = "result";
+      }
+      const fd = new FormData(form);
+      try {
+        const res = await fetch(form.action, { method: "POST", body: fd });
+        if (res.ok) {
+          if (result) {
+            result.textContent = "Thanks — message received.";
+            result.className = "result success";
+          }
+          form.reset();
+        } else {
+          if (result) {
+            result.textContent = `Something went wrong: ${res.status} ${res.statusText}`;
+            result.className = "result error";
+          }
+        }
+      } catch (err) {
+        if (result) {
+          result.textContent = `Network error: ${(err as Error).message}`;
+          result.className = "result error";
+        }
+      }
+    });
+  </script>
+</BaseLayout>

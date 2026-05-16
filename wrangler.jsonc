@@ -1,17 +1,57 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "dlptest",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-04-01",
+  // Prod Worker name (must match what's already deployed in Cloudflare).
+  // `main` and `assets.directory` are intentionally omitted at the top
+  // level: the @astrojs/cloudflare adapter writes a fully-baked, flattened
+  // wrangler config to `dist/server/wrangler.json` at build time, and the
+  // Vite plugin would otherwise fail validating `main` before the build
+  // creates it. Deploys use the generated flattened config (see
+  // package.json `deploy` / `deploy:staging` scripts and the
+  // CLOUDFLARE_ENV env var).
+  "name": "dlptest-com-prod",
+  "compatibility_date": "2026-05-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
   "vars": {
     "ENVIRONMENT": "production"
   },
+  // ---------------------------------------------------------------------
+  // R2 bucket for DLP test file downloads
+  // ---------------------------------------------------------------------
+  // The DOWNLOADS binding is left out of this scaffold deploy because R2
+  // has not yet been enabled on this Cloudflare account (one-time accept
+  // of R2 pricing in the dashboard is required). Re-enable in two steps:
+  //
+  //   1. Visit https://dash.cloudflare.com → R2 → "Enable R2"
+  //   2. `npx wrangler r2 bucket create dlptest-downloads`
+  //   3. Un-comment the `r2_buckets` block below (in both top-level and
+  //      env.staging) and redeploy.
+  //
+  // The site middleware already guards on `env.DOWNLOADS` being present,
+  // so until then the routes 404 instead of failing the deploy.
+  //
+  // "r2_buckets": [
+  //   { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
+  // ],
   "env": {
     "staging": {
       "name": "dlptest-com-staging",
+      "compatibility_date": "2026-05-16",
+      "compatibility_flags": ["nodejs_compat"],
+      "observability": {
+        "enabled": true
+      },
       "vars": {
         "ENVIRONMENT": "staging"
       }
+      // "r2_buckets": [
+      //   { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
+      // ]
     }
   }
+  // Custom domains (dlptest.com, www.dlptest.com, staging.dlptest.com) are
+  // configured via the Cloudflare dashboard once the zone is added to this
+  // account.
 }
