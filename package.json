@@ -12,6 +12,7 @@
     "check": "tsc --noEmit",
     "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
     "deploy:staging": "npm run build:staging && wrangler deploy --config dist/server/wrangler.json",
+    "news:cloud-draft": "node scripts/news/run-cloud-draft.mjs",
     "r2:create": "wrangler r2 bucket create dlptest-downloads"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250425.0",
+    "@cursor/sdk": "^1.0.13",
     "aws4fetch": "^1.0.20",
     "typescript": "^5.8.3",
     "wrangler": "^4.92.0"

@@ -1,0 +1,44 @@
+name: News discovery (Cursor Cloud Agent)
+
+# Weekly Cursor Cloud Agent pass: clones NEWS_BASE_REF (default staging),
+# searches for industry stories newer than the newest news pubDate, drafts
+# Markdown posts, commits, opens a PR via @cursor/sdk (autoCreatePR).
+#
+# Requires:
+#   Secret CURSOR_API_KEY — https://cursor.com/dashboard/cloud-agents
+#   Repo connected for Cursor Cloud Agents (same dashboard).
+#
+# Notifications: GitHub PR opened against NEWS_BASE_REF → normal PR alerts.
+
+on:
+  schedule:
+    # Mondays 15:00 UTC (~10am Eastern). Adjust cron as needed.
+    - cron: "0 15 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: news-draft-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  cursor-news-draft:
+    name: Cursor Cloud Agent → draft PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run Cursor Cloud Agent (opens PR when stories exist)
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          NEWS_BASE_REF: staging
+        run: node scripts/news/run-cloud-draft.mjs
