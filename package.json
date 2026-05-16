@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250425.0",
+    "aws4fetch": "^1.0.20",
     "typescript": "^5.8.3",
     "wrangler": "^4.92.0"
   }
