@@ -11,7 +11,7 @@
     "preview": "wrangler dev --config dist/server/wrangler.json",
     "check": "tsc --noEmit",
     "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
-    "deploy:staging": "npm run build:staging && wrangler deploy --config dist/server/wrangler.json --env staging",
+    "deploy:staging": "npm run build:staging && wrangler deploy --config dist/server/wrangler.json",
     "r2:create": "wrangler r2 bucket create dlptest-downloads"
   },
   "dependencies": {
