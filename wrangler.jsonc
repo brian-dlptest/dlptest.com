@@ -17,24 +17,13 @@
   "vars": {
     "ENVIRONMENT": "production"
   },
-  // ---------------------------------------------------------------------
-  // R2 bucket for DLP test file downloads
-  // ---------------------------------------------------------------------
-  // The DOWNLOADS binding is left out of this scaffold deploy because R2
-  // has not yet been enabled on this Cloudflare account (one-time accept
-  // of R2 pricing in the dashboard is required). Re-enable in two steps:
-  //
-  //   1. Visit https://dash.cloudflare.com → R2 → "Enable R2"
-  //   2. `npx wrangler r2 bucket create dlptest-downloads`
-  //   3. Un-comment the `r2_buckets` block below (in both top-level and
-  //      env.staging) and redeploy.
-  //
-  // The site middleware already guards on `env.DOWNLOADS` being present,
-  // so until then the routes 404 instead of failing the deploy.
-  //
-  // "r2_buckets": [
-  //   { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
-  // ],
+  // R2 bucket holding the legacy DLP test downloads (sample-data.csv,
+  // 1-MB-Test.xlsx, 334-MB-Test-CSV.csv, etc). Populated by
+  // `./scripts/upload-r2.sh`; consumed via env.DOWNLOADS in
+  // src/middleware.ts and src/lib/downloads.ts.
+  "r2_buckets": [
+    { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
+  ],
   "env": {
     "staging": {
       "name": "dlptest-com-staging",
@@ -45,10 +34,10 @@
       },
       "vars": {
         "ENVIRONMENT": "staging"
-      }
-      // "r2_buckets": [
-      //   { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
-      // ]
+      },
+      "r2_buckets": [
+        { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
+      ]
     }
   }
   // Custom domains (dlptest.com, www.dlptest.com, staging.dlptest.com) are
