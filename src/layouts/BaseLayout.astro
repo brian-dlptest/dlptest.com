@@ -22,8 +22,7 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const nav: Array<{ href: string; label: string }> = [
   { href: "/", label: "Home" },
   { href: "/sample-data/", label: "Sample Data" },
-  { href: "/http-post/", label: "HTTP Post" },
-  { href: "/https-post/", label: "HTTPS Post" },
+  { href: "/http-post/", label: "HTTP POST Test" },
   { href: "/ftp-test/", label: "FTP Test" },
   { href: "/data-security-news/", label: "News" },
   { href: "/contact/", label: "Contact" },
@@ -36,7 +35,6 @@ const TOP_LEVEL_PATHS = new Set<string>([
   "/",
   "/sample-data",
   "/http-post",
-  "/https-post",
   "/ftp-test",
   "/contact",
   "/privacy-policy",

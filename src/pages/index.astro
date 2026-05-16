@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     q: "How to test Web Prevent / ICAP DLP",
-    a: `Validate that the proxy sends all PUT/POST traffic through Web Prevent via ICAP, then ensure the test workstation’s browser routes through that proxy. Enable a test SSN and CCN policy, then copy sample data from <a href="/sample-data/">/sample-data/</a> and submit it to <a href="/http-post/">/http-post/</a> and <a href="/https-post/">/https-post/</a>. Always run first in monitor mode, then again in blocking mode.`,
+    a: `Validate that the proxy sends all PUT/POST traffic through Web Prevent via ICAP, then ensure the test workstation’s browser routes through that proxy. Enable a test SSN and CCN policy, then copy sample data from <a href="/sample-data/">/sample-data/</a> and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code> (see that page for examples). Always run first in monitor mode, then again in blocking mode.`,
   },
   {
     q: "How to test Email Prevent",
@@ -28,24 +28,24 @@ const faqs = [
   },
   {
     q: "How to test Data-in-Use (Endpoint DLP)",
-    a: `Enable monitoring of web browsers and FTP channels on the endpoint agent, enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/http-post/">/http-post/</a> and <a href="/https-post/">/https-post/</a>. Also upload a sample-data document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Test in monitor mode first, then in blocking mode.`,
+    a: `Enable monitoring of web browsers and FTP channels on the endpoint agent, enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/http-post/">/http-post/</a> or your own script posting to <code>/api/http-post/</code>. Also upload a sample-data document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Test in monitor mode first, then in blocking mode.`,
   },
 ];
 ---
-<BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP/HTTPS POST endpoints, and a public FTP server to verify your DLP is blocking what it should.">
+<BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP POST test endpoint over HTTPS, and a public FTP server to verify your DLP is blocking what it should.">
   <section class="hero">
     <h1>Test Your DLP. Prove It Actually Blocks.</h1>
     <p>
       DLPTest.com is a free testing resource for Data Loss Prevention software.
       If your DLP is configured correctly, the endpoints here will demonstrate
-      it. We provide sample data, HTTP/HTTPS POST tripwires, and a public FTP
-      server — all designed to be safe targets that your DLP can detect
+      it. We provide sample data, an HTTP POST test endpoint over HTTPS, and a public FTP
+      server. They are designed to be safe targets that your DLP can detect
       and block.
     </p>
     <p>
       <a class="button" href="/sample-data/">Get sample data</a>
       {" "}
-      <a class="button" style="background:transparent;border:1px solid var(--accent);color:var(--accent);" href="/http-post/">Try the HTTP Post test</a>
+      <a class="button" style="background:transparent;border:1px solid var(--accent);color:var(--accent);" href="/http-post/">Try the HTTP POST test</a>
     </p>
   </section>
 
@@ -113,9 +113,9 @@ const faqs = [
         <p><a href="/sample-data/">Browse sample data →</a></p>
       </div>
       <div class="card">
-        <h3>HTTP / HTTPS Post</h3>
-        <p>Submit text and files to a safe endpoint that accepts and discards them. Trip your DLP without leaking data.</p>
-        <p><a href="/http-post/">HTTP Post →</a>{" · "}<a href="/https-post/">HTTPS Post →</a></p>
+        <h3>HTTP POST test</h3>
+        <p>Submit text and files with the HTTP POST method to a safe HTTPS endpoint that accepts and discards them. Trip your DLP without leaking data.</p>
+        <p><a href="/http-post/">HTTP POST Test →</a></p>
       </div>
       <div class="card">
         <h3>FTP Test</h3>

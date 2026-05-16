@@ -2,31 +2,95 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PostTestForm from "@/components/PostTestForm.astro";
 export const prerender = true;
+
+const curlExamples = `# Probe the endpoint
+curl -sS "https://dlptest.com/api/http-post/"
+
+# Small form-style body
+curl -sS -X POST "https://dlptest.com/api/http-post/" \\
+  -d "message=DLP+POST+test"
+
+# JSON body
+curl -sS -X POST "https://dlptest.com/api/http-post/" \\
+  -H "Content-Type: application/json" \\
+  -d '{"note":"sample payload"}'
+
+# Raw file (single part; good for scripted throughput checks)
+curl -sS -X POST "https://dlptest.com/api/http-post/" \\
+  --data-binary @./your-local-file.bin`;
 ---
-<BaseLayout title="HTTP Post Test" description="Submit text and files over HTTP to a safe endpoint that immediately discards them. Use it to verify your DLP can block sensitive data in transit.">
-  <h1>HTTP Post Test</h1>
+<BaseLayout
+  title="HTTP POST Test"
+  description="Submit text and files with the HTTP POST method to a safe HTTPS endpoint that discards the body. Use it to verify DLP, proxies, and SSL inspection without storing data."
+>
+  <h1>HTTP POST Test</h1>
   <p>
-    Use the form below to send a test message and/or a file to dlptest.com over
-    plain HTTP. The server accepts the request and discards the body. No data
-    is logged, stored, or forwarded. This is intended as a tripwire so your DLP
-    can detect — and ideally block — sensitive content as it leaves the
-    endpoint.
-  </p>
-  <p>
-    Need TLS instead? Use the <a href="/https-post/">HTTPS Post test</a>.
+    Use the form below to send a test message and/or a file to dlptest.com using the
+    HTTP POST method over TLS (HTTPS). Most browsers and Cloudflare configurations
+    no longer offer this site over cleartext HTTP, but the POST method is the same
+    either way. The server accepts the request and discards the body. No data is
+    logged, stored, or forwarded. This is intended as a tripwire so your DLP can
+    detect and ideally block sensitive content as it leaves the endpoint or passes
+    through your proxy or SSE inspection path.
   </p>
 
-  <PostTestForm scheme="http" />
+  <PostTestForm />
+
+  <p class="muted">
+    Bookmark note: the former <code>/https-post/</code> page redirects here with HTTP 301.
+  </p>
+
+  <h2>Test with curl or scripts</h2>
+  <p>
+    The accept-and-discard endpoint is <code>/api/http-post/</code>. You can POST any
+    body (form data, JSON, raw bytes, multipart). Responses are JSON with an
+    <code>ok</code> field (<code>true</code> when the body was accepted). GET on the same URL returns a short JSON hint.
+    Cross-origin use from automation or in-browser fetch from another origin is allowed
+    via permissive CORS on this route only.
+  </p>
+  <p>Examples (use your own hostname for staging or production):</p>
+  <pre><code>{curlExamples}</code></pre>
+  <p class="muted small">
+    Cleartext HTTP (<code>http://</code>) may be redirected to HTTPS by Cloudflare or blocked by
+    HSTS in your browser. For a deliberate cleartext POST from the command line, try
+    <code>curl -X POST "http://dlptest.com/api/http-post/" -d "test=1"</code> only if your
+    environment allows port 80 without an immediate upgrade.
+  </p>
 
   <h2>What is an HTTP POST?</h2>
   <p>
-    HTTP POST is one of the request methods supported by the HTTP protocol. By
-    design, a POST asks a server to accept the data enclosed in the body of the
-    request, most often so it can store or process it. POSTs are how browsers
-    upload files and submit forms.
+    HTTP POST is a request method in the HTTP family (the same protocol whether the
+    transport is TLS or not). A POST asks a server to accept an entity in the request
+    body. Forms in browsers, REST APIs, and file uploads typically use POST when they
+    send data that is not idempotent or that does not fit cleanly in the URL.
   </p>
+  <h3>POST compared to GET</h3>
   <p>
-    On dlptest.com we don’t do either — we accept the request, read enough of
-    the body to satisfy the client, then drop it. Other sites will not.
+    GET requests usually retrieve data and carry parameters in the query string. POST
+    requests send their primary payload in the body, which suits larger or structured
+    content and avoids putting sensitive values in URLs or logs. Many DLP products
+    inspect POST bodies on web and API traffic, often together with TLS decryption on
+    proxies or agents.
+  </p>
+  <h3>How dlptest.com uses POST</h3>
+  <p>
+    This site does not store or process your test payloads. The Worker reads the
+    request body so the bytes traverse the network fully (so inspection appliances
+    can see them), then discards them. That makes POST here a safe pattern for
+    validating Data Loss Prevention rules, ICAP integrations, and SSE inspection,
+    without sending real customer data to a third party that would retain it.
   </p>
 </BaseLayout>
+
+<style>
+  pre {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+  pre code { font-family: ui-monospace, monospace; }
+</style>

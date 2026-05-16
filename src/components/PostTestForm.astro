@@ -1,20 +1,15 @@
 ---
-interface Props {
-  scheme: "http" | "https";
-}
-const { scheme } = Astro.props;
 const action = "/api/http-post/";
 ---
-<form class="post-test" method="POST" action={action} enctype="multipart/form-data" data-scheme={scheme}>
-  <input type="hidden" name="scheme" value={scheme} />
+<form class="post-test" method="POST" action={action} enctype="multipart/form-data">
   <div class="field">
-    <label for={`pt-message-${scheme}`}>Test message</label>
-    <textarea id={`pt-message-${scheme}`} name="message" placeholder="Paste sample data, an SSN, a credit card number, anything you want your DLP to catch."></textarea>
+    <label for="pt-message">Test message</label>
+    <textarea id="pt-message" name="message" placeholder="Paste sample data, an SSN, a credit card number, anything you want your DLP to catch."></textarea>
   </div>
   <div class="field">
-    <label for={`pt-file-${scheme}`}>File upload</label>
-    <input id={`pt-file-${scheme}`} type="file" name="file" />
-    <p class="muted small">Maximum file size: 100 MB. Nothing you send is stored or forwarded — the server reads the request body and discards it.</p>
+    <label for="pt-file">File upload</label>
+    <input id="pt-file" type="file" name="file" />
+    <p class="muted small">Maximum file size: 100 MB. Nothing you send is stored or forwarded; the server reads the request body and discards it.</p>
   </div>
   <div class="field" aria-hidden="true">
     <label class="honeypot">
