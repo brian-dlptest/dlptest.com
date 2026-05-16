@@ -12,3 +12,6 @@ node_modules/
 # Astro build output and cache
 dist/
 .astro/
+
+# Local scratch caches for one-shot import scripts (regenerable from the source URLs)
+scripts/news/cache/

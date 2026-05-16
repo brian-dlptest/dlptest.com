@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
+	>
+
+<channel>
+	<title>DLP Test</title>
+	<atom:link href="https://dlptest.com/feed/" rel="self" type="application/rss+xml" />
+	<link>https://dlptest.com</link>
+	<description>Data Loss Prevention Testing Resources</description>
+	<lastBuildDate>Sat, 16 May 2026 15:55:31 +0000</lastBuildDate>
+	<language>en-US</language>
+	<sy:updatePeriod>
+	hourly	</sy:updatePeriod>
+	<sy:updateFrequency>
+	1	</sy:updateFrequency>
+	<generator>https://wordpress.org/?v=6.9.4</generator>
+
+<image>
+	<url>https://dlptest.com/wp-content/uploads/2016/11/DLP_Test_Favicon-150x150.png</url>
+	<title>DLP Test</title>
+	<link>https://dlptest.com</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
+	<item>
+		<title>HYCU Launches aiR, Using Backup Data for Data Security and AI Governance</title>
+		<link>https://dlptest.com/hycu-launches-air-turning-backup-data-into-a-source-for-data-security-and-ai-governance/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Sat, 16 May 2026 15:54:11 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<category><![CDATA[Insider Risk Management]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=6208241</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Cyera Raises $400M to Meet Rapidly Growing Demand for AI Security Among Enterprises</title>
+		<link>https://dlptest.com/cyera-raises-400m-to-meet-rapidly-growing-demand-for-ai-security-among-enterprises/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Tue, 27 Jan 2026 06:09:09 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=5816517</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Bedrock Data Raises $25M Series A to Accelerate AI-Native Data Security Platform</title>
+		<link>https://dlptest.com/5680676-2/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Wed, 10 Dec 2025 23:37:48 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=5680676</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Teleskope Raises $25M to Bring Human-Level Intelligence to Data Security</title>
+		<link>https://dlptest.com/teleskope-raises-25m-to-bring-human-level-intelligence-to-data-security/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Tue, 11 Nov 2025 17:02:34 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<category><![CDATA[Endpoint DLP]]></category>
+		<category><![CDATA[Insider Risk Management]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=5567565</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Veeam Reportedly Nears $1.8B Acquisition of DSPM vendor Securiti AI</title>
+		<link>https://dlptest.com/veeam-reportedly-nears-1-8b-acquisition-of-dspm-vendor-securiti-ai/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Thu, 16 Oct 2025 03:46:42 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=5455560</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>The Hard Truth About DLP: Why Endpoint Agents Are Essential</title>
+		<link>https://dlptest.com/the-hard-truth-about-dlp-why-endpoint-agents-are-essential/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Fri, 01 Aug 2025 02:41:06 +0000</pubDate>
+				<category><![CDATA[Opinion]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<category><![CDATA[Endpoint DLP]]></category>
+		<category><![CDATA[Insider Risk Management]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=5177844</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Concentric AI Acquires Data Security Technologies Swift Security and Acante</title>
+		<link>https://dlptest.com/concentric-ai-acquires-data-security-technologies-swift-security-and-acante/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Wed, 02 Jul 2025 21:55:13 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=5067168</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Sentra Closes $50 Million Series B Amid Surging Demand for Securing Data for AI Adoption</title>
+		<link>https://dlptest.com/sentra-closes-50-million-series-b-amid-surging-demand-for-securing-data-for-ai-adoption/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Tue, 29 Apr 2025 14:00:00 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4831483</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Cyberhaven Raises $100 Million Series D at $1 Billion Valuation</title>
+		<link>https://dlptest.com/cyberhaven-raises-100-million-series-d-at-1-billion-valuation/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Sat, 26 Apr 2025 03:52:50 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[Endpoint DLP]]></category>
+		<category><![CDATA[Insider Risk Management]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4831474</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>CloudRise, a premier Data Security consulting services company, announced acquisition by Exclusive Networks</title>
+		<link>https://dlptest.com/cloudrise-a-premier-data-security-consulting-services-company-announced-acquisition-by-exclusive-networks/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Fri, 22 Nov 2024 17:53:09 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Security]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<category><![CDATA[Managed Services]]></category>
+		<category><![CDATA[SASE]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4319836</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Cyera is announcing a massive round of funding and is now a clear leader in the DSPM field, at least from a funding standpoint.</title>
+		<link>https://dlptest.com/cyera-is-announcing-a-massive-round-of-funding-and-is-now-a-clear-leader-in-the-dspm-field-at-least-from-a-funding-standpoint/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Thu, 21 Nov 2024 05:33:38 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4313485</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>A new stealth DLP vendor emerges &#8211; MIND</title>
+		<link>https://dlptest.com/a-new-stealth-dlp-vendor-emerges-mind/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Thu, 31 Oct 2024 03:48:10 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<category><![CDATA[Endpoint DLP]]></category>
+		<category><![CDATA[Insider Risk Management]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4257965</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Proofpoint to acquire Normalyze AI, another DSPM acquisition</title>
+		<link>https://dlptest.com/proofpoint-to-acquire-normalyze-ai-another-dspm-acquisition/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Tue, 29 Oct 2024 18:13:50 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4253030</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Concentric AI Secures $45M Financing in Series B Round</title>
+		<link>https://dlptest.com/concentric-ai-secures-45m-financing-in-series-b-round/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Thu, 24 Oct 2024 22:11:20 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4240854</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>Cyera is acquiring Trail Security </title>
+		<link>https://dlptest.com/cyera-is-acquiring-trail-security/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Fri, 18 Oct 2024 15:50:37 +0000</pubDate>
+				<category><![CDATA[News]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4223415</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+		<item>
+		<title>The data protection platform race is on!</title>
+		<link>https://dlptest.com/the-data-protection-platform-race-is-on/</link>
+		
+		<dc:creator><![CDATA[Brian Hileman]]></dc:creator>
+		<pubDate>Thu, 17 Oct 2024 19:04:34 +0000</pubDate>
+				<category><![CDATA[Opinion]]></category>
+		<category><![CDATA[Data Discovery]]></category>
+		<category><![CDATA[data protection]]></category>
+		<category><![CDATA[Data Security Posture Management]]></category>
+		<category><![CDATA[DLP]]></category>
+		<category><![CDATA[DSPM]]></category>
+		<category><![CDATA[Email DLP]]></category>
+		<category><![CDATA[Endpoint DLP]]></category>
+		<category><![CDATA[Insider Risk Management]]></category>
+		<category><![CDATA[Network DLP]]></category>
+		<guid isPermaLink="false">https://dlptest.com/?p=4220218</guid>
+
+					<description><![CDATA[]]></description>
+		
+		
+		
+			</item>
+	</channel>
+</rss>
