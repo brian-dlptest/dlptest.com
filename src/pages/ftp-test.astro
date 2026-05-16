@@ -3,12 +3,12 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 export const prerender = true;
 
 // The FTP test server lives on a separate host (ftp.dlptest.com) outside of
-// Cloudflare. The password rotates and is published on this page. This file
-// is a static placeholder during the rebuild — replace the password below
-// with the current rotating value (or wire a build-time fetch later).
+// Cloudflare. The password is intentionally public — it is published on
+// this page so anyone can run tests. Rotate by updating this value and
+// pushing through the normal staging -> main flow.
 const ftpHost = "ftp.dlptest.com";
 const ftpUser = "dlpuser";
-const ftpPassword = "REPLACE_BEFORE_LAUNCH";
+const ftpPassword = "rNrKYTX9g7z3RgJRmxWuGHbeu";
 const retentionMinutes = 10;
 ---
 <BaseLayout title="FTP Test" description="Public FTP server credentials for testing DLP. Files are kept for 10 minutes then deleted.">
