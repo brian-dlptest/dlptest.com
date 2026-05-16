@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import SampleDataNav from "@/components/SampleDataNav.astro";
 import { sampleData, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 
@@ -14,18 +15,15 @@ const byGroup = {
 <BaseLayout title="Sample Data" description="Sample PII and PCI test data — names, SSNs, credit card numbers — plus downloadable sample files for DLP testing.">
   <h1>Sample Data</h1>
   <p>
-    Copy-paste the table below, or grab one of the prepared files. All values
+    Copy-paste the tables here, or grab one of the prepared files. All values
     are fabricated test data and should be safe to use as DLP detection
     targets. Some DLP systems may not trigger on every row depending on the
     pattern checks they run.
   </p>
-  <p class="muted small">
-    More variants: <a href="/sample-data/namessndob/">Names + SSN + DOB</a> ·
-    <a href="/sample-data/nameccnzip/">Names + CCN + ZIP + expiry</a> ·
-    <a href="/sample-data/namedobemail/">Names + DOB + email</a>
-  </p>
 
-  <h2>PII + PCI — names, SSNs, credit card numbers</h2>
+  <SampleDataNav active="ssncc" />
+
+  <h2>Name + SSN + Credit Card Number</h2>
   <table>
     <thead>
       <tr>

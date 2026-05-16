@@ -1,13 +1,34 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import SampleDataNav from "@/components/SampleDataNav.astro";
+import { sampleNameSsnDob } from "@/data/sample-data";
 export const prerender = true;
-// TODO: Port the names/SSN/DOB table from the legacy site (https://dlptest.com/sample-data/namessndob/).
 ---
-<BaseLayout title="Sample Data — Names + SSN + DOB">
-  <h1>Names + SSN + Date of Birth</h1>
-  <p class="muted">
-    This variant of the sample table is still being ported from the legacy
-    WordPress site. For now, see the
-    <a href="/sample-data/">primary sample data page</a>.
+<BaseLayout title="Sample Data — Names + SSN + DOB" description="Test PII data: fabricated names, Social Security Numbers, and dates of birth for DLP testing.">
+  <h1>Name + SSN + Date of Birth</h1>
+  <p>
+    Fabricated PII test rows. Useful for verifying that your DLP detects
+    composite patterns (e.g. an SSN within a row of a known birth date).
   </p>
+
+  <SampleDataNav active="ssndob" />
+
+  <table>
+    <thead>
+      <tr>
+        <th>First and Last Name</th>
+        <th>SSN</th>
+        <th>Date of Birth</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sampleNameSsnDob.map((row) => (
+        <tr>
+          <td>{row.name}</td>
+          <td><code>{row.ssn}</code></td>
+          <td><code>{row.dob}</code></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
 </BaseLayout>

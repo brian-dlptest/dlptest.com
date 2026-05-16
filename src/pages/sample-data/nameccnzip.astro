@@ -1,11 +1,39 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import SampleDataNav from "@/components/SampleDataNav.astro";
+import { sampleNameCcnZip } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + CCN + ZIP">
-  <h1>Names + Credit Card Number + ZIP + Expiry</h1>
-  <p class="muted">
-    This variant of the sample table is still being ported. For now, see the
-    <a href="/sample-data/">primary sample data page</a>.
+<BaseLayout title="Sample Data — Names + CCN + ZIP" description="Test PCI data: fabricated names, credit card numbers, ZIP codes, and expiration dates for DLP testing.">
+  <h1>Name + Credit Card Number + ZIP + Expiration</h1>
+  <p>
+    Fabricated PCI test rows including Visa, Mastercard, American Express,
+    Discover, and JCB number formats. Useful for testing PCI-DSS detection
+    rules.
   </p>
+
+  <SampleDataNav active="ccnzip" />
+
+  <table>
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>ZIP</th>
+        <th>Credit Card Number</th>
+        <th>Expiration</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sampleNameCcnZip.map((row) => (
+        <tr>
+          <td>{row.first}</td>
+          <td>{row.last}</td>
+          <td><code>{row.zip}</code></td>
+          <td><code>{row.ccn}</code></td>
+          <td><code>{row.expiry}</code></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
 </BaseLayout>

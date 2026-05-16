@@ -1,0 +1,53 @@
+---
+interface Props {
+  active: "ssncc" | "ssndob" | "ccnzip" | "dobemail";
+}
+const { active } = Astro.props;
+
+const tabs: Array<{ id: Props["active"]; href: string; label: string }> = [
+  { id: "ssncc", href: "/sample-data/", label: "Name + SSN + CCN" },
+  { id: "ssndob", href: "/sample-data/namessndob/", label: "Name + SSN + DOB" },
+  { id: "ccnzip", href: "/sample-data/nameccnzip/", label: "Name + CCN + ZIP" },
+  { id: "dobemail", href: "/sample-data/namedobemail/", label: "Name + DOB + Email" },
+];
+---
+<nav class="sample-tabs" aria-label="Sample data variants">
+  {tabs.map((t) => (
+    <a
+      href={t.href}
+      class={t.id === active ? "tab active" : "tab"}
+      aria-current={t.id === active ? "page" : undefined}
+    >{t.label}</a>
+  ))}
+</nav>
+
+<style>
+  .sample-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    margin: 1rem 0 1.5rem;
+  }
+  .sample-tabs .tab {
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    text-decoration: none;
+    margin-bottom: -1px;
+  }
+  .sample-tabs .tab:hover {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .sample-tabs .tab.active {
+    background: var(--bg);
+    color: var(--text);
+    border-bottom: 1px solid var(--bg);
+    font-weight: 600;
+  }
+</style>

@@ -1,11 +1,37 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import SampleDataNav from "@/components/SampleDataNav.astro";
+import { sampleNameDobEmail } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + DOB + Email">
-  <h1>Names + Date of Birth + Email</h1>
-  <p class="muted">
-    This variant of the sample table is still being ported. For now, see the
-    <a href="/sample-data/">primary sample data page</a>.
+<BaseLayout title="Sample Data — Names + DOB + Email" description="Test PII data: fabricated names, dates of birth, and email addresses for DLP testing.">
+  <h1>Name + Date of Birth + Email</h1>
+  <p>
+    Fabricated PII test rows spanning common consumer email providers
+    (gmail, hotmail, yahoo, aol, facebook). Useful for verifying detection
+    of name-DOB-email composites.
   </p>
+
+  <SampleDataNav active="dobemail" />
+
+  <table>
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Date of Birth</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sampleNameDobEmail.map((row) => (
+        <tr>
+          <td>{row.first}</td>
+          <td>{row.last}</td>
+          <td><code>{row.dob}</code></td>
+          <td><code>{row.email}</code></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
 </BaseLayout>
