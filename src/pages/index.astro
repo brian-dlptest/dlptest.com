@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAd from "@/components/CyberhavenAd.astro";
 export const prerender = true;
 
 const faqs = [
@@ -48,6 +49,8 @@ const faqs = [
       <a class="button" style="background:transparent;border:1px solid var(--accent);color:var(--accent);" href="/http-post/">Try the HTTP POST test</a>
     </p>
   </section>
+
+  <CyberhavenAd unit="leaderboard" priority />
 
   <section>
     <h2>Why use dlptest.com?</h2>
