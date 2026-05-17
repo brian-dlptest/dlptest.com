@@ -40,6 +40,12 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   const hostname = url.hostname;
   const blockIndexing = shouldBlockIndexing(env.ENVIRONMENT, hostname);
 
+  // Legacy permalink: /https-post/ merged into /http-post/
+  const normalizedPath = url.pathname.replace(/\/+$/, "") || "/";
+  if (normalizedPath === "/https-post") {
+    return Response.redirect(new URL("/http-post/", url), 301);
+  }
+
   // robots.txt — only override the static asset when we want to block crawling.
   if (url.pathname === "/robots.txt" && blockIndexing) {
     return new Response(noIndexRobots(), {

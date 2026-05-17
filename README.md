@@ -54,7 +54,32 @@ GitHub Actions handles all deploys. See
 - Push to `main` → deploys `dlptest-com-prod`
 - Pull requests → run typecheck + build as a status check, no deploy
 
-The workflow uses two repo-level configurations:
+### Automated news drafts (Cursor Cloud Agent)
+
+[`.github/workflows/news-draft.yml`](.github/workflows/news-draft.yml) runs **weekly**
+(Mondays 15:00 UTC, editable cron) and can be triggered manually via **Actions → News discovery**.
+
+It executes [`scripts/news/run-cloud-draft.mjs`](scripts/news/run-cloud-draft.mjs), which calls the
+[`@cursor/sdk`](https://cursor.com/docs/api/sdk/typescript) **`Agent.prompt`** API with **`cloud.autoCreatePR: true`**.
+The Cursor-hosted agent clones **`staging`** (override with env `NEWS_BASE_REF`), scans **`src/content/news/*.md`** for the newest **`pubDate`**, searches for credible stories **after that cutoff**, drafts new Markdown files that match **`src/content.config.ts`**, runs **`npm run check`** and **`npm run build`**, commits, and opens a PR.
+
+You get alerted the same way as any other PR (GitHub email / mobile). Review and merge into **`staging`** like any content change.
+
+Setup (one-time):
+
+1. Connect this GitHub repo to **Cursor Cloud Agents** ([dashboard](https://cursor.com/dashboard/cloud-agents)).
+2. Add repo secret **`CURSOR_API_KEY`** — user API key or team **service account** key from the same dashboard.
+
+Local manual run (same behavior — opens a cloud PR, does **not** use your working tree):
+
+```bash
+export CURSOR_API_KEY="cursor_..."
+export NEWS_REPO_URL="https://github.com/<owner>/<repo>"   # optional in Actions; uses GITHUB_REPOSITORY there
+export NEWS_BASE_REF=staging                               # optional
+npm run news:cloud-draft
+```
+
+The deploy workflow uses two repo-level configurations:
 
 - **Secret** `CLOUDFLARE_API_TOKEN` — scoped Cloudflare API token
   (Workers Scripts: Edit, KV: Edit, R2: Edit, Observability: Edit,

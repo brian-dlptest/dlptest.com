@@ -1,0 +1,62 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+
+// Prerender each news post at its legacy WordPress permalink — e.g.
+// /cyberhaven-raises-100-million-series-d-at-1-billion-valuation/. The
+// trailing slash matches astro.config.mjs (`trailingSlash: "always"`).
+// We only emit pages for slugs returned by getStaticPaths(); other unknown
+// slugs fall through to a 404 because output is "server" but this route has
+// `export const prerender = true` and no SSR fallback for non-matching ids.
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection("news");
+  return posts.map((post) => ({
+    params: { slug: post.data.slug },
+    props: { post },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+function fmt(d: Date) {
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+---
+<BaseLayout title={post.data.title} description={post.data.excerpt || undefined}>
+  <article class="news-post">
+    <p class="news-back">
+      <a href="/data-security-news/">← All news</a>
+    </p>
+    <header>
+      <div class="news-eyebrow">
+        <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+        {post.data.categories.length > 0 && (
+          <span class="news-cats">
+            {post.data.categories.map((c) => (
+              <span class="news-cat">{c}</span>
+            ))}
+          </span>
+        )}
+      </div>
+      <h1>{post.data.title}</h1>
+    </header>
+
+    {post.data.heroImage && (
+      <figure class="news-hero">
+        <img src={post.data.heroImage} alt="" loading="lazy" />
+      </figure>
+    )}
+
+    <div class="news-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

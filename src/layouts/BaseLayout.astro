@@ -22,16 +22,37 @@ const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const nav: Array<{ href: string; label: string }> = [
   { href: "/", label: "Home" },
   { href: "/sample-data/", label: "Sample Data" },
-  { href: "/http-post/", label: "HTTP Post" },
-  { href: "/https-post/", label: "HTTPS Post" },
+  { href: "/http-post/", label: "HTTP POST Test" },
   { href: "/ftp-test/", label: "FTP Test" },
-  { href: "/blog/", label: "Blog" },
+  { href: "/data-security-news/", label: "News" },
   { href: "/contact/", label: "Contact" },
 ];
 
+// Known top-level routes. News articles live at /<slug>/ (legacy WordPress
+// permalinks); anything not in this set that arrives as a single path segment
+// is treated as a news article for the purpose of highlighting the News nav.
+const TOP_LEVEL_PATHS = new Set<string>([
+  "/",
+  "/sample-data",
+  "/http-post",
+  "/ftp-test",
+  "/contact",
+  "/privacy-policy",
+  "/terms-and-conditions",
+  "/data-security-news",
+]);
+
 function isActive(href: string) {
   const normHref = href.replace(/\/+$/, "") || "/";
-  return normHref === currentPath;
+  if (normHref === currentPath) return true;
+  if (
+    normHref === "/data-security-news" &&
+    currentPath.startsWith("/") &&
+    !TOP_LEVEL_PATHS.has(currentPath)
+  ) {
+    return true;
+  }
+  return false;
 }
 ---
 <!doctype html>
