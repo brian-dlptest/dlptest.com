@@ -1,0 +1,91 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+export const prerender = true;
+
+const newsPosts = (await getCollection("news")).map((post) => ({
+  ...post,
+  type: "news" as const,
+}));
+
+const guidePosts = (await getCollection("guides")).map((post) => ({
+  ...post,
+  type: "guide" as const,
+}));
+
+const allPosts = [...newsPosts, ...guidePosts].sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+);
+
+function fmt(d: Date) {
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+const totalCount = allPosts.length;
+const newsCount = newsPosts.length;
+const guideCount = guidePosts.length;
+---
+<BaseLayout
+  title="Blog"
+  description="DLP guides, vendor analysis, and data security industry news from DLP Test."
+>
+  <header class="news-header">
+    <h1>Blog</h1>
+    <p class="news-lede">
+      Guides, vendor analysis, and data security industry news.
+      {totalCount} {totalCount === 1 ? "post" : "posts"}.
+    </p>
+  </header>
+
+  <div class="blog-filters" data-filter-group>
+    <button class="blog-filter active" data-filter="all">All ({totalCount})</button>
+    <button class="blog-filter" data-filter="news">News ({newsCount})</button>
+    <button class="blog-filter" data-filter="guide">Guides ({guideCount})</button>
+  </div>
+
+  <ul class="news-list">
+    {allPosts.map((post) => (
+      <li class="news-item" data-type={post.type}>
+        <div class="news-eyebrow">
+          <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+          <span class={`blog-type-badge blog-type-${post.type}`}>
+            {post.type === "guide" ? "Guide" : "News"}
+          </span>
+        </div>
+        <h3>
+          <a href={`/${post.data.slug}/`}>{post.data.title}</a>
+        </h3>
+        {"excerpt" in post.data && post.data.excerpt && <p>{post.data.excerpt}</p>}
+        {"description" in post.data && post.data.description && <p>{post.data.description}</p>}
+      </li>
+    ))}
+  </ul>
+
+  <script>
+    const group = document.querySelector("[data-filter-group]");
+    if (group) {
+      const buttons = group.querySelectorAll<HTMLButtonElement>("[data-filter]");
+      const items = document.querySelectorAll<HTMLElement>("[data-type]");
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          buttons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const filter = btn.dataset.filter;
+          items.forEach((item) => {
+            if (filter === "all" || item.dataset.type === filter) {
+              item.style.display = "";
+            } else {
+              item.style.display = "none";
+            }
+          });
+        });
+      });
+    }
+  </script>
+</BaseLayout>

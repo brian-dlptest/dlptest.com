@@ -1,10 +1,9 @@
 ---
-title: "The data protection platform race is on!"
-slug: "the-data-protection-platform-race-is-on"
+title: “The data protection platform race is on!”
+slug: the-data-protection-platform-race-is-on
 pubDate: 2024-10-17T19:04:34+00:00
-categories: ["Opinion", "Data Discovery", "data protection", "Data Security Posture Management", "DLP", "DSPM", "Email DLP", "Endpoint DLP", "Insider Risk Management", "Network DLP"]
-excerpt: "Throughout 2023 and early 2024, I spoke at conferences and ISSA chapter meetings about the “Evolution of Data Protection” (a copy of that presentation is here). I made two primary predictions about how the data…"
-sourceUrl: "https://dlptest.com/the-data-protection-platform-race-is-on/"
+description: “An analysis of the converging DSPM, endpoint DLP, and network security markets — who will build the next $1B data protection platform?”
+categories: [“DLP”, “DSPM”, “Endpoint DLP”, “Guide”]
 ---
 
 Throughout 2023 and early 2024, I spoke at conferences and ISSA chapter meetings about the “Evolution of Data Protection” ([a copy of that presentation is here](https://www.linkedin.com/in/brianhileman/overlay/1729115613939/single-media-viewer?type=DOCUMENT&profileId=ACoAAAOnGSkBZW4bfsvUpsT1RWxhNibP06X39jA&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BjjtD0fbqRpqpJ1UwXyT9Ig%3D%3D)). I made two primary predictions about how the data protection landscape would transform over the next few years. What I didn’t know was that it would happen so quickly, so let’s break it down.

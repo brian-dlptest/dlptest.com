@@ -40,6 +40,9 @@ function fmt(d: Date) {
 {type === "guide" ? (
   <BaseLayout title={entry.data.title} description={entry.data.description}>
     <article class="guide-post">
+      <p class="news-back">
+        <a href="/blog/">← All posts</a>
+      </p>
       <header>
         <div class="news-eyebrow">
           <time datetime={entry.data.pubDate.toISOString()}>{fmt(entry.data.pubDate)}</time>
@@ -62,7 +65,7 @@ function fmt(d: Date) {
   <BaseLayout title={entry.data.title} description={entry.data.excerpt || undefined}>
     <article class="news-post">
       <p class="news-back">
-        <a href="/data-security-news/">← All news</a>
+        <a href="/blog/">← All posts</a>
       </p>
       <header>
         <div class="news-eyebrow">

@@ -499,6 +499,43 @@ ul.download-list li:last-child { border-bottom: none; }
 .news-body ul, .news-body ol { padding-left: 1.5rem; }
 .news-body li { margin: 0.25rem 0; }
 
+/* ---------- Blog filters ---------- */
+
+.blog-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.blog-filter {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.blog-filter:hover { border-color: var(--text); color: var(--text); }
+.blog-filter.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.blog-type-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+.blog-type-news { background: var(--bg-elev); color: var(--text-dim); }
+.blog-type-guide { background: #2563eb20; color: #2563eb; }
+:root.dark .blog-type-guide { background: #60a5fa20; color: #60a5fa; }
+
 /* ---------- Guides ---------- */
 
 .guide-post header h1 { margin-top: 0.25rem; }
