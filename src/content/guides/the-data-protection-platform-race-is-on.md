@@ -1,5 +1,5 @@
 ---
-title: “The data protection platform race is on!”
+title: The data protection platform race is on
 slug: the-data-protection-platform-race-is-on
 pubDate: 2024-10-17T19:04:34+00:00
 description: “An analysis of the converging DSPM, endpoint DLP, and network security markets — who will build the next $1B data protection platform?”
