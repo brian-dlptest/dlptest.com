@@ -174,21 +174,16 @@ textarea { min-height: 6rem; resize: vertical; }
 .site-brand {
   flex: 1 1 auto;
   min-width: 0;
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--text);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
 }
-.site-brand:hover { text-decoration: none; }
-.site-brand .brand-mark {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, var(--accent), #6c5ce7);
+.site-brand:hover { text-decoration: none; opacity: 0.92; }
+.site-brand-logo {
+  display: block;
+  height: 2.35rem;
+  width: auto;
+  max-width: min(100%, 11.5rem);
 }
 .site-header-toolbar {
   display: flex;
