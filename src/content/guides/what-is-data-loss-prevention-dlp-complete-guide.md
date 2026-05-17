@@ -155,7 +155,7 @@ The DLP market includes both dedicated DLP vendors and platform vendors that inc
 
 **Platform vendors with strong DLP capabilities:** Microsoft Purview DLP, Symantec DLP (Broadcom), Forcepoint DLP, Palo Alto Networks (Enterprise DLP), Zscaler DLP, Proofpoint, Netskope, Trellix DLP.
 
-The vendor landscape is changing rapidly. The convergence of DLP, DSPM, and insider risk management is creating a new category often called "data security platforms." For a detailed vendor comparison, see our [DLP Solutions Compared](/dlp-solutions-compared/) guide.
+The vendor landscape is changing rapidly. The convergence of DLP, DSPM, and insider risk management is creating a new category often called "data security platforms." For a factual vendor directory, see our [DLP Solutions Directory](/dlp-solutions-directory/) guide.
 
 ## How to Implement DLP Successfully
 
