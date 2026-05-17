@@ -151,21 +151,15 @@ textarea { min-height: 6rem; resize: vertical; }
   flex-wrap: wrap;
 }
 .site-brand {
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--text);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
 }
 .site-brand:hover { text-decoration: none; }
-.site-brand .brand-mark {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, var(--accent), #6c5ce7);
+.site-logo {
+  height: 40px;
+  width: auto;
+  display: block;
 }
 
 .site-nav {
