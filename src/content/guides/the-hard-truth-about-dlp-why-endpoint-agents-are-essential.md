@@ -1,7 +1,7 @@
 ---
 title: "The Hard Truth About DLP: Why Endpoint Agents Are Essential"
 slug: "the-hard-truth-about-dlp-why-endpoint-agents-are-essential"
-pubDate: 2025-08-01T02:41:06+00:00
+pubDate: 2025-07-29
 description: "Why agentless DLP solutions leave critical blind spots, and why building a proper endpoint agent takes years of deep OS integration work."
 categories: ["DLP", "Endpoint DLP", "Guide"]
 ---
@@ -47,3 +47,7 @@ Another strategic perspective: the rise of “shadow AI”. In 2023-2024, we’v
 To sum up, let’s be clear: I’m not anti-DSPM or opposed to using cloud-native security tools. Data Security Posture Management and similar technologies are valuable components of a comprehensive data security strategy, particularly in identifying unknown risks and strengthening configurations. However, they are not a cure-all. If someone tries to sell you a “DLP” or insider threat solution that is 100% agentless, be very cautious about what it actually covers. Chances are it will handle data at rest and some cloud events well, but you will be on your own when it comes to data in use and stopping active breaches. In other words, DSPM can tell you where your sensitive data resides, but only DLP with an agent will seize that data when it tries to escape.
 
 The debate shouldn’t be “agent vs. no agent” but rather “how do we cover all our bases?” In an ideal world, you would leverage both: use DSPM to understand and harden your data landscape, and use endpoint DLP & Insider Risk agents to enforce controls at the user interaction level. In practice, if I had to pick one to prevent data loss, I’d pick the agent every time because that’s where the rubber meets the road. It’s the difference between proactively preventing a data leak versus reactively analyzing one.
+
+---
+
+*Originally published on [LinkedIn](https://www.linkedin.com/pulse/hard-truth-dlp-why-endpoint-agents-essential-brian-hileman-56b6c/).*

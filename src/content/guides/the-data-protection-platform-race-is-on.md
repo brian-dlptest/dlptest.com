@@ -62,4 +62,6 @@ If I am going to hedge my bets, here are two possible outcomes that I see for th
 
 **2. SASE + DSPM + Endpoint + A robust business focus on data security. **We are already seeing SASE vendors acquire DSPM solutions, and Fortinet bought an Endpoint solution. I will highlight that many SASE vendors surpass $1B ARR. As of now, I wouldn’t consider any of these vendors the next innovative data protection platform, but with strategic acquisitions and leadership that prioritizes data protection, this could change quickly.
 
-Post on LinkedIn – [https://www.linkedin.com/pulse/data-protection-platform-race-brian-hileman-ummre/?trackingId=kfMkZRZtQXitmmZk2Echiw%3D%3D](https://www.linkedin.com/pulse/data-protection-platform-race-brian-hileman-ummre/?trackingId=kfMkZRZtQXitmmZk2Echiw%3D%3D)
+---
+
+*Originally published on [LinkedIn](https://www.linkedin.com/pulse/data-protection-platform-race-brian-hileman-ummre/).*
