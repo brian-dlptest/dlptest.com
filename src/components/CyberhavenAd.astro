@@ -9,7 +9,7 @@ interface Props {
   showDisclosure?: boolean;
 }
 
-const { unit, priority = false, showDisclosure = false } = Astro.props;
+const { unit, priority = false, showDisclosure = true } = Astro.props;
 const ad = CYBERHAVEN_ADS[unit];
 ---
 <aside class:list={["cyberhaven-ad", `cyberhaven-ad--${unit}`]} aria-label="Advertisement">

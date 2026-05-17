@@ -34,7 +34,7 @@ export const CYBERHAVEN_PAGE_ADS = {
   "sample-data": ["skyscraper", "medium-rectangle"] as const,
   /** Tab pages under /sample-data/* (skyscraper only on legacy site). */
   "sample-data-tab": ["skyscraper"] as const,
-  "http-post": ["leaderboard", "medium-rectangle"] as const,
+  "http-post": ["leaderboard"] as const,
   "ftp-test": ["medium-rectangle"] as const,
 } satisfies Record<string, readonly CyberhavenAdUnit[]>;
 
