@@ -433,8 +433,16 @@ ul.download-list li:last-child { border-bottom: none; }
 /* ---------- Cyberhaven sponsored ads ---------- */
 
 .cyberhaven-ad {
-  margin: 1.5rem 0;
+  margin: 2rem 0;
   text-align: center;
+}
+.cyberhaven-ad-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
 }
 .cyberhaven-ad-link {
   display: inline-block;

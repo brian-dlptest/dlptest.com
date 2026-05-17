@@ -5,12 +5,15 @@ interface Props {
   unit: CyberhavenAdUnit;
   /** Eager-load above-the-fold units (leaderboard on key pages). */
   priority?: boolean;
+  /** Show an "Advertisement" label above the unit. */
+  showDisclosure?: boolean;
 }
 
-const { unit, priority = false } = Astro.props;
+const { unit, priority = false, showDisclosure = false } = Astro.props;
 const ad = CYBERHAVEN_ADS[unit];
 ---
-<aside class:list={["cyberhaven-ad", `cyberhaven-ad--${unit}`]} aria-label="Sponsored">
+<aside class:list={["cyberhaven-ad", `cyberhaven-ad--${unit}`]} aria-label="Advertisement">
+  {showDisclosure && <p class="cyberhaven-ad-label">Advertisement</p>}
   <a
     class="cyberhaven-ad-link"
     href={CYBERHAVEN_HREF}
