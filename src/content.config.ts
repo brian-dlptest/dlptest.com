@@ -20,4 +20,16 @@ const news = defineCollection({
   }),
 });
 
-export const collections = { news };
+const guides = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/guides" }),
+  schema: z.object({
+    title: z.string().min(1),
+    slug: z.string().min(1),
+    description: z.string().min(1),
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    categories: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { news, guides };

@@ -499,6 +499,20 @@ ul.download-list li:last-child { border-bottom: none; }
 .news-body ul, .news-body ol { padding-left: 1.5rem; }
 .news-body li { margin: 0.25rem 0; }
 
+/* ---------- Guides ---------- */
+
+.guide-post header h1 { margin-top: 0.25rem; }
+.guide-body h2 { font-size: 1.4rem; margin-top: 2.5rem; }
+.guide-body h3 { font-size: 1.15rem; margin-top: 1.75rem; }
+.guide-body h4 { font-size: 1rem; margin-top: 1.25rem; color: var(--text-dim); }
+.guide-body p { margin: 0.85rem 0; }
+.guide-body ul, .guide-body ol { padding-left: 1.5rem; }
+.guide-body li { margin: 0.35rem 0; }
+.guide-body hr { margin: 2.5rem 0; border: none; border-top: 1px solid var(--border); }
+.guide-body table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1.5rem 0; overflow-x: auto; display: block; }
+.guide-body th, .guide-body td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; }
+.guide-body th { background: var(--bg-elev); font-weight: 600; }
+
 /* ---------- Cyberhaven sponsored ads ---------- */
 
 .cyberhaven-ad {

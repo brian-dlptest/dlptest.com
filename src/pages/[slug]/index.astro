@@ -3,24 +3,31 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getCollection, render } from "astro:content";
 import type { GetStaticPaths } from "astro";
 
-// Prerender each news post at its legacy WordPress permalink — e.g.
-// /cyberhaven-raises-100-million-series-d-at-1-billion-valuation/. The
-// trailing slash matches astro.config.mjs (`trailingSlash: "always"`).
-// We only emit pages for slugs returned by getStaticPaths(); other unknown
-// slugs fall through to a 404 because output is "server" but this route has
-// `export const prerender = true` and no SSR fallback for non-matching ids.
+// Prerender each news post and guide at its root-level permalink — e.g.
+// /cyberhaven-raises-100-million-series-d-at-1-billion-valuation/ or
+// /what-is-data-loss-prevention-dlp/. The trailing slash matches
+// astro.config.mjs (`trailingSlash: "always"`).
 export const prerender = true;
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection("news");
-  return posts.map((post) => ({
+  const guides = await getCollection("guides");
+
+  const newsPages = posts.map((post) => ({
     params: { slug: post.data.slug },
-    props: { post },
+    props: { entry: post, type: "news" as const },
   }));
+
+  const guidePages = guides.map((guide) => ({
+    params: { slug: guide.data.slug },
+    props: { entry: guide, type: "guide" as const },
+  }));
+
+  return [...newsPages, ...guidePages];
 }) satisfies GetStaticPaths;
 
-const { post } = Astro.props;
-const { Content } = await render(post);
+const { entry, type } = Astro.props;
+const { Content } = await render(entry);
 
 function fmt(d: Date) {
   return d.toLocaleDateString("en-US", {
@@ -30,33 +37,56 @@ function fmt(d: Date) {
   });
 }
 ---
-<BaseLayout title={post.data.title} description={post.data.excerpt || undefined}>
-  <article class="news-post">
-    <p class="news-back">
-      <a href="/data-security-news/">← All news</a>
-    </p>
-    <header>
-      <div class="news-eyebrow">
-        <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
-        {post.data.categories.length > 0 && (
-          <span class="news-cats">
-            {post.data.categories.map((c) => (
-              <span class="news-cat">{c}</span>
-            ))}
-          </span>
-        )}
+{type === "guide" ? (
+  <BaseLayout title={entry.data.title} description={entry.data.description}>
+    <article class="guide-post">
+      <header>
+        <div class="news-eyebrow">
+          <time datetime={entry.data.pubDate.toISOString()}>{fmt(entry.data.pubDate)}</time>
+          {entry.data.categories.length > 0 && (
+            <span class="news-cats">
+              {entry.data.categories.map((c: string) => (
+                <span class="news-cat">{c}</span>
+              ))}
+            </span>
+          )}
+        </div>
+        <h1>{entry.data.title}</h1>
+      </header>
+      <div class="guide-body">
+        <Content />
       </div>
-      <h1>{post.data.title}</h1>
-    </header>
+    </article>
+  </BaseLayout>
+) : (
+  <BaseLayout title={entry.data.title} description={entry.data.excerpt || undefined}>
+    <article class="news-post">
+      <p class="news-back">
+        <a href="/data-security-news/">← All news</a>
+      </p>
+      <header>
+        <div class="news-eyebrow">
+          <time datetime={entry.data.pubDate.toISOString()}>{fmt(entry.data.pubDate)}</time>
+          {entry.data.categories.length > 0 && (
+            <span class="news-cats">
+              {entry.data.categories.map((c: string) => (
+                <span class="news-cat">{c}</span>
+              ))}
+            </span>
+          )}
+        </div>
+        <h1>{entry.data.title}</h1>
+      </header>
 
-    {post.data.heroImage && (
-      <figure class="news-hero">
-        <img src={post.data.heroImage} alt="" loading="lazy" />
-      </figure>
-    )}
+      {entry.data.heroImage && (
+        <figure class="news-hero">
+          <img src={entry.data.heroImage} alt="" loading="lazy" />
+        </figure>
+      )}
 
-    <div class="news-body">
-      <Content />
-    </div>
-  </article>
-</BaseLayout>
+      <div class="news-body">
+        <Content />
+      </div>
+    </article>
+  </BaseLayout>
+)}
