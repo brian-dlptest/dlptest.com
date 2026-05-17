@@ -14,26 +14,28 @@ export const prerender = true;
 
   <SampleDataNav active="ccnzip" />
 
-  <table>
-    <thead>
-      <tr>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>ZIP</th>
-        <th>Credit Card Number</th>
-        <th>Expiration</th>
-      </tr>
-    </thead>
-    <tbody>
-      {sampleNameCcnZip.map((row) => (
+  <div class="table-scroll">
+    <table>
+      <thead>
         <tr>
-          <td>{row.first}</td>
-          <td>{row.last}</td>
-          <td><code>{row.zip}</code></td>
-          <td><code>{row.ccn}</code></td>
-          <td><code>{row.expiry}</code></td>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>ZIP</th>
+          <th>Credit Card Number</th>
+          <th>Expiration</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {sampleNameCcnZip.map((row) => (
+          <tr>
+            <td>{row.first}</td>
+            <td>{row.last}</td>
+            <td><code>{row.zip}</code></td>
+            <td><code>{row.ccn}</code></td>
+            <td><code>{row.expiry}</code></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 </BaseLayout>

@@ -13,22 +13,24 @@ export const prerender = true;
 
   <SampleDataNav active="ssndob" />
 
-  <table>
-    <thead>
-      <tr>
-        <th>First and Last Name</th>
-        <th>SSN</th>
-        <th>Date of Birth</th>
-      </tr>
-    </thead>
-    <tbody>
-      {sampleNameSsnDob.map((row) => (
+  <div class="table-scroll">
+    <table>
+      <thead>
         <tr>
-          <td>{row.name}</td>
-          <td><code>{row.ssn}</code></td>
-          <td><code>{row.dob}</code></td>
+          <th>First and Last Name</th>
+          <th>SSN</th>
+          <th>Date of Birth</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {sampleNameSsnDob.map((row) => (
+          <tr>
+            <td>{row.name}</td>
+            <td><code>{row.ssn}</code></td>
+            <td><code>{row.dob}</code></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 </BaseLayout>

@@ -45,7 +45,7 @@ const faqs = [
     <p>
       <a class="button" href="/sample-data/">Get sample data</a>
       {" "}
-      <a class="button" style="background:transparent;border:1px solid var(--accent);color:var(--accent);" href="/http-post/">Try the HTTP POST test</a>
+      <a class="button button-outline" href="/http-post/">Try the HTTP POST test</a>
     </p>
   </section>
 
@@ -148,12 +148,26 @@ const faqs = [
   details {
     background: var(--bg-elev);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+    padding: 0.875rem 1.25rem;
     margin: 0.5rem 0;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
   }
-  details[open] { padding-bottom: 1rem; }
-  summary { cursor: pointer; padding: 0.25rem 0; }
-  details > div { margin-top: 0.75rem; }
+  details:hover {
+    border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
+  }
+  details[open] {
+    padding-bottom: 1.25rem;
+    box-shadow: var(--shadow-md);
+  }
+  summary {
+    cursor: pointer;
+    padding: 0.25rem 0;
+    font-size: 1rem;
+    transition: color var(--transition-fast);
+  }
+  summary:hover { color: var(--accent); }
+  details > div { margin-top: 0.875rem; color: var(--text-dim); line-height: 1.7; }
   details ol { padding-left: 1.5rem; }
 </style>

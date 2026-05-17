@@ -24,24 +24,26 @@ const byGroup = {
   <SampleDataNav active="ssncc" />
 
   <h2>Name + SSN + Credit Card Number</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>First and Last Name</th>
-        <th>SSN</th>
-        <th>Credit Card Number (Visa / MC / AMEX)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {sampleData.map((row) => (
+  <div class="table-scroll">
+    <table>
+      <thead>
         <tr>
-          <td>{row.name}</td>
-          <td><code>{row.ssn}</code></td>
-          <td><code>{row.ccn}</code></td>
+          <th>First and Last Name</th>
+          <th>SSN</th>
+          <th>Credit Card Number (Visa / MC / AMEX)</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {sampleData.map((row) => (
+          <tr>
+            <td>{row.name}</td>
+            <td><code>{row.ssn}</code></td>
+            <td><code>{row.ccn}</code></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
   <h2>Sample files</h2>
   <h3>Sample SSN &amp; CCN files</h3>

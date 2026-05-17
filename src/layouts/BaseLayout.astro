@@ -97,13 +97,31 @@ function isActive(href: string) {
     </main>
     <footer class="site-footer">
       <div class="site-footer-inner">
-        <div>&copy; {new Date().getFullYear()} DLP Test. Created by Brian Hileman.</div>
-        <div>
-          <a href="/privacy-policy/">Privacy</a>
-          {" · "}
-          <a href="/terms-and-conditions/">Terms</a>
-          {" · "}
-          <a href="/contact/">Contact</a>
+        <div class="footer-brand">
+          <a href="/" class="site-brand">
+            <img src="/logo.png" alt="DLP Test" height="32" class="site-logo" />
+          </a>
+          <p class="footer-tagline">A free testing resource for Data Loss Prevention software.</p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer">
+          <div class="footer-nav-col">
+            <span class="footer-nav-heading">Tools</span>
+            <a href="/sample-data/">Sample Data</a>
+            <a href="/http-post/">HTTP POST Test</a>
+            <a href="/ftp-test/">FTP Test</a>
+          </div>
+          <div class="footer-nav-col">
+            <span class="footer-nav-heading">Site</span>
+            <a href="/data-security-news/">News</a>
+            <a href="/contact/">Contact</a>
+            <a href="/privacy-policy/">Privacy</a>
+            <a href="/terms-and-conditions/">Terms</a>
+          </div>
+        </nav>
+      </div>
+      <div class="site-footer-bottom">
+        <div class="site-footer-bottom-inner">
+          <span>&copy; {new Date().getFullYear()} DLP Test. Created by Brian Hileman.</span>
         </div>
       </div>
     </footer>
