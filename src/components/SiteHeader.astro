@@ -1,0 +1,79 @@
+---
+export interface HeaderNavItem {
+  href: string;
+  label: string;
+  active: boolean;
+}
+
+interface Props {
+  nav: HeaderNavItem[];
+}
+
+const { nav } = Astro.props;
+---
+<header class="site-header" data-site-header>
+  <div class="site-header-inner">
+    <a href="/" class="site-brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>DLP Test</span>
+    </a>
+
+    <div class="site-header-toolbar">
+      <button
+        type="button"
+        class="nav-menu-toggle"
+        aria-expanded="false"
+        aria-controls="primary-navigation"
+        aria-label="Open menu"
+      >
+        <svg class="nav-menu-icon nav-menu-icon--open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+        <svg class="nav-menu-icon nav-menu-icon--close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav id="primary-navigation" class="site-nav" aria-label="Primary">
+      {nav.map((item) => (
+        <a href={item.href} aria-current={item.active ? "page" : undefined}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  function initSiteHeader() {
+    const header = document.querySelector<HTMLElement>("[data-site-header]");
+    const toggle = header?.querySelector<HTMLButtonElement>(".nav-menu-toggle");
+    const nav = header?.querySelector<HTMLElement>(".site-nav");
+    if (!header || !toggle || !nav) return;
+
+    const close = () => {
+      header.classList.remove("site-header--nav-open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open menu");
+    };
+
+    toggle.addEventListener("click", () => {
+      const open = !header.classList.contains("site-header--nav-open");
+      header.classList.toggle("site-header--nav-open", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    });
+
+    nav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", close);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") close();
+    });
+  }
+
+  initSiteHeader();
+  document.addEventListener("astro:page-load", initSiteHeader);
+</script>

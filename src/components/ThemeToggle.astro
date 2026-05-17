@@ -1,5 +1,5 @@
 ---
-/** Light / dark / system appearance control (see `src/lib/theme.ts`). */
+/** Pill-style system / dark / light control (footer). See `src/lib/theme.ts`. */
 ---
 <div class="theme-toggle" role="group" aria-label="Color theme">
   <button
@@ -7,44 +7,44 @@
     class="theme-toggle-btn"
     data-theme-pref="system"
     aria-pressed="false"
-    title="Use system setting"
+    title="System theme"
   >
     <span class="theme-toggle-icon" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="4" width="18" height="14" rx="2"></rect>
         <path d="M8 20h8"></path>
       </svg>
     </span>
-    <span class="theme-toggle-label">System</span>
-  </button>
-  <button
-    type="button"
-    class="theme-toggle-btn"
-    data-theme-pref="light"
-    aria-pressed="false"
-    title="Light mode"
-  >
-    <span class="theme-toggle-icon" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="4"></circle>
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-      </svg>
-    </span>
-    <span class="theme-toggle-label">Light</span>
+    <span class="visually-hidden">System</span>
   </button>
   <button
     type="button"
     class="theme-toggle-btn"
     data-theme-pref="dark"
     aria-pressed="false"
-    title="Dark mode"
+    title="Dark theme"
   >
     <span class="theme-toggle-icon" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3 9.5 9.5 0 1 0 21 14.5z"></path>
       </svg>
     </span>
-    <span class="theme-toggle-label">Dark</span>
+    <span class="visually-hidden">Dark</span>
+  </button>
+  <button
+    type="button"
+    class="theme-toggle-btn"
+    data-theme-pref="light"
+    aria-pressed="false"
+    title="Light theme"
+  >
+    <span class="theme-toggle-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+      </svg>
+    </span>
+    <span class="visually-hidden">Light</span>
   </button>
 </div>
 
@@ -56,12 +56,14 @@
     type ThemePreference,
   } from "@/lib/theme";
 
+  let themeToggleBound = false;
+
   function syncToggleUi(preference: ThemePreference) {
-    const group = document.querySelector(".theme-toggle");
-    if (!group) return;
-    group.querySelectorAll<HTMLButtonElement>("[data-theme-pref]").forEach((btn) => {
-      const pref = btn.dataset.themePref as ThemePreference;
-      btn.setAttribute("aria-pressed", pref === preference ? "true" : "false");
+    document.querySelectorAll(".theme-toggle").forEach((group) => {
+      group.querySelectorAll<HTMLButtonElement>("[data-theme-pref]").forEach((btn) => {
+        const pref = btn.dataset.themePref as ThemePreference;
+        btn.setAttribute("aria-pressed", pref === preference ? "true" : "false");
+      });
     });
   }
 
@@ -75,20 +77,26 @@
     syncToggleUi(preference);
   }
 
+  function onThemeToggleClick(event: MouseEvent) {
+    const btn = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      ".theme-toggle [data-theme-pref]",
+    );
+    if (!btn?.dataset.themePref) return;
+    setPreference(btn.dataset.themePref as ThemePreference);
+  }
+
   function init() {
     const preference = readThemePreference();
     applyThemePreference(preference);
     syncToggleUi(preference);
 
-    document.querySelector(".theme-toggle")?.addEventListener("click", (event) => {
-      const btn = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-theme-pref]");
-      if (!btn?.dataset.themePref) return;
-      setPreference(btn.dataset.themePref as ThemePreference);
-    });
-
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-      if (readThemePreference() === "system") syncToggleUi("system");
-    });
+    if (!themeToggleBound) {
+      document.addEventListener("click", onThemeToggleClick);
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+        if (readThemePreference() === "system") syncToggleUi("system");
+      });
+      themeToggleBound = true;
+    }
   }
 
   init();
