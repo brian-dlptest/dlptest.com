@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
+import rehypeExternalLinks from "rehype-external-links";
 
 // Astro on Cloudflare Workers. On-demand rendering enabled (output: "server")
 // because we need:
@@ -13,6 +14,11 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   site: "https://dlptest.com",
   output: "server",
+  markdown: {
+    rehypePlugins: [
+      [rehypeExternalLinks, { target: "_blank", rel: ["noopener", "noreferrer"] }],
+    ],
+  },
   adapter: cloudflare({
     // Use directory output so Wrangler can wire static assets + Worker entry.
     imageService: "passthrough",
