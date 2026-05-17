@@ -16,3 +16,7 @@ declare namespace Cloudflare {
 // Cloudflare adapter's `handle(request, env, ctx)` signature). Mirror the
 // same shape there for consistency.
 interface Env extends Cloudflare.Env {}
+
+interface Window {
+  dataLayer?: Record<string, unknown>[];
+}

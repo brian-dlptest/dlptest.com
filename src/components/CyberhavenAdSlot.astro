@@ -1,0 +1,27 @@
+---
+import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import { CYBERHAVEN_PAGE_ADS, type CyberhavenAdPage } from "@/lib/cyberhaven-ad";
+
+interface Props {
+  page: CyberhavenAdPage;
+}
+
+const { page } = Astro.props;
+const units = CYBERHAVEN_PAGE_ADS[page];
+const hasSidebar = units.includes("skyscraper");
+const inlineUnits = units.filter((u) => u !== "skyscraper");
+---
+{hasSidebar ? (
+  <div class="cyberhaven-ad-layout cyberhaven-ad-layout--sidebar">
+    <div class="cyberhaven-ad-main">
+      <slot />
+    </div>
+    <CyberhavenAd unit="skyscraper" />
+  </div>
+) : (
+  <slot />
+)}
+
+{inlineUnits.map((unit) => (
+  <CyberhavenAd unit={unit} priority={unit === "leaderboard"} />
+))}

@@ -1,6 +1,11 @@
 ---
 import "@/styles/global.css";
+import SiteAnalytics from "@/components/SiteAnalytics.astro";
+import SiteHeader, { type HeaderNavItem } from "@/components/SiteHeader.astro";
+import ThemeToggle from "@/components/ThemeToggle.astro";
+import { GTM_CONTAINER_ID } from "@/lib/analytics";
 import { env } from "cloudflare:workers";
+import { THEME_STORAGE_KEY } from "@/lib/theme";
 
 interface Props {
   title: string;
@@ -16,6 +21,8 @@ const { title, description = "DLP Test — a resource for testing Data Loss Prev
 // staging build correctly shows the banner and emits noindex tags.
 const isStaging = env.ENVIRONMENT === "staging";
 const shouldNoindex = noindex || isStaging;
+/** GTM/GA4 only on production so staging traffic does not pollute reports. */
+const analyticsEnabled = env.ENVIRONMENT === "production";
 const canonical = new URL(Astro.url.pathname, "https://dlptest.com").toString();
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
 
@@ -54,6 +61,11 @@ function isActive(href: string) {
   }
   return false;
 }
+
+const headerNav: HeaderNavItem[] = nav.map((item) => ({
+  ...item,
+  active: isActive(item.href),
+}));
 ---
 <!doctype html>
 <html lang="en">
@@ -70,42 +82,52 @@ function isActive(href: string) {
     ) : (
       <link rel="canonical" href={canonical} />
     )}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="150x150" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY }}>
+      (function () {
+        try {
+          var t = localStorage.getItem(themeKey);
+          if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
+    <SiteAnalytics enabled={analyticsEnabled} />
   </head>
   <body>
+    {analyticsEnabled && (
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${GTM_CONTAINER_ID}`}
+          height="0"
+          width="0"
+          style="display:none;visibility:hidden"
+          title="Google Tag Manager"
+        />
+      </noscript>
+    )}
     {isStaging && (
       <div class="staging-banner">
         STAGING — content is not indexed and may differ from production.
       </div>
     )}
-    <header class="site-header">
-      <div class="site-header-inner">
-        <a href="/" class="site-brand">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <span>DLP Test</span>
-        </a>
-        <nav class="site-nav" aria-label="Primary">
-          {nav.map((item) => (
-            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
-      </div>
-    </header>
+    <SiteHeader nav={headerNav} />
     <main>
       <slot />
     </main>
     <footer class="site-footer">
       <div class="site-footer-inner">
-        <div>&copy; {new Date().getFullYear()} DLP Test. Created by Brian Hileman.</div>
-        <div>
+        <div class="site-footer-start">
+          <div>&copy; {new Date().getFullYear()} DLP Test. Created by Brian Hileman.</div>
+          <div class="site-footer-links">
           <a href="/privacy-policy/">Privacy</a>
           {" · "}
           <a href="/terms-and-conditions/">Terms</a>
           {" · "}
           <a href="/contact/">Contact</a>
+          </div>
         </div>
+        <ThemeToggle />
       </div>
     </footer>
   </body>

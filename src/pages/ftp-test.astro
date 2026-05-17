@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAd from "@/components/CyberhavenAd.astro";
 export const prerender = true;
 
 // The FTP test server lives on a separate host (ftp.dlptest.com) outside of
@@ -18,15 +19,18 @@ const retentionMinutes = 10;
     deleted after about {retentionMinutes} minutes.
   </p>
 
-  <table>
-    <tbody>
-      <tr><th>FTP host</th><td><code>{ftpHost}</code></td></tr>
-      <tr><th>User</th><td><code>{ftpUser}</code></td></tr>
-      <tr><th>Password</th><td><code>{ftpPassword}</code></td></tr>
-      <tr><th>Mode</th><td>Passive (active is not supported)</td></tr>
-      <tr><th>Retention</th><td>{retentionMinutes} minutes</td></tr>
-    </tbody>
-  </table>
+  <div class="ftp-credentials-with-ad">
+    <table class="ftp-credentials-table">
+      <tbody>
+        <tr><th>FTP host</th><td><code>{ftpHost}</code></td></tr>
+        <tr><th>User</th><td><code>{ftpUser}</code></td></tr>
+        <tr><th>Password</th><td><code>{ftpPassword}</code></td></tr>
+        <tr><th>Mode</th><td>Passive (active is not supported)</td></tr>
+        <tr><th>Retention</th><td>{retentionMinutes} minutes</td></tr>
+      </tbody>
+    </table>
+    <CyberhavenAd unit="medium-rectangle" />
+  </div>
 
   <p>
     On Windows, use a client like
@@ -43,3 +47,47 @@ const retentionMinutes = 10;
     <a href="/contact/">contact page</a>.
   </p>
 </BaseLayout>
+
+<style>
+  .ftp-credentials-with-ad {
+    display: grid;
+    gap: 1.25rem 2rem;
+    align-items: start;
+    margin: 1.25rem 0 2rem;
+  }
+
+  .ftp-credentials-table {
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+
+  .ftp-credentials-table th,
+  .ftp-credentials-table td {
+    padding: 0.4rem 0.65rem;
+  }
+
+  .ftp-credentials-table th {
+    width: 1%;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .ftp-credentials-with-ad .cyberhaven-ad {
+    margin: 0;
+  }
+
+  @media (min-width: 720px) {
+    .ftp-credentials-with-ad {
+      grid-template-columns: auto auto;
+      justify-content: start;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .ftp-credentials-with-ad {
+      justify-items: center;
+    }
+  }
+</style>

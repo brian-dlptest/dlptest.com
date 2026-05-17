@@ -1,4 +1,7 @@
-:root {
+/* Dark tokens (default + explicit dark). */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #0b1220;
   --bg-elev: #111a2e;
   --surface: #16213e;
@@ -19,17 +22,33 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f7f9fc;
-    --bg-elev: #ffffff;
-    --surface: #ffffff;
-    --border: #d9e0ec;
-    --text: #1a2138;
-    --text-dim: #5a6378;
-    --accent: #1f6feb;
-    --accent-hover: #0a58ca;
-    --code-bg: #f1f4f9;
+/* Light tokens (explicit choice or system preference when no override). */
+:root[data-theme="light"],
+:root:not([data-theme]) {
+  color-scheme: light;
+  --bg: #f7f9fc;
+  --bg-elev: #ffffff;
+  --surface: #ffffff;
+  --border: #d9e0ec;
+  --text: #1a2138;
+  --text-dim: #5a6378;
+  --accent: #1f6feb;
+  --accent-hover: #0a58ca;
+  --code-bg: #f1f4f9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #0b1220;
+    --bg-elev: #111a2e;
+    --surface: #16213e;
+    --border: #233057;
+    --text: #e6edf7;
+    --text-dim: #aab4c8;
+    --accent: #4fa3ff;
+    --accent-hover: #7cc0ff;
+    --code-bg: #0a1020;
   }
 }
 
@@ -45,6 +64,9 @@ html {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-size-adjust: 100%;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 body {
@@ -146,40 +168,164 @@ textarea { min-height: 6rem; resize: vertical; }
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   flex-wrap: wrap;
+  gap: 0.75rem 1rem;
 }
 .site-brand {
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--text);
+  flex: 1 1 auto;
+  min-width: 0;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
 }
-.site-brand:hover { text-decoration: none; }
-.site-brand .brand-mark {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, var(--accent), #6c5ce7);
+.site-brand:hover { text-decoration: none; opacity: 0.92; }
+.site-brand-logo {
+  display: block;
+  height: 2.35rem;
+  width: auto;
+  max-width: min(100%, 11.5rem);
+}
+.site-header-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.nav-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.nav-menu-toggle:hover {
+  background: var(--bg-elev);
+}
+.nav-menu-icon--close {
+  display: none;
+}
+.site-header--nav-open .nav-menu-icon--open {
+  display: none;
+}
+.site-header--nav-open .nav-menu-icon--close {
+  display: block;
 }
 
 .site-nav {
-  display: flex;
-  gap: 1.25rem;
-  flex-wrap: wrap;
+  display: none;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 0;
   font-size: 0.95rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.site-header--nav-open .site-nav {
+  display: flex;
 }
 .site-nav a {
   color: var(--text-dim);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.site-nav a:last-child {
+  border-bottom: none;
 }
 .site-nav a:hover, .site-nav a[aria-current="page"] {
   color: var(--text);
   text-decoration: none;
+}
+
+@media (min-width: 768px) {
+  .nav-menu-toggle {
+    display: none;
+  }
+
+  .site-header-inner {
+    flex-wrap: nowrap;
+  }
+
+  .site-brand {
+    flex: 0 1 auto;
+  }
+
+  .site-header-toolbar {
+    margin-left: auto;
+  }
+
+  .site-nav {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding-top: 0;
+    border-top: none;
+    margin-left: 0.75rem;
+  }
+
+  .site-nav a {
+    padding: 0;
+    border-bottom: none;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.theme-toggle-btn:hover {
+  color: var(--text);
+}
+.theme-toggle-btn[aria-pressed="true"] {
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.theme-toggle-icon {
+  display: inline-flex;
+  line-height: 0;
+}
+.theme-toggle-icon svg {
+  display: block;
 }
 
 main {
@@ -211,8 +357,17 @@ main {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1rem 1.5rem;
+}
+.site-footer-start {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.site-footer-links {
+  font-size: 0.88rem;
 }
 .site-footer a { color: var(--text-dim); }
 .site-footer a:hover { color: var(--text); }
@@ -343,3 +498,55 @@ ul.download-list li:last-child { border-bottom: none; }
 .news-body p { margin: 0.85rem 0; }
 .news-body ul, .news-body ol { padding-left: 1.5rem; }
 .news-body li { margin: 0.25rem 0; }
+
+/* ---------- Cyberhaven sponsored ads ---------- */
+
+.cyberhaven-ad {
+  margin: 2rem 0;
+  text-align: center;
+}
+.cyberhaven-ad-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.cyberhaven-ad-link {
+  display: inline-block;
+  line-height: 0;
+}
+.cyberhaven-ad-link:hover {
+  text-decoration: none;
+  opacity: 0.92;
+}
+.cyberhaven-ad img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.cyberhaven-ad-layout--sidebar {
+  display: grid;
+  gap: 1.5rem 2rem;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .cyberhaven-ad-layout--sidebar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--skyscraper {
+    margin: 0;
+    position: sticky;
+    top: 1rem;
+  }
+}
+@media (max-width: 899px) {
+  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--skyscraper {
+    order: -1;
+    margin-bottom: 0;
+  }
+}
