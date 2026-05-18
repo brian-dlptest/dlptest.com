@@ -1,0 +1,291 @@
+---
+/** Newsletter / contact subscribe form — uses site CSS tokens (light + dark). */
+const apiUrl =
+  import.meta.env.PUBLIC_SUBSCRIBE_API_URL ??
+  "https://dlp-test-subscribe-email-database-production.up.railway.app/api/contacts";
+const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
+---
+
+<div class="subscribe-form" data-subscribe-form>
+  <div class="subscribe-form__panel subscribe-form__success" data-success hidden>
+    <p class="subscribe-form__success-title">Thank you!</p>
+    <button type="button" class="subscribe-form__reset" data-reset>
+      Submit another response
+    </button>
+  </div>
+
+  <div class="subscribe-form__panel" data-form-panel>
+    <p class="subscribe-form__alert" data-alert role="alert" hidden></p>
+
+    <form data-subscribe novalidate>
+      <div class="field">
+        <label for="subscribe-email">Email <span class="required">*</span></label>
+        <input
+          id="subscribe-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          required
+        />
+        <span class="field-error">Please enter a valid email address</span>
+      </div>
+
+      <div class="field">
+        <label for="subscribe-name">Name <span class="required">*</span></label>
+        <input
+          id="subscribe-name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          placeholder="Your name"
+          required
+        />
+        <span class="field-error">Please enter your name</span>
+      </div>
+
+      <div class="field">
+        <label for="subscribe-company">
+          Company <span class="optional">(optional)</span>
+        </label>
+        <input
+          id="subscribe-company"
+          name="company"
+          type="text"
+          autocomplete="organization"
+          placeholder="Your company"
+        />
+      </div>
+
+      <button type="submit" data-submit>Subscribe</button>
+      <p class="subscribe-form__footer muted small">
+        By subscribing, you agree to receive our communications.
+      </p>
+    </form>
+  </div>
+</div>
+
+<style>
+  .subscribe-form {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    max-width: 32rem;
+  }
+
+  .subscribe-form__panel {
+    display: block;
+  }
+
+  .subscribe-form__panel[hidden] {
+    display: none;
+  }
+
+  .subscribe-form .field {
+    margin-bottom: 1rem;
+  }
+
+  .subscribe-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+  }
+
+  .subscribe-form .required {
+    color: var(--danger);
+  }
+
+  .subscribe-form .optional {
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .subscribe-form input.invalid {
+    border-color: var(--danger);
+  }
+
+  .subscribe-form .field-error {
+    display: none;
+    font-size: 0.85rem;
+    color: var(--danger);
+    margin-top: 0.35rem;
+  }
+
+  .subscribe-form input.invalid + .field-error {
+    display: block;
+  }
+
+  .subscribe-form__alert {
+    margin: 0 0 1rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    background: color-mix(in srgb, var(--danger) 12%, var(--bg-elev));
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+    color: var(--danger);
+  }
+
+  .subscribe-form__alert[hidden] {
+    display: none;
+  }
+
+  .subscribe-form__success {
+    text-align: center;
+    padding: 1.5rem 0.5rem;
+  }
+
+  .subscribe-form__success-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+  }
+
+  .subscribe-form__reset {
+    background: transparent;
+    color: var(--accent);
+    border: none;
+    padding: 0;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .subscribe-form__reset:hover {
+    color: var(--accent-hover);
+    background: transparent;
+  }
+
+  .subscribe-form__footer {
+    margin: 0.85rem 0 0;
+    text-align: center;
+  }
+
+  .subscribe-form button[type="submit"]:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+</style>
+
+<script define:vars={{ apiUrl, apiKey }}>
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function initSubscribeForm(root) {
+    const form = root.querySelector("[data-subscribe]");
+    const formPanel = root.querySelector("[data-form-panel]");
+    const successPanel = root.querySelector("[data-success]");
+    const alertEl = root.querySelector("[data-alert]");
+    const submitBtn = root.querySelector("[data-submit]");
+    const resetBtn = root.querySelector("[data-reset]");
+    const emailInput = root.querySelector("#subscribe-email");
+    const nameInput = root.querySelector("#subscribe-name");
+    const companyInput = root.querySelector("#subscribe-company");
+
+    if (!form || !apiKey) {
+      if (alertEl) {
+        alertEl.hidden = false;
+        alertEl.textContent =
+          "Subscribe form is not configured (missing PUBLIC_SUBSCRIBE_API_KEY).";
+      }
+      return;
+    }
+
+    function showAlert(message) {
+      if (!alertEl) return;
+      alertEl.textContent = message;
+      alertEl.hidden = !message;
+    }
+
+    function validateField(input, validator) {
+      const value = input.value.trim();
+      const valid = validator(value);
+      input.classList.toggle("invalid", !valid);
+      return valid;
+    }
+
+    emailInput?.addEventListener("blur", () =>
+      validateField(emailInput, (v) => v && emailRegex.test(v)),
+    );
+    nameInput?.addEventListener("blur", () =>
+      validateField(nameInput, (v) => v.length > 0),
+    );
+    [emailInput, nameInput].forEach((input) => {
+      input?.addEventListener("input", () => input.classList.remove("invalid"));
+    });
+
+    function setLoading(loading) {
+      if (submitBtn) {
+        submitBtn.disabled = loading;
+        submitBtn.textContent = loading ? "Submitting…" : "Subscribe";
+      }
+    }
+
+    function showSuccess() {
+      formPanel?.setAttribute("hidden", "");
+      successPanel?.removeAttribute("hidden");
+      showAlert("");
+    }
+
+    function resetView() {
+      form.reset();
+      formPanel?.removeAttribute("hidden");
+      successPanel?.setAttribute("hidden", "");
+      showAlert("");
+      emailInput?.classList.remove("invalid");
+      nameInput?.classList.remove("invalid");
+    }
+
+    resetBtn?.addEventListener("click", resetView);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showAlert("");
+
+      const emailValid = validateField(
+        emailInput,
+        (v) => v && emailRegex.test(v),
+      );
+      const nameValid = validateField(nameInput, (v) => v.length > 0);
+      if (!emailValid || !nameValid) {
+        showAlert("Please fill in all required fields correctly.");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": apiKey,
+          },
+          body: JSON.stringify({
+            email: emailInput.value.trim(),
+            name: nameInput.value.trim(),
+            company: companyInput?.value.trim() || undefined,
+          }),
+        });
+
+        if (response.ok) {
+          showSuccess();
+        } else if (response.status === 409) {
+          showAlert("This email is already subscribed. Thank you!");
+        } else if (response.status === 429) {
+          showAlert("Too many requests. Please try again later.");
+        } else {
+          const data = await response.json().catch(() => ({}));
+          showAlert(data.message || "Something went wrong. Please try again.");
+        }
+      } catch {
+        showAlert("Unable to connect. Please check your internet connection.");
+      } finally {
+        setLoading(false);
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-subscribe-form]").forEach(initSubscribeForm);
+  document.addEventListener("astro:page-load", () => {
+    document.querySelectorAll("[data-subscribe-form]").forEach(initSubscribeForm);
+  });
+</script>

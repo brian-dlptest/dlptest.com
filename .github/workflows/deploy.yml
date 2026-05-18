@@ -39,6 +39,9 @@ jobs:
         run: npm run check
       - name: Build (production target)
         run: npm run build
+        env:
+          PUBLIC_SUBSCRIBE_API_URL: ${{ secrets.PUBLIC_SUBSCRIBE_API_URL }}
+          PUBLIC_SUBSCRIBE_API_KEY: ${{ secrets.PUBLIC_SUBSCRIBE_API_KEY }}
 
   # ---------------------------------------------------------------------
   # Staging deploy — runs on push to `staging`
@@ -64,6 +67,9 @@ jobs:
         run: npm run check
       - name: Build (staging)
         run: npm run build:staging
+        env:
+          PUBLIC_SUBSCRIBE_API_URL: ${{ secrets.PUBLIC_SUBSCRIBE_API_URL }}
+          PUBLIC_SUBSCRIBE_API_KEY: ${{ secrets.PUBLIC_SUBSCRIBE_API_KEY }}
       - name: Deploy
         run: npx wrangler deploy --config dist/server/wrangler.json
         env:
@@ -94,6 +100,9 @@ jobs:
         run: npm run check
       - name: Build (production)
         run: npm run build
+        env:
+          PUBLIC_SUBSCRIBE_API_URL: ${{ secrets.PUBLIC_SUBSCRIBE_API_URL }}
+          PUBLIC_SUBSCRIBE_API_KEY: ${{ secrets.PUBLIC_SUBSCRIBE_API_KEY }}
       - name: Deploy
         run: npx wrangler deploy --config dist/server/wrangler.json
         env:
