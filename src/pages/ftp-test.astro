@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import SubscribeAdRow from "@/components/SubscribeAdRow.astro";
 export const prerender = true;
 
 // The FTP test server lives on a separate host (ftp.dlptest.com) outside of
@@ -46,6 +47,8 @@ const retentionMinutes = 10;
     enforced. If you believe your address has been blocked in error, use the
     <a href="/contact/">contact page</a>.
   </p>
+
+  <SubscribeAdRow />
 </BaseLayout>
 
 <style>

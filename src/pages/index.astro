@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
-import SubscribeForm from "@/components/SubscribeForm.astro";
+import SubscribeSection from "@/components/SubscribeSection.astro";
 export const prerender = true;
 
 const faqs = [
@@ -129,13 +129,7 @@ const faqs = [
     </div>
   </section>
 
-  <section class="subscribe-section">
-    <h2>Subscribe to Updates</h2>
-    <p class="muted">
-      Get notified about new test tools, sample data, and data security news.
-    </p>
-    <SubscribeForm />
-  </section>
+  <SubscribeSection />
 
   <section>
     <h2>Frequently Asked Questions</h2>
