@@ -21,12 +21,24 @@ import SampleDataNav from "@/components/SampleDataNav.astro";
       <label class="control-group">
         <span class="control-label">Dataset</span>
         <select name="dataset" id="dataset-select">
-          <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
-          <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
-          <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
-          <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
-          <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
-          <option value="banking">Banking — Name + Routing + Account</option>
+          <optgroup label="US PII / PCI">
+            <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
+            <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
+            <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
+            <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+          </optgroup>
+          <optgroup label="US Specialized">
+            <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
+            <option value="banking">Banking — Name + Routing + Account</option>
+            <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
+            <option value="driver-license">Driver's License — Name + DL + State</option>
+          </optgroup>
+          <optgroup label="International">
+            <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
+            <option value="canada-sin">Canada — Name + SIN + Province</option>
+            <option value="passport">International — Name + Passport Number</option>
+            <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+          </optgroup>
         </select>
       </label>
 
