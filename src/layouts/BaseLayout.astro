@@ -31,29 +31,29 @@ const nav: Array<{ href: string; label: string }> = [
   { href: "/sample-data/", label: "Sample Data" },
   { href: "/http-post/", label: "HTTP POST Test" },
   { href: "/ftp-test/", label: "FTP Test" },
-  { href: "/data-security-news/", label: "News" },
+  { href: "/blog/", label: "Blog" },
   { href: "/contact/", label: "Contact" },
 ];
 
-// Known top-level routes. News articles live at /<slug>/ (legacy WordPress
-// permalinks); anything not in this set that arrives as a single path segment
-// is treated as a news article for the purpose of highlighting the News nav.
+// Known top-level routes. Blog posts (news + guides) live at /<slug>/ (legacy
+// WordPress permalinks); anything not in this set that arrives as a single path
+// segment is treated as a blog post for the purpose of highlighting the Blog nav.
 const TOP_LEVEL_PATHS = new Set<string>([
   "/",
   "/sample-data",
   "/http-post",
   "/ftp-test",
+  "/blog",
   "/contact",
   "/privacy-policy",
   "/terms-and-conditions",
-  "/data-security-news",
 ]);
 
 function isActive(href: string) {
   const normHref = href.replace(/\/+$/, "") || "/";
   if (normHref === currentPath) return true;
   if (
-    normHref === "/data-security-news" &&
+    normHref === "/blog" &&
     currentPath.startsWith("/") &&
     !TOP_LEVEL_PATHS.has(currentPath)
   ) {

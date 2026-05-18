@@ -1,0 +1,17 @@
+---
+import SubscribeForm from "@/components/SubscribeForm.astro";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<section class:list={["subscribe-section", className]}>
+  <h2>Subscribe to Updates</h2>
+  <p class="muted">
+    Get notified about new test tools, sample data, and data security news.
+  </p>
+  <SubscribeForm />
+</section>

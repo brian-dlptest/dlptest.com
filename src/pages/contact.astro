@@ -26,6 +26,23 @@ export const prerender = true;
       <label for="c-message">Message</label>
       <textarea id="c-message" name="message" required></textarea>
     </div>
+    <div class="field field--checkbox">
+      <label class="checkbox-label" for="c-subscribe">
+        <input
+          id="c-subscribe"
+          name="subscribe_updates"
+          type="checkbox"
+          value="1"
+          checked
+        />
+        <span class="checkbox-copy">
+          <span class="checkbox-title">Subscribe to Updates</span>
+          <span class="checkbox-desc muted small">
+            Get notified about new test tools, sample data, and data security news.
+          </span>
+        </span>
+      </label>
+    </div>
     <div class="field honeypot" aria-hidden="true">
       <label>If you are human, leave this field blank.
         <input type="text" name="website" tabindex="-1" autocomplete="off" />
@@ -49,6 +66,25 @@ export const prerender = true;
     #contact-form { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
     #contact-form .field { margin-bottom: 1rem; }
     #contact-form label { display: block; font-weight: 500; margin-bottom: 0.35rem; }
+    #contact-form .field--checkbox { margin-bottom: 1.25rem; }
+    #contact-form .checkbox-label {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      font-weight: 400;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+    #contact-form .checkbox-label input {
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+    #contact-form .checkbox-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    #contact-form .checkbox-title { font-weight: 600; color: var(--text); }
     #contact-form .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
     #contact-form .result { margin-top: 0.75rem; min-height: 1.5rem; }
     #contact-form .result.success { color: var(--success); }

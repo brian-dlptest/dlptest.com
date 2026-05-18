@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.5.1",
-    "astro": "^6.3.3"
+    "astro": "^6.3.3",
+    "rehype-external-links": "^3.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250425.0",
