@@ -1,5 +1,16 @@
 # dlptest.com — Development Notes
 
+## Completed
+
+### Copy-to-clipboard buttons on sample data tables (PR #14)
+Added per-row **Copy** buttons and a **Copy all** button (top-right header cell) to all four sample-data tables. Implemented via `src/components/CopyRowScript.astro` — a shared component that injects JS via event delegation on any `<div data-copy-table>` wrapper. Copies tab-separated values; degrades gracefully without JS. Applied to:
+- `src/pages/sample-data/index.astro`
+- `src/pages/sample-data/namessndob.astro`
+- `src/pages/sample-data/nameccnzip.astro`
+- `src/pages/sample-data/namedobemail.astro`
+
+---
+
 ## Backlog
 
 ### Dataset expansion
