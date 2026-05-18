@@ -1,9 +1,6 @@
 ---
-/** Newsletter / contact subscribe form — uses site CSS tokens (light + dark). */
-const apiUrl =
-  import.meta.env.PUBLIC_SUBSCRIBE_API_URL ??
-  "https://dlp-test-subscribe-email-database-production.up.railway.app/api/contacts";
-const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
+/** Newsletter subscribe form — posts to same-origin /api/subscribe/ (proxies to Railway). */
+const apiUrl = "/api/subscribe/";
 ---
 
 <div class="subscribe-form" data-subscribe-form>
@@ -167,7 +164,7 @@ const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
   }
 </style>
 
-<script define:vars={{ apiUrl, apiKey }}>
+<script define:vars={{ apiUrl }}>
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   function initSubscribeForm(root) {
@@ -181,14 +178,7 @@ const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
     const nameInput = root.querySelector("#subscribe-name");
     const companyInput = root.querySelector("#subscribe-company");
 
-    if (!form || !apiKey) {
-      if (alertEl) {
-        alertEl.hidden = false;
-        alertEl.textContent =
-          "Subscribe form is not configured (missing PUBLIC_SUBSCRIBE_API_KEY).";
-      }
-      return;
-    }
+    if (!form) return;
 
     function showAlert(message) {
       if (!alertEl) return;
@@ -255,10 +245,7 @@ const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-API-Key": apiKey,
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: emailInput.value.trim(),
             name: nameInput.value.trim(),
@@ -277,7 +264,7 @@ const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
           showAlert(data.message || "Something went wrong. Please try again.");
         }
       } catch {
-        showAlert("Unable to connect. Please check your internet connection.");
+        showAlert("Unable to reach the server. Please try again.");
       } finally {
         setLoading(false);
       }
