@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
 import { sampleNameSsnDob } from "@/data/sample-data";
 export const prerender = true;
@@ -11,6 +12,7 @@ export const prerender = true;
     composite patterns (e.g. an SSN within a row of a known birth date).
   </p>
 
+  <CyberhavenAdSlot page="sample-data-tab" showSubscribe>
   <SampleDataNav active="ssndob" />
 
   <div class="table-scroll">
@@ -33,4 +35,5 @@ export const prerender = true;
       </tbody>
     </table>
   </div>
+  </CyberhavenAdSlot>
 </BaseLayout>

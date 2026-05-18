@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAd from "@/components/CyberhavenAd.astro";
 import PostTestForm from "@/components/PostTestForm.astro";
+import SubscribeSection from "@/components/SubscribeSection.astro";
 export const prerender = true;
 
 const curlExamples = `# Probe the endpoint
@@ -39,6 +41,8 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
   <p class="muted">
     Bookmark note: the former <code>/https-post/</code> page redirects here with HTTP 301.
   </p>
+
+  <CyberhavenAd unit="leaderboard" />
 
   <h2>Test with curl or scripts</h2>
   <p>
@@ -80,5 +84,7 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
     validating Data Loss Prevention rules, ICAP integrations, and SSE inspection,
     without sending real customer data to a third party that would retain it.
   </p>
+
+  <SubscribeSection />
 </BaseLayout>
 

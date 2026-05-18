@@ -1,0 +1,34 @@
+---
+import { CYBERHAVEN_ADS, CYBERHAVEN_HREF, type CyberhavenAdUnit } from "@/lib/cyberhaven-ad";
+
+interface Props {
+  unit: CyberhavenAdUnit;
+  /** Eager-load above-the-fold units (leaderboard on key pages). */
+  priority?: boolean;
+  /** Show an "Advertisement" label above the unit. */
+  showDisclosure?: boolean;
+}
+
+const { unit, priority = false, showDisclosure = true } = Astro.props;
+const ad = CYBERHAVEN_ADS[unit];
+---
+<aside class:list={["cyberhaven-ad", `cyberhaven-ad--${unit}`]} aria-label="Advertisement">
+  {showDisclosure && <p class="cyberhaven-ad-label">Advertisement</p>}
+  <a
+    class="cyberhaven-ad-link"
+    href={CYBERHAVEN_HREF}
+    target="_blank"
+    rel="sponsored noopener noreferrer"
+    data-track="cyberhaven_ad_click"
+    data-ad-unit={unit}
+  >
+    <img
+      src={ad.src}
+      alt={ad.alt}
+      width={ad.width}
+      height={ad.height}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+    />
+  </a>
+</aside>

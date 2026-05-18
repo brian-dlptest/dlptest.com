@@ -1,0 +1,50 @@
+---
+import { GTM_CONTAINER_ID } from "@/lib/analytics";
+
+interface Props {
+  /** Load GTM and client-side event hooks (production only by default). */
+  enabled: boolean;
+}
+
+const { enabled } = Astro.props;
+---
+{enabled && (
+  <>
+    <script is:inline define:vars={{ gtmId: GTM_CONTAINER_ID }}>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", gtmId);
+    </script>
+    <script>
+      import {
+        trackCyberhavenAdClick,
+        trackFileDownload,
+      } from "@/lib/analytics";
+      import { downloadKeyFromHref } from "@/lib/download-links";
+
+      function onDocumentClick(event: MouseEvent) {
+        const target = event.target as Element;
+
+        const ad = target.closest<HTMLAnchorElement>('[data-track="cyberhaven_ad_click"]');
+        if (ad) {
+          trackCyberhavenAdClick(ad.dataset.adUnit ?? "unknown");
+          return;
+        }
+
+        const link = target.closest<HTMLAnchorElement>("a[href]");
+        if (!link) return;
+        const fileName = downloadKeyFromHref(link.href);
+        if (fileName) trackFileDownload(fileName);
+      }
+
+      document.addEventListener("click", onDocumentClick, { capture: true });
+    </script>
+  </>
+)}

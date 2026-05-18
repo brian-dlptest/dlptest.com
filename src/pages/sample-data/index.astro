@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
 import { sampleData, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
@@ -21,6 +22,7 @@ const byGroup = {
     pattern checks they run.
   </p>
 
+  <CyberhavenAdSlot page="sample-data" showSubscribe>
   <SampleDataNav active="ssncc" />
 
   <h2>Name + SSN + Credit Card Number</h2>
@@ -85,4 +87,5 @@ const byGroup = {
     Basic "Hello World" sample source code is also hosted on
     <a href="https://github.com/brian-dlptest/dlptest">GitHub — brian-dlptest/dlptest</a>.
   </p>
+  </CyberhavenAdSlot>
 </BaseLayout>
