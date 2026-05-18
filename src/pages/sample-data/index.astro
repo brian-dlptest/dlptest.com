@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
+import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleData, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 
@@ -26,24 +27,27 @@ const byGroup = {
   <SampleDataNav active="ssncc" />
 
   <h2>Name + SSN + Credit Card Number</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>First and Last Name</th>
-        <th>SSN</th>
-        <th>Credit Card Number (Visa / MC / AMEX)</th>
-      </tr>
-    </thead>
-    <tbody>
-      {sampleData.map((row) => (
+  <div class="table-scroll" data-copy-table>
+    <table>
+      <thead>
         <tr>
-          <td>{row.name}</td>
-          <td><code>{row.ssn}</code></td>
-          <td><code>{row.ccn}</code></td>
+          <th>First and Last Name</th>
+          <th>SSN</th>
+          <th>Credit Card Number (Visa / MC / AMEX)</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {sampleData.map((row) => (
+          <tr>
+            <td>{row.name}</td>
+            <td><code>{row.ssn}</code></td>
+            <td><code>{row.ccn}</code></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <CopyRowScript />
 
   <h2>Sample files</h2>
   <h3>Sample SSN &amp; CCN files</h3>

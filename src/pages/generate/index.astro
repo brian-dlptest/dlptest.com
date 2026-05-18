@@ -1,0 +1,267 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
+import SampleDataNav from "@/components/SampleDataNav.astro";
+---
+<BaseLayout
+  title="Generate Test Data"
+  description="Generate synthetic PII, PCI, HIPAA, and banking test data on demand. Choose a dataset type, row count, and optional seed for reproducible output."
+>
+  <h1>Generate Test Data</h1>
+  <p>
+    Configure and generate synthetic PII, PCI, HIPAA, or banking data for DLP testing.
+    All values are fabricated. Use a seed to reproduce the exact same dataset.
+  </p>
+
+  <CyberhavenAdSlot page="sample-data-tab">
+  <SampleDataNav active="generate" />
+
+  <form id="generate-form" class="generate-form">
+    <div class="generate-controls">
+      <label class="control-group">
+        <span class="control-label">Dataset</span>
+        <select name="dataset" id="dataset-select">
+          <optgroup label="US PII / PCI">
+            <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
+            <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
+            <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
+            <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+          </optgroup>
+          <optgroup label="US Specialized">
+            <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
+            <option value="banking">Banking — Name + Routing + Account</option>
+            <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
+            <option value="driver-license">Driver's License — Name + DL + State</option>
+          </optgroup>
+          <optgroup label="International">
+            <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
+            <option value="canada-sin">Canada — Name + SIN + Province</option>
+            <option value="passport">International — Name + Passport Number</option>
+            <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <label class="control-group">
+        <span class="control-label">Row count <span class="muted">(1–500)</span></span>
+        <input type="number" name="count" id="count-input" value="50" min="1" max="500" />
+      </label>
+
+      <label class="control-group">
+        <span class="control-label">Seed <span class="muted">(optional — leave blank for random)</span></span>
+        <input type="number" name="seed" id="seed-input" placeholder="e.g. 42" />
+      </label>
+    </div>
+
+    <div class="generate-actions">
+      <button type="submit" id="generate-btn">Generate</button>
+      <button type="button" id="download-csv-btn" class="btn-secondary" hidden>Download CSV</button>
+      <button type="button" id="download-json-btn" class="btn-secondary" hidden>Download JSON</button>
+    </div>
+  </form>
+
+  <p id="generate-status" class="muted" aria-live="polite"></p>
+
+  <div id="generate-results" hidden>
+    <p id="seed-echo" class="muted small"></p>
+    <div class="table-scroll">
+      <table id="results-table">
+        <thead id="results-head"></thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  </CyberhavenAdSlot>
+</BaseLayout>
+
+<style>
+  .generate-form {
+    margin: 1.5rem 0;
+  }
+  .generate-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .control-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .generate-controls select,
+  .generate-controls input[type="number"] {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.95rem;
+    min-width: 12rem;
+  }
+  .generate-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .btn-secondary {
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .table-scroll {
+    overflow-x: auto;
+  }
+</style>
+
+<script>
+  type DatasetRow = Record<string, string>;
+
+  interface GenerateResult {
+    rows: DatasetRow[];
+    columns: string[];
+    dataset: string;
+    seed: number;
+    count: number;
+  }
+
+  // Columns that should be rendered in <code> tags
+  const CODE_COLUMNS = new Set([
+    "SSN", "Credit Card Number", "MRN", "Routing Number", "Account Number",
+    "ICD-10", "CPT",
+  ]);
+
+  let lastResult: GenerateResult | null = null;
+
+  const form = document.getElementById("generate-form") as HTMLFormElement;
+  const btn = document.getElementById("generate-btn") as HTMLButtonElement;
+  const status = document.getElementById("generate-status") as HTMLElement;
+  const resultsDiv = document.getElementById("generate-results") as HTMLDivElement;
+  const thead = document.getElementById("results-head") as HTMLTableSectionElement;
+  const tbody = document.getElementById("results-body") as HTMLTableSectionElement;
+  const seedEcho = document.getElementById("seed-echo") as HTMLParagraphElement;
+  const csvBtn = document.getElementById("download-csv-btn") as HTMLButtonElement;
+  const jsonBtn = document.getElementById("download-json-btn") as HTMLButtonElement;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const dataset = data.get("dataset") as string;
+    const count = Math.max(1, Math.min(500, parseInt(data.get("count") as string, 10) || 50));
+    const rawSeed = data.get("seed") as string;
+    const seed = rawSeed.trim() !== "" ? parseInt(rawSeed, 10) : undefined;
+
+    btn.disabled = true;
+    status.textContent = "Generating…";
+    resultsDiv.hidden = true;
+    csvBtn.hidden = true;
+    jsonBtn.hidden = true;
+
+    try {
+      const body: Record<string, unknown> = { dataset, count, format: "json" };
+      if (seed !== undefined && !isNaN(seed)) body["seed"] = seed;
+
+      const res = await fetch("/api/generate/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        status.textContent = `Error: ${res.status} ${res.statusText}`;
+        return;
+      }
+
+      const result = (await res.json()) as GenerateResult;
+      lastResult = result;
+
+      renderTable(result);
+      seedEcho.textContent = `Generated with seed ${result.seed} — paste this seed to reproduce the exact dataset.`;
+      resultsDiv.hidden = false;
+      csvBtn.hidden = false;
+      jsonBtn.hidden = false;
+      status.textContent = "";
+    } catch (err) {
+      status.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function renderTable(result: GenerateResult) {
+    const headerRow = document.createElement("tr");
+    for (const col of result.columns) {
+      const th = document.createElement("th");
+      th.textContent = col;
+      headerRow.appendChild(th);
+    }
+    thead.innerHTML = "";
+    thead.appendChild(headerRow);
+
+    tbody.innerHTML = "";
+    for (const row of result.rows) {
+      const tr = document.createElement("tr");
+      for (let i = 0; i < result.columns.length; i++) {
+        const col = result.columns[i];
+        const key = Object.keys(row)[i];
+        const td = document.createElement("td");
+        const value = key !== undefined ? String(row[key] ?? "") : "";
+        if (CODE_COLUMNS.has(col)) {
+          const code = document.createElement("code");
+          code.textContent = value;
+          td.appendChild(code);
+        } else {
+          td.textContent = value;
+        }
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+  }
+
+  function clientCsv(result: GenerateResult): string {
+    function escape(v: string): string {
+      return v.includes(",") || v.includes('"') || v.includes("\n")
+        ? `"${v.replace(/"/g, '""')}"` : v;
+    }
+    const header = result.columns.join(",");
+    const body = result.rows
+      .map((row) => Object.values(row).map((v) => escape(String(v))).join(","))
+      .join("\n");
+    return `${header}\n${body}`;
+  }
+
+  function downloadBlob(content: string, filename: string, mime: string) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  csvBtn.addEventListener("click", () => {
+    if (!lastResult) return;
+    downloadBlob(
+      clientCsv(lastResult),
+      `dlptest-${lastResult.dataset}-seed${lastResult.seed}.csv`,
+      "text/csv"
+    );
+  });
+
+  jsonBtn.addEventListener("click", () => {
+    if (!lastResult) return;
+    downloadBlob(
+      JSON.stringify(lastResult.rows, null, 2),
+      `dlptest-${lastResult.dataset}-seed${lastResult.seed}.json`,
+      "application/json"
+    );
+  });
+</script>
