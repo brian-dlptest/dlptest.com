@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active: "ssncc" | "ssndob" | "ccnzip" | "dobemail";
+  active: "ssncc" | "ssndob" | "ccnzip" | "dobemail" | "generate";
 }
 const { active } = Astro.props;
 
@@ -9,6 +9,7 @@ const tabs: Array<{ id: Props["active"]; href: string; label: string }> = [
   { id: "ssndob", href: "/sample-data/namessndob/", label: "Name + SSN + DOB" },
   { id: "ccnzip", href: "/sample-data/nameccnzip/", label: "Name + CCN + ZIP" },
   { id: "dobemail", href: "/sample-data/namedobemail/", label: "Name + DOB + Email" },
+  { id: "generate", href: "/generate/", label: "Generate" },
 ];
 ---
 <nav class="sample-tabs" aria-label="Sample data variants">
