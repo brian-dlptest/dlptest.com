@@ -3,7 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
 import CopyRowScript from "@/components/CopyRowScript.astro";
-import { sampleNameDobEmail } from "@/data/sample-data";
+import { sampleNameDobEmail, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
 <BaseLayout title="Sample Data — Names + DOB + Email" description="Test PII data: fabricated names, dates of birth, and email addresses for DLP testing.">
@@ -40,5 +40,12 @@ export const prerender = true;
     </table>
   </div>
   <CopyRowScript />
+  <h2>Sample files</h2>
+  <h3>Sample DOB &amp; Email files</h3>
+  <ul class="download-list">
+    {downloadFiles.filter((f) => f.group === "dobemail").map((f) => (
+      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+    ))}
+  </ul>
   </CyberhavenAdSlot>
 </BaseLayout>

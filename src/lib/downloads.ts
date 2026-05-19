@@ -20,6 +20,18 @@ export const DOWNLOAD_KEYS: ReadonlySet<string> = new Set([
   "DLP_Test_FTP_FileZilla.xml",
   "DLP_Test_FTP_FileZilla_old.xml",
   "DLP-Test-State-Data.zip",
+  "sample-ssndob.csv",
+  "sample-ssndob.xls",
+  "sample-ssndob.xlsx",
+  "sample-ssndob.pdf",
+  "sample-ccnzip.csv",
+  "sample-ccnzip.xls",
+  "sample-ccnzip.xlsx",
+  "sample-ccnzip.pdf",
+  "sample-dobemail.csv",
+  "sample-dobemail.xls",
+  "sample-dobemail.xlsx",
+  "sample-dobemail.pdf",
 ]);
 
 const CONTENT_TYPE_BY_EXT: Record<string, string> = {
