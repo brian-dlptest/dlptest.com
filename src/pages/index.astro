@@ -152,29 +152,52 @@ const faqs = [
 </BaseLayout>
 
 <style>
-  details {
+  .faq-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .faq-section details {
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 0.875rem 1.25rem;
-    margin: 0.5rem 0;
+    padding: 1.05rem 1.25rem;
+    margin: 0;
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
   }
-  details:hover {
+
+  .faq-section details:hover {
     border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
   }
-  details[open] {
+
+  .faq-section details[open] {
     padding-bottom: 1.25rem;
     box-shadow: var(--shadow-md);
   }
-  summary {
+
+  .faq-section summary {
     cursor: pointer;
-    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0;
     font-size: 1rem;
     transition: color var(--transition-fast);
   }
-  summary:hover { color: var(--accent); }
-  details > div { margin-top: 0.875rem; color: var(--text-dim); line-height: 1.7; }
-  details ol { padding-left: 1.5rem; }
+
+  .faq-section summary:hover {
+    color: var(--accent);
+  }
+
+  .faq-section details > div {
+    margin-top: 0.875rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .faq-section details ol {
+    padding-left: 1.5rem;
+  }
 </style>

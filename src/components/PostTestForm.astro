@@ -67,7 +67,27 @@ const action = "/api/http-post/";
   @media (min-width: 720px) {
     .post-test-grid {
       grid-template-columns: 1fr 1fr;
-      align-items: start;
+      align-items: stretch;
+    }
+
+    form.post-test {
+      display: flex;
+      flex-direction: column;
+    }
+
+    form.post-test--file .field:has(.file-drop) {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    form.post-test--file .file-drop {
+      flex: 1;
+      min-height: 12rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
   }
 
@@ -99,6 +119,14 @@ const action = "/api/http-post/";
     resize: vertical;
   }
 
+  form.post-test button[type="submit"] {
+    align-self: flex-start;
+    width: auto;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
   form.post-test .honeypot {
     position: absolute;
     left: -10000px;
@@ -124,9 +152,11 @@ const action = "/api/http-post/";
     position: relative;
     border: 2px dashed var(--border);
     border-radius: var(--radius);
-    padding: 2rem 1rem 1rem;
+    padding: 1.5rem 1rem;
+    min-height: 12rem;
     text-align: center;
     background: var(--bg);
+    box-sizing: border-box;
   }
 
   .file-drop input[type="file"] {
