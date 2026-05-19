@@ -63,6 +63,56 @@ const CPT_CODES = [
   "71046", "80053", "85025", "36415", "90834", "97110", "99283",
 ] as const;
 
+const US_STATES = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+] as const;
+
+const CA_PROVINCES = [
+  "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT",
+] as const;
+
+const EU_COUNTRIES = [
+  { code: "DE", name: "Germany",     vatPrefix: "DE", vatDigits: 9  },
+  { code: "FR", name: "France",      vatPrefix: "FR", vatDigits: 11 },
+  { code: "IT", name: "Italy",       vatPrefix: "IT", vatDigits: 11 },
+  { code: "ES", name: "Spain",       vatPrefix: "ES", vatDigits: 9  },
+  { code: "NL", name: "Netherlands", vatPrefix: "NL", vatDigits: 9  },
+  { code: "BE", name: "Belgium",     vatPrefix: "BE", vatDigits: 10 },
+  { code: "PL", name: "Poland",      vatPrefix: "PL", vatDigits: 10 },
+  { code: "SE", name: "Sweden",      vatPrefix: "SE", vatDigits: 12 },
+  { code: "AT", name: "Austria",     vatPrefix: "AT", vatDigits: 9  },
+  { code: "PT", name: "Portugal",    vatPrefix: "PT", vatDigits: 9  },
+] as const;
+
+const PASSPORT_COUNTRIES = [
+  "United States", "United Kingdom", "Canada", "Australia",
+  "Germany", "France", "Japan", "Brazil", "India", "Mexico",
+] as const;
+
+const MEDICAL_SPECIALTIES = [
+  "Internal Medicine", "Cardiology", "Dermatology", "Emergency Medicine",
+  "Family Medicine", "Gastroenterology", "General Surgery", "Neurology",
+  "Obstetrics and Gynecology", "Oncology", "Ophthalmology", "Orthopedic Surgery",
+  "Pediatrics", "Psychiatry", "Pulmonology", "Radiology", "Urology",
+] as const;
+
+// Valid UK NIN first-letter prefixes (D, F, I, Q, U, V not allowed for first; also certain combos excluded)
+const UK_NIN_FIRST_LETTERS = [
+  "A", "B", "C", "E", "G", "H", "J", "K", "L", "M",
+  "N", "O", "P", "R", "S", "T", "W", "X", "Y", "Z",
+] as const;
+// Second letter: C, I, K, M, O, V not allowed
+const UK_NIN_SECOND_LETTERS = [
+  "A", "B", "D", "E", "F", "G", "H", "J", "L", "N",
+  "P", "Q", "R", "S", "T", "U", "W", "X", "Y", "Z",
+] as const;
+
+const DEA_FIRST_LETTERS = ["B", "D", "F", "M", "P", "R"] as const;
+
 // ─── PRNG ─────────────────────────────────────────────────────────────────────
 
 function mulberry32(seed: number): () => number {
@@ -222,6 +272,97 @@ function generateAccountNumber(rng: ScopedRandom): string {
   return Array.from({ length: len }, () => rng.int(0, 9)).join("");
 }
 
+function generateUKNIN(rng: ScopedRandom): string {
+  const l1 = rng.pick(UK_NIN_FIRST_LETTERS);
+  const l2 = rng.pick(UK_NIN_SECOND_LETTERS);
+  const d1 = rng.int(10, 99).toString().padStart(2, "0");
+  const d2 = rng.int(10, 99).toString().padStart(2, "0");
+  const d3 = rng.int(10, 99).toString().padStart(2, "0");
+  const suffix = rng.pick(["A", "B", "C", "D"] as const);
+  return `${l1}${l2} ${d1} ${d2} ${d3} ${suffix}`;
+}
+
+function generateNHSNumber(rng: ScopedRandom): string {
+  // Generate 9 digits then compute modulus-11 check digit
+  let digits: number[];
+  let check: number;
+  do {
+    digits = Array.from({ length: 9 }, () => rng.int(0, 9));
+    const weights = [10, 9, 8, 7, 6, 5, 4, 3, 2];
+    const sum = digits.reduce((acc, d, i) => acc + d * weights[i], 0);
+    check = 11 - (sum % 11);
+  } while (check === 11 || check === 10); // 10 = invalid, 11 = use 0
+  const all = [...digits, check === 11 ? 0 : check];
+  return `${all.slice(0, 3).join("")} ${all.slice(3, 6).join("")} ${all.slice(6).join("")}`;
+}
+
+function generateCanadianSIN(rng: ScopedRandom): string {
+  // First digit 1-8; 9-prefix reserved for temporary residents
+  let digits: number[];
+  let check: number;
+  do {
+    digits = [rng.int(1, 8), ...Array.from({ length: 7 }, () => rng.int(0, 9))];
+    check = luhnCheckDigit(digits);
+  } while (check < 0);
+  const all = [...digits, check];
+  return `${all.slice(0, 3).join("")}-${all.slice(3, 6).join("")}-${all.slice(6).join("")}`;
+}
+
+function generatePassportNumber(rng: ScopedRandom): string {
+  const letter = String.fromCharCode(65 + rng.int(0, 25));
+  const digits = Array.from({ length: 8 }, () => rng.int(0, 9)).join("");
+  return `${letter}${digits}`;
+}
+
+function generateEUVATNumber(rng: ScopedRandom, country: typeof EU_COUNTRIES[number]): string {
+  const digits = Array.from({ length: country.vatDigits }, () => rng.int(0, 9)).join("");
+  return `${country.vatPrefix}${digits}`;
+}
+
+function generateIBAN(rng: ScopedRandom, countryCode: string): string {
+  const check = rng.int(10, 99).toString();
+  const formatMap: Record<string, number> = {
+    DE: 18, FR: 23, IT: 23, ES: 20, NL: 14,
+    BE: 12, PL: 24, SE: 20, AT: 16, PT: 21,
+  };
+  const len = formatMap[countryCode] ?? 18;
+  const body = Array.from({ length: len }, () => rng.int(0, 9)).join("");
+  return `${countryCode}${check}${body}`;
+}
+
+function generateNPI(rng: ScopedRandom): string {
+  // NPI Luhn: prepend 80840 to 9 payload digits, compute check
+  const payload = Array.from({ length: 9 }, () => rng.int(0, 9));
+  const prefix = [8, 0, 8, 4, 0];
+  const check = luhnCheckDigit([...prefix, ...payload]);
+  return `${payload.join("")}${check}`;
+}
+
+function generateDEANumber(rng: ScopedRandom, lastName: string): string {
+  const first = rng.pick(DEA_FIRST_LETTERS);
+  const second = (lastName[0] ?? String.fromCharCode(65 + rng.int(0, 25))).toUpperCase();
+  const digits = Array.from({ length: 6 }, () => rng.int(0, 9));
+  // DEA checksum: (d1+d3+d5) + 2*(d2+d4+d6), last digit = ones place
+  const sum1 = digits[0] + digits[2] + digits[4];
+  const sum2 = 2 * (digits[1] + digits[3] + digits[5]);
+  const check = (sum1 + sum2) % 10;
+  return `${first}${second}${digits.join("")}${check}`;
+}
+
+function generateDriversLicense(rng: ScopedRandom, state: string): string {
+  const letter = () => String.fromCharCode(65 + rng.int(0, 25));
+  const digits = (n: number) => Array.from({ length: n }, () => rng.int(0, 9)).join("");
+  switch (state) {
+    case "CA": return `${letter()}${digits(7)}`;
+    case "TX": return digits(8);
+    case "NY": return `${letter()}${digits(7)}`;
+    case "FL": return `${letter()}${digits(12)}`;
+    case "IL": return `${letter()}${digits(11)}`;
+    case "PA": return `${digits(2)} ${digits(3)} ${digits(3)}`;
+    default:   return `${letter()}${digits(7)}`;
+  }
+}
+
 // ─── Row builders ─────────────────────────────────────────────────────────────
 
 function buildPiiSsnCcnRow(rng: ScopedRandom): PiiSsnCcnRow {
@@ -273,6 +414,74 @@ function buildBankingRow(rng: ScopedRandom): BankingRow {
   };
 }
 
+function buildUkIdentityRow(rng: ScopedRandom): UkIdentityRow {
+  const { first, last } = generateName(rng);
+  return {
+    first,
+    last,
+    nin: generateUKNIN(rng),
+    nhs: generateNHSNumber(rng),
+    dob: generateDOB(rng),
+  };
+}
+
+function buildCanadaSinRow(rng: ScopedRandom): CanadaSinRow {
+  const { first, last } = generateName(rng);
+  return {
+    first,
+    last,
+    sin: generateCanadianSIN(rng),
+    province: rng.pick(CA_PROVINCES),
+    dob: generateDOB(rng),
+  };
+}
+
+function buildPassportRow(rng: ScopedRandom): PassportRow {
+  const { first, last } = generateName(rng);
+  return {
+    first,
+    last,
+    passport: generatePassportNumber(rng),
+    country: rng.pick(PASSPORT_COUNTRIES),
+    dob: generateDOB(rng),
+    expiry: generateCardExpiry(rng),
+  };
+}
+
+function buildEuVatRow(rng: ScopedRandom): EuVatRow {
+  const { full } = generateName(rng);
+  const country = rng.pick(EU_COUNTRIES);
+  return {
+    name: full,
+    vat: generateEUVATNumber(rng, country),
+    iban: generateIBAN(rng, country.code),
+    country: country.name,
+  };
+}
+
+function buildNpiProviderRow(rng: ScopedRandom): NpiProviderRow {
+  const { first, last } = generateName(rng);
+  return {
+    first,
+    last,
+    npi: generateNPI(rng),
+    dea: generateDEANumber(rng, last),
+    specialty: rng.pick(MEDICAL_SPECIALTIES),
+  };
+}
+
+function buildDriverLicenseRow(rng: ScopedRandom): DriverLicenseRow {
+  const { first, last } = generateName(rng);
+  const state = rng.pick(US_STATES);
+  return {
+    first,
+    last,
+    dl: generateDriversLicense(rng, state),
+    state,
+    dob: generateDOB(rng),
+  };
+}
+
 // ─── Public types ─────────────────────────────────────────────────────────────
 
 export interface PiiSsnCcnRow {
@@ -319,13 +528,67 @@ export interface BankingRow {
   phone: string;
 }
 
+export interface UkIdentityRow {
+  first: string;
+  last: string;
+  nin: string;
+  nhs: string;
+  dob: string;
+}
+
+export interface CanadaSinRow {
+  first: string;
+  last: string;
+  sin: string;
+  province: string;
+  dob: string;
+}
+
+export interface PassportRow {
+  first: string;
+  last: string;
+  passport: string;
+  country: string;
+  dob: string;
+  expiry: string;
+}
+
+export interface EuVatRow {
+  name: string;
+  vat: string;
+  iban: string;
+  country: string;
+}
+
+export interface NpiProviderRow {
+  first: string;
+  last: string;
+  npi: string;
+  dea: string;
+  specialty: string;
+}
+
+export interface DriverLicenseRow {
+  first: string;
+  last: string;
+  dl: string;
+  state: string;
+  dob: string;
+}
+
 export type DatasetRow =
   | PiiSsnCcnRow
   | PiiSsnDobRow
   | PciCcnZipRow
   | PiiDobEmailRow
   | HipaaRow
-  | BankingRow;
+  | BankingRow
+  | UkIdentityRow
+  | CanadaSinRow
+  | PassportRow
+  | EuVatRow
+  | NpiProviderRow
+  | DriverLicenseRow;
 
 export type DatasetType =
   | "pii-ssn-ccn"
@@ -333,7 +596,13 @@ export type DatasetType =
   | "pci-ccn-zip"
   | "pii-dob-email"
   | "hipaa"
-  | "banking";
+  | "banking"
+  | "uk-identity"
+  | "canada-sin"
+  | "passport"
+  | "eu-vat"
+  | "npi-provider"
+  | "driver-license";
 
 export interface GenerateOptions {
   dataset: DatasetType;
@@ -358,6 +627,12 @@ const BUILDERS: Record<DatasetType, (rng: ScopedRandom) => DatasetRow> = {
   "pii-dob-email": buildPiiDobEmailRow,
   hipaa: buildHipaaRow,
   banking: buildBankingRow,
+  "uk-identity": buildUkIdentityRow,
+  "canada-sin": buildCanadaSinRow,
+  passport: buildPassportRow,
+  "eu-vat": buildEuVatRow,
+  "npi-provider": buildNpiProviderRow,
+  "driver-license": buildDriverLicenseRow,
 };
 
 const COLUMNS: Record<DatasetType, string[]> = {
@@ -367,6 +642,12 @@ const COLUMNS: Record<DatasetType, string[]> = {
   "pii-dob-email": ["First Name", "Last Name", "Date of Birth", "Email"],
   hipaa: ["First Name", "Last Name", "DOB", "MRN", "ICD-10", "CPT", "Phone"],
   banking: ["Name", "Routing Number", "Account Number", "Phone"],
+  "uk-identity": ["First Name", "Last Name", "NI Number", "NHS Number", "Date of Birth"],
+  "canada-sin": ["First Name", "Last Name", "SIN", "Province", "Date of Birth"],
+  passport: ["First Name", "Last Name", "Passport Number", "Country", "Date of Birth", "Expiry"],
+  "eu-vat": ["Name", "EU VAT Number", "IBAN", "Country"],
+  "npi-provider": ["First Name", "Last Name", "NPI", "DEA Number", "Specialty"],
+  "driver-license": ["First Name", "Last Name", "DL Number", "State", "Date of Birth"],
 };
 
 export function generateDataset(options: GenerateOptions): GenerateResult {

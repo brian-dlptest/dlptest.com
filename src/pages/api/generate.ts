@@ -11,6 +11,12 @@ const VALID_DATASETS = new Set<DatasetType>([
   "pii-dob-email",
   "hipaa",
   "banking",
+  "uk-identity",
+  "canada-sin",
+  "passport",
+  "eu-vat",
+  "npi-provider",
+  "driver-license",
 ]);
 
 const MAX_COUNT = 500;

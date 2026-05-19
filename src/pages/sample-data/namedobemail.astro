@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
+import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleNameDobEmail, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
@@ -16,7 +17,7 @@ export const prerender = true;
   <CyberhavenAdSlot page="sample-data-tab" showSubscribe>
   <SampleDataNav active="dobemail" />
 
-  <div class="table-scroll">
+  <div class="table-scroll" data-copy-table>
     <table>
       <thead>
         <tr>
@@ -38,6 +39,7 @@ export const prerender = true;
       </tbody>
     </table>
   </div>
+  <CopyRowScript />
   <h2>Sample files</h2>
   <h3>Sample DOB &amp; Email files</h3>
   <ul class="download-list">

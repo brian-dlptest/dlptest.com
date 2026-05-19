@@ -1,32 +1,42 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
-import SampleDataNav from "@/components/SampleDataNav.astro";
 ---
 <BaseLayout
-  title="Generate Test Data"
+  title="Data Generator"
   description="Generate synthetic PII, PCI, HIPAA, and banking test data on demand. Choose a dataset type, row count, and optional seed for reproducible output."
 >
-  <h1>Generate Test Data</h1>
+  <h1>Data Generator</h1>
   <p>
     Configure and generate synthetic PII, PCI, HIPAA, or banking data for DLP testing.
     All values are fabricated. Use a seed to reproduce the exact same dataset.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">
-  <SampleDataNav active="generate" />
 
   <form id="generate-form" class="generate-form">
     <div class="generate-controls">
       <label class="control-group">
         <span class="control-label">Dataset</span>
         <select name="dataset" id="dataset-select">
-          <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
-          <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
-          <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
-          <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
-          <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
-          <option value="banking">Banking — Name + Routing + Account</option>
+          <optgroup label="US PII / PCI">
+            <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
+            <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
+            <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
+            <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+          </optgroup>
+          <optgroup label="US Specialized">
+            <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
+            <option value="banking">Banking — Name + Routing + Account</option>
+            <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
+            <option value="driver-license">Driver's License — Name + DL + State</option>
+          </optgroup>
+          <optgroup label="International">
+            <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
+            <option value="canada-sin">Canada — Name + SIN + Province</option>
+            <option value="passport">International — Name + Passport Number</option>
+            <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+          </optgroup>
         </select>
       </label>
 
