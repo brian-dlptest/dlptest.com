@@ -9,6 +9,12 @@ declare namespace Cloudflare {
     ENVIRONMENT: string;
     ASSETS: Fetcher;
     DOWNLOADS: R2Bucket;
+    /** Inbox for /api/contact/ submissions (MailChannels). */
+    CONTACT_TO_EMAIL: string;
+    /** From address on dlptest.com (must be authorized via MailChannels DNS). */
+    CONTACT_FROM_EMAIL: string;
+    /** MailChannels Email API key (paid API; optional if lockdown-only). */
+    MAILCHANNELS_API_KEY: string;
   }
 }
 

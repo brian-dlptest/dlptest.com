@@ -809,6 +809,27 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
   margin: 2.5rem 0 0;
 }
 
+.faq-subscribe-row {
+  display: grid;
+  gap: 1.25rem 2rem;
+  align-items: start;
+  margin: 2.5rem 0 0;
+}
+
+.faq-subscribe-row .subscribe-section {
+  margin: 0;
+}
+
+.faq-subscribe-row .subscribe-form {
+  max-width: none;
+}
+
+@media (min-width: 720px) {
+  .faq-subscribe-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  }
+}
+
 .subscribe-ad-row {
   display: grid;
   gap: 1.25rem 2rem;

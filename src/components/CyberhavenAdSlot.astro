@@ -26,16 +26,16 @@ const inlineUnits = units.filter((u) => u !== "skyscraper");
 )}
 
 {showSubscribe ? (
-  <div class="subscribe-ad-row">
-    <SubscribeSection />
-    {inlineUnits.length > 0 ? (
-      inlineUnits.map((unit) => (
+  inlineUnits.length > 0 ? (
+    <div class="subscribe-ad-row">
+      <SubscribeSection />
+      {inlineUnits.map((unit) => (
         <CyberhavenAd unit={unit} priority={unit === "leaderboard"} />
-      ))
-    ) : (
-      <CyberhavenAd unit="medium-rectangle" />
-    )}
-  </div>
+      ))}
+    </div>
+  ) : (
+    <SubscribeSection />
+  )
 ) : (
   inlineUnits.map((unit) => (
     <CyberhavenAd unit={unit} priority={unit === "leaderboard"} />

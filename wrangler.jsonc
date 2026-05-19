@@ -15,7 +15,9 @@
     "enabled": true
   },
   "vars": {
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "CONTACT_FROM_EMAIL": "contact@dlptest.com",
+    "CONTACT_TO_EMAIL": ""
   },
   // R2 bucket holding the legacy DLP test downloads (sample-data.csv,
   // 1-MB-Test.xlsx, 334-MB-Test-CSV.csv, etc). Populated by
@@ -33,7 +35,9 @@
         "enabled": true
       },
       "vars": {
-        "ENVIRONMENT": "staging"
+        "ENVIRONMENT": "staging",
+        "CONTACT_FROM_EMAIL": "contact@dlptest.com",
+        "CONTACT_TO_EMAIL": ""
       },
       "r2_buckets": [
         { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }

@@ -129,16 +129,17 @@ const faqs = [
     </div>
   </section>
 
-  <SubscribeSection />
-
-  <section>
-    <h2>Frequently Asked Questions</h2>
-    {faqs.map((f) => (
-      <details>
-        <summary><strong>{f.q}</strong></summary>
-        <div set:html={f.a} />
-      </details>
-    ))}
+  <section class="faq-subscribe-row">
+    <section class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      {faqs.map((f) => (
+        <details>
+          <summary><strong>{f.q}</strong></summary>
+          <div set:html={f.a} />
+        </details>
+      ))}
+    </section>
+    <SubscribeSection />
   </section>
 
   <section>

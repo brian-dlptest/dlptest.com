@@ -110,8 +110,13 @@ export const prerender = true;
           }
           form.reset();
         } else {
+          const data = (await res.json().catch(() => ({}))) as {
+            message?: string;
+          };
           if (result) {
-            result.textContent = `Something went wrong: ${res.status} ${res.statusText}`;
+            result.textContent =
+              data.message ||
+              `Something went wrong (${res.status}). Please try again.`;
             result.className = "result error";
           }
         }
