@@ -97,8 +97,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
     <div class="generate-actions">
       <button type="submit" id="generate-btn">Generate</button>
-      <button type="button" id="download-csv-btn" class="btn-secondary" hidden>Download CSV</button>
-      <button type="button" id="download-json-btn" class="btn-secondary" hidden>Download JSON</button>
+      <button type="button" id="download-csv-btn" class="btn-secondary">Download CSV</button>
+      <button type="button" id="download-json-btn" class="btn-secondary">Download JSON</button>
     </div>
   </form>
 
@@ -256,6 +256,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     color: var(--text);
     border: 1px solid var(--border);
   }
+  .btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
   .table-scroll { overflow-x: auto; }
 
   :global(.copy-col) {
@@ -345,6 +350,42 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   let lastResult: GenerateResult | null = null;
 
+  function collectFieldsPayload(): Record<string, unknown> {
+    const countInput = document.getElementById("count-input") as HTMLInputElement;
+    const seedInput  = document.getElementById("seed-input")  as HTMLInputElement;
+    const count = Math.max(1, Math.min(500, parseInt(countInput.value, 10) || 50));
+    const rawSeed = seedInput.value.trim();
+    const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
+    const fields = getRows().map((row) => ({
+      name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
+      type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
+      blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
+    }));
+    const payload: Record<string, unknown> = { fields, count };
+    if (seed !== undefined && !isNaN(seed)) payload["seed"] = seed;
+    return payload;
+  }
+
+  async function fetchCurrentData(): Promise<GenerateResult> {
+    if (lastResult) return lastResult;
+    const res = await fetch("/api/generate-custom/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(collectFieldsPayload()),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({})) as Record<string, unknown>;
+      throw new Error(String(err["error"] ?? res.statusText));
+    }
+    const result = (await res.json()) as GenerateResult;
+    lastResult = result;
+    return result;
+  }
+
+  function setDownloadBtnLoading(btn: HTMLButtonElement, loading: boolean) {
+    btn.disabled = loading;
+  }
+
   // ── Builder DOM helpers ──────────────────────────────────────────────────────
 
   const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
@@ -382,6 +423,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       if (getRows().length > 1) {
         tr.remove();
         enforceRemoveButtons();
+        lastResult = null;
       }
     });
 
@@ -411,7 +453,14 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     tbody.appendChild(row);
     enforceRemoveButtons();
     row.querySelector<HTMLInputElement>(".field-name-input")!.focus();
+    lastResult = null;
   });
+
+  // Invalidate cached result whenever field config or generation options change
+  tbody.addEventListener("change", () => { lastResult = null; });
+  tbody.addEventListener("input",  () => { lastResult = null; });
+  document.getElementById("count-input")!.addEventListener("input", () => { lastResult = null; });
+  document.getElementById("seed-input")!.addEventListener("input",  () => { lastResult = null; });
 
   // ── Drag-and-drop reorder ────────────────────────────────────────────────────
 
@@ -478,8 +527,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     generateBtn.disabled = true;
     statusEl.textContent = "Generating…";
     resultsDiv.hidden = true;
-    csvBtn.hidden = true;
-    jsonBtn.hidden = true;
 
     try {
       const body: Record<string, unknown> = { fields, count };
@@ -605,17 +652,47 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     URL.revokeObjectURL(url);
   }
 
-  csvBtn.addEventListener("click", () => {
-    if (!lastResult) return;
-    downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
+  csvBtn.addEventListener("click", async () => {
+    if (lastResult) {
+      downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
+      return;
+    }
+    setDownloadBtnLoading(csvBtn, true);
+    statusEl.textContent = "Generating…";
+    try {
+      const result = await fetchCurrentData();
+      downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
+      statusEl.textContent = "";
+    } catch (err) {
+      statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
+    } finally {
+      setDownloadBtnLoading(csvBtn, false);
+    }
   });
 
-  jsonBtn.addEventListener("click", () => {
-    if (!lastResult) return;
-    downloadBlob(
-      JSON.stringify(lastResult.rows, null, 2),
-      `dlptest-custom-seed${lastResult.seed}.json`,
-      "application/json"
-    );
+  jsonBtn.addEventListener("click", async () => {
+    if (lastResult) {
+      downloadBlob(
+        JSON.stringify(lastResult.rows, null, 2),
+        `dlptest-custom-seed${lastResult.seed}.json`,
+        "application/json"
+      );
+      return;
+    }
+    setDownloadBtnLoading(jsonBtn, true);
+    statusEl.textContent = "Generating…";
+    try {
+      const result = await fetchCurrentData();
+      downloadBlob(
+        JSON.stringify(result.rows, null, 2),
+        `dlptest-custom-seed${result.seed}.json`,
+        "application/json"
+      );
+      statusEl.textContent = "";
+    } catch (err) {
+      statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
+    } finally {
+      setDownloadBtnLoading(jsonBtn, false);
+    }
   });
 </script>
