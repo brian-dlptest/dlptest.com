@@ -71,21 +71,29 @@ const faqs = [
       <h3>Data In Use (Endpoint DLP)</h3>
       <p>
         Data In Use, also known as Endpoint DLP, involves installing an endpoint
-        agent on user devices — laptops, desktops, and virtual desktops such
-        as Citrix VDI. Once installed, the agent can monitor channels including
-        USB transfers, CD/DVD burning, network share copies, web browsers,
-        FTP transfers, and cloud storage. Supported channels vary by vendor.
+        agent on user devices such as laptops, desktops, and virtual desktops
+        with OS support for Windows, macOS, or Linux. Once installed, the
+        agent can monitor local channels like Bluetooth transfers, USB
+        transfers, CD/DVD burning, and network share copies. Agents also
+        provide visibility into network layer movement across web browsers,
+        FTP transfers, cloud storage, and GenAI apps. With network visibility,
+        this is typically done with a browser extension or a locally running
+        man-in-the-middle proxy. Supported OSs and channels vary by vendor.
       </p>
     </div>
     <div class="card">
       <h3>Data In Motion (SSE and SASE)</h3>
       <p>
         Data In Motion refers to monitoring traffic across protocols like HTTP,
-        HTTPS, FTP, and SMTP. Historically this was split into a network
-        monitor (SPAN/tap), an email MTA between Exchange and the edge,
-        and an ICAP integration with a web proxy. The modern approach is to
-        incorporate DLP into a Secure Service Edge (SSE) that monitors all
-        user traffic regardless of location.
+        HTTPS, FTP, and SMTP. Historically, this was split into a network
+        monitor that would sit off a network SPAN or tap, an email MTA between
+        Exchange and the edge, and an ICAP integration with a web proxy. The
+        modern approach to HTTP and HTTPS is to incorporate DLP into a Secure
+        Service Edge (SSE) that monitors all user traffic, regardless of
+        location. For email (SMTP) traffic, many customers now use built-in
+        Microsoft Purview or Google Workspace DLP controls. There are also
+        3rd-party email providers that have started building blocking with
+        API integrations.
       </p>
     </div>
   </section>
