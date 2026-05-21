@@ -1,45 +1,89 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
+import { FIELD_TYPE_DEFS } from "@/lib/data-generator";
+import type { FieldTypeKey } from "@/lib/data-generator";
+
+// Build grouped options for the type <select>
+const groups: Record<string, { key: FieldTypeKey; label: string }[]> = {};
+for (const [key, def] of Object.entries(FIELD_TYPE_DEFS) as [FieldTypeKey, { label: string; group: string }][]) {
+  if (!groups[def.group]) groups[def.group] = [];
+  groups[def.group].push({ key, label: def.label });
+}
+const GROUP_ORDER = ["Basic", "US PII / PCI", "US Specialized", "International"];
+
+const defaultFields: { name: string; type: FieldTypeKey }[] = [
+  { name: "id",         type: "row-number" },
+  { name: "first_name", type: "first-name" },
+  { name: "last_name",  type: "last-name"  },
+  { name: "email",      type: "email"      },
+  { name: "gender",     type: "gender"     },
+  { name: "ip_address", type: "ip-v4"      },
+];
 ---
 <BaseLayout
   title="Data Generator"
-  description="Generate synthetic PII, PCI, HIPAA, and banking test data on demand. Choose a dataset type, row count, and optional seed for reproducible output."
+  description="Build a custom dataset from any combination of PII, PCI, HIPAA, and other field types. Generate synthetic test data for DLP testing."
 >
   <h1>Data Generator</h1>
   <p>
-    Configure and generate synthetic PII, PCI, HIPAA, or banking data for DLP testing.
+    Add fields, choose their types, and generate synthetic test data for DLP testing.
     All values are fabricated. Use a seed to reproduce the exact same dataset.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">
 
+  <!-- Field builder table -->
+  <div class="builder-wrap">
+    <table class="builder-table" id="builder-table">
+      <thead>
+        <tr>
+          <th class="col-drag" aria-label="Drag to reorder"></th>
+          <th class="col-name">Field Name</th>
+          <th class="col-type">Type</th>
+          <th class="col-blank" colspan="2">Options</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody id="builder-body">
+        {defaultFields.map(({ name, type }) => (
+          <tr class="builder-row" draggable="true" data-field-name={name} data-field-type={type}>
+            <td class="col-drag drag-handle" aria-label="Drag handle">⠿</td>
+            <td class="col-name">
+              <input type="text" class="field-name-input" value={name} maxlength="50" aria-label="Field name" />
+            </td>
+            <td class="col-type">
+              <select class="field-type-select" aria-label="Field type">
+                {GROUP_ORDER.map((g) => (
+                  <optgroup label={g}>
+                    {(groups[g] ?? []).map(({ key, label }) => (
+                      <option value={key} selected={key === type}>{label}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </td>
+            <td class="col-blank-label">blank:</td>
+            <td class="col-blank-input">
+              <span class="blank-pct-wrap">
+                <input type="number" class="blank-pct-input" value="0" min="0" max="100" aria-label="Blank percent" />
+                <span class="pct-sign">%</span>
+              </span>
+            </td>
+            <td class="col-remove">
+              <button type="button" class="btn-remove" aria-label="Remove field">✕</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <button type="button" id="add-field-btn" class="btn-add-field">+ Add another field</button>
+  </div>
+
+  <!-- Generate controls -->
   <form id="generate-form" class="generate-form">
     <div class="generate-controls">
-      <label class="control-group">
-        <span class="control-label">Dataset</span>
-        <select name="dataset" id="dataset-select">
-          <optgroup label="US PII / PCI">
-            <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
-            <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
-            <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
-            <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
-          </optgroup>
-          <optgroup label="US Specialized">
-            <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
-            <option value="banking">Banking — Name + Routing + Account</option>
-            <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
-            <option value="driver-license">Driver's License — Name + DL + State</option>
-          </optgroup>
-          <optgroup label="International">
-            <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
-            <option value="canada-sin">Canada — Name + SIN + Province</option>
-            <option value="passport">International — Name + Passport Number</option>
-            <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
-          </optgroup>
-        </select>
-      </label>
-
       <label class="control-group">
         <span class="control-label">Row count <span class="muted">(1–500)</span></span>
         <input type="number" name="count" id="count-input" value="50" min="1" max="500" />
@@ -60,6 +104,8 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 
   <p id="generate-status" class="muted" aria-live="polite"></p>
 
+  </CyberhavenAdSlot>
+
   <div id="generate-results" hidden>
     <p id="seed-echo" class="muted small"></p>
     <div class="table-scroll">
@@ -69,14 +115,116 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
       </table>
     </div>
   </div>
-
-  </CyberhavenAdSlot>
 </BaseLayout>
 
 <style>
-  .generate-form {
-    margin: 1.5rem 0;
+  /* ── Builder table ─────────────────────────────────────────────────────────── */
+  .builder-wrap {
+    margin: 1.5rem 0 0;
   }
+  .builder-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+  .builder-table thead th {
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted, #888);
+    padding: 0.3rem 0.5rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .builder-table thead th.col-drag { width: 1.5rem; }
+  .builder-table thead th.col-name { width: 26%; }
+  .builder-table thead th.col-type { width: 34%; }
+  .builder-table thead th.col-blank { width: 1px; white-space: nowrap; }
+  .builder-table thead th.col-actions { width: 1px; }
+
+  .builder-row td {
+    padding: 0.35rem 0.5rem;
+    vertical-align: middle;
+  }
+  .builder-row:hover { background: var(--bg-elev); }
+  .builder-row.drag-over { outline: 2px dashed var(--border); }
+  .builder-row.dragging { opacity: 0.4; }
+
+  .drag-handle {
+    cursor: grab;
+    color: var(--muted, #888);
+    font-size: 1.1rem;
+    user-select: none;
+    text-align: center;
+    width: 1.5rem;
+  }
+  .drag-handle:active { cursor: grabbing; }
+
+  .field-name-input,
+  .field-type-select {
+    width: 100%;
+    padding: 0.38rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.92rem;
+    font-family: monospace;
+    box-sizing: border-box;
+  }
+  .field-type-select { font-family: inherit; }
+
+  .col-blank-label {
+    font-size: 0.85rem;
+    color: var(--muted, #888);
+    white-space: nowrap;
+    padding-right: 0.25rem;
+  }
+  .blank-pct-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .blank-pct-input {
+    width: 4rem;
+    padding: 0.38rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.92rem;
+    text-align: right;
+  }
+  .pct-sign {
+    font-size: 0.85rem;
+    color: var(--muted, #888);
+  }
+
+  .btn-remove {
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--muted, #888);
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+  .btn-remove:hover { color: var(--text); border-color: var(--text); }
+
+  .btn-add-field {
+    margin-top: 0.6rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--muted, #888);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .btn-add-field:hover { color: var(--text); border-color: var(--text); }
+
+  /* ── Generate controls ─────────────────────────────────────────────────────── */
+  .generate-form { margin: 1.25rem 0; }
   .generate-controls {
     display: flex;
     flex-wrap: wrap;
@@ -93,7 +241,6 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
     font-weight: 600;
     color: var(--text);
   }
-  .generate-controls select,
   .generate-controls input[type="number"] {
     padding: 0.4rem 0.6rem;
     border: 1px solid var(--border);
@@ -103,113 +250,319 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
     font-size: 0.95rem;
     min-width: 12rem;
   }
-  .generate-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
+  .generate-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .btn-secondary {
     background: var(--bg-elev);
     color: var(--text);
     border: 1px solid var(--border);
   }
-  .table-scroll {
-    overflow-x: auto;
+  .table-scroll { overflow-x: auto; }
+
+  :global(.copy-col) {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  :global(.copy-btn) {
+    font-size: 0.72rem;
+    padding: 0.18rem 0.5rem;
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    line-height: 1.4;
+  }
+  :global(.copy-btn:hover) {
+    color: var(--text);
+    border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
+  }
+  :global(.copy-btn.copied) {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  #results-table {
+    min-width: 100%;
+    width: max-content;
+    table-layout: fixed;
   }
 </style>
 
 <script>
-  type DatasetRow = Record<string, string>;
+  // ── Type registry (mirrors FIELD_TYPE_DEFS keys, used for default name suggestions) ──
+  const DEFAULT_NAMES: Record<string, string> = {
+    "row-number":      "id",
+    "first-name":      "first_name",
+    "last-name":       "last_name",
+    "full-name":       "full_name",
+    "gender":          "gender",
+    "email":           "email",
+    "ip-v4":           "ip_address",
+    "ssn":             "ssn",
+    "credit-card":     "credit_card_number",
+    "dob":             "date_of_birth",
+    "phone":           "phone",
+    "zip":             "zip_code",
+    "card-expiry":     "card_expiry",
+    "mrn":             "mrn",
+    "icd10":           "icd10_code",
+    "cpt":             "cpt_code",
+    "routing-number":  "routing_number",
+    "account-number":  "account_number",
+    "npi":             "npi",
+    "dea-number":      "dea_number",
+    "specialty":       "specialty",
+    "us-state":        "state",
+    "dl-number":       "dl_number",
+    "uk-nin":          "uk_nin",
+    "nhs-number":      "nhs_number",
+    "canada-sin":      "sin",
+    "canada-province": "province",
+    "passport-number": "passport_number",
+    "country":         "country",
+    "eu-vat":          "eu_vat_number",
+    "iban":            "iban",
+  };
 
+  // Columns rendered in <code> tags in the results table
+  const CODE_COLUMNS = new Set([
+    "ssn", "credit_card_number", "mrn", "routing_number", "account_number",
+    "icd10_code", "cpt_code", "npi", "dea_number", "uk_nin", "nhs_number", "sin",
+    "passport_number", "eu_vat_number", "iban",
+  ]);
+
+  type DatasetRow = Record<string, string>;
   interface GenerateResult {
     rows: DatasetRow[];
     columns: string[];
-    dataset: string;
     seed: number;
     count: number;
   }
 
-  // Columns that should be rendered in <code> tags
-  const CODE_COLUMNS = new Set([
-    "SSN", "Credit Card Number", "MRN", "Routing Number", "Account Number",
-    "ICD-10", "CPT",
-  ]);
-
   let lastResult: GenerateResult | null = null;
 
+  // ── Builder DOM helpers ──────────────────────────────────────────────────────
+
+  const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
+  const addFieldBtn = document.getElementById("add-field-btn") as HTMLButtonElement;
+
+  function getRows(): HTMLTableRowElement[] {
+    return Array.from(tbody.querySelectorAll<HTMLTableRowElement>(".builder-row"));
+  }
+
+  function enforceRemoveButtons() {
+    const rows = getRows();
+    rows.forEach((r) => {
+      const btn = r.querySelector<HTMLButtonElement>(".btn-remove")!;
+      btn.disabled = rows.length === 1;
+    });
+  }
+
+  function makeRow(type: string = "first-name", name?: string): HTMLTableRowElement {
+    // Clone an existing row so Astro's scoped CSS attribute is inherited
+    const template = tbody.querySelector<HTMLTableRowElement>(".builder-row")!;
+    const tr = template.cloneNode(true) as HTMLTableRowElement;
+    tr.draggable = true;
+
+    tr.querySelector<HTMLInputElement>(".field-name-input")!.value = name ?? DEFAULT_NAMES[type] ?? type;
+    tr.querySelector<HTMLSelectElement>(".field-type-select")!.value = type;
+    tr.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+
+    wireRow(tr);
+    return tr;
+  }
+
+  function wireRow(tr: HTMLTableRowElement) {
+    const removeBtn = tr.querySelector<HTMLButtonElement>(".btn-remove")!;
+    removeBtn.addEventListener("click", () => {
+      if (getRows().length > 1) {
+        tr.remove();
+        enforceRemoveButtons();
+      }
+    });
+
+    const typeSelect = tr.querySelector<HTMLSelectElement>(".field-type-select")!;
+    const nameInput = tr.querySelector<HTMLInputElement>(".field-name-input")!;
+    typeSelect.addEventListener("change", () => {
+      const suggested = DEFAULT_NAMES[typeSelect.value];
+      // Only auto-fill if the name still matches a known default (user hasn't customised it)
+      const currentIsDefault = Object.values(DEFAULT_NAMES).includes(nameInput.value);
+      if (suggested && currentIsDefault) nameInput.value = suggested;
+    });
+
+    // Drag-and-drop
+    tr.addEventListener("dragstart", onDragStart);
+    tr.addEventListener("dragover", onDragOver);
+    tr.addEventListener("dragleave", onDragLeave);
+    tr.addEventListener("drop", onDrop);
+    tr.addEventListener("dragend", onDragEnd);
+  }
+
+  // Wire the server-rendered default rows
+  getRows().forEach(wireRow);
+  enforceRemoveButtons();
+
+  addFieldBtn.addEventListener("click", () => {
+    const row = makeRow("first-name");
+    tbody.appendChild(row);
+    enforceRemoveButtons();
+    row.querySelector<HTMLInputElement>(".field-name-input")!.focus();
+  });
+
+  // ── Drag-and-drop reorder ────────────────────────────────────────────────────
+
+  let dragSrc: HTMLTableRowElement | null = null;
+
+  function onDragStart(this: HTMLTableRowElement, e: DragEvent) {
+    dragSrc = this;
+    this.classList.add("dragging");
+    e.dataTransfer!.effectAllowed = "move";
+  }
+  function onDragOver(this: HTMLTableRowElement, e: DragEvent) {
+    e.preventDefault();
+    e.dataTransfer!.dropEffect = "move";
+    this.classList.add("drag-over");
+  }
+  function onDragLeave(this: HTMLTableRowElement) {
+    this.classList.remove("drag-over");
+  }
+  function onDrop(this: HTMLTableRowElement, e: DragEvent) {
+    e.preventDefault();
+    this.classList.remove("drag-over");
+    if (dragSrc && dragSrc !== this) {
+      const rows = getRows();
+      const srcIdx = rows.indexOf(dragSrc);
+      const tgtIdx = rows.indexOf(this);
+      if (srcIdx < tgtIdx) {
+        tbody.insertBefore(dragSrc, this.nextSibling);
+      } else {
+        tbody.insertBefore(dragSrc, this);
+      }
+    }
+  }
+  function onDragEnd(this: HTMLTableRowElement) {
+    this.classList.remove("dragging");
+    getRows().forEach((r) => r.classList.remove("drag-over"));
+    dragSrc = null;
+  }
+
+  // ── Generate form ────────────────────────────────────────────────────────────
+
   const form = document.getElementById("generate-form") as HTMLFormElement;
-  const btn = document.getElementById("generate-btn") as HTMLButtonElement;
-  const status = document.getElementById("generate-status") as HTMLElement;
+  const generateBtn = document.getElementById("generate-btn") as HTMLButtonElement;
+  const statusEl = document.getElementById("generate-status") as HTMLElement;
   const resultsDiv = document.getElementById("generate-results") as HTMLDivElement;
-  const thead = document.getElementById("results-head") as HTMLTableSectionElement;
-  const tbody = document.getElementById("results-body") as HTMLTableSectionElement;
+  const resultsThead = document.getElementById("results-head") as HTMLTableSectionElement;
+  const resultsTbody = document.getElementById("results-body") as HTMLTableSectionElement;
   const seedEcho = document.getElementById("seed-echo") as HTMLParagraphElement;
   const csvBtn = document.getElementById("download-csv-btn") as HTMLButtonElement;
   const jsonBtn = document.getElementById("download-json-btn") as HTMLButtonElement;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const data = new FormData(form);
-    const dataset = data.get("dataset") as string;
-    const count = Math.max(1, Math.min(500, parseInt(data.get("count") as string, 10) || 50));
-    const rawSeed = data.get("seed") as string;
-    const seed = rawSeed.trim() !== "" ? parseInt(rawSeed, 10) : undefined;
+    const formData = new FormData(form);
+    const count = Math.max(1, Math.min(500, parseInt(formData.get("count") as string, 10) || 50));
+    const rawSeed = (formData.get("seed") as string).trim();
+    const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
 
-    btn.disabled = true;
-    status.textContent = "Generating…";
+    const fields = getRows().map((row) => ({
+      name: (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
+      type: row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
+      blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
+    }));
+
+    generateBtn.disabled = true;
+    statusEl.textContent = "Generating…";
     resultsDiv.hidden = true;
     csvBtn.hidden = true;
     jsonBtn.hidden = true;
 
     try {
-      const body: Record<string, unknown> = { dataset, count, format: "json" };
+      const body: Record<string, unknown> = { fields, count };
       if (seed !== undefined && !isNaN(seed)) body["seed"] = seed;
 
-      const res = await fetch("/api/generate/", {
+      const res = await fetch("/api/generate-custom/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
       if (!res.ok) {
-        status.textContent = `Error: ${res.status} ${res.statusText}`;
+        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
+        statusEl.textContent = `Error: ${String(err["error"] ?? res.statusText)}`;
         return;
       }
 
       const result = (await res.json()) as GenerateResult;
       lastResult = result;
-
       renderTable(result);
       seedEcho.textContent = `Generated with seed ${result.seed} — paste this seed to reproduce the exact dataset.`;
       resultsDiv.hidden = false;
       csvBtn.hidden = false;
       jsonBtn.hidden = false;
-      status.textContent = "";
+      statusEl.textContent = "";
     } catch (err) {
-      status.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      statusEl.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
     } finally {
-      btn.disabled = false;
+      generateBtn.disabled = false;
     }
   });
 
+  function makeCopyBtn(label: string, getText: () => string): HTMLButtonElement {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = label;
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(getText());
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => { btn.textContent = label; btn.classList.remove("copied"); }, 1500);
+      } catch {
+        btn.textContent = "Error";
+        setTimeout(() => { btn.textContent = label; }, 1500);
+      }
+    });
+    return btn;
+  }
+
   function renderTable(result: GenerateResult) {
+    const colWidth = `${Math.max(8, Math.floor(100 / result.columns.length))}%`;
+
+    // Header row + "Copy all" button
     const headerRow = document.createElement("tr");
     for (const col of result.columns) {
       const th = document.createElement("th");
       th.textContent = col;
+      th.style.minWidth = "8rem";
+      th.style.width = colWidth;
       headerRow.appendChild(th);
     }
-    thead.innerHTML = "";
-    thead.appendChild(headerRow);
+    const copyAllTh = document.createElement("th");
+    copyAllTh.className = "copy-col";
+    copyAllTh.appendChild(makeCopyBtn("Copy all", () =>
+      [...resultsTbody.querySelectorAll<HTMLElement>("tr")]
+        .map((tr) =>
+          [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
+            .map((c) => c.textContent?.trim() ?? "").join("\t")
+        ).join("\n")
+    ));
+    headerRow.appendChild(copyAllTh);
+    resultsThead.innerHTML = "";
+    resultsThead.appendChild(headerRow);
 
-    tbody.innerHTML = "";
+    // Body rows + per-row "Copy" button
+    resultsTbody.innerHTML = "";
     for (const row of result.rows) {
       const tr = document.createElement("tr");
-      for (let i = 0; i < result.columns.length; i++) {
-        const col = result.columns[i];
-        const key = Object.keys(row)[i];
+      for (const col of result.columns) {
         const td = document.createElement("td");
-        const value = key !== undefined ? String(row[key] ?? "") : "";
+        const value = String(row[col] ?? "");
         if (CODE_COLUMNS.has(col)) {
           const code = document.createElement("code");
           code.textContent = value;
@@ -219,7 +572,14 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
         }
         tr.appendChild(td);
       }
-      tbody.appendChild(tr);
+      const copyTd = document.createElement("td");
+      copyTd.className = "copy-col";
+      copyTd.appendChild(makeCopyBtn("Copy", () =>
+        [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
+          .map((c) => c.textContent?.trim() ?? "").join("\t")
+      ));
+      tr.appendChild(copyTd);
+      resultsTbody.appendChild(tr);
     }
   }
 
@@ -230,7 +590,7 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
     }
     const header = result.columns.join(",");
     const body = result.rows
-      .map((row) => Object.values(row).map((v) => escape(String(v))).join(","))
+      .map((row) => result.columns.map((c) => escape(String(row[c] ?? ""))).join(","))
       .join("\n");
     return `${header}\n${body}`;
   }
@@ -247,18 +607,14 @@ import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 
   csvBtn.addEventListener("click", () => {
     if (!lastResult) return;
-    downloadBlob(
-      clientCsv(lastResult),
-      `dlptest-${lastResult.dataset}-seed${lastResult.seed}.csv`,
-      "text/csv"
-    );
+    downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
   });
 
   jsonBtn.addEventListener("click", () => {
     if (!lastResult) return;
     downloadBlob(
       JSON.stringify(lastResult.rows, null, 2),
-      `dlptest-${lastResult.dataset}-seed${lastResult.seed}.json`,
+      `dlptest-custom-seed${lastResult.seed}.json`,
       "application/json"
     );
   });

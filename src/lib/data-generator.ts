@@ -603,10 +603,13 @@ export type DatasetType =
   | "passport"
   | "eu-vat"
   | "npi-provider"
-  | "driver-license";
+  | "driver-license"
+  | "custom";
+
+export type PresetDatasetType = Exclude<DatasetType, "custom">;
 
 export interface GenerateOptions {
-  dataset: DatasetType;
+  dataset: PresetDatasetType;
   count: number;
   seed: number;
 }
@@ -621,7 +624,7 @@ export interface GenerateResult {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-const BUILDERS: Record<DatasetType, (rng: ScopedRandom) => DatasetRow> = {
+const BUILDERS: Record<PresetDatasetType, (rng: ScopedRandom) => DatasetRow> = {
   "pii-ssn-ccn": buildPiiSsnCcnRow,
   "pii-ssn-dob": buildPiiSsnDobRow,
   "pci-ccn-zip": buildPciCcnZipRow,
@@ -636,7 +639,7 @@ const BUILDERS: Record<DatasetType, (rng: ScopedRandom) => DatasetRow> = {
   "driver-license": buildDriverLicenseRow,
 };
 
-const COLUMNS: Record<DatasetType, string[]> = {
+const COLUMNS: Record<PresetDatasetType, string[]> = {
   "pii-ssn-ccn": ["Name", "SSN", "Credit Card Number"],
   "pii-ssn-dob": ["Name", "SSN", "Date of Birth"],
   "pci-ccn-zip": ["First Name", "Last Name", "ZIP", "Credit Card Number", "Expiration"],
@@ -675,4 +678,127 @@ export function rowsToCsv(result: GenerateResult): string {
     )
     .join("\n");
   return `${header}\n${body}`;
+}
+
+// ─── Standalone field generators ─────────────────────────────────────────────
+
+function generateEmailStandalone(rng: ScopedRandom): string {
+  const first = rng.pick(FIRST_NAMES);
+  const last = rng.pick(LAST_NAMES);
+  return generateEmail(rng, first, last);
+}
+
+function generateGender(rng: ScopedRandom): string {
+  return rng.pick(["Male", "Female", "Non-binary"] as const);
+}
+
+function generateIPv4(rng: ScopedRandom): string {
+  return `${rng.int(1, 254)}.${rng.int(0, 255)}.${rng.int(0, 255)}.${rng.int(1, 254)}`;
+}
+
+function generateDEANumberStandalone(rng: ScopedRandom): string {
+  const first = rng.pick(DEA_FIRST_LETTERS);
+  const second = String.fromCharCode(65 + rng.int(0, 25));
+  const digits = Array.from({ length: 6 }, () => rng.int(0, 9));
+  const sum1 = digits[0] + digits[2] + digits[4];
+  const sum2 = 2 * (digits[1] + digits[3] + digits[5]);
+  const check = (sum1 + sum2) % 10;
+  return `${first}${second}${digits.join("")}${check}`;
+}
+
+function generateDriversLicenseStandalone(rng: ScopedRandom): string {
+  const state = rng.pick(US_STATES);
+  return generateDriversLicense(rng, state);
+}
+
+function generateEUVATStandalone(rng: ScopedRandom): string {
+  const country = rng.pick(EU_COUNTRIES);
+  return generateEUVATNumber(rng, country);
+}
+
+function generateIBANStandalone(rng: ScopedRandom): string {
+  const country = rng.pick(EU_COUNTRIES);
+  return generateIBAN(rng, country.code);
+}
+
+// ─── Custom field types ───────────────────────────────────────────────────────
+
+export type FieldTypeKey =
+  | "row-number" | "first-name" | "last-name" | "full-name" | "gender" | "email" | "ip-v4"
+  | "ssn" | "credit-card" | "dob" | "phone" | "zip" | "card-expiry"
+  | "mrn" | "icd10" | "cpt" | "routing-number" | "account-number" | "npi" | "dea-number"
+  | "specialty" | "us-state" | "dl-number"
+  | "uk-nin" | "nhs-number" | "canada-sin" | "canada-province" | "passport-number"
+  | "country" | "eu-vat" | "iban";
+
+interface FieldTypeDef {
+  label: string;
+  group: string;
+  generate: (rng: ScopedRandom, rowIndex: number) => string;
+}
+
+export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
+  "row-number":      { label: "Row Number",              group: "Basic",          generate: (_, i) => String(i + 1) },
+  "first-name":      { label: "First Name",              group: "Basic",          generate: (rng)  => rng.pick(FIRST_NAMES) },
+  "last-name":       { label: "Last Name",               group: "Basic",          generate: (rng)  => rng.pick(LAST_NAMES) },
+  "full-name":       { label: "Full Name",               group: "Basic",          generate: (rng)  => generateName(rng).full },
+  "gender":          { label: "Gender",                  group: "Basic",          generate: (rng)  => generateGender(rng) },
+  "email":           { label: "Email Address",           group: "Basic",          generate: (rng)  => generateEmailStandalone(rng) },
+  "ip-v4":           { label: "IP Address v4",           group: "Basic",          generate: (rng)  => generateIPv4(rng) },
+  "ssn":             { label: "SSN",                     group: "US PII / PCI",   generate: (rng)  => generateSSN(rng) },
+  "credit-card":     { label: "Credit Card Number",      group: "US PII / PCI",   generate: (rng)  => generateCreditCard(rng) },
+  "dob":             { label: "Date of Birth",           group: "US PII / PCI",   generate: (rng)  => generateDOB(rng) },
+  "phone":           { label: "Phone Number",            group: "US PII / PCI",   generate: (rng)  => generatePhone(rng) },
+  "zip":             { label: "ZIP Code",                group: "US PII / PCI",   generate: (rng)  => generateZip(rng) },
+  "card-expiry":     { label: "Card Expiry",             group: "US PII / PCI",   generate: (rng)  => generateCardExpiry(rng) },
+  "mrn":             { label: "Medical Record Number",   group: "US Specialized", generate: (rng)  => generateMRN(rng) },
+  "icd10":           { label: "ICD-10 Code",             group: "US Specialized", generate: (rng)  => generateICD10(rng) },
+  "cpt":             { label: "CPT Code",                group: "US Specialized", generate: (rng)  => generateCPT(rng) },
+  "routing-number":  { label: "Routing Number",          group: "US Specialized", generate: (rng)  => generateRoutingNumber(rng) },
+  "account-number":  { label: "Bank Account Number",     group: "US Specialized", generate: (rng)  => generateAccountNumber(rng) },
+  "npi":             { label: "NPI",                     group: "US Specialized", generate: (rng)  => generateNPI(rng) },
+  "dea-number":      { label: "DEA Number",              group: "US Specialized", generate: (rng)  => generateDEANumberStandalone(rng) },
+  "specialty":       { label: "Medical Specialty",       group: "US Specialized", generate: (rng)  => rng.pick(MEDICAL_SPECIALTIES) },
+  "us-state":        { label: "US State",                group: "US Specialized", generate: (rng)  => rng.pick(US_STATES) },
+  "dl-number":       { label: "Driver's License Number", group: "US Specialized", generate: (rng)  => generateDriversLicenseStandalone(rng) },
+  "uk-nin":          { label: "UK NI Number",            group: "International",  generate: (rng)  => generateUKNIN(rng) },
+  "nhs-number":      { label: "NHS Number",              group: "International",  generate: (rng)  => generateNHSNumber(rng) },
+  "canada-sin":      { label: "Canadian SIN",            group: "International",  generate: (rng)  => generateCanadianSIN(rng) },
+  "canada-province": { label: "Canadian Province",       group: "International",  generate: (rng)  => rng.pick(CA_PROVINCES) },
+  "passport-number": { label: "Passport Number",         group: "International",  generate: (rng)  => generatePassportNumber(rng) },
+  "country":         { label: "Country",                 group: "International",  generate: (rng)  => rng.pick(PASSPORT_COUNTRIES) },
+  "eu-vat":          { label: "EU VAT Number",           group: "International",  generate: (rng)  => generateEUVATStandalone(rng) },
+  "iban":            { label: "IBAN",                    group: "International",  generate: (rng)  => generateIBANStandalone(rng) },
+};
+
+export interface CustomField {
+  name: string;
+  type: FieldTypeKey;
+  blankPct: number;
+}
+
+export function generateCustom(
+  fields: CustomField[],
+  count: number,
+  seed: number
+): GenerateResult {
+  const rng = createScopedRandom(seed);
+  const rows = Array.from({ length: count }, (_, rowIndex) => {
+    const row: Record<string, string> = {};
+    for (const field of fields) {
+      if (field.blankPct > 0 && rng.float() * 100 < field.blankPct) {
+        row[field.name] = "";
+      } else {
+        row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex);
+      }
+    }
+    return row;
+  });
+  return {
+    rows: rows as unknown as DatasetRow[],
+    columns: fields.map((f) => f.name),
+    dataset: "custom",
+    seed,
+    count,
+  };
 }

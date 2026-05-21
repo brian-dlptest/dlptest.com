@@ -24,6 +24,11 @@ Options in `<select>` are grouped into optgroups: US PII/PCI, US Specialized, In
 
 ---
 
+### Fix CCN Luhn check digit (PR #18)
+The `luhnCheckDigit` function in `src/lib/data-generator.ts` used a left-to-right parity loop that doubled the wrong digit positions, causing every generated credit card number to fail Luhn validation. Replaced with a right-to-left iteration (`doubleNext = true` starting from the rightmost partial digit), matching the canonical Luhn spec and the fix shipped in robserver v2.7.7. Applies correctly to both 16-digit cards (Visa, Mastercard, Discover) and 15-digit AMEX.
+
+---
+
 ## Backlog
 
 ### Downloadable test artifacts
