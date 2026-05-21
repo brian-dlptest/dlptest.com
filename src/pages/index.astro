@@ -36,19 +36,34 @@ const faqs = [
 ---
 <BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP POST test endpoint over HTTPS, and a public FTP server to verify your DLP is blocking what it should.">
   <section class="hero">
-    <h1>Test Your DLP. Prove It Actually Blocks.</h1>
-    <p>
-      DLPTest.com is a free testing resource for Data Loss Prevention software.
-      If your DLP is configured correctly, the endpoints here will demonstrate
-      it. We provide sample data, an HTTP POST test endpoint over HTTPS, and a public FTP
-      server. They are designed to be safe targets that your DLP can detect
-      and block.
-    </p>
-    <p>
-      <a class="button" href="/sample-data/">Get sample data</a>
-      {" "}
-      <a class="button button-outline" href="/http-post/">Try the HTTP POST test</a>
-    </p>
+    <div class="hero-content">
+      <h1>Test Your DLP. Prove It Actually Blocks.</h1>
+      <p>
+        DLPTest.com is a free testing resource for Data Loss Prevention software.
+        If your DLP is configured correctly, the endpoints here will demonstrate
+        it. We provide sample data, an HTTP POST test endpoint over HTTPS, and a public FTP
+        server. They are designed to be safe targets that your DLP can detect
+        and block.
+      </p>
+      <p class="hero-actions">
+        <a class="button" href="/sample-data/">Get sample data</a>
+        <a class="button button-outline" href="/http-post/">Try the HTTP POST test</a>
+      </p>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="terminal-mock">
+        <div class="terminal-mock-chrome">
+          <span></span><span></span><span></span>
+          <span class="terminal-mock-title">dlp-test — curl</span>
+        </div>
+        <pre class="terminal-mock-body"><span class="t-prompt">$</span> <span class="t-cmd">curl</span> -X POST https://dlptest.com/api/http-post \
+    -F <span class="t-str">"ssn=123-45-6789"</span> \
+    -F <span class="t-str">"cc=5555-4444-3333-2222"</span>
+
+<span class="t-ok">HTTP/1.1 200 OK</span>
+<span class="t-comment"># Your DLP should have blocked this.</span></pre>
+      </div>
+    </div>
   </section>
 
   <section class="card-grid">
