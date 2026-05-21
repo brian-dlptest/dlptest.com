@@ -968,41 +968,6 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
   margin: 2.5rem 0 0;
 }
 
-.faq-subscribe-row {
-  display: grid;
-  gap: 1.25rem;
-  width: 100%;
-  margin: 2.5rem 0 0;
-}
-
-.faq-subscribe-row .faq-section {
-  min-width: 0;
-}
-
-.faq-subscribe-row .subscribe-section {
-  margin: 0;
-  min-width: 0;
-}
-
-.faq-subscribe-row .subscribe-section > .muted {
-  max-width: none;
-}
-
-/* Beat SubscribeForm scoped max-width: 32rem so the card fills the 550px column */
-.faq-subscribe-row .subscribe-section .subscribe-form {
-  width: 100%;
-  max-width: none;
-  box-sizing: border-box;
-}
-
-@media (min-width: 720px) {
-  .faq-subscribe-row {
-    grid-template-columns: minmax(0, 1fr) 550px;
-    column-gap: 2rem;
-    align-items: start;
-  }
-}
-
 .subscribe-ad-row {
   display: grid;
   gap: 1.25rem 2rem;
