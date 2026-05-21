@@ -51,37 +51,6 @@ const faqs = [
     </p>
   </section>
 
-  <section>
-    <h2>Why use dlptest.com?</h2>
-    <p>
-      DLPTest.com is a testing resource for Data Loss Prevention (DLP) software.
-      When DLP has been installed and configured correctly, this site can
-      demonstrate that sensitive data is protected when DLP is in blocking mode.
-      Data Loss Prevention has historically been divided into three categories:
-      Data in Use (DIU), Data at Rest (DAR), and Data in Motion (DIM). DLPTest
-      currently offers features to test Data in Use and Data in Motion.
-    </p>
-  </section>
-
-  <section>
-    <h2>What is Data Loss Prevention?</h2>
-    <p>
-      Data Loss Prevention (DLP) is a strategy and set of technologies designed
-      to prevent sensitive or confidential data from being disclosed, shared, or
-      used in unauthorized ways that violate an organization’s policies. DLP
-      technologies can be software, hardware, or a combination of both.
-    </p>
-    <p>
-      DLP can identify, classify, and protect data based on sensitivity and can
-      be configured to take different actions when sensitive data is detected.
-      For example, a DLP solution might prevent an email from being sent if it
-      contains sensitive information, alert an administrator when sensitive
-      data is accessed or copied, or encrypt data to prevent unauthorized
-      access. Organizations use DLP to comply with regulations such as data
-      privacy laws, and to protect sensitive business information.
-    </p>
-  </section>
-
   <section class="card-grid">
     <div class="card">
       <h3>Data In Use (Endpoint DLP)</h3>
@@ -106,8 +75,6 @@ const faqs = [
     </div>
   </section>
 
-  <CyberhavenAd unit="leaderboard" />
-
   <section>
     <h2>Quick start</h2>
     <div class="card-grid">
@@ -127,6 +94,39 @@ const faqs = [
         <p><a href="/ftp-test/">Get FTP credentials →</a></p>
       </div>
     </div>
+  </section>
+
+  <CyberhavenAd unit="leaderboard" />
+
+  <section class="prose">
+    <h2>Why use dlptest.com?</h2>
+    <p>
+      DLPTest.com is a testing resource for Data Loss Prevention (DLP) software.
+      When DLP has been installed and configured correctly, this site can
+      demonstrate that sensitive data is protected when DLP is in blocking mode.
+      Data Loss Prevention has historically been divided into three categories:
+      Data in Use (DIU), Data at Rest (DAR), and Data in Motion (DIM). DLPTest
+      currently offers features to test Data in Use and Data in Motion.
+    </p>
+  </section>
+
+  <section class="prose">
+    <h2>What is Data Loss Prevention?</h2>
+    <p>
+      Data Loss Prevention (DLP) is a strategy and set of technologies designed
+      to prevent sensitive or confidential data from being disclosed, shared, or
+      used in unauthorized ways that violate an organization’s policies. DLP
+      technologies can be software, hardware, or a combination of both.
+    </p>
+    <p>
+      DLP can identify, classify, and protect data based on sensitivity and can
+      be configured to take different actions when sensitive data is detected.
+      For example, a DLP solution might prevent an email from being sent if it
+      contains sensitive information, alert an administrator when sensitive
+      data is accessed or copied, or encrypt data to prevent unauthorized
+      access. Organizations use DLP to comply with regulations such as data
+      privacy laws, and to protect sensitive business information.
+    </p>
   </section>
 
   <section class="faq-subscribe-row">
@@ -152,6 +152,10 @@ const faqs = [
 </BaseLayout>
 
 <style>
+  .prose p {
+    max-width: 72ch;
+  }
+
   .faq-section {
     display: flex;
     flex-direction: column;
