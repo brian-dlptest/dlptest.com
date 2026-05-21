@@ -33,6 +33,32 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   <CyberhavenAdSlot page="sample-data-tab">
 
+  <!-- Preset template picker -->
+  <div class="preset-wrap">
+    <span class="preset-label">Quick Start</span>
+    <select id="preset-select" class="preset-select">
+      <option value="">— Choose a template —</option>
+      <optgroup label="US PII / PCI">
+        <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
+        <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
+        <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
+        <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+      </optgroup>
+      <optgroup label="US Specialized">
+        <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
+        <option value="banking">Banking — Name + Routing + Account</option>
+        <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
+        <option value="driver-license">Driver's License — Name + DL + State</option>
+      </optgroup>
+      <optgroup label="International">
+        <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
+        <option value="canada-sin">Canada — Name + SIN + Province</option>
+        <option value="passport">International — Name + Passport Number</option>
+        <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+      </optgroup>
+    </select>
+  </div>
+
   <!-- Field builder table -->
   <div class="builder-wrap">
     <table class="builder-table" id="builder-table">
@@ -118,6 +144,29 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 </BaseLayout>
 
 <style>
+  /* ── Preset picker ─────────────────────────────────────────────────────────── */
+  .preset-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .preset-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .preset-select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.95rem;
+    min-width: 20rem;
+  }
+
   /* ── Builder table ─────────────────────────────────────────────────────────── */
   .builder-wrap {
     margin: 1.5rem 0 0;
@@ -332,6 +381,120 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "eu-vat":          "eu_vat_number",
     "iban":            "iban",
   };
+
+  // ── Preset templates ────────────────────────────────────────────────────────
+
+  type PresetField = { type: string; name: string };
+  const PRESETS: Record<string, PresetField[]> = {
+    "pii-ssn-ccn": [
+      { type: "first-name",  name: "first_name" },
+      { type: "last-name",   name: "last_name" },
+      { type: "ssn",         name: "ssn" },
+      { type: "credit-card", name: "credit_card_number" },
+    ],
+    "pii-ssn-dob": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "ssn",        name: "ssn" },
+      { type: "dob",        name: "date_of_birth" },
+    ],
+    "pci-ccn-zip": [
+      { type: "first-name",  name: "first_name" },
+      { type: "last-name",   name: "last_name" },
+      { type: "credit-card", name: "credit_card_number" },
+      { type: "zip",         name: "zip_code" },
+      { type: "card-expiry", name: "card_expiry" },
+    ],
+    "pii-dob-email": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "dob",        name: "date_of_birth" },
+      { type: "email",      name: "email" },
+    ],
+    "hipaa": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "dob",        name: "date_of_birth" },
+      { type: "mrn",        name: "mrn" },
+      { type: "icd10",      name: "icd10_code" },
+      { type: "cpt",        name: "cpt_code" },
+      { type: "phone",      name: "phone" },
+    ],
+    "banking": [
+      { type: "first-name",      name: "first_name" },
+      { type: "last-name",       name: "last_name" },
+      { type: "routing-number",  name: "routing_number" },
+      { type: "account-number",  name: "account_number" },
+      { type: "phone",           name: "phone" },
+    ],
+    "npi-provider": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "npi",        name: "npi" },
+      { type: "dea-number", name: "dea_number" },
+      { type: "specialty",  name: "specialty" },
+    ],
+    "driver-license": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "dl-number",  name: "dl_number" },
+      { type: "us-state",   name: "state" },
+      { type: "dob",        name: "date_of_birth" },
+    ],
+    "uk-identity": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "uk-nin",     name: "uk_nin" },
+      { type: "nhs-number", name: "nhs_number" },
+      { type: "dob",        name: "date_of_birth" },
+    ],
+    "canada-sin": [
+      { type: "first-name",      name: "first_name" },
+      { type: "last-name",       name: "last_name" },
+      { type: "canada-sin",      name: "sin" },
+      { type: "canada-province", name: "province" },
+      { type: "dob",             name: "date_of_birth" },
+    ],
+    "passport": [
+      { type: "first-name",      name: "first_name" },
+      { type: "last-name",       name: "last_name" },
+      { type: "passport-number", name: "passport_number" },
+      { type: "country",         name: "country" },
+      { type: "dob",             name: "date_of_birth" },
+      { type: "card-expiry",     name: "expiry" },
+    ],
+    "eu-vat": [
+      { type: "full-name", name: "full_name" },
+      { type: "eu-vat",   name: "eu_vat_number" },
+      { type: "iban",     name: "iban" },
+      { type: "country",  name: "country" },
+    ],
+  };
+
+  function applyPreset(fields: PresetField[]) {
+    const rows = getRows();
+    // Update the first row in-place (preserves Astro's scoped CSS attribute)
+    const firstRow = rows[0];
+    firstRow.querySelector<HTMLSelectElement>(".field-type-select")!.value = fields[0].type;
+    firstRow.querySelector<HTMLInputElement>(".field-name-input")!.value = fields[0].name;
+    firstRow.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+    // Remove all rows after the first
+    rows.slice(1).forEach((r) => r.remove());
+    // Append remaining preset fields as new rows
+    for (const field of fields.slice(1)) {
+      tbody.appendChild(makeRow(field.type, field.name));
+    }
+    enforceRemoveButtons();
+    lastResult = null;
+  }
+
+  const presetSelect = document.getElementById("preset-select") as HTMLSelectElement;
+  presetSelect.addEventListener("change", () => {
+    const val = presetSelect.value;
+    if (!val) return;
+    const preset = PRESETS[val];
+    if (preset) applyPreset(preset);
+  });
 
   // Columns rendered in <code> tags in the results table
   const CODE_COLUMNS = new Set([
