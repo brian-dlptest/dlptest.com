@@ -113,6 +113,17 @@ const UK_NIN_SECOND_LETTERS = [
 
 const DEA_FIRST_LETTERS = ["B", "D", "F", "M", "P", "R"] as const;
 
+const BANK_NAMES = [
+  "JPMorgan Chase", "Bank of America", "Wells Fargo", "Citibank",
+  "U.S. Bank", "PNC Bank", "Goldman Sachs", "TD Bank", "Capital One",
+  "Truist Bank", "Citizens Bank", "Fifth Third Bank", "KeyBank",
+  "Regions Bank", "Huntington National Bank", "BMO Harris Bank",
+  "M&T Bank", "Ally Bank", "Santander Bank", "First National Bank",
+] as const;
+
+const CARD_TYPES = ["Visa", "Mastercard", "American Express", "Discover"] as const;
+export type CardTypeName = typeof CARD_TYPES[number];
+
 // ─── PRNG ─────────────────────────────────────────────────────────────────────
 
 function mulberry32(seed: number): () => number {
@@ -177,21 +188,22 @@ function luhnCheckDigit(digits: number[]): number {
   return (10 - (sum % 10)) % 10;
 }
 
-function generateCreditCard(rng: ScopedRandom, delim = "-"): string {
-  const type = rng.int(0, 3); // 0=Visa, 1=MC, 2=AMEX, 3=Discover
+function generateCreditCard(rng: ScopedRandom, cardType?: CardTypeName, delim = "-"): string {
+  const resolved = cardType ?? rng.pick(CARD_TYPES);
   let prefix: number[];
   let length: number;
 
-  if (type === 0) {
+  if (resolved === "Visa") {
     prefix = [4];
     length = 16;
-  } else if (type === 1) {
+  } else if (resolved === "Mastercard") {
     prefix = [5, rng.int(1, 5)];
     length = 16;
-  } else if (type === 2) {
+  } else if (resolved === "American Express") {
     prefix = [3, rng.pick([4, 7] as const)];
     length = 15;
   } else {
+    // Discover
     prefix = [6, 0, 1, 1];
     length = 16;
   }
@@ -724,20 +736,33 @@ function generateIBANStandalone(rng: ScopedRandom): string {
   return generateIBAN(rng, country.code);
 }
 
+function generateCardType(rng: ScopedRandom): string {
+  return rng.pick(CARD_TYPES);
+}
+
+function generateBankName(rng: ScopedRandom): string {
+  return rng.pick(BANK_NAMES);
+}
+
 // ─── Custom field types ───────────────────────────────────────────────────────
 
 export type FieldTypeKey =
   | "row-number" | "first-name" | "last-name" | "full-name" | "gender" | "email" | "ip-v4"
-  | "ssn" | "credit-card" | "dob" | "phone" | "zip" | "card-expiry"
+  | "ssn" | "credit-card" | "credit-card-type" | "bank-name"
+  | "dob" | "phone" | "zip" | "card-expiry"
   | "mrn" | "icd10" | "cpt" | "routing-number" | "account-number" | "npi" | "dea-number"
   | "specialty" | "us-state" | "dl-number"
   | "uk-nin" | "nhs-number" | "canada-sin" | "canada-province" | "passport-number"
   | "country" | "eu-vat" | "iban";
 
+export interface CustomFieldOptions {
+  cardBrands?: CardTypeName[];
+}
+
 interface FieldTypeDef {
   label: string;
   group: string;
-  generate: (rng: ScopedRandom, rowIndex: number) => string;
+  generate: (rng: ScopedRandom, rowIndex: number, options?: CustomFieldOptions) => string;
 }
 
 export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
@@ -748,12 +773,20 @@ export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
   "gender":          { label: "Gender",                  group: "Basic",          generate: (rng)  => generateGender(rng) },
   "email":           { label: "Email Address",           group: "Basic",          generate: (rng)  => generateEmailStandalone(rng) },
   "ip-v4":           { label: "IP Address v4",           group: "Basic",          generate: (rng)  => generateIPv4(rng) },
-  "ssn":             { label: "SSN",                     group: "US PII / PCI",   generate: (rng)  => generateSSN(rng) },
-  "credit-card":     { label: "Credit Card Number",      group: "US PII / PCI",   generate: (rng)  => generateCreditCard(rng) },
-  "dob":             { label: "Date of Birth",           group: "US PII / PCI",   generate: (rng)  => generateDOB(rng) },
-  "phone":           { label: "Phone Number",            group: "US PII / PCI",   generate: (rng)  => generatePhone(rng) },
-  "zip":             { label: "ZIP Code",                group: "US PII / PCI",   generate: (rng)  => generateZip(rng) },
-  "card-expiry":     { label: "Card Expiry",             group: "US PII / PCI",   generate: (rng)  => generateCardExpiry(rng) },
+  "ssn":             { label: "SSN",                group: "US PII / PCI", generate: (rng)        => generateSSN(rng) },
+  "credit-card":     { label: "Credit Card Number", group: "US PII / PCI", generate: (rng, _, opts) => {
+    const brands = opts?.cardBrands;
+    return generateCreditCard(rng, brands && brands.length > 0 ? rng.pick(brands) : undefined);
+  }},
+  "credit-card-type": { label: "Credit Card Type",  group: "US PII / PCI", generate: (rng, _, opts) => {
+    const brands = opts?.cardBrands;
+    return brands && brands.length > 0 ? rng.pick(brands) : generateCardType(rng);
+  }},
+  "bank-name":       { label: "Bank Name",          group: "US PII / PCI", generate: (rng)        => generateBankName(rng) },
+  "dob":             { label: "Date of Birth",       group: "US PII / PCI", generate: (rng)        => generateDOB(rng) },
+  "phone":           { label: "Phone Number",        group: "US PII / PCI", generate: (rng)        => generatePhone(rng) },
+  "zip":             { label: "ZIP Code",            group: "US PII / PCI", generate: (rng)        => generateZip(rng) },
+  "card-expiry":     { label: "Card Expiry",         group: "US PII / PCI", generate: (rng)        => generateCardExpiry(rng) },
   "mrn":             { label: "Medical Record Number",   group: "US Specialized", generate: (rng)  => generateMRN(rng) },
   "icd10":           { label: "ICD-10 Code",             group: "US Specialized", generate: (rng)  => generateICD10(rng) },
   "cpt":             { label: "CPT Code",                group: "US Specialized", generate: (rng)  => generateCPT(rng) },
@@ -779,6 +812,7 @@ export interface CustomField {
   type: FieldTypeKey;
   blankPct: number;
   delimiter?: string;
+  cardBrands?: CardTypeName[];
 }
 
 // Maps field types that support custom delimiters to their default delimiter character.
@@ -799,7 +833,7 @@ type DelimGen = (rng: ScopedRandom, rowIndex: number, delimiter: string) => stri
 
 const DELIMITER_GENERATORS: Partial<Record<FieldTypeKey, DelimGen>> = {
   "ssn":         (rng, _, d) => generateSSN(rng, d),
-  "credit-card": (rng, _, d) => generateCreditCard(rng, d),
+  "credit-card": (rng, _, d) => generateCreditCard(rng, undefined, d),
   "dob":         (rng, _, d) => generateDOB(rng, d),
   "phone":       (rng, _, d) => generatePhone(rng, d),
   "card-expiry": (rng, _, d) => generateCardExpiry(rng, d),
@@ -823,9 +857,13 @@ export function generateCustom(
       } else {
         const delimGen = DELIMITER_GENERATORS[field.type];
         if (typeof field.delimiter === "string" && delimGen) {
-          row[field.name] = delimGen(rng, rowIndex, field.delimiter);
+          if (field.type === "credit-card" && field.cardBrands?.length) {
+            row[field.name] = generateCreditCard(rng, rng.pick(field.cardBrands), field.delimiter);
+          } else {
+            row[field.name] = delimGen(rng, rowIndex, field.delimiter);
+          }
         } else {
-          row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex);
+          row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex, { cardBrands: field.cardBrands });
         }
       }
     }
