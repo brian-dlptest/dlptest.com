@@ -494,7 +494,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     if (!val) return;
     const preset = PRESETS[val];
     if (preset) applyPreset(preset);
-    presetSelect.value = "";
   });
 
   // Columns rendered in <code> tags in the results table
