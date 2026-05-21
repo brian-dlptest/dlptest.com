@@ -92,15 +92,10 @@ const maxBytes = 100 * 1024 * 1024;
 
     form.post-test--file .file-drop {
       flex: 1;
-      min-height: 8rem;
+      min-height: 12rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
-    }
-
-    .post-test-grid form.post-test--file {
-      max-width: 22rem;
-      justify-self: start;
     }
   }
 
@@ -170,8 +165,8 @@ const maxBytes = 100 * 1024 * 1024;
     position: relative;
     border: 2px dashed var(--border);
     border-radius: var(--radius);
-    padding: 1rem 0.85rem;
-    min-height: 8rem;
+    padding: 1.5rem 1rem;
+    min-height: 12rem;
     text-align: center;
     background: var(--bg);
     box-sizing: border-box;
@@ -215,11 +210,10 @@ const maxBytes = 100 * 1024 * 1024;
   }
 
   .file-queue__item {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    column-gap: 0.75rem;
+    display: flex;
     align-items: center;
-    padding: 0.4rem 0.45rem 0.4rem 0.65rem;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.65rem;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -227,6 +221,7 @@ const maxBytes = 100 * 1024 * 1024;
   }
 
   .file-queue__name {
+    flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -234,49 +229,31 @@ const maxBytes = 100 * 1024 * 1024;
   }
 
   .file-queue__meta {
+    flex-shrink: 0;
     color: var(--text-dim);
     font-size: 0.8rem;
-    white-space: nowrap;
   }
 
-  form.post-test button.file-queue__remove {
+  .file-queue__remove {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    margin: 0;
+    width: 1.75rem;
+    height: 1.75rem;
     padding: 0;
     border: none;
     border-radius: var(--radius);
     background: transparent;
     color: var(--text-dim);
-    font-size: 1.1rem;
-    font-weight: 400;
+    font-size: 1.25rem;
     line-height: 1;
-    letter-spacing: 0;
-    box-shadow: none;
     cursor: pointer;
-    transform: none;
-    justify-self: end;
   }
 
-  form.post-test button.file-queue__remove:hover {
+  .file-queue__remove:hover {
     background: color-mix(in srgb, var(--danger) 12%, transparent);
     color: var(--danger);
-    box-shadow: none;
-    transform: none;
-  }
-
-  form.post-test button.file-queue__remove:active {
-    transform: none;
-    box-shadow: none;
-  }
-
-  form.post-test button.file-queue__remove:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    box-shadow: none;
   }
 </style>
 
