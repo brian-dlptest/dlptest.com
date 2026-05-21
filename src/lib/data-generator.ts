@@ -152,14 +152,14 @@ function generateName(rng: ScopedRandom): { first: string; last: string; full: s
   return { first, last, full: `${first} ${last}` };
 }
 
-function generateSSN(rng: ScopedRandom): string {
+function generateSSN(rng: ScopedRandom, delim = "-"): string {
   let area: number;
   do {
     area = rng.int(1, 899);
   } while (area === 666);
   const group = rng.int(1, 99);
   const serial = rng.int(1, 9999);
-  return `${area.toString().padStart(3, "0")}-${group.toString().padStart(2, "0")}-${serial.toString().padStart(4, "0")}`;
+  return `${area.toString().padStart(3, "0")}${delim}${group.toString().padStart(2, "0")}${delim}${serial.toString().padStart(4, "0")}`;
 }
 
 function luhnCheckDigit(digits: number[]): number {
@@ -177,7 +177,7 @@ function luhnCheckDigit(digits: number[]): number {
   return (10 - (sum % 10)) % 10;
 }
 
-function generateCreditCard(rng: ScopedRandom): string {
+function generateCreditCard(rng: ScopedRandom, delim = "-"): string {
   const type = rng.int(0, 3); // 0=Visa, 1=MC, 2=AMEX, 3=Discover
   let prefix: number[];
   let length: number;
@@ -203,17 +203,17 @@ function generateCreditCard(rng: ScopedRandom): string {
   digits.push(luhnCheckDigit(digits));
 
   if (length === 15) {
-    return `${digits.slice(0, 4).join("")}-${digits.slice(4, 10).join("")}-${digits.slice(10).join("")}`;
+    return `${digits.slice(0, 4).join("")}${delim}${digits.slice(4, 10).join("")}${delim}${digits.slice(10).join("")}`;
   }
-  return `${digits.slice(0, 4).join("")}-${digits.slice(4, 8).join("")}-${digits.slice(8, 12).join("")}-${digits.slice(12).join("")}`;
+  return `${digits.slice(0, 4).join("")}${delim}${digits.slice(4, 8).join("")}${delim}${digits.slice(8, 12).join("")}${delim}${digits.slice(12).join("")}`;
 }
 
-function generateDOB(rng: ScopedRandom): string {
+function generateDOB(rng: ScopedRandom, delim = "/"): string {
   const year = rng.int(new Date().getFullYear() - 80, new Date().getFullYear() - 21);
   const month = rng.int(1, 12);
   const maxDay = new Date(year, month, 0).getDate();
   const day = rng.int(1, maxDay);
-  return `${month}/${day}/${year}`;
+  return `${month}${delim}${day}${delim}${year}`;
 }
 
 function generateEmail(rng: ScopedRandom, first: string, last: string): string {
@@ -227,10 +227,13 @@ function generateEmail(rng: ScopedRandom, first: string, last: string): string {
   return `${local}@${domain}`;
 }
 
-function generatePhone(rng: ScopedRandom): string {
+function generatePhone(rng: ScopedRandom, delim?: string): string {
   const area = rng.int(200, 999);
   const exchange = rng.int(200, 999);
   const line = rng.int(1000, 9999);
+  if (delim !== undefined) {
+    return `${area}${delim}${exchange}${delim}${line}`;
+  }
   return `(${area}) ${exchange}-${line}`;
 }
 
@@ -238,15 +241,15 @@ function generateZip(rng: ScopedRandom): string {
   return rng.pick(ZIP_CODES);
 }
 
-function generateCardExpiry(rng: ScopedRandom): string {
+function generateCardExpiry(rng: ScopedRandom, delim = "/"): string {
   const year = new Date().getFullYear() + rng.int(1, 4);
   const month = rng.int(1, 12);
-  return `${month}/${year}`;
+  return `${month}${delim}${year}`;
 }
 
-function generateMRN(rng: ScopedRandom): string {
+function generateMRN(rng: ScopedRandom, delim = "-"): string {
   const num = Array.from({ length: 8 }, () => rng.int(0, 9)).join("");
-  return `MRN-${num}`;
+  return `MRN${delim}${num}`;
 }
 
 function generateICD10(rng: ScopedRandom): string {
@@ -273,17 +276,17 @@ function generateAccountNumber(rng: ScopedRandom): string {
   return Array.from({ length: len }, () => rng.int(0, 9)).join("");
 }
 
-function generateUKNIN(rng: ScopedRandom): string {
+function generateUKNIN(rng: ScopedRandom, delim = " "): string {
   const l1 = rng.pick(UK_NIN_FIRST_LETTERS);
   const l2 = rng.pick(UK_NIN_SECOND_LETTERS);
   const d1 = rng.int(10, 99).toString().padStart(2, "0");
   const d2 = rng.int(10, 99).toString().padStart(2, "0");
   const d3 = rng.int(10, 99).toString().padStart(2, "0");
   const suffix = rng.pick(["A", "B", "C", "D"] as const);
-  return `${l1}${l2} ${d1} ${d2} ${d3} ${suffix}`;
+  return `${l1}${l2}${delim}${d1}${delim}${d2}${delim}${d3}${delim}${suffix}`;
 }
 
-function generateNHSNumber(rng: ScopedRandom): string {
+function generateNHSNumber(rng: ScopedRandom, delim = " "): string {
   // Generate 9 digits then compute modulus-11 check digit
   let digits: number[];
   let check: number;
@@ -294,10 +297,10 @@ function generateNHSNumber(rng: ScopedRandom): string {
     check = 11 - (sum % 11);
   } while (check === 11 || check === 10); // 10 = invalid, 11 = use 0
   const all = [...digits, check === 11 ? 0 : check];
-  return `${all.slice(0, 3).join("")} ${all.slice(3, 6).join("")} ${all.slice(6).join("")}`;
+  return `${all.slice(0, 3).join("")}${delim}${all.slice(3, 6).join("")}${delim}${all.slice(6).join("")}`;
 }
 
-function generateCanadianSIN(rng: ScopedRandom): string {
+function generateCanadianSIN(rng: ScopedRandom, delim = "-"): string {
   // First digit 1-8; 9-prefix reserved for temporary residents
   let digits: number[];
   let check: number;
@@ -306,7 +309,7 @@ function generateCanadianSIN(rng: ScopedRandom): string {
     check = luhnCheckDigit(digits);
   } while (check < 0);
   const all = [...digits, check];
-  return `${all.slice(0, 3).join("")}-${all.slice(3, 6).join("")}-${all.slice(6).join("")}`;
+  return `${all.slice(0, 3).join("")}${delim}${all.slice(3, 6).join("")}${delim}${all.slice(6).join("")}`;
 }
 
 function generatePassportNumber(rng: ScopedRandom): string {
@@ -775,7 +778,36 @@ export interface CustomField {
   name: string;
   type: FieldTypeKey;
   blankPct: number;
+  delimiter?: string;
 }
+
+// Maps field types that support custom delimiters to their default delimiter character.
+// "" means the default format uses no single delimiter (e.g. phone uses parens).
+export const DELIMITER_DEFAULTS: Partial<Record<FieldTypeKey, string>> = {
+  "ssn":          "-",
+  "credit-card":  "-",
+  "dob":          "/",
+  "phone":        "",
+  "card-expiry":  "/",
+  "mrn":          "-",
+  "uk-nin":       " ",
+  "nhs-number":   " ",
+  "canada-sin":   "-",
+};
+
+type DelimGen = (rng: ScopedRandom, rowIndex: number, delimiter: string) => string;
+
+const DELIMITER_GENERATORS: Partial<Record<FieldTypeKey, DelimGen>> = {
+  "ssn":         (rng, _, d) => generateSSN(rng, d),
+  "credit-card": (rng, _, d) => generateCreditCard(rng, d),
+  "dob":         (rng, _, d) => generateDOB(rng, d),
+  "phone":       (rng, _, d) => generatePhone(rng, d),
+  "card-expiry": (rng, _, d) => generateCardExpiry(rng, d),
+  "mrn":         (rng, _, d) => generateMRN(rng, d),
+  "uk-nin":      (rng, _, d) => generateUKNIN(rng, d),
+  "nhs-number":  (rng, _, d) => generateNHSNumber(rng, d),
+  "canada-sin":  (rng, _, d) => generateCanadianSIN(rng, d),
+};
 
 export function generateCustom(
   fields: CustomField[],
@@ -789,7 +821,12 @@ export function generateCustom(
       if (field.blankPct > 0 && rng.float() * 100 < field.blankPct) {
         row[field.name] = "";
       } else {
-        row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex);
+        const delimGen = DELIMITER_GENERATORS[field.type];
+        if (typeof field.delimiter === "string" && delimGen) {
+          row[field.name] = delimGen(rng, rowIndex, field.delimiter);
+        } else {
+          row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex);
+        }
       }
     }
     return row;

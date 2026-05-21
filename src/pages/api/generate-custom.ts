@@ -47,7 +47,9 @@ export const POST: APIRoute = async ({ request }) => {
       typeof rawBlank === "number" && Number.isFinite(rawBlank)
         ? Math.max(0, Math.min(100, rawBlank))
         : 0;
-    fields.push({ name, type: type as FieldTypeKey, blankPct });
+    const rawDelim = field["delimiter"];
+    const delimiter = typeof rawDelim === "string" ? rawDelim.slice(0, 5) : undefined;
+    fields.push({ name, type: type as FieldTypeKey, blankPct, ...(delimiter !== undefined && { delimiter }) });
   }
 
   const rawCount =
