@@ -164,14 +164,15 @@ function generateSSN(rng: ScopedRandom): string {
 
 function luhnCheckDigit(digits: number[]): number {
   let sum = 0;
-  const parity = digits.length % 2;
-  for (let i = 0; i < digits.length; i++) {
+  let doubleNext = true;
+  for (let i = digits.length - 1; i >= 0; i--) {
     let d = digits[i];
-    if (i % 2 === parity) {
+    if (doubleNext) {
       d *= 2;
       if (d > 9) d -= 9;
     }
     sum += d;
+    doubleNext = !doubleNext;
   }
   return (10 - (sum % 10)) % 10;
 }
