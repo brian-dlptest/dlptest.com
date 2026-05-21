@@ -1,5 +1,31 @@
 # dlptest.com — Development Notes
 
+## Workflow
+
+This repo has more than one contributor — **do not push directly to `staging` or `main`**. All work goes through pull requests.
+
+**Branch layout:**
+- `main` — production. Deploys to dlptest.com.
+- `staging` — integration. Deploys to staging.dlptest.com.
+- `feature/<short-name>` — day-to-day work. Branch off `staging`.
+
+**For every change Claude makes:**
+1. Start from latest `staging`: `git checkout staging && git pull`.
+2. Create a feature branch: `git checkout -b feature/<short-name>` (kebab-case, describes the change).
+3. Commit on the feature branch.
+4. Open a PR into `staging` with `gh pr create --base staging --fill` (gh is authenticated as `brian-dlptest`).
+5. Do **not** merge the PR — leave it for human review.
+
+**Releases (`staging` → `main`)** are opened by a human, not by Claude, unless explicitly asked.
+
+**Narrow exceptions where direct push to `staging` is acceptable** (still ask first if unsure):
+- Trivial copy/typo fixes the user explicitly says to push directly.
+- A branch the user explicitly names as theirs (e.g., `brian/experiments`).
+
+When the user says "commit and push" without specifying a branch, assume the feature-branch workflow above — don't push to `staging` directly.
+
+---
+
 ## Completed
 
 ### Copy-to-clipboard buttons on sample data tables (PR #14)
