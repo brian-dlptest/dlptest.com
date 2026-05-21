@@ -1,5 +1,6 @@
 ---
 const action = "/api/http-post/";
+const maxBytes = 100 * 1024 * 1024;
 ---
 <div class="post-test-grid">
   <form
@@ -33,18 +34,25 @@ const action = "/api/http-post/";
     action={action}
     enctype="multipart/form-data"
     data-post-test="file"
+    data-max-bytes={maxBytes}
   >
     <div class="field">
       <label for="pt-file">File upload <span class="required">*</span></label>
-      <div class="file-drop">
-        <input id="pt-file" type="file" name="file" required />
-        <p class="file-drop__hint">
-          Drop a file here or click to upload
+      <div class="file-drop" data-file-drop>
+        <input
+          id="pt-file"
+          type="file"
+          multiple
+          aria-describedby="pt-file-hint pt-file-limit"
+        />
+        <p id="pt-file-hint" class="file-drop__hint">
+          Drop files here or click to add
         </p>
-        <p class="muted small file-drop__limit">
-          Maximum file size: 100 MB. Nothing you send is stored or forwarded; the server reads the attachment and discards it.
+        <p id="pt-file-limit" class="muted small file-drop__limit">
+          Maximum total upload size: 100 MB. Nothing you send is stored or forwarded; the server reads each attachment and discards it.
         </p>
       </div>
+      <ul class="file-queue" data-file-queue hidden></ul>
     </div>
     <div class="field" aria-hidden="true">
       <label class="honeypot">
@@ -52,7 +60,7 @@ const action = "/api/http-post/";
         <input type="text" name="website" tabindex="-1" autocomplete="off" />
       </label>
     </div>
-    <button type="submit">Submit</button>
+    <button type="submit" data-file-submit disabled>Submit</button>
     <p class="result" role="status"></p>
   </form>
 </div>
@@ -127,6 +135,11 @@ const action = "/api/http-post/";
     font-weight: 600;
   }
 
+  form.post-test button[type="submit"]:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
   form.post-test .honeypot {
     position: absolute;
     left: -10000px;
@@ -179,9 +192,68 @@ const action = "/api/http-post/";
     pointer-events: none;
   }
 
-  .file-drop:has(input:valid:not([value=""])) .file-drop__hint,
-  .file-drop.is-selected .file-drop__hint {
+  .file-drop.has-files .file-drop__hint {
     color: var(--accent);
+  }
+
+  .file-queue {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .file-queue[hidden] {
+    display: none;
+  }
+
+  .file-queue__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.65rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+  }
+
+  .file-queue__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-queue__meta {
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  .file-queue__remove {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .file-queue__remove:hover {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
   }
 </style>
 
@@ -191,20 +263,168 @@ const action = "/api/http-post/";
     trackHttpPostTextSubmitClick,
   } from "@/lib/analytics";
 
-  document.querySelectorAll<HTMLFormElement>("form.post-test").forEach((form) => {
-    const kind = form.dataset.postTest;
-    const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
-    const fileDrop = form.querySelector<HTMLElement>(".file-drop");
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
 
-    fileInput?.addEventListener("change", () => {
-      if (!fileDrop) return;
-      const file = fileInput.files?.[0];
-      fileDrop.classList.toggle("is-selected", Boolean(file && file.size > 0));
-      if (file && file.size > 0) {
-        const hint = fileDrop.querySelector(".file-drop__hint");
-        if (hint) hint.textContent = file.name;
+  function fileKey(file: File): string {
+    return `${file.name}:${file.size}:${file.lastModified}`;
+  }
+
+  function initFileForm(form: HTMLFormElement) {
+    const maxBytes = Number(form.dataset.maxBytes) || 100 * 1024 * 1024;
+    const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+    const fileDrop = form.querySelector<HTMLElement>("[data-file-drop]");
+    const fileQueue = form.querySelector<HTMLUListElement>("[data-file-queue]");
+    const submitBtn = form.querySelector<HTMLButtonElement>("[data-file-submit]");
+    const result = form.querySelector<HTMLElement>(".result");
+    const pending: File[] = [];
+
+    if (!fileInput || !fileQueue || !submitBtn) return;
+
+    function totalBytes(): number {
+      return pending.reduce((sum, f) => sum + f.size, 0);
+    }
+
+    function syncUi() {
+      const hasFiles = pending.length > 0;
+      fileQueue.hidden = !hasFiles;
+      submitBtn.disabled = !hasFiles;
+      fileDrop?.classList.toggle("has-files", hasFiles);
+
+      fileQueue.innerHTML = "";
+      pending.forEach((file, index) => {
+        const li = document.createElement("li");
+        li.className = "file-queue__item";
+
+        const name = document.createElement("span");
+        name.className = "file-queue__name";
+        name.textContent = file.name;
+        name.title = file.name;
+
+        const meta = document.createElement("span");
+        meta.className = "file-queue__meta";
+        meta.textContent = formatFileSize(file.size);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "file-queue__remove";
+        remove.setAttribute("aria-label", `Remove ${file.name}`);
+        remove.textContent = "×";
+
+        remove.addEventListener("click", () => {
+          pending.splice(index, 1);
+          syncUi();
+        });
+
+        li.append(name, meta, remove);
+        fileQueue.append(li);
+      });
+    }
+
+    function addFiles(files: File[]) {
+      let rejected = false;
+      for (const file of files) {
+        if (file.size === 0) continue;
+        if (pending.some((f) => fileKey(f) === fileKey(file))) continue;
+
+        if (file.size > maxBytes) {
+          if (result) {
+            result.textContent = `${file.name} exceeds the 100 MB per-file limit.`;
+            result.className = "result error";
+          }
+          rejected = true;
+          continue;
+        }
+        if (totalBytes() + file.size > maxBytes) {
+          if (result) {
+            result.textContent =
+              "Total upload size cannot exceed 100 MB. Remove a file or submit the current list first.";
+            result.className = "result error";
+          }
+          rejected = true;
+          break;
+        }
+
+        pending.push(file);
+      }
+
+      if (!rejected && result?.classList.contains("error")) {
+        result.textContent = "";
+        result.className = "result";
+      }
+
+      fileInput.value = "";
+      syncUi();
+    }
+
+    fileInput.addEventListener("change", () => {
+      addFiles(Array.from(fileInput.files ?? []));
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (result) {
+        result.textContent = "Submitting…";
+        result.className = "result";
+      }
+
+      const honeypot = form.querySelector<HTMLInputElement>(
+        'input[name="website"]',
+      );
+      if (String(honeypot?.value ?? "").trim()) return;
+
+      if (pending.length === 0) {
+        if (result) {
+          result.textContent = "Add at least one file before submitting.";
+          result.className = "result error";
+        }
+        return;
+      }
+
+      trackHttpPostAttachmentSubmitClick();
+
+      const fd = new FormData();
+      if (honeypot) fd.append("website", honeypot.value);
+      for (const file of pending) {
+        fd.append("file", file, file.name);
+      }
+
+      try {
+        const res = await fetch(form.action, { method: "POST", body: fd });
+        if (res.ok) {
+          if (result) {
+            result.textContent =
+              "Received. Nothing was stored. Check your DLP console for an incident.";
+            result.className = "result success";
+          }
+          pending.length = 0;
+          syncUi();
+          form.reset();
+        } else if (result) {
+          result.textContent = `Submission failed: ${res.status} ${res.statusText}`;
+          result.className = "result error";
+        }
+      } catch (err) {
+        if (result) {
+          result.textContent = `Submission failed: ${(err as Error).message}`;
+          result.className = "result error";
+        }
       }
     });
+
+    syncUi();
+  }
+
+  document.querySelectorAll<HTMLFormElement>("form.post-test").forEach((form) => {
+    const kind = form.dataset.postTest;
+
+    if (kind === "file") {
+      initFileForm(form);
+      return;
+    }
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -217,30 +437,15 @@ const action = "/api/http-post/";
       const fd = new FormData(form);
       if (String(fd.get("website") ?? "").trim()) return;
 
-      if (kind === "text") {
-        const message = String(fd.get("message") ?? "").trim();
-        if (!message) {
-          if (result) {
-            result.textContent = "Enter a test message before submitting.";
-            result.className = "result error";
-          }
-          return;
+      const message = String(fd.get("message") ?? "").trim();
+      if (!message) {
+        if (result) {
+          result.textContent = "Enter a test message before submitting.";
+          result.className = "result error";
         }
-        trackHttpPostTextSubmitClick();
-        fd.delete("file");
-      } else if (kind === "file") {
-        const file = fd.get("file");
-        const hasFile = file instanceof File && file.size > 0;
-        if (!hasFile) {
-          if (result) {
-            result.textContent = "Choose a file before submitting.";
-            result.className = "result error";
-          }
-          return;
-        }
-        trackHttpPostAttachmentSubmitClick();
-        fd.delete("message");
+        return;
       }
+      trackHttpPostTextSubmitClick();
 
       try {
         const res = await fetch(form.action, { method: "POST", body: fd });
@@ -251,9 +456,6 @@ const action = "/api/http-post/";
             result.className = "result success";
           }
           form.reset();
-          fileDrop?.classList.remove("is-selected");
-          const hint = fileDrop?.querySelector(".file-drop__hint");
-          if (hint) hint.textContent = "Drop a file here or click to upload";
         } else if (result) {
           result.textContent = `Submission failed: ${res.status} ${res.statusText}`;
           result.className = "result error";
