@@ -121,49 +121,49 @@ const faqs = [
 
   <CyberhavenAd unit="leaderboard" />
 
-  <section class="prose">
-    <h2>Why use dlptest.com?</h2>
-    <p>
-      DLPTest.com is a testing resource for Data Loss Prevention (DLP) software.
-      When DLP has been installed and configured correctly, this site can
-      demonstrate that sensitive data is protected when DLP is in blocking mode.
-      Data Loss Prevention has historically been divided into three categories:
-      Data in Use (DIU), Data at Rest (DAR), and Data in Motion (DIM). DLPTest
-      currently offers features to test Data in Use and Data in Motion.
-    </p>
+  <section class="intro-prose-grid">
+    <div class="prose">
+      <h2>Why use dlptest.com?</h2>
+      <p>
+        DLPTest.com is a testing resource for Data Loss Prevention (DLP) software.
+        When DLP has been installed and configured correctly, this site can
+        demonstrate that sensitive data is protected when DLP is in blocking mode.
+        Data Loss Prevention has historically been divided into three categories:
+        Data in Use (DIU), Data at Rest (DAR), and Data in Motion (DIM). DLPTest
+        currently offers features to test Data in Use and Data in Motion.
+      </p>
+    </div>
+    <div class="prose">
+      <h2>What is Data Loss Prevention?</h2>
+      <p>
+        Data Loss Prevention (DLP) is a strategy and set of technologies designed
+        to prevent sensitive or confidential data from being disclosed, shared, or
+        used in unauthorized ways that violate an organization’s policies. DLP
+        technologies can be software, hardware, or a combination of both.
+      </p>
+      <p>
+        DLP can identify, classify, and protect data based on sensitivity and can
+        be configured to take different actions when sensitive data is detected.
+        For example, a DLP solution might prevent an email from being sent if it
+        contains sensitive information, alert an administrator when sensitive
+        data is accessed or copied, or encrypt data to prevent unauthorized
+        access. Organizations use DLP to comply with regulations such as data
+        privacy laws, and to protect sensitive business information.
+      </p>
+    </div>
   </section>
 
-  <section class="prose">
-    <h2>What is Data Loss Prevention?</h2>
-    <p>
-      Data Loss Prevention (DLP) is a strategy and set of technologies designed
-      to prevent sensitive or confidential data from being disclosed, shared, or
-      used in unauthorized ways that violate an organization’s policies. DLP
-      technologies can be software, hardware, or a combination of both.
-    </p>
-    <p>
-      DLP can identify, classify, and protect data based on sensitivity and can
-      be configured to take different actions when sensitive data is detected.
-      For example, a DLP solution might prevent an email from being sent if it
-      contains sensitive information, alert an administrator when sensitive
-      data is accessed or copied, or encrypt data to prevent unauthorized
-      access. Organizations use DLP to comply with regulations such as data
-      privacy laws, and to protect sensitive business information.
-    </p>
+  <section class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    {faqs.map((f) => (
+      <details>
+        <summary><strong>{f.q}</strong></summary>
+        <div set:html={f.a} />
+      </details>
+    ))}
   </section>
 
-  <section class="faq-subscribe-row">
-    <section class="faq-section">
-      <h2>Frequently Asked Questions</h2>
-      {faqs.map((f) => (
-        <details>
-          <summary><strong>{f.q}</strong></summary>
-          <div set:html={f.a} />
-        </details>
-      ))}
-    </section>
-    <SubscribeSection />
-  </section>
+  <SubscribeSection />
 
   <section>
     <h2>Data security news</h2>
@@ -179,17 +179,40 @@ const faqs = [
     max-width: 72ch;
   }
 
+  .intro-prose-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  @media (min-width: 900px) {
+    .intro-prose-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  .intro-prose-grid .prose h2 {
+    margin-top: 0;
+  }
+
+  .intro-prose-grid .prose p {
+    max-width: none;
+  }
+
   .faq-section {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: 0.5rem;
+    margin: 2.5rem 0 0;
   }
 
   .faq-section details {
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 1.05rem 1.25rem;
+    padding: 0.7rem 1rem;
     margin: 0;
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
@@ -200,7 +223,7 @@ const faqs = [
   }
 
   .faq-section details[open] {
-    padding-bottom: 1.25rem;
+    padding-bottom: 1rem;
     box-shadow: var(--shadow-md);
   }
 
@@ -208,7 +231,7 @@ const faqs = [
     cursor: pointer;
     display: flex;
     align-items: center;
-    min-height: 2.75rem;
+    min-height: 2.25rem;
     padding: 0;
     font-size: 1rem;
     transition: color var(--transition-fast);
