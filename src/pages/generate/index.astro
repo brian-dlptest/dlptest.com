@@ -67,7 +67,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
           <th class="col-drag" aria-label="Drag to reorder"></th>
           <th class="col-name">Field Name</th>
           <th class="col-type">Type</th>
-          <th class="col-blank" colspan="2">Options</th>
+          <th class="col-options">Options</th>
+          <th class="col-blank">Blank %</th>
           <th class="col-actions"></th>
         </tr>
       </thead>
@@ -89,12 +90,24 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
                 ))}
               </select>
             </td>
-            <td class="col-blank-label">blank:</td>
-            <td class="col-blank-input">
-              <span class="blank-pct-wrap">
-                <input type="number" class="blank-pct-input" value="0" min="0" max="100" aria-label="Blank percent" />
-                <span class="pct-sign">%</span>
+            <td class="col-options">
+              <span class="delim-group">
+                <span class="option-label">delim:</span>
+                <input type="text" class="delim-input" maxlength="5" aria-label="Custom delimiter" />
+                <label class="none-label">
+                  <input type="checkbox" class="delim-none-check" aria-label="No delimiter" />
+                  none
+                </label>
               </span>
+            </td>
+            <td class="col-blank">
+              <div class="blank-wrap">
+                <div class="blank-bar"><div class="blank-bar-fill"></div></div>
+                <div class="blank-input-row">
+                  <input type="number" class="blank-pct-input" value="0" min="0" max="100" aria-label="Blank percent" />
+                  <span class="pct-sign">%</span>
+                </div>
+              </div>
             </td>
             <td class="col-remove">
               <button type="button" class="btn-remove" aria-label="Remove field">✕</button>
@@ -187,7 +200,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   .builder-table thead th.col-drag { width: 1.5rem; }
   .builder-table thead th.col-name { width: 26%; }
   .builder-table thead th.col-type { width: 34%; }
-  .builder-table thead th.col-blank { width: 1px; white-space: nowrap; }
+  .builder-table thead th.col-options { width: 1px; white-space: nowrap; }
+  .builder-table thead th.col-blank { width: 5.5rem; white-space: nowrap; }
   .builder-table thead th.col-actions { width: 1px; }
 
   .builder-row td {
@@ -222,13 +236,69 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   }
   .field-type-select { font-family: inherit; }
 
-  .col-blank-label {
-    font-size: 0.85rem;
-    color: var(--muted, #888);
+  .col-options {
     white-space: nowrap;
     padding-right: 0.25rem;
+    vertical-align: middle;
   }
-  .blank-pct-wrap {
+  .delim-group {
+    display: none;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+  }
+  .delim-group.is-visible {
+    display: flex;
+  }
+  .option-label {
+    font-size: 0.85rem;
+    color: var(--muted, #888);
+  }
+  .delim-input {
+    width: 2.5rem;
+    padding: 0.25rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: monospace;
+    text-align: center;
+  }
+  .delim-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .none-label {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+    color: var(--muted, #888);
+    cursor: pointer;
+    user-select: none;
+  }
+  .blank-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .blank-bar {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .blank-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent, #7c5cbf);
+    border-radius: 2px;
+    transition: width 0.12s ease;
+  }
+  .blank-input-row {
     display: flex;
     align-items: center;
     gap: 0.2rem;
@@ -519,11 +589,21 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const count = Math.max(1, Math.min(500, parseInt(countInput.value, 10) || 50));
     const rawSeed = seedInput.value.trim();
     const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
-    const fields = getRows().map((row) => ({
-      name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
-      type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
-      blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
-    }));
+    const fields = getRows().map((row) => {
+      const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
+      const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
+      const fieldObj: Record<string, unknown> = {
+        name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
+        type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
+        blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
+      };
+      if (noneCheck.checked) {
+        fieldObj["delimiter"] = "";
+      } else if (delimInput.value) {
+        fieldObj["delimiter"] = delimInput.value;
+      }
+      return fieldObj;
+    });
     const payload: Record<string, unknown> = { fields, count };
     if (seed !== undefined && !isNaN(seed)) payload["seed"] = seed;
     return payload;
@@ -551,6 +631,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   // ── Builder DOM helpers ──────────────────────────────────────────────────────
 
+  const DELIM_DEFAULTS: Record<string, string> = {
+    "ssn": "-", "credit-card": "-", "dob": "/", "phone": "",
+    "card-expiry": "/", "mrn": "-", "uk-nin": " ", "nhs-number": " ", "canada-sin": "-",
+  };
+
   const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
   const addFieldBtn = document.getElementById("add-field-btn") as HTMLButtonElement;
 
@@ -575,6 +660,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     tr.querySelector<HTMLInputElement>(".field-name-input")!.value = name ?? DEFAULT_NAMES[type] ?? type;
     tr.querySelector<HTMLSelectElement>(".field-type-select")!.value = type;
     tr.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+    tr.querySelector<HTMLDivElement>(".blank-bar-fill")!.style.width = "0%";
+    tr.querySelector<HTMLInputElement>(".delim-input")!.value = "";
+    (tr.querySelector<HTMLInputElement>(".delim-none-check")!).checked = false;
+    (tr.querySelector<HTMLInputElement>(".delim-none-check")!).disabled = false;
+    tr.querySelector<HTMLSpanElement>(".delim-group")!.classList.remove("is-visible");
 
     wireRow(tr);
     return tr;
@@ -591,13 +681,59 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     });
 
     const typeSelect = tr.querySelector<HTMLSelectElement>(".field-type-select")!;
-    const nameInput = tr.querySelector<HTMLInputElement>(".field-name-input")!;
+    const nameInput  = tr.querySelector<HTMLInputElement>(".field-name-input")!;
+    const delimGroup = tr.querySelector<HTMLSpanElement>(".delim-group")!;
+    const delimInput = tr.querySelector<HTMLInputElement>(".delim-input")!;
+    const noneCheck  = tr.querySelector<HTMLInputElement>(".delim-none-check")!;
+    const blankInput = tr.querySelector<HTMLInputElement>(".blank-pct-input")!;
+    const barFill    = tr.querySelector<HTMLDivElement>(".blank-bar-fill")!;
+
+    function updateBar() {
+      const pct = Math.max(0, Math.min(100, parseFloat(blankInput.value) || 0));
+      barFill.style.width = `${pct}%`;
+    }
+    blankInput.addEventListener("input", updateBar);
+    updateBar();
+
+    function updateDelimVisibility() {
+      const type = typeSelect.value;
+      const isDelimType = Object.prototype.hasOwnProperty.call(DELIM_DEFAULTS, type);
+      delimGroup.classList.toggle("is-visible", isDelimType);
+      if (isDelimType) {
+        const def = DELIM_DEFAULTS[type];
+        if (def === " ") {
+          delimInput.placeholder = "(space)";
+        } else if (def === "") {
+          delimInput.placeholder = "e.g. -";
+        } else {
+          delimInput.placeholder = def;
+        }
+      } else {
+        delimInput.value = "";
+        noneCheck.checked = false;
+        delimInput.disabled = false;
+      }
+    }
+
+    noneCheck.addEventListener("change", () => {
+      if (noneCheck.checked) {
+        delimInput.value = "";
+        delimInput.disabled = true;
+      } else {
+        delimInput.disabled = false;
+      }
+      lastResult = null;
+    });
+
     typeSelect.addEventListener("change", () => {
       const suggested = DEFAULT_NAMES[typeSelect.value];
       // Only auto-fill if the name still matches a known default (user hasn't customised it)
       const currentIsDefault = Object.values(DEFAULT_NAMES).includes(nameInput.value);
       if (suggested && currentIsDefault) nameInput.value = suggested;
+      updateDelimVisibility();
     });
+
+    updateDelimVisibility();
 
     // Drag-and-drop
     tr.addEventListener("dragstart", onDragStart);
@@ -681,11 +817,21 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const rawSeed = (formData.get("seed") as string).trim();
     const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
 
-    const fields = getRows().map((row) => ({
-      name: (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
-      type: row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
-      blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
-    }));
+    const fields = getRows().map((row) => {
+      const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
+      const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
+      const fieldObj: Record<string, unknown> = {
+        name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
+        type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
+        blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
+      };
+      if (noneCheck.checked) {
+        fieldObj["delimiter"] = "";
+      } else if (delimInput.value) {
+        fieldObj["delimiter"] = delimInput.value;
+      }
+      return fieldObj;
+    });
 
     generateBtn.disabled = true;
     statusEl.textContent = "Generating…";
