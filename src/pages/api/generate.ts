@@ -1,10 +1,10 @@
 import type { APIRoute } from "astro";
 import { generateDataset, rowsToCsv } from "@/lib/data-generator";
-import type { DatasetType } from "@/lib/data-generator";
+import type { PresetDatasetType } from "@/lib/data-generator";
 
 export const prerender = false;
 
-const VALID_DATASETS = new Set<DatasetType>([
+const VALID_DATASETS = new Set<PresetDatasetType>([
   "pii-ssn-ccn",
   "pii-ssn-dob",
   "pci-ccn-zip",
@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const dataset = body["dataset"];
-  if (typeof dataset !== "string" || !VALID_DATASETS.has(dataset as DatasetType)) {
+  if (typeof dataset !== "string" || !VALID_DATASETS.has(dataset as PresetDatasetType)) {
     return Response.json({ ok: false, error: "invalid_dataset" }, { status: 400 });
   }
 
@@ -49,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const format = body["format"] === "csv" ? "csv" : "json";
 
-  const result = generateDataset({ dataset: dataset as DatasetType, count, seed });
+  const result = generateDataset({ dataset: dataset as PresetDatasetType, count, seed });
 
   if (format === "csv") {
     return new Response(rowsToCsv(result), {
