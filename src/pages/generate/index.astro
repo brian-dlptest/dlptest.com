@@ -99,6 +99,13 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
                   none
                 </label>
               </span>
+              <div class="brand-picker" hidden>
+                <span class="brand-picker-label">brands:</span>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="Visa" checked /> Visa</label>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="Mastercard" checked /> MC</label>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="American Express" checked /> Amex</label>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="Discover" checked /> Disc</label>
+              </div>
             </td>
             <td class="col-blank">
               <div class="blank-wrap">
@@ -380,6 +387,31 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     cursor: wait;
   }
 
+  /* ── Brand picker ─────────────────────────────────────────────────────────── */
+  .brand-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+  }
+  .brand-picker[hidden] { display: none; }
+  .brand-picker-label {
+    font-size: 0.82rem;
+    color: var(--muted, #888);
+    margin-right: 0.1rem;
+  }
+  .brand-label {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .brand-label input[type="checkbox"] { cursor: pointer; }
+
   .table-scroll { overflow-x: auto; }
 
   :global(.copy-col) {
@@ -426,12 +458,14 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "gender":          "gender",
     "email":           "email",
     "ip-v4":           "ip_address",
-    "ssn":             "ssn",
-    "credit-card":     "credit_card_number",
-    "dob":             "date_of_birth",
-    "phone":           "phone",
-    "zip":             "zip_code",
-    "card-expiry":     "card_expiry",
+    "ssn":              "ssn",
+    "credit-card":      "credit_card_number",
+    "credit-card-type": "card_type",
+    "bank-name":        "bank_name",
+    "dob":              "date_of_birth",
+    "phone":            "phone",
+    "zip":              "zip_code",
+    "card-expiry":      "card_expiry",
     "mrn":             "mrn",
     "icd10":           "icd10_code",
     "cpt":             "cpt_code",
@@ -545,7 +579,9 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const rows = getRows();
     // Update the first row in-place (preserves Astro's scoped CSS attribute)
     const firstRow = rows[0];
-    firstRow.querySelector<HTMLSelectElement>(".field-type-select")!.value = fields[0].type;
+    const firstTypeSelect = firstRow.querySelector<HTMLSelectElement>(".field-type-select")!;
+    firstTypeSelect.value = fields[0].type;
+    firstTypeSelect.dispatchEvent(new Event("change")); // syncs delimiter + brand picker
     firstRow.querySelector<HTMLInputElement>(".field-name-input")!.value = fields[0].name;
     firstRow.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
     // Remove all rows after the first
@@ -565,6 +601,9 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const preset = PRESETS[val];
     if (preset) applyPreset(preset);
   });
+
+  // Field types that show the brand picker in the Options column
+  const BRAND_PICKER_TYPES = new Set(["credit-card", "credit-card-type"]);
 
   // Columns rendered in <code> tags in the results table
   const CODE_COLUMNS = new Set([
@@ -590,11 +629,16 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const rawSeed = seedInput.value.trim();
     const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
     const fields = getRows().map((row) => {
+      const type       = row.querySelector<HTMLSelectElement>(".field-type-select")!.value;
       const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
       const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
+      const brandPicker = row.querySelector<HTMLElement>(".brand-picker");
+      const cardBrands = brandPicker && !brandPicker.hidden
+        ? Array.from(row.querySelectorAll<HTMLInputElement>(".brand-check:checked")).map((cb) => cb.value)
+        : undefined;
       const fieldObj: Record<string, unknown> = {
-        name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
-        type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
+        name:     row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field",
+        type,
         blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
       };
       if (noneCheck.checked) {
@@ -602,6 +646,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       } else if (delimInput.value) {
         fieldObj["delimiter"] = delimInput.value;
       }
+      if (cardBrands && cardBrands.length > 0) fieldObj["cardBrands"] = cardBrands;
       return fieldObj;
     });
     const payload: Record<string, unknown> = { fields, count };
@@ -665,6 +710,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     (tr.querySelector<HTMLInputElement>(".delim-none-check")!).checked = false;
     (tr.querySelector<HTMLInputElement>(".delim-none-check")!).disabled = false;
     tr.querySelector<HTMLSpanElement>(".delim-group")!.classList.remove("is-visible");
+    tr.querySelectorAll<HTMLInputElement>(".brand-check").forEach((cb) => { cb.checked = true; });
 
     wireRow(tr);
     return tr;
@@ -687,6 +733,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const noneCheck  = tr.querySelector<HTMLInputElement>(".delim-none-check")!;
     const blankInput = tr.querySelector<HTMLInputElement>(".blank-pct-input")!;
     const barFill    = tr.querySelector<HTMLDivElement>(".blank-bar-fill")!;
+    const brandPicker = tr.querySelector<HTMLElement>(".brand-picker")!;
 
     function updateBar() {
       const pct = Math.max(0, Math.min(100, parseFloat(blankInput.value) || 0));
@@ -715,6 +762,10 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       }
     }
 
+    function syncBrandPicker() {
+      brandPicker.hidden = !BRAND_PICKER_TYPES.has(typeSelect.value);
+    }
+
     noneCheck.addEventListener("change", () => {
       if (noneCheck.checked) {
         delimInput.value = "";
@@ -731,6 +782,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       const currentIsDefault = Object.values(DEFAULT_NAMES).includes(nameInput.value);
       if (suggested && currentIsDefault) nameInput.value = suggested;
       updateDelimVisibility();
+      syncBrandPicker();
     });
 
     updateDelimVisibility();
@@ -818,11 +870,16 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
 
     const fields = getRows().map((row) => {
+      const type       = row.querySelector<HTMLSelectElement>(".field-type-select")!.value;
       const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
       const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
+      const brandPicker = row.querySelector<HTMLElement>(".brand-picker");
+      const cardBrands = brandPicker && !brandPicker.hidden
+        ? Array.from(row.querySelectorAll<HTMLInputElement>(".brand-check:checked")).map((cb) => cb.value)
+        : undefined;
       const fieldObj: Record<string, unknown> = {
-        name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
-        type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
+        name:     row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field",
+        type,
         blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
       };
       if (noneCheck.checked) {
@@ -830,6 +887,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       } else if (delimInput.value) {
         fieldObj["delimiter"] = delimInput.value;
       }
+      if (cardBrands && cardBrands.length > 0) fieldObj["cardBrands"] = cardBrands;
       return fieldObj;
     });
 

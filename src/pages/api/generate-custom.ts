@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
 import { generateCustom, FIELD_TYPE_DEFS } from "@/lib/data-generator";
-import type { CustomField, FieldTypeKey } from "@/lib/data-generator";
+import type { CustomField, FieldTypeKey, CardTypeName } from "@/lib/data-generator";
+
+const VALID_BRANDS = new Set<CardTypeName>(["Visa", "Mastercard", "American Express", "Discover"]);
 
 export const prerender = false;
 
@@ -49,7 +51,13 @@ export const POST: APIRoute = async ({ request }) => {
         : 0;
     const rawDelim = field["delimiter"];
     const delimiter = typeof rawDelim === "string" ? rawDelim.slice(0, 5) : undefined;
-    fields.push({ name, type: type as FieldTypeKey, blankPct, ...(delimiter !== undefined && { delimiter }) });
+    const rawBrands = field["cardBrands"];
+    const cardBrands: CardTypeName[] | undefined = Array.isArray(rawBrands)
+      ? (rawBrands as unknown[])
+          .filter((b): b is string => typeof b === "string")
+          .filter((b): b is CardTypeName => VALID_BRANDS.has(b as CardTypeName))
+      : undefined;
+    fields.push({ name, type: type as FieldTypeKey, blankPct, ...(delimiter !== undefined && { delimiter }), cardBrands: cardBrands?.length ? cardBrands : undefined });
   }
 
   const rawCount =
