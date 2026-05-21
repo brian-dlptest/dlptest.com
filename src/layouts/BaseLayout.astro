@@ -84,8 +84,10 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
     ) : (
       <link rel="canonical" href={canonical} />
     )}
-    <link rel="icon" type="image/png" href="/favicon.png" sizes="150x150" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/apple-touch-icon.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="msapplication-TileImage" content="/apple-touch-icon.png" />
     <script is:inline define:vars={{ themeKey: THEME_STORAGE_KEY }}>
       (function () {
         try {
