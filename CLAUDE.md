@@ -24,6 +24,8 @@ This repo has more than one contributor — **do not push directly to `staging` 
 
 When the user says "commit and push" without specifying a branch, assume the feature-branch workflow above — don't push to `staging` directly.
 
+> The same workflow lives in `.cursor/rules/workflow.mdc` so Cursor follows it too. If you change one, change the other.
+
 ---
 
 ## Completed
