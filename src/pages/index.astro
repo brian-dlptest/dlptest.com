@@ -36,50 +36,34 @@ const faqs = [
 ---
 <BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP POST test endpoint over HTTPS, and a public FTP server to verify your DLP is blocking what it should.">
   <section class="hero">
-    <h1>Test Your DLP. Prove It Actually Blocks.</h1>
-    <p>
-      DLPTest.com is a free testing resource for Data Loss Prevention software.
-      If your DLP is configured correctly, the endpoints here will demonstrate
-      it. We provide sample data, an HTTP POST test endpoint over HTTPS, and a public FTP
-      server. They are designed to be safe targets that your DLP can detect
-      and block.
-    </p>
-    <p>
-      <a class="button" href="/sample-data/">Get sample data</a>
-      {" "}
-      <a class="button button-outline" href="/http-post/">Try the HTTP POST test</a>
-    </p>
-  </section>
+    <div class="hero-content">
+      <h1>Test Your DLP. Prove It Actually Blocks.</h1>
+      <p>
+        DLPTest.com is a free testing resource for Data Loss Prevention software.
+        If your DLP is configured correctly, the endpoints here will demonstrate
+        it. We provide sample data, an HTTP POST test endpoint over HTTPS, and a public FTP
+        server. They are designed to be safe targets that your DLP can detect
+        and block.
+      </p>
+      <p class="hero-actions">
+        <a class="button" href="/sample-data/">Get sample data</a>
+        <a class="button button-outline" href="/http-post/">Try the HTTP POST test</a>
+      </p>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="terminal-mock">
+        <div class="terminal-mock-chrome">
+          <span></span><span></span><span></span>
+          <span class="terminal-mock-title">dlp-test — curl</span>
+        </div>
+        <pre class="terminal-mock-body"><span class="t-prompt">$</span> <span class="t-cmd">curl</span> -X POST https://dlptest.com/api/http-post \
+    -F <span class="t-str">"ssn=123-45-6789"</span> \
+    -F <span class="t-str">"cc=5555-4444-3333-2222"</span>
 
-  <section>
-    <h2>Why use dlptest.com?</h2>
-    <p>
-      DLPTest.com is a testing resource for Data Loss Prevention (DLP) software.
-      When DLP has been installed and configured correctly, this site can
-      demonstrate that sensitive data is protected when DLP is in blocking mode.
-      Data Loss Prevention has historically been divided into three categories:
-      Data in Use (DIU), Data at Rest (DAR), and Data in Motion (DIM). DLPTest
-      currently offers features to test Data in Use and Data in Motion.
-    </p>
-  </section>
-
-  <section>
-    <h2>What is Data Loss Prevention?</h2>
-    <p>
-      Data Loss Prevention (DLP) is a strategy and set of technologies designed
-      to prevent sensitive or confidential data from being disclosed, shared, or
-      used in unauthorized ways that violate an organization’s policies. DLP
-      technologies can be software, hardware, or a combination of both.
-    </p>
-    <p>
-      DLP can identify, classify, and protect data based on sensitivity and can
-      be configured to take different actions when sensitive data is detected.
-      For example, a DLP solution might prevent an email from being sent if it
-      contains sensitive information, alert an administrator when sensitive
-      data is accessed or copied, or encrypt data to prevent unauthorized
-      access. Organizations use DLP to comply with regulations such as data
-      privacy laws, and to protect sensitive business information.
-    </p>
+<span class="t-ok">HTTP/1.1 200 OK</span>
+<span class="t-comment"># Your DLP should have blocked this.</span></pre>
+      </div>
+    </div>
   </section>
 
   <section class="card-grid">
@@ -87,26 +71,32 @@ const faqs = [
       <h3>Data In Use (Endpoint DLP)</h3>
       <p>
         Data In Use, also known as Endpoint DLP, involves installing an endpoint
-        agent on user devices — laptops, desktops, and virtual desktops such
-        as Citrix VDI. Once installed, the agent can monitor channels including
-        USB transfers, CD/DVD burning, network share copies, web browsers,
-        FTP transfers, and cloud storage. Supported channels vary by vendor.
+        agent on user devices such as laptops, desktops, and virtual desktops
+        with OS support for Windows, macOS, or Linux. Once installed, the
+        agent can monitor local channels like Bluetooth transfers, USB
+        transfers, CD/DVD burning, and network share copies. Agents also
+        provide visibility into network layer movement across web browsers,
+        FTP transfers, cloud storage, and GenAI apps. With network visibility,
+        this is typically done with a browser extension or a locally running
+        man-in-the-middle proxy. Supported OSs and channels vary by vendor.
       </p>
     </div>
     <div class="card">
       <h3>Data In Motion (SSE and SASE)</h3>
       <p>
         Data In Motion refers to monitoring traffic across protocols like HTTP,
-        HTTPS, FTP, and SMTP. Historically this was split into a network
-        monitor (SPAN/tap), an email MTA between Exchange and the edge,
-        and an ICAP integration with a web proxy. The modern approach is to
-        incorporate DLP into a Secure Service Edge (SSE) that monitors all
-        user traffic regardless of location.
+        HTTPS, FTP, and SMTP. Historically, this was split into a network
+        monitor that would sit off a network SPAN or tap, an email MTA between
+        Exchange and the edge, and an ICAP integration with a web proxy. The
+        modern approach to HTTP and HTTPS is to incorporate DLP into a Secure
+        Service Edge (SSE) that monitors all user traffic, regardless of
+        location. For email (SMTP) traffic, many customers now use built-in
+        Microsoft Purview or Google Workspace DLP controls. There are also
+        3rd-party email providers that have started building blocking with
+        API integrations.
       </p>
     </div>
   </section>
-
-  <CyberhavenAd unit="leaderboard" />
 
   <section>
     <h2>Quick start</h2>
@@ -129,16 +119,50 @@ const faqs = [
     </div>
   </section>
 
-  <SubscribeSection />
+  <CyberhavenAd unit="leaderboard" />
 
-  <section>
-    <h2>Frequently Asked Questions</h2>
-    {faqs.map((f) => (
-      <details>
-        <summary><strong>{f.q}</strong></summary>
-        <div set:html={f.a} />
-      </details>
-    ))}
+  <section class="prose">
+    <h2>Why use dlptest.com?</h2>
+    <p>
+      DLPTest.com is a testing resource for Data Loss Prevention (DLP) software.
+      When DLP has been installed and configured correctly, this site can
+      demonstrate that sensitive data is protected when DLP is in blocking mode.
+      Data Loss Prevention has historically been divided into three categories:
+      Data in Use (DIU), Data at Rest (DAR), and Data in Motion (DIM). DLPTest
+      currently offers features to test Data in Use and Data in Motion.
+    </p>
+  </section>
+
+  <section class="prose">
+    <h2>What is Data Loss Prevention?</h2>
+    <p>
+      Data Loss Prevention (DLP) is a strategy and set of technologies designed
+      to prevent sensitive or confidential data from being disclosed, shared, or
+      used in unauthorized ways that violate an organization’s policies. DLP
+      technologies can be software, hardware, or a combination of both.
+    </p>
+    <p>
+      DLP can identify, classify, and protect data based on sensitivity and can
+      be configured to take different actions when sensitive data is detected.
+      For example, a DLP solution might prevent an email from being sent if it
+      contains sensitive information, alert an administrator when sensitive
+      data is accessed or copied, or encrypt data to prevent unauthorized
+      access. Organizations use DLP to comply with regulations such as data
+      privacy laws, and to protect sensitive business information.
+    </p>
+  </section>
+
+  <section class="faq-subscribe-row">
+    <section class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      {faqs.map((f) => (
+        <details>
+          <summary><strong>{f.q}</strong></summary>
+          <div set:html={f.a} />
+        </details>
+      ))}
+    </section>
+    <SubscribeSection />
   </section>
 
   <section>
@@ -151,29 +175,56 @@ const faqs = [
 </BaseLayout>
 
 <style>
-  details {
+  .prose p {
+    max-width: 72ch;
+  }
+
+  .faq-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .faq-section details {
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 0.875rem 1.25rem;
-    margin: 0.5rem 0;
+    padding: 1.05rem 1.25rem;
+    margin: 0;
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
   }
-  details:hover {
+
+  .faq-section details:hover {
     border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
   }
-  details[open] {
+
+  .faq-section details[open] {
     padding-bottom: 1.25rem;
     box-shadow: var(--shadow-md);
   }
-  summary {
+
+  .faq-section summary {
     cursor: pointer;
-    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0;
     font-size: 1rem;
     transition: color var(--transition-fast);
   }
-  summary:hover { color: var(--accent); }
-  details > div { margin-top: 0.875rem; color: var(--text-dim); line-height: 1.7; }
-  details ol { padding-left: 1.5rem; }
+
+  .faq-section summary:hover {
+    color: var(--accent);
+  }
+
+  .faq-section details > div {
+    margin-top: 0.875rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .faq-section details ol {
+    padding-left: 1.5rem;
+  }
 </style>

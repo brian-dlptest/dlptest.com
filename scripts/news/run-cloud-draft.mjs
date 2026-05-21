@@ -34,24 +34,28 @@ function repoCloneUrl() {
 
 const PROMPT = `You are updating the Data Security News section for dlptest.com (Astro site; posts live in src/content/news/).
 
+Read and follow scripts/news/EDITORIAL.md exactly — it defines what Brian publishes vs. what to skip.
+
 ## Goal
-Find credible industry stories dated AFTER the newest pubDate across existing posts in src/content/news/*.md, then draft new Markdown posts.
+Find credible industry stories dated AFTER the newest pubDate across existing posts in src/content/news/*.md, then draft new Markdown posts that match the editorial bar (DLP, DSPM, insider risk, vendor funding/M&A — not generic AI governance surveys, academic papers, or compliance-only attestations).
 
 ## Procedure
 1. Scan every file matching src/content/news/*.md. Parse YAML frontmatter and compute the maximum pubDate — call this CUTOFF (ISO instant).
-2. Using web search / browsing, identify substantive stories after CUTOFF through today's UTC date about: DLP, DSPM, insider risk, AI security / AI agents & data governance, cloud data security, major CNAPP posture vendors, acquisitions and funding in this space.
+2. Using web search / browsing, identify substantive stories after CUTOFF through today's UTC date. Prioritize: vendor funding, acquisitions, DLP/DSPM/endpoint DLP/insider-risk product news, Israeli security M&A (Calcalist, Globes), SecurityWeek, vendor press releases.
 3. Exclude duplicates: skip if an existing slug or title clearly covers the same event.
-4. For each qualifying story, create ONE new file src/content/news/<slug>.md where:
+4. Reject low-fit topics listed in EDITORIAL.md (data virtualization partner integrations, LF surveys, pure research, IRAP/FedRAMP-only posts, etc.) even if recent.
+5. For each qualifying story, create ONE new file src/content/news/<slug>.md where:
    - Filename stem equals frontmatter slug (WordPress-style kebab-case, lowercase).
    - Frontmatter matches src/content.config.ts schema exactly:
-     title (string), slug (string), pubDate (ISO 8601 with offset), categories (array of strings — always include "News" or "Opinion" plus topical tags), excerpt (~200–280 chars, plain text), sourceUrl (HTTPS canonical primary source — vendor press release or reputable outlet, NOT dlptest.com).
+     title (string), slug (string), pubDate (ISO 8601 with offset), categories (array — include "News" plus tags like "DLP", "DSPM", "data protection", "Endpoint DLP" when relevant), excerpt (~200–280 chars, plain text), sourceUrl (HTTPS canonical primary source — Calcalist, vendor PR, SecurityWeek, etc.; NOT dlptest.com).
      Optionally heroImage only if you have a durable vendor CDN URL; otherwise omit.
-   - Body: original synthesis in Markdown — short headings OK, **bold** company names on first mention, no paste of entire press releases.
-5. Run npm run check && npm run build — fix any schema or Astro errors before finishing.
-6. Commit only new/edited news markdown files with message:
+   - Body: practitioner synthesis like existing posts — bold company names on first mention; short ### subheads OK; no press-release paste; optional "what this means for DLP" angle.
+6. Prefer 0–2 strong posts per run over padding with weak fits.
+7. Run npm run check && npm run build — fix any schema or Astro errors before finishing.
+8. Commit only new/edited news markdown files with message:
    feat(news): add industry posts since <CUTOFF date>
 
-If nothing qualifies after exhaustive search, commit nothing and reply explaining no stories met the bar — still exit successfully conceptually (no empty commits).
+If nothing qualifies after search, commit nothing and reply explaining no stories met the bar — still exit successfully (no empty commits).
 
 Stay factual; flag uncertainty briefly where sources conflict.`;
 
@@ -74,7 +78,6 @@ async function main() {
       cloud: {
         repos: [{ url, startingRef }],
         autoCreatePR: true,
-        // Keep false so GitHub requests you as reviewer → surfaces in notifications.
         skipReviewerRequest: false,
       },
     });

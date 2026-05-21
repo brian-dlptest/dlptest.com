@@ -31,7 +31,7 @@ export const CYBERHAVEN_ADS: Record<
 /** Ad sets per page, matching legacy WordPress placements. */
 export const CYBERHAVEN_PAGE_ADS = {
   home: ["leaderboard"] as const,
-  "sample-data": ["skyscraper", "medium-rectangle"] as const,
+  "sample-data": ["skyscraper"] as const,
   /** Tab pages under /sample-data/* (skyscraper only on legacy site). */
   "sample-data-tab": ["skyscraper"] as const,
   "http-post": ["leaderboard"] as const,

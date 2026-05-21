@@ -1,16 +1,9 @@
 import type { APIRoute } from "astro";
+import { sendContactEmail } from "@/lib/contact-email";
 import { addSubscriber } from "@/lib/subscribe";
 
 export const prerender = false;
 
-// Contact form handler. Reads the submission, validates the honeypot, and
-// returns 200. Email delivery (MailChannels / Resend) is intentionally
-// deferred until the form goes live; in this scaffold we just acknowledge
-// and discard. The submission is NOT logged or persisted.
-//
-// When subscribe_updates is checked, name and email are also sent to the
-// contacts list via the Railway subscribe API (best-effort; does not block
-// the contact acknowledgement).
 export const POST: APIRoute = async ({ request }) => {
   let form: FormData;
   try {
@@ -34,12 +27,19 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse({ ok: false, error: "missing_field" }, 400);
   }
 
+  const mail = await sendContactEmail({ name, email, subject, message });
+  if (!mail.ok) {
+    const status = mail.reason === "not_configured" ? 503 : 502;
+    return jsonResponse(
+      { ok: false, error: mail.reason, message: mail.message },
+      status,
+    );
+  }
+
   if (subscribeUpdates) {
     await addSubscriber({ email, name });
   }
 
-  // TODO: send via MailChannels or Resend once the domain is on Cloudflare
-  // and SPF/DKIM are in place.
   return jsonResponse({ ok: true, message: "received" }, 200);
 };
 
@@ -48,4 +48,4 @@ function jsonResponse(body: unknown, status: number): Response {
     status,
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
-};
+}
