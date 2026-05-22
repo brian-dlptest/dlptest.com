@@ -35,34 +35,7 @@
       theadRow.appendChild(th);
     }
 
-    table.querySelectorAll("tbody tr").forEach((tr) => {
-      const td = document.createElement("td");
-      td.className = "copy-col";
 
-      const btn = document.createElement("button");
-      btn.className = "copy-btn";
-      btn.textContent = "Copy";
-      btn.addEventListener("click", async () => {
-        const text = [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
-          .map((c) => c.textContent?.trim() ?? "")
-          .join("\t");
-        try {
-          await navigator.clipboard.writeText(text);
-          btn.textContent = "Copied!";
-          btn.classList.add("copied");
-          setTimeout(() => {
-            btn.textContent = "Copy";
-            btn.classList.remove("copied");
-          }, 1500);
-        } catch {
-          btn.textContent = "Error";
-          setTimeout(() => { btn.textContent = "Copy"; }, 1500);
-        }
-      });
-
-      td.appendChild(btn);
-      tr.appendChild(td);
-    });
   });
 </script>
 

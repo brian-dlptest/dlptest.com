@@ -59,6 +59,32 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     </select>
   </div>
 
+  <!-- Preset template picker -->
+  <div class="preset-wrap">
+    <span class="preset-label">Quick Start</span>
+    <select id="preset-select" class="preset-select">
+      <option value="">— Choose a template —</option>
+      <optgroup label="US PII / PCI">
+        <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
+        <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
+        <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
+        <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+      </optgroup>
+      <optgroup label="US Specialized">
+        <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
+        <option value="banking">Banking — Name + Routing + Account</option>
+        <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
+        <option value="driver-license">Driver's License — Name + DL + State</option>
+      </optgroup>
+      <optgroup label="International">
+        <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
+        <option value="canada-sin">Canada — Name + SIN + Province</option>
+        <option value="passport">International — Name + Passport Number</option>
+        <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+      </optgroup>
+    </select>
+  </div>
+
   <!-- Field builder table -->
   <div class="builder-wrap">
     <table class="builder-table" id="builder-table">
@@ -784,6 +810,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     });
 
     updateDelimVisibility();
+    syncBrandPicker();
 
     // Drag-and-drop
     tr.addEventListener("dragstart", onDragStart);
