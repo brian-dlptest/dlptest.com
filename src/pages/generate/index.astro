@@ -143,8 +143,16 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
     <div class="generate-actions">
       <button type="submit" id="generate-btn">Generate</button>
-      <button type="button" id="download-csv-btn" class="btn-secondary">Download CSV</button>
-      <button type="button" id="download-json-btn" class="btn-secondary">Download JSON</button>
+      <div class="export-wrap" id="export-wrap">
+        <button type="button" id="export-btn" class="btn-secondary">Export ▾</button>
+        <ul class="export-menu" id="export-menu" hidden role="menu">
+          <li><button type="button" data-format="csv"  role="menuitem">CSV</button></li>
+          <li><button type="button" data-format="json" role="menuitem">JSON</button></li>
+          <li><button type="button" data-format="xlsx" role="menuitem">Excel (.xlsx)</button></li>
+          <li><button type="button" data-format="docx" role="menuitem">Word (.docx)</button></li>
+          <li><button type="button" data-format="pdf"  role="menuitem">PDF</button></li>
+        </ul>
+      </div>
     </div>
   </form>
 
@@ -410,6 +418,40 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   }
   .brand-label input[type="checkbox"] { cursor: pointer; }
 
+  .export-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .export-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0;
+    min-width: 10rem;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .export-menu li button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.4rem 0.85rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 0.92rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .export-menu li button:hover {
+    background: var(--bg);
+  }
+
   .table-scroll { overflow-x: auto; }
 
   :global(.copy-col) {
@@ -668,10 +710,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     return result;
   }
 
-  function setDownloadBtnLoading(btn: HTMLButtonElement, loading: boolean) {
-    btn.disabled = loading;
-  }
-
   // ── Builder DOM helpers ──────────────────────────────────────────────────────
 
   const DELIM_DEFAULTS: Record<string, string> = {
@@ -857,8 +895,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   const resultsThead = document.getElementById("results-head") as HTMLTableSectionElement;
   const resultsTbody = document.getElementById("results-body") as HTMLTableSectionElement;
   const seedEcho = document.getElementById("seed-echo") as HTMLParagraphElement;
-  const csvBtn = document.getElementById("download-csv-btn") as HTMLButtonElement;
-  const jsonBtn = document.getElementById("download-json-btn") as HTMLButtonElement;
+  const exportBtn = document.getElementById("export-btn") as HTMLButtonElement;
+  const exportMenu = document.getElementById("export-menu") as HTMLUListElement;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -914,8 +952,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       renderTable(result);
       seedEcho.textContent = `Generated with seed ${result.seed} — paste this seed to reproduce the exact dataset.`;
       resultsDiv.hidden = false;
-      csvBtn.hidden = false;
-      jsonBtn.hidden = false;
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
@@ -1007,7 +1043,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     return `${header}\n${body}`;
   }
 
-  function downloadBlob(content: string, filename: string, mime: string) {
+  function downloadBlob(content: string | ArrayBuffer, filename: string, mime: string) {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -1017,47 +1053,105 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     URL.revokeObjectURL(url);
   }
 
-  csvBtn.addEventListener("click", async () => {
-    if (lastResult) {
-      downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
-      return;
-    }
-    setDownloadBtnLoading(csvBtn, true);
-    statusEl.textContent = "Generating…";
-    try {
-      const result = await fetchCurrentData();
-      downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
-      statusEl.textContent = "";
-    } catch (err) {
-      statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
-    } finally {
-      setDownloadBtnLoading(csvBtn, false);
+  // ── Export dropdown ──────────────────────────────────────────────────────────
+
+  exportBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    exportMenu.hidden = !exportMenu.hidden;
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!exportMenu.hidden && !exportMenu.contains(e.target as Node)) {
+      exportMenu.hidden = true;
     }
   });
 
-  jsonBtn.addEventListener("click", async () => {
-    if (lastResult) {
-      downloadBlob(
-        JSON.stringify(lastResult.rows, null, 2),
-        `dlptest-custom-seed${lastResult.seed}.json`,
-        "application/json"
-      );
+  exportMenu.addEventListener("click", async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-format]");
+    if (!btn) return;
+    const format = btn.dataset["format"]!;
+    exportMenu.hidden = true;
+
+    // CSV and JSON: generate client-side when data is already cached
+    if (format === "csv") {
+      if (lastResult) {
+        downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
+        return;
+      }
+      exportBtn.disabled = true;
+      statusEl.textContent = "Generating…";
+      try {
+        const result = await fetchCurrentData();
+        downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
+        statusEl.textContent = "";
+      } catch (err) {
+        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      } finally {
+        exportBtn.disabled = false;
+      }
       return;
     }
-    setDownloadBtnLoading(jsonBtn, true);
+
+    if (format === "json") {
+      if (lastResult) {
+        downloadBlob(
+          JSON.stringify(lastResult.rows, null, 2),
+          `dlptest-custom-seed${lastResult.seed}.json`,
+          "application/json"
+        );
+        return;
+      }
+      exportBtn.disabled = true;
+      statusEl.textContent = "Generating…";
+      try {
+        const result = await fetchCurrentData();
+        downloadBlob(
+          JSON.stringify(result.rows, null, 2),
+          `dlptest-custom-seed${result.seed}.json`,
+          "application/json"
+        );
+        statusEl.textContent = "";
+      } catch (err) {
+        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      } finally {
+        exportBtn.disabled = false;
+      }
+      return;
+    }
+
+    // XLSX, DOCX, PDF: server-side generation
+    exportBtn.disabled = true;
     statusEl.textContent = "Generating…";
     try {
-      const result = await fetchCurrentData();
-      downloadBlob(
-        JSON.stringify(result.rows, null, 2),
-        `dlptest-custom-seed${result.seed}.json`,
-        "application/json"
-      );
+      const payload = collectFieldsPayload();
+      // Use cached seed so the download matches what's shown in the table
+      if (lastResult) payload["seed"] = lastResult.seed;
+      payload["format"] = format;
+
+      const res = await fetch("/api/generate-custom/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
+        statusEl.textContent = `Download failed: ${String(err["error"] ?? res.statusText)}`;
+        return;
+      }
+      const seed = lastResult?.seed ?? "";
+      const ext = format;
+      const buf = await res.arrayBuffer();
+      const mimeMap: Record<string, string> = {
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        pdf:  "application/pdf",
+      };
+      downloadBlob(buf, `dlptest-custom-seed${seed}.${ext}`, mimeMap[format]!);
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
     } finally {
-      setDownloadBtnLoading(jsonBtn, false);
+      exportBtn.disabled = false;
     }
   });
 </script>
