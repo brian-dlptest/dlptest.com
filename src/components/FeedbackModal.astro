@@ -1,0 +1,231 @@
+---
+import { env } from "cloudflare:workers";
+
+// Fall back to Cloudflare's always-pass test key when the real key isn't configured.
+const siteKey = env.CF_TURNSTILE_SITE_KEY?.trim() || "1x00000000000000000000AA";
+---
+
+<dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-dialog-title">
+  <div class="feedback-modal-inner">
+    <button type="button" class="feedback-modal-close" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12" />
+      </svg>
+    </button>
+
+    <h2 id="feedback-dialog-title" class="feedback-modal-title">Share Feedback</h2>
+    <p class="feedback-modal-subtitle">Found a bug or have an idea? Let us know.</p>
+
+    <form id="feedback-form" class="feedback-form" novalidate>
+      <!-- Honeypot — bots fill this, humans don't see it -->
+      <input type="text" name="website" tabindex="-1" aria-hidden="true" class="feedback-honeypot" autocomplete="off" />
+
+      <!-- Category -->
+      <div class="feedback-field">
+        <span class="feedback-field-label" id="feedback-category-label">Category</span>
+        <div class="feedback-pills" role="radiogroup" aria-labelledby="feedback-category-label">
+          <label class="feedback-pill">
+            <input type="radio" name="category" value="bug" required />
+            <span>🐛 Found a Bug</span>
+          </label>
+          <label class="feedback-pill">
+            <input type="radio" name="category" value="enhancement" />
+            <span>💡 Have an Idea</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="feedback-field">
+        <label class="feedback-field-label" for="feedback-title">Title</label>
+        <input
+          type="text"
+          id="feedback-title"
+          name="title"
+          class="feedback-input"
+          placeholder="Brief summary"
+          required
+          maxlength="256"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Description -->
+      <div class="feedback-field">
+        <label class="feedback-field-label" for="feedback-description">Description</label>
+        <textarea
+          id="feedback-description"
+          name="description"
+          class="feedback-textarea"
+          placeholder="Steps to reproduce, expected behavior, or a detailed description of your idea…"
+          required
+          maxlength="5000"
+          rows="5"
+        ></textarea>
+      </div>
+
+      <!-- Cloudflare Turnstile widget (rendered explicitly via JS) -->
+      <div id="cf-turnstile" class="feedback-turnstile"></div>
+
+      <!-- Inline status message -->
+      <p id="feedback-status" class="feedback-status" aria-live="polite"></p>
+
+      <div class="feedback-actions">
+        <button type="submit" id="feedback-submit" class="feedback-submit-btn">Submit Feedback</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<script define:vars={{ siteKey }}>
+  let widgetId = null;
+  let turnstileToken = null;
+
+  function initFeedbackModal() {
+    const dialog = document.getElementById("feedback-dialog");
+    const form = document.getElementById("feedback-form");
+    const closeBtn = dialog?.querySelector(".feedback-modal-close");
+    const statusEl = document.getElementById("feedback-status");
+    const submitBtn = document.getElementById("feedback-submit");
+    const turnstileContainer = document.getElementById("cf-turnstile");
+
+    if (!dialog || !form || !closeBtn || !statusEl || !submitBtn || !turnstileContainer) return;
+
+    // Reset state on each page-load (Astro view transitions respawn the DOM)
+    widgetId = null;
+    turnstileToken = null;
+
+    // Wire up the trigger buttons declared in SiteHeader
+    document.querySelectorAll("[data-feedback-trigger]").forEach((btn) => {
+      btn.addEventListener("click", openModal);
+    });
+
+    closeBtn.addEventListener("click", () => dialog.close());
+
+    // Close when clicking the ::backdrop (target is the dialog element itself)
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    // Reset form state when dialog closes
+    dialog.addEventListener("close", () => {
+      setStatus("", "");
+    });
+
+    function openModal() {
+      resetForm();
+      dialog.showModal();
+      loadTurnstile();
+    }
+
+    function loadTurnstile() {
+      if (window.turnstile) {
+        renderWidget();
+        return;
+      }
+      // Avoid double-injecting the script
+      if (document.getElementById("turnstile-script")) return;
+      const script = document.createElement("script");
+      script.id = "turnstile-script";
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onload = renderWidget;
+      document.head.appendChild(script);
+    }
+
+    function renderWidget() {
+      if (!window.turnstile || !turnstileContainer) return;
+      if (widgetId !== null) {
+        // Already rendered — just reset the existing widget
+        window.turnstile.reset(widgetId);
+        return;
+      }
+      turnstileContainer.innerHTML = "";
+      widgetId = window.turnstile.render(turnstileContainer, {
+        sitekey: siteKey,
+        callback: (token) => {
+          turnstileToken = token;
+        },
+        "expired-callback": () => {
+          turnstileToken = null;
+        },
+        "error-callback": () => {
+          turnstileToken = null;
+        },
+      });
+    }
+
+    function setStatus(msg, type) {
+      statusEl.textContent = msg;
+      statusEl.className = "feedback-status" + (type ? " feedback-status--" + type : "");
+    }
+
+    function resetTurnstile() {
+      turnstileToken = null;
+      if (widgetId !== null && window.turnstile) {
+        window.turnstile.reset(widgetId);
+      }
+    }
+
+    function resetForm() {
+      form.reset();
+      setStatus("", "");
+      submitBtn.disabled = false;
+      resetTurnstile();
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const categoryInput = form.querySelector("input[name='category']:checked");
+      const titleInput = form.querySelector("#feedback-title");
+      const descInput = form.querySelector("#feedback-description");
+      const honeypotInput = form.querySelector("input[name='website']");
+
+      const category = categoryInput?.value ?? "";
+      const title = titleInput?.value?.trim() ?? "";
+      const description = descInput?.value?.trim() ?? "";
+      const honeypot = honeypotInput?.value ?? "";
+
+      if (!category) { setStatus("Please select a category.", "error"); return; }
+      if (!title) { setStatus("Please enter a title.", "error"); return; }
+      if (!description) { setStatus("Please enter a description.", "error"); return; }
+      if (!turnstileToken) { setStatus("Please complete the security check.", "error"); return; }
+
+      submitBtn.disabled = true;
+      setStatus("Submitting…", "");
+
+      try {
+        const res = await fetch("/api/feedback/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category, title, description, website: honeypot, turnstileToken }),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          setStatus("Thanks! Your feedback has been received.", "success");
+          form.reset();
+          resetTurnstile();
+          setTimeout(() => {
+            dialog.close();
+          }, 2500);
+        } else {
+          const msg =
+            data.error === "captcha_failed"
+              ? "Security check failed. Please try again."
+              : "Something went wrong. Please try again.";
+          setStatus(msg, "error");
+          resetTurnstile();
+        }
+      } catch {
+        setStatus("Network error. Please try again.", "error");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  initFeedbackModal();
+  document.addEventListener("astro:page-load", initFeedbackModal);
+</script>
