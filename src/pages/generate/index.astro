@@ -39,6 +39,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     <select id="preset-select" class="preset-select">
       <option value="">— Choose a template —</option>
       <optgroup label="US PII / PCI">
+        <option value="pii-dob-ccn">Name + DOB + Credit Card + Card Type (PII/PCI)</option>
         <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
         <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
         <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
@@ -530,6 +531,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   type PresetField = { type: string; name: string };
   const PRESETS: Record<string, PresetField[]> = {
+    "pii-dob-ccn": [
+      { type: "full-name",       name: "full_name"          },
+      { type: "dob",             name: "date_of_birth"      },
+      { type: "credit-card",     name: "credit_card_number" },
+      { type: "credit-card-type", name: "card_type"         },
+    ],
     "pii-ssn-ccn": [
       { type: "first-name",  name: "first_name" },
       { type: "last-name",   name: "last_name" },
@@ -822,6 +829,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     });
 
     updateDelimVisibility();
+    syncBrandPicker();
 
     // Drag-and-drop
     tr.addEventListener("dragstart", onDragStart);
@@ -1020,13 +1028,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         }
         tr.appendChild(td);
       }
-      const copyTd = document.createElement("td");
-      copyTd.className = "copy-col";
-      copyTd.appendChild(makeCopyBtn("Copy", () =>
-        [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
-          .map((c) => c.textContent?.trim() ?? "").join("\t")
-      ));
-      tr.appendChild(copyTd);
       resultsTbody.appendChild(tr);
     }
   }

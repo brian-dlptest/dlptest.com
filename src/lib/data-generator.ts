@@ -849,21 +849,42 @@ export function generateCustom(
   seed: number
 ): GenerateResult {
   const rng = createScopedRandom(seed);
+
+  const hasCCN    = fields.some(f => f.type === "credit-card");
+  const hasCCType = fields.some(f => f.type === "credit-card-type");
+
   const rows = Array.from({ length: count }, (_, rowIndex) => {
     const row: Record<string, string> = {};
+
+    // When both credit-card and credit-card-type are in the same row, pick one
+    // brand up-front so the number and type always match.
+    let sharedBrand: CardTypeName | undefined;
+    if (hasCCN && hasCCType) {
+      const brandsSource = fields.find(f => f.type === "credit-card" || f.type === "credit-card-type");
+      const brands = brandsSource?.cardBrands;
+      sharedBrand = brands && brands.length > 0 ? rng.pick(brands) : rng.pick(CARD_TYPES);
+    }
+
     for (const field of fields) {
       if (field.blankPct > 0 && rng.float() * 100 < field.blankPct) {
         row[field.name] = "";
       } else {
         const delimGen = DELIMITER_GENERATORS[field.type];
         if (typeof field.delimiter === "string" && delimGen) {
-          if (field.type === "credit-card" && field.cardBrands?.length) {
-            row[field.name] = generateCreditCard(rng, rng.pick(field.cardBrands), field.delimiter);
+          if (field.type === "credit-card") {
+            const brand = sharedBrand ?? (field.cardBrands?.length ? rng.pick(field.cardBrands) : undefined);
+            row[field.name] = generateCreditCard(rng, brand, field.delimiter);
           } else {
             row[field.name] = delimGen(rng, rowIndex, field.delimiter);
           }
         } else {
-          row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex, { cardBrands: field.cardBrands });
+          if (sharedBrand && field.type === "credit-card-type") {
+            row[field.name] = sharedBrand;
+          } else if (sharedBrand && field.type === "credit-card") {
+            row[field.name] = generateCreditCard(rng, sharedBrand);
+          } else {
+            row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex, { cardBrands: field.cardBrands });
+          }
         }
       }
     }
