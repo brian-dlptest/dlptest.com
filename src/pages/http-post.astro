@@ -2,7 +2,6 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
 import PostTestForm from "@/components/PostTestForm.astro";
-import SubscribeSection from "@/components/SubscribeSection.astro";
 export const prerender = true;
 
 const curlExamples = `# Probe the endpoint
@@ -84,7 +83,5 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
     validating Data Loss Prevention rules, ICAP integrations, and SSE inspection,
     without sending real customer data to a third party that would retain it.
   </p>
-
-  <SubscribeSection />
 </BaseLayout>
 
