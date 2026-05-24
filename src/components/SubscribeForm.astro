@@ -1,5 +1,15 @@
 ---
 /** Newsletter subscribe form — posts to same-origin /api/subscribe/ (proxies to Railway). */
+
+interface Props {
+  /** Unique identifier used to namespace input IDs and label `for` attributes so multiple instances can coexist (e.g. inline + modal). */
+  instance?: string;
+}
+
+const { instance = "default" } = Astro.props;
+const emailId = `subscribe-${instance}-email`;
+const nameId = `subscribe-${instance}-name`;
+const companyId = `subscribe-${instance}-company`;
 const apiUrl = "/api/subscribe/";
 ---
 
@@ -16,9 +26,9 @@ const apiUrl = "/api/subscribe/";
 
     <form data-subscribe novalidate>
       <div class="field">
-        <label for="subscribe-email">Email <span class="required">*</span></label>
+        <label for={emailId}>Email <span class="required">*</span></label>
         <input
-          id="subscribe-email"
+          id={emailId}
           name="email"
           type="email"
           autocomplete="email"
@@ -29,9 +39,9 @@ const apiUrl = "/api/subscribe/";
       </div>
 
       <div class="field">
-        <label for="subscribe-name">Name <span class="required">*</span></label>
+        <label for={nameId}>Name <span class="required">*</span></label>
         <input
-          id="subscribe-name"
+          id={nameId}
           name="name"
           type="text"
           autocomplete="name"
@@ -42,11 +52,11 @@ const apiUrl = "/api/subscribe/";
       </div>
 
       <div class="field">
-        <label for="subscribe-company">
+        <label for={companyId}>
           Company <span class="optional">(optional)</span>
         </label>
         <input
-          id="subscribe-company"
+          id={companyId}
           name="company"
           type="text"
           autocomplete="organization"
@@ -168,15 +178,19 @@ const apiUrl = "/api/subscribe/";
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   function initSubscribeForm(root) {
+    if (root.dataset.subscribeInit === "1") return;
+    root.dataset.subscribeInit = "1";
+
     const form = root.querySelector("[data-subscribe]");
     const formPanel = root.querySelector("[data-form-panel]");
     const successPanel = root.querySelector("[data-success]");
     const alertEl = root.querySelector("[data-alert]");
     const submitBtn = root.querySelector("[data-submit]");
     const resetBtn = root.querySelector("[data-reset]");
-    const emailInput = root.querySelector("#subscribe-email");
-    const nameInput = root.querySelector("#subscribe-name");
-    const companyInput = root.querySelector("#subscribe-company");
+    // Use name-based selectors so multiple form instances with different IDs all work.
+    const emailInput = root.querySelector("input[name='email']");
+    const nameInput = root.querySelector("input[name='name']");
+    const companyInput = root.querySelector("input[name='company']");
 
     if (!form) return;
 

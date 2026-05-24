@@ -2,6 +2,7 @@
 import "@/styles/global.css";
 import SiteAnalytics from "@/components/SiteAnalytics.astro";
 import SiteHeader, { type HeaderNavItem } from "@/components/SiteHeader.astro";
+import SubscribeModal from "@/components/SubscribeModal.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { GTM_CONTAINER_ID } from "@/lib/analytics";
 import { env } from "cloudflare:workers";
@@ -133,7 +134,10 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
           <a href="/contact/">Contact</a>
           </div>
         </div>
-        <ThemeToggle />
+        <div class="site-footer-end">
+          <SubscribeModal />
+          <ThemeToggle />
+        </div>
       </div>
     </footer>
   </body>

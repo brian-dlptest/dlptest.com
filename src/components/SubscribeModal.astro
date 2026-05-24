@@ -1,0 +1,150 @@
+---
+import SubscribeForm from "@/components/SubscribeForm.astro";
+---
+
+<button type="button" class="subscribe-cta" data-subscribe-open>
+  Subscribe to updates
+</button>
+
+<dialog class="subscribe-dialog" data-subscribe-dialog aria-labelledby="subscribe-dialog-title">
+  <div class="subscribe-dialog__inner">
+    <div class="subscribe-dialog__header">
+      <h2 id="subscribe-dialog-title" class="subscribe-dialog__title">Subscribe to Updates</h2>
+      <button
+        type="button"
+        class="subscribe-dialog__close"
+        data-subscribe-close
+        aria-label="Close subscribe dialog"
+      >
+        &times;
+      </button>
+    </div>
+    <p class="subscribe-dialog__intro muted">
+      Get notified about new test tools, sample data, and data security news.
+    </p>
+    <SubscribeForm instance="modal" />
+  </div>
+</dialog>
+
+<style>
+  .subscribe-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      background var(--transition-fast),
+      border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+  .subscribe-cta:hover,
+  .subscribe-cta:focus-visible {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-color: var(--accent);
+    color: var(--accent);
+    outline: none;
+  }
+
+  .subscribe-dialog {
+    border: none;
+    background: transparent;
+    padding: 0;
+    max-width: min(34rem, 92vw);
+    width: 100%;
+  }
+  .subscribe-dialog::backdrop {
+    background: rgba(8, 13, 25, 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  .subscribe-dialog__inner {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.4);
+    padding: 1.25rem 1.5rem 1.5rem;
+  }
+
+  .subscribe-dialog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .subscribe-dialog__title {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  .subscribe-dialog__close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.6rem;
+    line-height: 1;
+    padding: 0.1rem 0.4rem;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+  .subscribe-dialog__close:hover,
+  .subscribe-dialog__close:focus-visible {
+    background: color-mix(in srgb, var(--border) 50%, transparent);
+    color: var(--text);
+    outline: none;
+  }
+
+  .subscribe-dialog__intro {
+    margin: 0 0 1rem;
+  }
+
+  /* The form already has its own border + bg; inside the dialog we let the
+     dialog's panel provide the surface, so flatten the form's chrome. */
+  .subscribe-dialog .subscribe-form {
+    background: transparent;
+    border: none;
+    padding: 0;
+    max-width: none;
+  }
+</style>
+
+<script>
+  function initSubscribeModal() {
+    const dialog = document.querySelector<HTMLDialogElement>("[data-subscribe-dialog]");
+    if (!dialog || dialog.dataset.init === "1") return;
+    dialog.dataset.init = "1";
+
+    const openers = document.querySelectorAll<HTMLButtonElement>("[data-subscribe-open]");
+    const closeBtn = dialog.querySelector<HTMLButtonElement>("[data-subscribe-close]");
+
+    openers.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (typeof dialog.showModal === "function") {
+          dialog.showModal();
+        } else {
+          dialog.setAttribute("open", "");
+        }
+      });
+    });
+
+    closeBtn?.addEventListener("click", () => dialog.close());
+
+    // Close on backdrop click (clicks land on the dialog element itself when
+    // outside the .subscribe-dialog__inner panel).
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+
+  initSubscribeModal();
+  document.addEventListener("astro:page-load", initSubscribeModal);
+</script>
