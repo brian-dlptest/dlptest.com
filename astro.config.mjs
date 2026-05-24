@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
+import sitemap from "@astrojs/sitemap";
 import rehypeExternalLinks from "rehype-external-links";
 
 // Astro on Cloudflare Workers. On-demand rendering enabled (output: "server")
@@ -14,6 +15,18 @@ import rehypeExternalLinks from "rehype-external-links";
 export default defineConfig({
   site: "https://dlptest.com",
   output: "server",
+  integrations: [
+    sitemap({
+      // Filter out pages we don't want crawlers to land on. The Classification
+      // Test stub is intentionally noindex on production until the real page
+      // ships; the legal pages are reachable from the footer but don't need
+      // to compete in search results.
+      filter: (page) =>
+        !page.includes("/inspect-data") &&
+        !page.includes("/privacy-policy") &&
+        !page.includes("/terms-and-conditions"),
+    }),
+  ],
   markdown: {
     rehypePlugins: [
       [rehypeExternalLinks, { target: "_blank", rel: ["noopener", "noreferrer"] }],
