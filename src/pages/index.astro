@@ -387,7 +387,7 @@ const faqs = [
     ))}
   </section>
 
-  <SubscribeSection />
+  <SubscribeSection class="subscribe-section--centered" />
 
   <section>
     <h2>Data security news</h2>
@@ -401,6 +401,15 @@ const faqs = [
 <style>
   .prose p {
     max-width: 72ch;
+  }
+
+  :global(.subscribe-section--centered) {
+    text-align: center;
+  }
+
+  :global(.subscribe-section--centered .subscribe-form) {
+    margin: 0 auto;
+    text-align: left;
   }
 
   .intro-prose-grid {
