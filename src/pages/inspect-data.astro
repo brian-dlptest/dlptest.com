@@ -2,6 +2,12 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 export const prerender = true;
 ---
+<!--
+  TODO: Remove noindex={true} below once the real Classification Test UI
+  ships. It's set so this "coming soon" stub stays out of Google when
+  staging merges to main. Tracked in issue: see /inspect-data/ noindex
+  removal task on GitHub.
+-->
 <BaseLayout
   title="Classification Test"
   description="Test DLP classification by inspecting how sensitive data gets identified and categorized."
