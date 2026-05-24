@@ -5,9 +5,65 @@ import SubscribeSection from "@/components/SubscribeSection.astro";
 export const prerender = true;
 
 const faqs = [
+  // --- Test methodology ---
+  {
+    q: "What sample data should I use to test DLP?",
+    a: `<p>Use synthetic test data that matches the same structural rules as real sensitive data. Most DLP products validate detection with format checks (Luhn for credit cards, area number rules for SSNs, BIN ranges for cards), so randomly generated strings won't always trigger. The sample data on this site at <a href="/sample-data/">/sample-data/</a> is generated to pass those validators while not corresponding to any real person or account.</p>
+      <p>A good test set includes:</p>
+      <ul>
+        <li><strong>SSNs</strong> with valid area-group-serial combinations</li>
+        <li><strong>Credit card numbers</strong> that pass the Luhn algorithm, for each major brand</li>
+        <li><strong>Bank account and routing numbers</strong> in valid formats</li>
+        <li><strong>PHI samples</strong> (MRN, NDC, ICD codes) if you're testing HIPAA policies</li>
+        <li><strong>Custom organization-specific data</strong> (sample customer records, sample source code) for EDM or IDM policies</li>
+      </ul>
+      <p>Avoid using real production data for testing, even in non-production environments. The risk of accidentally leaking real data during a DLP test is higher than people expect, and the data protection obligations attached to real PII don't pause for a test.</p>
+      <p>If you need fresh test data on demand, use the data generator at <a href="/generate/">/generate/</a> to produce custom samples.</p>`,
+  },
+  {
+    q: "How do I measure DLP detection accuracy and tune for false positives?",
+    a: `<p>Detection accuracy is usually expressed as a combination of two numbers: how often the DLP catches what it should (recall), and how often it fires correctly when it does fire (precision).</p>
+      <p>A simple measurement loop:</p>
+      <ol>
+        <li>Build a labeled test corpus: known-positive samples that should trigger the policy, and known-negative samples that should not. Use <a href="/sample-data/">/sample-data/</a> for the positive set and a representative sample of clean business data for the negative set.</li>
+        <li>Run the corpus through the channel you're testing (web upload, email, USB, etc.) with the policy active in monitor mode.</li>
+        <li>Count true positives (correctly fired), false positives (fired on clean data), false negatives (missed real samples), and true negatives (correctly didn't fire).</li>
+        <li>Calculate precision = TP / (TP + FP) and recall = TP / (TP + FN).</li>
+        <li>Tune policies to improve precision without sacrificing too much recall, or vice versa, depending on whether the policy is in monitor or block mode.</li>
+      </ol>
+      <p>Healthy mature deployments typically run with policy-level false positive rates below 10 percent and recall above 80 percent for high-value policies. Targets vary by policy type; EDM and IDM policies should be near-zero false positive, while regex-based policies usually accept a higher false positive rate in exchange for broader coverage.</p>
+      <p>Track these metrics over time. A policy with declining recall is being worked around. A policy with rising false positives needs tuning before users start ignoring its alerts.</p>`,
+  },
+  {
+    q: "Should I test in monitor mode or blocking mode?",
+    a: `<p>Both, in that order.</p>
+      <p><strong>Monitor mode</strong> (sometimes called observe, alert-only, or detect) generates incidents without taking any user-facing action. Always start here. Monitor mode lets you tune policies against real or synthetic traffic without disrupting users or generating help desk tickets. Stay in monitor mode for at least two weeks of representative use before changing the policy action.</p>
+      <p><strong>User-prompt mode</strong> (sometimes called justify or warn) shows the user a dialog asking them to justify or cancel the action. Useful as a middle step between monitor and block, especially for policies where the legitimate-use rate is unclear.</p>
+      <p><strong>Blocking mode</strong> prevents the action and notifies the user. Only move a policy to block mode when:</p>
+      <ul>
+        <li>Alert volume is stable and predictable</li>
+        <li>False positive rate is below your threshold (typically under 10 percent)</li>
+        <li>The user-facing message clearly explains why the action was blocked and how to request an exception</li>
+        <li>There is a documented exception workflow for legitimate business needs</li>
+      </ul>
+      <p>Move policies from monitor to block one at a time, not all at once. Start with high-confidence, low-impact policies (for example, blocking uploads of clearly tagged confidential files to personal cloud storage) and expand from there. Some policies should stay in monitor mode permanently because the goal is visibility rather than prevention.</p>`,
+  },
+  {
+    q: "How often should I re-test DLP?",
+    a: `<p>Re-test on a regular cadence and after any change that could affect detection. A reasonable baseline:</p>
+      <ul>
+        <li><strong>Monthly:</strong> quick smoke test of the most critical policies on the most critical channels. A short script that submits sample data via <a href="/http-post/">/http-post/</a> and uploads to <code>ftp://ftp.dlptest.com/24_Hour/</code> covers most of this in minutes.</li>
+        <li><strong>Quarterly:</strong> full regression test of all production policies across all channels in scope. Confirm that previously fixed false positives haven't returned and that detection rates are stable.</li>
+        <li><strong>After every DLP product update:</strong> policy engines and detection logic change between releases. A test that passed last quarter can silently start failing after an upgrade.</li>
+        <li><strong>After every policy change:</strong> any time someone tunes a regex, adds a dictionary, or modifies an EDM index, re-run that policy's tests before pushing to production.</li>
+        <li><strong>After every major endpoint change:</strong> OS upgrades, browser updates, and new EDR or antivirus deployments can interact with the DLP agent. Smoke-test the most-used channels.</li>
+      </ul>
+      <p>Keep the test results. A six-month trend of detection rates per policy is the most useful artifact you can show an auditor or a security committee.</p>`,
+  },
+  // --- Test procedures by channel ---
   {
     q: "How to run an FTP Upload (FTP PUT)",
-    a: `Windows does not support passive FTP natively, so use a third-party client like FileZilla. We provide a ready-to-import profile at <a href="/DLP_Test_FTP_FileZilla.xml">/DLP_Test_FTP_FileZilla.xml</a>. On macOS or Linux:
+    a: `<p>Windows does not support passive FTP natively (and recent Windows versions have removed the bundled <code>ftp</code> client entirely), so use a third-party client like FileZilla. We provide a ready-to-import profile at <a href="/DLP_Test_FTP_FileZilla.xml">/DLP_Test_FTP_FileZilla.xml</a>. On macOS or Linux:</p>
       <ol>
         <li>Open a terminal.</li>
         <li><code>cd</code> into the folder containing your test files.</li>
@@ -17,20 +73,188 @@ const faqs = [
       </ol>`,
   },
   {
-    q: "How to test Web Prevent / ICAP DLP",
-    a: `Validate that the proxy sends all PUT/POST traffic through Web Prevent via ICAP, then ensure the test workstation’s browser routes through that proxy. Enable a test SSN and CCN policy, then copy sample data from <a href="/sample-data/">/sample-data/</a> and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code> (see that page for examples). Always run first in monitor mode, then again in blocking mode.`,
+    q: "How to test web DLP (ICAP-based proxies)",
+    a: `<p>Validate that the proxy sends all PUT/POST traffic through the DLP server via ICAP, then ensure the test workstation's browser routes through that proxy. Enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code> (see that page for examples). Run first in monitor mode, then again in blocking mode.</p>
+      <p>This pattern applies to any ICAP-based DLP integration, including Symantec/Broadcom Web Prevent, Forcepoint, Trellix, and similar on-premises deployments. For cloud-delivered web DLP via SSE or SASE, see the next FAQ.</p>`,
   },
   {
-    q: "How to test Email Prevent",
-    a: `If Email Prevent is already in production, enable a test SSN and CCN policy, then send a few test emails to an external address containing sample data in both the body and as an attachment. Validate incidents fire. For initial bring-up, allowlist the Email Prevent IPs in your edge MTA, configure the forward address to your MTA, and add a send connector on Exchange pointing to a test domain.`,
+    q: "How to test web DLP via SSE / SASE",
+    a: `<p>Most modern web DLP is delivered as part of a Secure Service Edge (SSE) or SASE platform rather than an on-premises proxy. Common examples include Netskope, Zscaler, Microsoft Purview / Defender for Cloud Apps, Palo Alto Prisma Access, Cisco Umbrella, Forcepoint ONE, and Cyberhaven.</p>
+      <p>To test:</p>
+      <ol>
+        <li>Confirm the test endpoint's traffic is routed through the SSE tenant (via PAC file, agent, or device tunnel).</li>
+        <li>Enable a test SSN and CCN policy in the SSE console.</li>
+        <li>Copy sample data from <a href="/sample-data/">/sample-data/</a> and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code>.</li>
+        <li>Verify the incident appears in the SSE console. Run first in monitor mode, then in blocking mode.</li>
+      </ol>
+      <p>Because SSE inspects TLS-decrypted traffic in the cloud, the test workstation does not need to be on the corporate network. Off-network testing is a useful additional validation step.</p>`,
+  },
+  {
+    q: "How to test Email DLP",
+    a: `<p>Once Email DLP is in production, the test is the same regardless of platform: enable a test SSN and CCN policy, then send a few test emails to an external address with sample data in both the body and as an attachment. Validate that incidents fire and that the action (alert, quarantine, block, encrypt) matches what the policy was set to do.</p>
+      <p>Initial bring-up depends on your email platform:</p>
+      <ul>
+        <li><strong>Microsoft 365 / Exchange Online.</strong> Use a connector to route outbound mail through your Email DLP gateway (or use Microsoft Purview DLP and Exchange Online mail flow rules if your DLP is Microsoft-native). Allowlist the gateway IPs in EOP, and use a test domain or transport rule to scope the bring-up.</li>
+        <li><strong>Google Workspace.</strong> Configure a content compliance rule or outbound gateway route to your Email DLP product. Test against a non-production sending user to avoid disrupting real mail flow.</li>
+        <li><strong>On-premises Exchange or other SMTP gateways.</strong> Allowlist the Email DLP IPs in your edge MTA, configure the forward address to your MTA, and add a send connector on Exchange pointing to a test domain.</li>
+        <li><strong>Cloud email security / ICES (Abnormal, Avanan, Mimecast, Proofpoint, Material, etc.).</strong> These usually integrate via journaling, API, or inline relay. Follow the vendor's integration guide for outbound DLP, then run the same test described above.</li>
+      </ul>
+      <p>Whichever platform you're on, always validate in a non-production routing path first so a misconfigured policy doesn't block real outbound mail.</p>`,
   },
   {
     q: "How to test a Network Monitor",
-    a: `Confirm the Network Monitor is observing both HTTP and FTP traffic by checking its traffic stats. Enable a test SSN and CCN policy, then submit sample data to <a href="/http-post/">/http-post/</a> and upload a document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Network Monitor is monitor-only — you can’t test block actions, only detection. If incidents don’t appear, run Wireshark on the monitor to confirm the right traffic is being seen.`,
+    a: `<p>Confirm the Network Monitor is observing both HTTP and FTP traffic by checking its traffic stats. Enable a test SSN and CCN policy, then submit sample data to <a href="/http-post/">/http-post/</a> and upload a document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Network Monitor is monitor-only, so you can't test block actions, only detection. If incidents don't appear, run Wireshark on the monitor to confirm the right traffic is being seen.</p>
+      <p>Note: passive Network Monitors see less and less traffic as more activity moves to TLS-encrypted protocols and off-network endpoints. Most organizations now get equivalent coverage from an SSE / SASE deployment that inspects decrypted traffic in the cloud.</p>`,
   },
   {
     q: "How to test Data-in-Use (Endpoint DLP)",
-    a: `Enable monitoring of web browsers and FTP channels on the endpoint agent, enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/http-post/">/http-post/</a> or your own script posting to <code>/api/http-post/</code>. Also upload a sample-data document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Test in monitor mode first, then in blocking mode.`,
+    a: `<p>Modern endpoint DLP agents cover many channels: web browsers, FTP clients, cloud sync clients (OneDrive, Google Drive, Dropbox, Box), USB and removable media, printing, clipboard, screenshots, AirDrop and Bluetooth, virtual desktop sessions, and AI tools such as ChatGPT and Copilot. Test each channel that's in scope for your policy.</p>
+      <p>A simple bring-up test:</p>
+      <ol>
+        <li>Enable a test SSN and CCN policy on the endpoint agent.</li>
+        <li>Copy sample data from <a href="/sample-data/">/sample-data/</a>.</li>
+        <li>Trigger each channel you want to validate, for example:
+          <ul>
+            <li><strong>Web browser:</strong> submit via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code>.</li>
+            <li><strong>FTP:</strong> upload a sample-data file to <code>ftp://ftp.dlptest.com/24_Hour/</code>.</li>
+            <li><strong>USB:</strong> copy a sample-data file to a USB drive.</li>
+            <li><strong>Cloud sync:</strong> save a sample-data file into a OneDrive, Google Drive, or Dropbox folder.</li>
+            <li><strong>Clipboard / AI:</strong> paste sample data into a browser-based AI chat that your policy is meant to cover.</li>
+          </ul>
+        </li>
+        <li>Verify the agent generates the expected incident for each channel.</li>
+        <li>Run first in monitor mode, then switch the policy to blocking mode and re-test.</li>
+      </ol>
+      <p>For broader deployment guidance, see the <a href="/blog/endpoint-dlp-deployment-guide/">Endpoint DLP deployment guide</a>.</p>`,
+  },
+  {
+    q: "How to test Data-at-Rest (DAR) scanning",
+    a: `<p>Data-at-Rest (DAR) scanning means searching file shares, databases, cloud storage, and endpoints for sensitive data already at rest, regardless of how it got there. This is the third of the classic three DLP categories (alongside Data-in-Use and Data-in-Motion).</p>
+      <p>Modern DAR is often delivered as part of a Data Security Posture Management (DSPM) product (Cyberhaven, Varonis, BigID, Cyera, Wiz, Microsoft Purview, etc.) rather than a standalone DLP scanner, but the testing approach is the same.</p>
+      <p>To test:</p>
+      <ol>
+        <li>Place a set of sample data files in each target location: an SMB share, a SharePoint or OneDrive folder, an S3 bucket, a Google Drive shared folder, and a local endpoint folder. Download files from <a href="/sample-data/">/sample-data/</a> or use the generator at <a href="/generate/">/generate/</a>.</li>
+        <li>Wait for the scanner's normal indexing or scan cycle, or trigger a manual scan if the product supports it.</li>
+        <li>Verify the scanner identifies each test file and tags it with the correct classification.</li>
+        <li>Confirm the resulting incident or policy action matches expectation (alert, quarantine, encrypt, restrict access, etc.).</li>
+      </ol>
+      <p>Common gotchas:</p>
+      <ul>
+        <li>Scan coverage often excludes default directories (Recycle Bin, System Volume Information, OS update caches). Test files placed in those locations may not be detected, by design.</li>
+        <li>Many DAR scanners index incrementally. Newly placed files may not appear in results until the next scan window.</li>
+        <li>Cloud DAR products may rely on tenant-level API permissions that don't extend to all sub-locations (private channels in Teams, personal OneDrive, etc.).</li>
+      </ul>`,
+  },
+  {
+    q: "How to test DLP for cloud and SaaS apps",
+    a: `<p>Cloud and SaaS DLP covers content stored in or transiting through cloud services like Microsoft 365, Google Workspace, Salesforce, Box, Slack, Jira, Workday, and hundreds of others. Most modern DLP coverage for these apps comes from one of three architectures:</p>
+      <ul>
+        <li><strong>CASB or SSE inline</strong> (Netskope, Zscaler, Palo Alto Prisma Access, Cisco Umbrella, Microsoft Defender for Cloud Apps, Forcepoint ONE) inspects traffic between the user and the SaaS app.</li>
+        <li><strong>API-based scanning</strong> (Microsoft Purview, Google Workspace DLP, vendor-native scanners) reads content directly out of the SaaS tenant.</li>
+        <li><strong>Browser-isolation or browser-extension DLP</strong> (Cyberhaven, Talon, Island) sits in the browser and inspects content as it's typed, pasted, or uploaded.</li>
+      </ul>
+      <p>To test, identify which architecture is in scope and exercise it directly:</p>
+      <ul>
+        <li><strong>Inline (CASB / SSE):</strong> route the test endpoint through the SSE tenant, then upload sample data from <a href="/sample-data/">/sample-data/</a> into the SaaS app's upload interface (a Salesforce attachment, a Box upload, a Slack message with a file).</li>
+        <li><strong>API-based:</strong> place sample data inside the SaaS app (a SharePoint file, a Google Doc, a Salesforce record) and wait for the scanner's indexing cycle.</li>
+        <li><strong>Browser-based:</strong> paste sample data into a SaaS app's web form on a managed endpoint and verify the agent generates an incident.</li>
+      </ul>
+      <p>Important: sanctioned SaaS apps (corporate tenants) and unsanctioned SaaS apps (personal accounts of the same app, or third-party apps the user found themselves) are often handled by different policies. Test both if both are in scope.</p>`,
+  },
+  // --- Advanced scenarios ---
+  {
+    q: "How to test DLP against AI tools like ChatGPT and Copilot",
+    a: `<p>AI tools have become one of the highest-volume data egress channels in most organizations. Users paste sensitive data into ChatGPT, Claude, Gemini, Microsoft Copilot, GitHub Copilot, and dozens of other tools dozens of times a day. DLP coverage for AI tools is a feature in almost every modern endpoint and SSE product, and it usually works in one of three ways:</p>
+      <ul>
+        <li><strong>Browser extension or endpoint agent</strong> that detects paste, type, or upload events on AI tool URLs.</li>
+        <li><strong>SSE inline inspection</strong> of traffic to known AI service endpoints.</li>
+        <li><strong>Network-level URL category blocking</strong> that prevents access entirely (the bluntest option).</li>
+      </ul>
+      <p>To test detection:</p>
+      <ol>
+        <li>Identify the AI tools in scope. At minimum, include <code>chat.openai.com</code>, <code>claude.ai</code>, <code>gemini.google.com</code>, <code>copilot.microsoft.com</code>, and <code>github.com/copilot</code>. Your security team will have a fuller list.</li>
+        <li>Enable an AI-channel DLP policy or repurpose an existing PII or source-code policy to cover AI URLs.</li>
+        <li>From a test endpoint, paste sample data from <a href="/sample-data/">/sample-data/</a> into the AI tool's input box. Also try uploading a sample-data file if the tool supports file upload.</li>
+        <li>Verify the agent or SSE detects the paste and generates the expected incident.</li>
+        <li>Test both monitor mode and blocking mode. AI-channel blocks should have a clear user message explaining the policy.</li>
+      </ol>
+      <p>Additional considerations:</p>
+      <ul>
+        <li>AI tools change rapidly. New endpoints, new file upload methods, and new browser extensions appear constantly. Re-test quarterly at minimum.</li>
+        <li>Some products differentiate between consumer AI tools (<code>chat.openai.com</code>) and enterprise-licensed versions (<code>chatgpt.com/enterprise</code>) and apply different policies. Test the boundary explicitly.</li>
+        <li>Detection-only ("DLP-aware coaching") is increasingly common: the tool detects sensitive content, redacts it, and lets the user proceed with the redacted prompt. Test that the redaction is doing what you think it is.</li>
+      </ul>`,
+  },
+  {
+    q: "How to test exact data matching (EDM) and indexed document matching (IDM)",
+    a: `<p>EDM and IDM are advanced policy types most DLP products support. They reduce false positives dramatically by matching against specific known data rather than generic patterns.</p>
+      <ul>
+        <li><strong>Exact Data Matching (EDM)</strong> indexes a structured source (a customer database, an employee roster, a list of patient MRNs) and detects exact field-level matches in content. A policy might say "block if at least three rows from the customer table appear together in a single document."</li>
+        <li><strong>Indexed Document Matching (IDM)</strong> fingerprints whole documents and detects partial or full copies of them. A policy might say "block if more than 30 percent of a fingerprinted contract appears in an outbound email."</li>
+      </ul>
+      <p>Both are tricky to test because the test data has to be related to the indexed source. Synthetic data won't match.</p>
+      <p>To test EDM:</p>
+      <ol>
+        <li>Build the EDM index from a small, controlled test source (not your production customer list). Use sample data from <a href="/sample-data/">/sample-data/</a> or generate a test source at <a href="/generate/">/generate/</a>.</li>
+        <li>Construct test content that contains rows from the indexed source: full rows, partial rows, rows with substitutions (slightly altered names, dates of birth).</li>
+        <li>Submit the content through the channel under test.</li>
+        <li>Verify the policy fires only when the configured match threshold is met (typically a minimum number of matching rows and matching columns).</li>
+        <li>Also test near-misses: content that has some matching fields but should not fire.</li>
+      </ol>
+      <p>To test IDM:</p>
+      <ol>
+        <li>Fingerprint a controlled set of test documents.</li>
+        <li>Generate test files that include full copies, partial copies (paragraphs only), and modified copies (formatting changes, paraphrased sections) of the fingerprinted documents.</li>
+        <li>Submit each through the channel under test.</li>
+        <li>Verify the policy fires above the match percentage threshold and stays quiet below it.</li>
+      </ol>
+      <p>Both EDM and IDM indexes need to be refreshed on a schedule. Test the refresh process at least once before relying on these policies in production.</p>`,
+  },
+  {
+    q: "How to test DLP on macOS",
+    a: `<p>macOS DLP coverage is genuinely uneven across products. Apple's endpoint security framework gives vendors a supported way to monitor file activity, network connections, and clipboard, but the channel coverage is usually a subset of what the same vendor offers on Windows. Test what's actually supported, not what the marketing page implies.</p>
+      <p>Things to verify specifically on macOS before relying on DLP enforcement:</p>
+      <ul>
+        <li><strong>Full Disk Access and Endpoint Security permissions.</strong> The agent needs these granted (via MDM profile, ideally) before it can monitor most channels. Verify the agent reports as fully authorized.</li>
+        <li><strong>System Extension authorization.</strong> macOS requires explicit approval for kernel and system extensions. Confirm the agent's extension is loaded and authorized.</li>
+        <li><strong>Browser coverage.</strong> Safari, Chrome, Firefox, Arc, and Edge all behave differently. Test each browser your users actually use.</li>
+        <li><strong>AirDrop, iMessage, and other Apple-native channels.</strong> These are common data exfiltration paths on macOS and are not always covered. Test or document the gap.</li>
+        <li><strong>iCloud sync.</strong> A Mac user with iCloud Drive enabled is syncing local files to a personal Apple account. Test whether the agent catches this and what action it takes.</li>
+        <li><strong>Time Machine and external drives.</strong> Backups to external drives can include sensitive data. Confirm policy behavior.</li>
+      </ul>
+      <p>Use sample data from <a href="/sample-data/">/sample-data/</a> and run the same channel tests described in "How to test Data-in-Use (Endpoint DLP)" above. Run the tests on multiple macOS versions (the two most recent are usually sufficient, but include any older versions still in scope).</p>
+      <p>Document any channel that's not supported. macOS users in your population should not be assumed to have the same coverage as Windows users.</p>`,
+  },
+  // --- Operations and compliance ---
+  {
+    q: "Best practices for deploying Endpoint DLP?",
+    a: `<p>The teams that succeed treat Endpoint DLP as a multi-phase program, not a software install. The short version:</p>
+      <ol>
+        <li><strong>Plan before you deploy.</strong> Build an endpoint inventory, define data scope, write success criteria, and align stakeholders before any agent is installed.</li>
+        <li><strong>Pilot in monitor mode.</strong> Deploy to 1 to 5 percent of the fleet, run policies in observe mode for at least two weeks, and tune against real telemetry before expanding.</li>
+        <li><strong>Roll out in rings with exit criteria.</strong> Move from pilot to IT to broader internal to full deployment in waves, with explicit go/no-go criteria between rings.</li>
+        <li><strong>Move from monitor to enforce one policy at a time.</strong> Start with high-confidence, low-impact policies. Avoid the temptation to flip everything to block at once.</li>
+        <li><strong>Invest in steady-state operations from day one.</strong> Agent health monitoring, alert triage, exception workflow, and quarterly policy review aren't optional.</li>
+      </ol>
+      <p>For the full playbook with phase-by-phase detail, sample success metrics, common pitfalls, and vendor-specific considerations, see the <a href="/blog/endpoint-dlp-deployment-guide/">Endpoint DLP deployment guide</a>.</p>`,
+  },
+  {
+    q: "How do I prove DLP is working to an auditor?",
+    a: `<p>Auditors want evidence that the control is in place, configured correctly, and effective. For DLP, that means three things:</p>
+      <ul>
+        <li><strong>Coverage evidence.</strong> A report showing the percentage of in-scope endpoints, servers, and SaaS tenants that are protected. Auditors will ask how you defined "in-scope" and how you handle gaps.</li>
+        <li><strong>Policy mapping.</strong> A document mapping each regulatory requirement to the specific DLP policy that addresses it. PCI DSS Requirement 3.4 → policy "PCI block on outbound web." HIPAA 164.312(e)(1) → policy "PHI alert on outbound email." GDPR Article 32 → policy "EU PII block to non-EU destinations." Most products can export this as a report.</li>
+        <li><strong>Test evidence.</strong> A log of regular DLP tests showing the policies are firing on the expected sample data. Quarterly tests against <a href="/sample-data/">/sample-data/</a> and <code>ftp://ftp.dlptest.com/24_Hour/</code>, plus screenshots or exported incident reports, give an auditor exactly what they're looking for.</li>
+      </ul>
+      <p>Common frameworks and the DLP evidence they typically expect:</p>
+      <ul>
+        <li><strong>PCI DSS:</strong> controls around cardholder data discovery, transmission, and storage. Auditors want evidence that PAN is detected and blocked on egress channels.</li>
+        <li><strong>HIPAA:</strong> technical safeguards including transmission security. Auditors want evidence that PHI is detected on outbound email and web.</li>
+        <li><strong>GDPR / UK GDPR:</strong> demonstrate appropriate technical measures (Article 32). DLP evidence for cross-border data transfers is particularly valuable.</li>
+        <li><strong>SOC 2:</strong> Common Criteria around logical access and confidentiality. DLP evidence supports CC6 and CC9.</li>
+        <li><strong>ISO 27001 / 27002:</strong> Annex A controls A.5.10, A.8.12, and A.13.2 all benefit from DLP evidence.</li>
+      </ul>
+      <p>Keep the evidence in a controlled location (a GRC tool, a SharePoint site with restricted access, or a similar repository). Six months of trending data is the most compelling artifact you can offer.</p>`,
   },
 ];
 ---
@@ -202,17 +426,31 @@ const faqs = [
   }
 
   .faq-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
     margin: 2.5rem 0 0;
+    align-items: start;
+  }
+
+  .faq-section > h2 {
+    grid-column: 1 / -1;
+    margin: 0 0 0.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .faq-section {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: 0.75rem;
+      row-gap: 0.4rem;
+    }
   }
 
   .faq-section details {
     background: var(--bg-elev);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 0.7rem 1rem;
+    padding: 0.5rem 0.85rem;
     margin: 0;
     box-shadow: var(--shadow-sm);
     transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
@@ -223,7 +461,7 @@ const faqs = [
   }
 
   .faq-section details[open] {
-    padding-bottom: 1rem;
+    padding-bottom: 0.85rem;
     box-shadow: var(--shadow-md);
   }
 
@@ -231,9 +469,10 @@ const faqs = [
     cursor: pointer;
     display: flex;
     align-items: center;
-    min-height: 2.25rem;
+    min-height: 2rem;
     padding: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
     transition: color var(--transition-fast);
   }
 
@@ -242,12 +481,22 @@ const faqs = [
   }
 
   .faq-section details > div {
-    margin-top: 0.875rem;
+    margin-top: 0.65rem;
     color: var(--text-dim);
-    line-height: 1.7;
+    line-height: 1.6;
+    font-size: 0.92rem;
   }
 
-  .faq-section details ol {
+  .faq-section details > div p:first-child {
+    margin-top: 0;
+  }
+
+  .faq-section details > div p:last-child {
+    margin-bottom: 0;
+  }
+
+  .faq-section details ol,
+  .faq-section details ul {
     padding-left: 1.5rem;
   }
 </style>
