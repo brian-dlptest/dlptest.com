@@ -407,6 +407,15 @@ const faqs = [
     text-align: center;
   }
 
+  /* Global `p` rule sets max-width: 72ch and the default margin-left/right
+     stays at 0 — so even with text-align: center on the section, the
+     paragraph stays pinned to the left. Center the paragraph block itself
+     so the text lands under the heading and above the form. */
+  :global(.subscribe-section--centered p) {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   :global(.subscribe-section--centered .subscribe-form) {
     margin: 0 auto;
     text-align: left;

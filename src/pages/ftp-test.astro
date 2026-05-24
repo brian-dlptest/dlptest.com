@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
-import SubscribeAdRow from "@/components/SubscribeAdRow.astro";
 export const prerender = true;
 
 // The FTP test server lives on a separate host (ftp.dlptest.com) outside of
@@ -48,7 +47,7 @@ const retentionMinutes = 10;
     <a href="/contact/">contact page</a>.
   </p>
 
-  <SubscribeAdRow />
+  <CyberhavenAd unit="medium-rectangle" />
 </BaseLayout>
 
 <style>

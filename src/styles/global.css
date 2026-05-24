@@ -974,38 +974,6 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
   margin: 2.5rem 0 0;
 }
 
-.subscribe-ad-row {
-  display: grid;
-  gap: 1.25rem 2rem;
-  align-items: start;
-  margin: 2.5rem 0 0;
-}
-
-.subscribe-ad-row .subscribe-section {
-  margin: 0;
-}
-
-.subscribe-ad-row .subscribe-form {
-  max-width: none;
-}
-
-.subscribe-ad-row .cyberhaven-ad {
-  margin: 0;
-}
-
-@media (min-width: 720px) {
-  .subscribe-ad-row {
-    grid-template-columns: minmax(0, 32rem) auto;
-    justify-content: start;
-  }
-}
-
-@media (max-width: 719px) {
-  .subscribe-ad-row {
-    justify-items: center;
-  }
-}
-
 .cyberhaven-ad-layout--sidebar {
   display: grid;
   gap: 1.5rem 2rem;
