@@ -186,8 +186,8 @@ const faqs = [
       </ul>`,
   },
   {
-    q: "How to test exact data matching (EDM) and indexed document matching (IDM)",
-    a: `<p>EDM and IDM are advanced policy types most DLP products support. They reduce false positives dramatically by matching against specific known data rather than generic patterns.</p>
+    q: "How to test exact data matching and indexed document matching",
+    a: `<p>Exact data matching (EDM) and indexed document matching (IDM) are advanced policy types most DLP products support. They reduce false positives dramatically by matching against specific known data rather than generic patterns.</p>
       <ul>
         <li><strong>Exact Data Matching (EDM)</strong> indexes a structured source (a customer database, an employee roster, a list of patient MRNs) and detects exact field-level matches in content. A policy might say "block if at least three rows from the customer table appear together in a single document."</li>
         <li><strong>Indexed Document Matching (IDM)</strong> fingerprints whole documents and detects partial or full copies of them. A policy might say "block if more than 30 percent of a fingerprinted contract appears in an outbound email."</li>
