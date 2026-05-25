@@ -1,0 +1,14 @@
+# Terraform / OpenTofu local state and cache. State files contain the
+# full configured ruleset and shouldn't go in git. .terraform.lock.hcl
+# IS committed so provider versions are pinned across machines.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
