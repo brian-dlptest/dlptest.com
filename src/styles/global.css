@@ -523,14 +523,14 @@ main {
   background: var(--gradient-hero);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: clamp(1.75rem, 3.5vw, 2.75rem) clamp(1.5rem, 3vw, 2.5rem);
-  margin-bottom: 2.5rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem) clamp(1.5rem, 3vw, 2.5rem);
+  margin-bottom: 1.5rem;
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
 }
 @media (min-width: 900px) {
@@ -709,7 +709,7 @@ main {
   font-size: clamp(1rem, 1.4vw, 1.15rem);
   color: var(--text-dim);
   max-width: 65ch;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
 /* ============ CARDS ============ */
@@ -1010,5 +1010,5 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
 }
 
 @media (min-width: 1400px) {
-  .hero { padding: 3rem 3rem; }
+  .hero { padding: 2rem 3rem; }
 }
