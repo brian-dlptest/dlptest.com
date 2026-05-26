@@ -677,15 +677,40 @@ export function generateDataset(options: GenerateOptions): GenerateResult {
   return { rows, columns: COLUMNS[dataset], dataset, seed, count };
 }
 
-function csvEscape(value: string): string {
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-    return `"${value.replace(/"/g, '""')}"`;
+// Characters that Excel / Google Sheets / LibreOffice Calc interpret as the
+// start of a formula when they appear as the first character of a cell. A
+// field name like `=cmd|'/c calc'!A1` would otherwise execute on open.
+// OWASP CSV Injection Prevention Cheat Sheet:
+// https://cheatsheetseries.owasp.org/cheatsheets/CSV_Injection_Prevention_Cheat_Sheet.html
+const FORMULA_PREFIX_CHARS = new Set(["=", "+", "-", "@", "\t", "\r"]);
+
+/**
+ * Prefix a single quote onto any value whose first character would be
+ * interpreted as a formula by a spreadsheet app. The single quote is the
+ * standard literal-string escape and is hidden from the user when the sheet
+ * is rendered. Applied to both header cells and body cells before they
+ * reach the CSV / xlsx output.
+ */
+export function sanitizeForSpreadsheet(value: string): string {
+  if (value.length > 0 && FORMULA_PREFIX_CHARS.has(value[0]!)) {
+    return `'${value}`;
   }
   return value;
 }
 
+function csvEscape(value: string): string {
+  const safe = sanitizeForSpreadsheet(value);
+  if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+    return `"${safe.replace(/"/g, '""')}"`;
+  }
+  return safe;
+}
+
 export function rowsToCsv(result: GenerateResult): string {
-  const header = result.columns.join(",");
+  // Escape headers as well as body cells — a field name like `a,b` or one
+  // containing a newline would otherwise corrupt the CSV structure, and a
+  // name starting with `=` would be a formula in Excel.
+  const header = result.columns.map(csvEscape).join(",");
   const rowKeys = Object.keys(result.rows[0] ?? {});
   const body = result.rows
     .map((row) =>
