@@ -270,8 +270,7 @@ const faqs = [
         and block.
       </p>
       <p class="hero-actions">
-        <a class="button" href="/sample-data/">Get sample data</a>
-        <a class="button button-outline" href="/http-post/">Try the HTTP POST test</a>
+        <a class="button" href="/http-post/">Try the HTTP POST test</a>
       </p>
     </div>
     <div class="hero-visual" aria-hidden="true">
@@ -288,6 +287,35 @@ const faqs = [
 <span class="t-comment"># Your DLP should have blocked this.</span></pre>
       </div>
     </div>
+  </section>
+
+  <section class="feature-spotlight-grid">
+    <article class="feature-spotlight">
+      <h2 class="feature-spotlight__title">Sample Data Library</h2>
+      <p class="feature-spotlight__copy">
+        Browse curated datasets of fake PII and PCI — names paired with SSNs,
+        credit cards with ZIP codes, dates of birth with emails. Every record
+        passes the structural checks DLP engines look for (Luhn for cards,
+        valid SSN area-group-serial), so it actually trips real policies.
+        Copy rows from the table or download CSV, PDF, or Excel files.
+      </p>
+      <p class="feature-spotlight__cta">
+        <a class="button" href="/sample-data/">Browse sample data →</a>
+      </p>
+    </article>
+    <article class="feature-spotlight">
+      <h2 class="feature-spotlight__title">Data Generator</h2>
+      <p class="feature-spotlight__copy">
+        Build a custom dataset on demand. Pick the fields you need — SSN,
+        credit card, IBAN, NPI, driver's license, passport, EU VAT, and
+        more — set a row count, optionally seed for reproducibility, and
+        export as CSV. Useful when the library doesn't match the schema you
+        need to test against.
+      </p>
+      <p class="feature-spotlight__cta">
+        <a class="button" href="/generate/">Generate sample data →</a>
+      </p>
+    </article>
   </section>
 
   <section class="card-grid">
@@ -401,6 +429,58 @@ const faqs = [
 <style>
   .prose p {
     max-width: 72ch;
+  }
+
+  .feature-spotlight-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    margin: 2rem 0 0;
+  }
+
+  @media (min-width: 900px) {
+    .feature-spotlight-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  .feature-spotlight {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.75rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition:
+      box-shadow var(--transition-base),
+      border-color var(--transition-base),
+      transform var(--transition-base);
+  }
+
+  .feature-spotlight:hover {
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--border) 60%, var(--accent));
+    transform: translateY(-3px);
+  }
+
+  .feature-spotlight__title {
+    margin: 0 0 0.6rem;
+    font-size: 1.4rem;
+    line-height: 1.2;
+  }
+
+  .feature-spotlight__copy {
+    margin: 0 0 1.25rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: none;
+    flex: 1;
+  }
+
+  .feature-spotlight__cta {
+    margin: 0;
   }
 
   :global(.subscribe-section--centered) {
