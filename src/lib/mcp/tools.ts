@@ -11,10 +11,14 @@ import {
   generateCustom,
   generateDataset,
   rowsToCsv,
+  type BankingRow,
   type CardTypeName,
   type CustomField,
   type FieldTypeKey,
   type GenerateResult,
+  type HipaaRow,
+  type PiiDobEmailRow,
+  type PiiSsnCcnRow,
   type PresetDatasetType,
 } from "@/lib/data-generator";
 
@@ -22,7 +26,7 @@ export interface ToolDefinition {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
-  handler: (args: Record<string, unknown>) => string;
+  handler: (args: Record<string, unknown>, request?: Request) => string;
 }
 
 export const MAX_COUNT = 500;
@@ -280,9 +284,209 @@ const customTool: ToolDefinition = {
   },
 };
 
+// ─── Prompt-side DLP test tools ─────────────────────────────────────────────
+
+// echo_sensitive_data: caller places PII in the tool-call *arguments*. The
+// payload travels outbound in the request body and inbound in the response —
+// DLP that only inspects responses misses the outbound leg.
+const echoTool: ToolDefinition = {
+  name: "echo_sensitive_data",
+  description:
+    "Accepts a `payload` string — typically sample PII such as Social Security Numbers (SSN), credit card numbers (CCN), or PHI — and echoes it back unchanged. The payload travels in the `arguments` field of the outbound `tools/call` request body, making it visible on the *prompt side* of the pipeline. Use this to verify that your DLP product inspects tool-call arguments (outbound), not only tool responses (inbound). Nothing is stored or forwarded.",
+  inputSchema: {
+    type: "object",
+    required: ["payload"],
+    properties: {
+      payload: {
+        type: "string",
+        maxLength: 10000,
+        description:
+          "Text to echo back. Paste sample SSNs, credit card numbers, PHI, or any sensitive content. This value appears in both the outbound request body and the inbound response — a DLP product that only inspects responses will miss it on the way out.",
+      },
+      label: {
+        type: "string",
+        maxLength: 100,
+        description:
+          "Optional tag for this test run (e.g. 'test-run-1', 'ssn-payload'). Included in the response for correlation.",
+      },
+    },
+    additionalProperties: false,
+  },
+  handler: (args) => {
+    const payload = typeof args["payload"] === "string" ? args["payload"].slice(0, 10000) : "";
+    const label =
+      typeof args["label"] === "string" ? args["label"].slice(0, 100) : undefined;
+    return JSON.stringify(
+      {
+        ...(label !== undefined && { label }),
+        payload,
+        char_count: payload.length,
+        note: "echoed — not stored or forwarded",
+      },
+      null,
+      2,
+    );
+  },
+};
+
+type PromptScenario = "medical-record" | "financial-statement" | "hr-file" | "customer-list";
+
+function buildPromptParagraphs(scenario: PromptScenario, count: number): string[] {
+  const seed = randomSeed();
+  const paragraphs: string[] = [];
+
+  switch (scenario) {
+    case "medical-record": {
+      const result = generateDataset({ dataset: "hipaa", count, seed });
+      for (const row of result.rows) {
+        const r = row as HipaaRow;
+        paragraphs.push(
+          `PATIENT RECORD — ${r.last}, ${r.first}\n` +
+            `Date of Birth: ${r.dob}  |  MRN: ${r.mrn}  |  Direct: ${r.phone}\n` +
+            `Primary Dx: ${r.icd10}  —  Procedure Code: CPT-${r.cpt}`,
+        );
+      }
+      break;
+    }
+    case "financial-statement": {
+      const result = generateDataset({ dataset: "banking", count, seed });
+      for (const row of result.rows) {
+        const r = row as BankingRow;
+        paragraphs.push(
+          `ACH PAYMENT RECORD — ${r.name}\n` +
+            `Routing: ${r.routing}  |  Account: ${r.account}\n` +
+            `Authorized contact: ${r.phone}`,
+        );
+      }
+      break;
+    }
+    case "hr-file": {
+      const result = generateDataset({ dataset: "pii-ssn-ccn", count, seed });
+      for (const row of result.rows) {
+        const r = row as PiiSsnCcnRow;
+        paragraphs.push(
+          `PERSONNEL FILE — ${r.name}\n` +
+            `Social Security Number: ${r.ssn}\n` +
+            `Corporate card: ${r.ccn}`,
+        );
+      }
+      break;
+    }
+    case "customer-list": {
+      const result = generateDataset({ dataset: "pii-dob-email", count, seed });
+      for (const row of result.rows) {
+        const r = row as PiiDobEmailRow;
+        paragraphs.push(
+          `CUSTOMER RECORD — ${r.last}, ${r.first}\n` +
+            `Date of Birth: ${r.dob}  |  Email: ${r.email}`,
+        );
+      }
+      break;
+    }
+  }
+  return paragraphs;
+}
+
+// generate_prompt_context: returns prose paragraphs with PII embedded inline,
+// simulating RAG retrieval, system-prompt injection, or document summarization.
+const promptContextTool: ToolDefinition = {
+  name: "generate_prompt_context",
+  description:
+    "Generates a realistic fake document excerpt with synthetic PII embedded inline as prose — the kind of content that reaches an LLM's context window via RAG retrieval, a system-prompt injection, or a document summarization request. Unlike the table-returning generate_* tools, this returns paragraph-formatted records with SSNs, credit card numbers, MRNs, routing numbers, or email addresses embedded in natural-language text. Use it to test whether your DLP or endpoint agent catches sensitive data arriving as LLM *context*, not as a tool response. Data is synthetic only — never real.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      scenario: {
+        type: "string",
+        enum: ["medical-record", "financial-statement", "hr-file", "customer-list"],
+        default: "medical-record",
+        description:
+          "Document type to simulate. 'medical-record' embeds MRN, ICD-10, CPT, DOB; 'financial-statement' embeds routing/account numbers; 'hr-file' embeds SSN and credit card number; 'customer-list' embeds DOB and email.",
+      },
+      count: {
+        type: "integer",
+        minimum: 1,
+        maximum: 20,
+        default: 3,
+        description: "Number of record paragraphs to generate (1–20). Default 3.",
+      },
+      format: {
+        type: "string",
+        enum: ["text", "json"],
+        default: "text",
+        description:
+          "'text' returns a plain string with paragraph breaks — natural for injecting directly into a prompt. 'json' returns a structured array of record strings.",
+      },
+    },
+    additionalProperties: false,
+  },
+  handler: (args) => {
+    const validScenarios: PromptScenario[] = [
+      "medical-record",
+      "financial-statement",
+      "hr-file",
+      "customer-list",
+    ];
+    const scenario: PromptScenario = validScenarios.includes(args["scenario"] as PromptScenario)
+      ? (args["scenario"] as PromptScenario)
+      : "medical-record";
+    const count = Math.max(
+      1,
+      Math.min(20, typeof args["count"] === "number" ? Math.floor(args["count"]) : 3),
+    );
+    const format = args["format"] === "json" ? "json" : "text";
+    const paragraphs = buildPromptParagraphs(scenario, count);
+    if (format === "json") {
+      return JSON.stringify(
+        { scenario, count: paragraphs.length, records: paragraphs },
+        null,
+        2,
+      );
+    }
+    return paragraphs.join("\n\n");
+  },
+};
+
+// probe_request: returns HTTP request metadata so security teams can confirm
+// which network leg their DLP is intercepting.
+const probeTool: ToolDefinition = {
+  name: "probe_request",
+  description:
+    "Returns metadata about the HTTP request received by this MCP server: User-Agent, client IP (via Cloudflare's CF-Connecting-IP header when available), protocol, and timestamp. Use this to confirm that your DLP or proxy is intercepting the correct connection — if the IP or User-Agent is unexpected, the traffic may be taking a path you haven't instrumented. No arguments required.",
+  inputSchema: {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  },
+  handler: (_args, request) => {
+    const ua = request?.headers.get("user-agent") ?? "(not available)";
+    const cfIp =
+      request?.headers.get("CF-Connecting-IP") ??
+      "(not available — not a Cloudflare request, or running locally)";
+    const proto = request?.headers.get("x-forwarded-proto") ?? "http";
+    return JSON.stringify(
+      {
+        user_agent: ua,
+        cf_connecting_ip: cfIp,
+        protocol: proto,
+        timestamp_utc: new Date().toISOString(),
+        note: "Use cf_connecting_ip to verify your DLP is intercepting the correct network leg.",
+      },
+      null,
+      2,
+    );
+  },
+};
+
 // ─── Registry ───────────────────────────────────────────────────────────────
 
-export const TOOLS: ToolDefinition[] = [...presetTools, customTool];
+export const TOOLS: ToolDefinition[] = [
+  ...presetTools,
+  customTool,
+  echoTool,
+  promptContextTool,
+  probeTool,
+];
 
 const TOOL_INDEX = new Map(TOOLS.map((t) => [t.name, t]));
 

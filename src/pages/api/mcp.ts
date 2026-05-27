@@ -112,7 +112,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const responses = requests
-    .map((req) => handleRpc(req))
+    .map((req) => handleRpc(req, request))
     .filter((r): r is NonNullable<typeof r> => r !== null);
 
   if (responses.length === 0) {

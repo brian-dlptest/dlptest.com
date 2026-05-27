@@ -22,7 +22,7 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'`;
 
-const callExample = `# 3. tools/call — invoke a tool
+const callExample = `# 3. tools/call — invoke a tool (response-side DLP test)
 curl -sS -X POST "https://mcp.dlptest.com/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -34,6 +34,41 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
       "arguments": { "count": 5, "format": "csv" }
     }
   }'`;
+
+const echoExample = `# 4. echo_sensitive_data — prompt-side DLP test
+# PII travels in the *request* arguments, not only in the response.
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "echo_sensitive_data",
+      "arguments": {
+        "label": "test-run-1",
+        "payload": "Patient: Jane Smith  SSN: 123-45-6789  CCN: 4111111111111111"
+      }
+    }
+  }'`;
+
+const promptContextExample = `# 5. generate_prompt_context — simulate RAG / system-prompt PII
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "tools/call",
+    "params": {
+      "name": "generate_prompt_context",
+      "arguments": { "scenario": "medical-record", "count": 3, "format": "text" }
+    }
+  }'`;
+
+const probeExample = `# 6. probe_request — verify DLP is on the right network leg
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"probe_request","arguments":{}}}'`;
 
 const claudeDesktopConfig = `{
   "mcpServers": {
@@ -51,10 +86,20 @@ const cursorConfig = `{
     }
   }
 }`;
+
+const localConfig = `# Local self-hosted instance (npm run dev → http://localhost:4321)
+{
+  "mcpServers": {
+    "dlptest-local": {
+      "type": "http",
+      "url": "http://localhost:4321/api/mcp/"
+    }
+  }
+}`;
 ---
 <BaseLayout
   title="MCP Server Test"
-  description="A public MCP (Model Context Protocol) server that returns synthetic PII, PCI, and PHI data. Use it to test whether your DLP, CASB, or endpoint agent can inspect agentic tool traffic."
+  description="A public MCP (Model Context Protocol) server that returns synthetic PII, PCI, and PHI data. Use it to test whether your DLP, CASB, or endpoint agent can inspect agentic tool traffic — including prompt-side data and unapproved external MCP connections."
 >
   <h1>MCP Server Test</h1>
   <p>
@@ -80,9 +125,9 @@ const cursorConfig = `{
   <p>
     DLP, CASB, and endpoint vendors increasingly claim that they can inspect
     "agentic" or "AI tool" traffic. Under the hood, the most common transport
-    for that traffic today is MCP — JSON-RPC 2.0 over HTTP, sometimes with an
-    SSE upgrade. If a product can inspect MCP, it can inspect this endpoint.
-    There are three distinct things to test:
+    for that traffic today is MCP — JSON-RPC 2.0 over HTTP. If a product can
+    inspect MCP, it can inspect this endpoint. There are three distinct vectors
+    to test:
   </p>
   <ul>
     <li>
@@ -91,12 +136,14 @@ const cursorConfig = `{
       hundreds of fake SSNs?
     </li>
     <li>
-      <strong>Endpoint agent.</strong> Does the agent see the tool call and
-      the data returned to the LLM, or only the final assistant message?
+      <strong>Endpoint agent.</strong> Does the agent see both the outbound
+      tool-call arguments <em>and</em> the data returned to the LLM, or only
+      the final assistant message?
     </li>
     <li>
-      <strong>CASB / browser extension.</strong> Does anything flag a request
-      to an unfamiliar external MCP server during the initial handshake?
+      <strong>CASB / browser extension.</strong> Does anything flag a
+      connection to an unfamiliar external MCP server during the initial
+      handshake?
     </li>
   </ul>
 
@@ -116,6 +163,97 @@ const cursorConfig = `{
   <pre><code>{listExample}</code></pre>
   <pre><code>{callExample}</code></pre>
 
+  <h2>Test prompt-side DLP</h2>
+  <p>
+    Most DLP products that claim MCP coverage only inspect the
+    <em>response</em> body — the data coming back from the tool. But in a
+    real agent pipeline, sensitive content can also flow <em>outward</em> in
+    the tool-call arguments. For example, a user might paste a document
+    containing real SSNs or PHI into a prompt, and that text gets forwarded
+    verbatim as a tool argument. Two tools cover this gap:
+  </p>
+
+  <h3><code>echo_sensitive_data</code> — outbound argument inspection</h3>
+  <p>
+    Accepts any text as a <code>payload</code> argument and echoes it back
+    unchanged. The sensitive content travels in the <em>outbound</em>
+    <code>tools/call</code> request body — in the <code>arguments</code>
+    field — and again in the inbound response. A DLP product that only
+    inspects responses will miss the outbound leg entirely.
+  </p>
+  <pre><code>{echoExample}</code></pre>
+
+  <h3><code>generate_prompt_context</code> — RAG / system-prompt simulation</h3>
+  <p>
+    Generates realistic fake document excerpts with PII embedded inline as
+    prose: patient records with MRN and ICD-10 codes, ACH payment records
+    with routing numbers, personnel files with SSNs, or customer lists with
+    email addresses. This mimics how sensitive data arrives in an LLM's
+    context window via RAG retrieval, an injected system prompt, or a document
+    summarization request — not as a tabular tool response.
+  </p>
+  <pre><code>{promptContextExample}</code></pre>
+
+  <h3><code>probe_request</code> — verify interception point</h3>
+  <p>
+    Returns the User-Agent, client IP (via Cloudflare's
+    <code>CF-Connecting-IP</code> header), and timestamp seen by the server.
+    Use it to confirm that your proxy or endpoint agent is actually on the
+    network leg you expect, especially after deploying SSL inspection.
+  </p>
+  <pre><code>{probeExample}</code></pre>
+
+  <h2>Sanctioned vs unsanctioned MCP servers</h2>
+  <p>
+    A growing risk in agentic deployments is agents connecting to external MCP
+    servers that IT has never reviewed or approved. This endpoint is
+    intentionally public and unauthenticated — it represents what an
+    unsanctioned server looks like:
+  </p>
+  <ul>
+    <li>No <code>Authorization</code> header required.</li>
+    <li>Reachable from any agent, on any machine, without IT involvement.</li>
+    <li>
+      Returns a <code>tools/list</code> that advertises capabilities an org may
+      not have evaluated.
+    </li>
+  </ul>
+  <p>
+    A <em>sanctioned</em> internal MCP server, by contrast, typically requires
+    an <code>Authorization: Bearer &lt;token&gt;</code> header and is
+    reachable only from the corporate network or via VPN. The presence of an
+    auth token flowing to an <em>external</em> endpoint is itself a DLP signal
+    worth alerting on: it may mean a user's agent is authenticating to a
+    service outside the approved catalog.
+  </p>
+  <p>
+    What your CASB or network DLP should detect when an agent connects here:
+  </p>
+  <ul>
+    <li>
+      An outbound connection to <code>mcp.dlptest.com</code> (or any
+      <code>mcp.*</code> domain not in the approved list).
+    </li>
+    <li>
+      A <code>tools/list</code> response — the fingerprint of an MCP
+      handshake — arriving from an unknown host.
+    </li>
+    <li>
+      Any <code>Authorization</code> token leaving the network to an
+      unapproved destination.
+    </li>
+  </ul>
+
+  <h3>Test with a local instance</h3>
+  <p>
+    To test <em>internal</em> traffic inspection separately from internet
+    egress, clone this repo and run <code>npm run dev</code>. The MCP
+    endpoint is available at <code>http://localhost:4321/api/mcp/</code>.
+    Point your agent at the local instance and verify that your endpoint DLP
+    agent sees tool calls even when no external network hop occurs.
+  </p>
+  <pre><code>{localConfig}</code></pre>
+
   <h2>Add it to an MCP client</h2>
   <p>
     Claude Desktop, Cursor, and most other MCP-capable clients can connect
@@ -129,10 +267,11 @@ const cursorConfig = `{
 
   <h2>Available tools</h2>
   <p>
-    Each tool returns 1–500 rows of synthetic data. Accepts <code>count</code>
-    (integer 1–500, default 50) and <code>format</code> (<code>"json"</code> or
+    The data-generation tools accept <code>count</code> (integer 1–500,
+    default 50) and <code>format</code> (<code>"json"</code> or
     <code>"csv"</code>, default <code>"json"</code>).
   </p>
+  <h3>Synthetic data generation</h3>
   <ul>
     <li><code>generate_pii_ssn_ccn</code> — name + SSN + credit card</li>
     <li><code>generate_pii_ssn_dob</code> — name + SSN + date of birth</li>
@@ -154,22 +293,50 @@ const cursorConfig = `{
       EU VAT, passport, driver's license, and more).
     </li>
   </ul>
+  <h3>Prompt-side and diagnostic tools</h3>
+  <ul>
+    <li>
+      <code>echo_sensitive_data</code> — echoes a <code>payload</code> string
+      back unchanged; PII travels in the outbound request arguments.
+    </li>
+    <li>
+      <code>generate_prompt_context</code> — returns prose paragraphs with
+      inline PII, simulating RAG retrieval or system-prompt injection.
+      Scenarios: <code>medical-record</code>, <code>financial-statement</code>,
+      <code>hr-file</code>, <code>customer-list</code>.
+    </li>
+    <li>
+      <code>probe_request</code> — returns User-Agent, client IP, and
+      timestamp to confirm the interception point.
+    </li>
+  </ul>
 
   <h2>What to look for in your DLP console</h2>
   <p>
-    After running a few <code>tools/call</code>s — either from curl or from
-    a real MCP client — check whether your DLP product:
+    After running a few tool calls — either from curl or from a connected MCP
+    client — check whether your product:
   </p>
   <ul>
-    <li>Caught the synthetic SSNs, CCNs, or IBANs in the response body.</li>
+    <li>Caught synthetic SSNs, CCNs, or IBANs in the <strong>response</strong> body.</li>
     <li>
-      Logged a connection to <code>mcp.dlptest.com</code> as an outbound
-      MCP server.
+      Caught PII in the <strong>request</strong> body (tool-call arguments) —
+      use <code>echo_sensitive_data</code> to test this specifically.
     </li>
     <li>
-      Surfaced the <code>tools/list</code> response, which advertises every
-      tool name and its description (a useful keyword surface for pattern
-      scanners).
+      Saw PII arriving as prose context, not tabular data — use
+      <code>generate_prompt_context</code>.
+    </li>
+    <li>
+      Logged a connection to <code>mcp.dlptest.com</code> as an outbound MCP
+      server contact.
+    </li>
+    <li>
+      Surfaced the <code>tools/list</code> handshake, which advertises every
+      tool name and description — a keyword-rich signal for pattern scanners.
+    </li>
+    <li>
+      Flagged the initial connection to an unapproved external MCP endpoint
+      (CASB / network policy).
     </li>
   </ul>
 
