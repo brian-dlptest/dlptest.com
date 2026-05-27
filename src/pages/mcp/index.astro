@@ -1,0 +1,180 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAd from "@/components/CyberhavenAd.astro";
+export const prerender = true;
+
+const initExample = `# 1. initialize — protocol handshake
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-06-18",
+      "capabilities": {},
+      "clientInfo": { "name": "curl", "version": "0.0.1" }
+    }
+  }'`;
+
+const listExample = `# 2. tools/list — discover available tools
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'`;
+
+const callExample = `# 3. tools/call — invoke a tool
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "generate_pii_ssn_ccn",
+      "arguments": { "count": 5, "format": "csv" }
+    }
+  }'`;
+
+const claudeDesktopConfig = `{
+  "mcpServers": {
+    "dlptest": {
+      "type": "http",
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+
+const cursorConfig = `{
+  "mcpServers": {
+    "dlptest": {
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+---
+<BaseLayout
+  title="MCP Server Test"
+  description="A public MCP (Model Context Protocol) server that returns synthetic PII, PCI, and PHI data. Use it to test whether your DLP, CASB, or endpoint agent can inspect agentic tool traffic."
+>
+  <h1>MCP Server Test</h1>
+  <p>
+    <strong><code>https://mcp.dlptest.com/</code></strong> is a public
+    <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
+    server. It exposes the same synthetic PII, PCI, and PHI generators that
+    power the rest of this site, but reachable over the MCP wire protocol
+    instead of an HTML page or a REST endpoint. Point an LLM client at it
+    — Claude Desktop, Cursor, an Anthropic Agent, anything that speaks MCP
+    — and the tool calls will flow over real HTTP that your DLP can inspect.
+  </p>
+
+  <p>
+    The data is fake. Credit-card numbers are Luhn-valid, NHS numbers pass
+    the mod-11 check, ABA routing numbers have the right check digit. None of
+    it corresponds to a real person or account. As with the rest of dlptest.com,
+    nothing you send is stored, logged, or forwarded.
+  </p>
+
+  <CyberhavenAd unit="leaderboard" />
+
+  <h2>Why this exists</h2>
+  <p>
+    DLP, CASB, and endpoint vendors increasingly claim that they can inspect
+    "agentic" or "AI tool" traffic. Under the hood, the most common transport
+    for that traffic today is MCP — JSON-RPC 2.0 over HTTP, sometimes with an
+    SSE upgrade. If a product can inspect MCP, it can inspect this endpoint.
+    There are three distinct things to test:
+  </p>
+  <ul>
+    <li>
+      <strong>Network / SSL inspection.</strong> Does your proxy decrypt and
+      scan the response body of a <code>tools/call</code> that returns
+      hundreds of fake SSNs?
+    </li>
+    <li>
+      <strong>Endpoint agent.</strong> Does the agent see the tool call and
+      the data returned to the LLM, or only the final assistant message?
+    </li>
+    <li>
+      <strong>CASB / browser extension.</strong> Does anything flag a request
+      to an unfamiliar external MCP server during the initial handshake?
+    </li>
+  </ul>
+
+  <h2>Transport</h2>
+  <p>
+    The endpoint speaks the
+    <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a>
+    transport in <em>stateless</em> mode. Each request is a self-contained
+    <code>POST</code> with a JSON-RPC 2.0 body, and the response is a single
+    JSON-RPC reply. No session IDs are issued, no <code>GET</code> stream is
+    held open, and there is no authentication. Cross-origin requests are
+    allowed.
+  </p>
+
+  <h2>Try it with curl</h2>
+  <pre><code>{initExample}</code></pre>
+  <pre><code>{listExample}</code></pre>
+  <pre><code>{callExample}</code></pre>
+
+  <h2>Add it to an MCP client</h2>
+  <p>
+    Claude Desktop, Cursor, and most other MCP-capable clients can connect
+    to a remote server with a small config entry. Use whichever the client
+    expects:
+  </p>
+  <h3>Claude Desktop / Anthropic Agent</h3>
+  <pre><code>{claudeDesktopConfig}</code></pre>
+  <h3>Cursor</h3>
+  <pre><code>{cursorConfig}</code></pre>
+
+  <h2>Available tools</h2>
+  <p>
+    Each tool returns 1–500 rows of synthetic data. Accepts <code>count</code>
+    (integer 1–500, default 50) and <code>format</code> (<code>"json"</code> or
+    <code>"csv"</code>, default <code>"json"</code>).
+  </p>
+  <ul>
+    <li><code>generate_pii_ssn_ccn</code> — name + SSN + credit card</li>
+    <li><code>generate_pii_ssn_dob</code> — name + SSN + date of birth</li>
+    <li><code>generate_pci_credit_card</code> — name + ZIP + CCN + expiry</li>
+    <li><code>generate_pii_email</code> — name + DOB + email</li>
+    <li><code>generate_hipaa_phi</code> — name + DOB + MRN + ICD-10 + CPT + phone</li>
+    <li><code>generate_banking</code> — name + routing + account + phone</li>
+    <li><code>generate_uk_identity</code> — name + UK NI + NHS + DOB</li>
+    <li><code>generate_canada_sin</code> — name + Canadian SIN + province + DOB</li>
+    <li><code>generate_passport</code> — name + passport + country + DOB + expiry</li>
+    <li><code>generate_eu_vat</code> — name + EU VAT + IBAN + country</li>
+    <li><code>generate_npi_provider</code> — name + NPI + DEA + specialty</li>
+    <li><code>generate_driver_license</code> — name + DL + state + DOB</li>
+    <li>
+      <code>generate_custom</code> — arbitrary fields. Takes a <code>fields</code>
+      array of <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code>;
+      same field types as the <a href="/generate/">/generate/</a> page (SSN,
+      credit-card, DOB, email, IPv4, MRN, NPI, IBAN, UK NI, NHS, Canadian SIN,
+      EU VAT, passport, driver's license, and more).
+    </li>
+  </ul>
+
+  <h2>What to look for in your DLP console</h2>
+  <p>
+    After running a few <code>tools/call</code>s — either from curl or from
+    a real MCP client — check whether your DLP product:
+  </p>
+  <ul>
+    <li>Caught the synthetic SSNs, CCNs, or IBANs in the response body.</li>
+    <li>
+      Logged a connection to <code>mcp.dlptest.com</code> as an outbound
+      MCP server.
+    </li>
+    <li>
+      Surfaced the <code>tools/list</code> response, which advertises every
+      tool name and its description (a useful keyword surface for pattern
+      scanners).
+    </li>
+  </ul>
+
+  <p class="muted small">
+    The endpoint is also reachable at <code>https://dlptest.com/api/mcp/</code>
+    as a fallback. The subdomain is the canonical URL.
+  </p>
+</BaseLayout>

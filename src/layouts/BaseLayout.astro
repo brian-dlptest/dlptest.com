@@ -2,6 +2,7 @@
 import "@/styles/global.css";
 import SiteAnalytics from "@/components/SiteAnalytics.astro";
 import SiteHeader, { type HeaderNavItem } from "@/components/SiteHeader.astro";
+import SubscribeModal from "@/components/SubscribeModal.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { GTM_CONTAINER_ID } from "@/lib/analytics";
 import { env } from "cloudflare:workers";
@@ -32,6 +33,7 @@ const nav: Array<{ href: string; label: string }> = [
   { href: "/generate/", label: "Data Generator" },
   { href: "/http-post/", label: "HTTP POST Test" },
   { href: "/ftp-test/", label: "FTP Test" },
+  { href: "/inspect-data/", label: "Classification Test" },
   { href: "/blog/", label: "Blog" },
   { href: "/contact/", label: "Contact" },
 ];
@@ -44,6 +46,7 @@ const TOP_LEVEL_PATHS = new Set<string>([
   "/sample-data",
   "/http-post",
   "/ftp-test",
+  "/inspect-data",
   "/blog",
   "/contact",
   "/privacy-policy",
@@ -131,7 +134,10 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
           <a href="/contact/">Contact</a>
           </div>
         </div>
-        <ThemeToggle />
+        <div class="site-footer-end">
+          <SubscribeModal />
+          <ThemeToggle />
+        </div>
       </div>
     </footer>
   </body>

@@ -196,7 +196,7 @@ const maxBytes = 100 * 1024 * 1024;
     color: var(--accent);
   }
 
-  .file-queue {
+  :global(.file-queue) {
     list-style: none;
     margin: 0.75rem 0 0;
     padding: 0;
@@ -205,22 +205,22 @@ const maxBytes = 100 * 1024 * 1024;
     gap: 0.4rem;
   }
 
-  .file-queue[hidden] {
+  :global(.file-queue[hidden]) {
     display: none;
   }
 
-  .file-queue__item {
+  :global(.file-queue__item) {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.5rem 0.45rem 0.65rem;
+    gap: 0.75rem;
+    padding: 0.4rem 0.5rem 0.4rem 0.75rem;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     font-size: 0.9rem;
   }
 
-  .file-queue__name {
+  :global(.file-queue__name) {
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -228,32 +228,39 @@ const maxBytes = 100 * 1024 * 1024;
     white-space: nowrap;
   }
 
-  .file-queue__meta {
+  :global(.file-queue__meta) {
     flex-shrink: 0;
     color: var(--text-dim);
     font-size: 0.8rem;
+    margin-left: auto;
   }
 
-  .file-queue__remove {
+  :global(.file-queue__remove) {
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.5rem;
+    height: 1.5rem;
     padding: 0;
     border: none;
-    border-radius: var(--radius);
+    border-radius: 50%;
     background: transparent;
     color: var(--text-dim);
-    font-size: 1.25rem;
+    font-size: 1rem;
+    font-weight: 400;
     line-height: 1;
     cursor: pointer;
+    box-shadow: none;
+    letter-spacing: 0;
+    transition: background var(--transition-fast), color var(--transition-fast);
   }
 
-  .file-queue__remove:hover {
+  :global(.file-queue__remove:hover) {
     background: color-mix(in srgb, var(--danger) 12%, transparent);
     color: var(--danger);
+    box-shadow: none;
+    transform: none;
   }
 </style>
 

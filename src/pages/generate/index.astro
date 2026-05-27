@@ -10,7 +10,7 @@ for (const [key, def] of Object.entries(FIELD_TYPE_DEFS) as [FieldTypeKey, { lab
   if (!groups[def.group]) groups[def.group] = [];
   groups[def.group].push({ key, label: def.label });
 }
-const GROUP_ORDER = ["Basic", "US PII / PCI", "US Specialized", "International"];
+const GROUP_ORDER = ["Basic", "Network / Tech", "US PII / PCI", "US Specialized", "International"];
 
 const defaultFields: { name: string; type: FieldTypeKey }[] = [
   { name: "id",         type: "row-number" },
@@ -31,7 +31,34 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     All values are fabricated. Use a seed to reproduce the exact same dataset.
   </p>
 
-  <CyberhavenAdSlot page="sample-data-tab">
+  <CyberhavenAdSlot page="sample-data-tab" />
+
+  <!-- Preset template picker -->
+  <div class="preset-wrap">
+    <span class="preset-label">Quick Start</span>
+    <select id="preset-select" class="preset-select">
+      <option value="">— Choose a template —</option>
+      <optgroup label="US PII / PCI">
+        <option value="pii-dob-ccn">Name + DOB + Credit Card + Card Type (PII/PCI)</option>
+        <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
+        <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
+        <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
+        <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+      </optgroup>
+      <optgroup label="US Specialized">
+        <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
+        <option value="banking">Banking — Name + Routing + Account</option>
+        <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
+        <option value="driver-license">Driver's License — Name + DL + State</option>
+      </optgroup>
+      <optgroup label="International">
+        <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
+        <option value="canada-sin">Canada — Name + SIN + Province</option>
+        <option value="passport">International — Name + Passport Number</option>
+        <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+      </optgroup>
+    </select>
+  </div>
 
   <!-- Field builder table -->
   <div class="builder-wrap">
@@ -41,7 +68,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
           <th class="col-drag" aria-label="Drag to reorder"></th>
           <th class="col-name">Field Name</th>
           <th class="col-type">Type</th>
-          <th class="col-blank" colspan="2">Options</th>
+          <th class="col-options">Options</th>
+          <th class="col-blank">Blank %</th>
           <th class="col-actions"></th>
         </tr>
       </thead>
@@ -63,12 +91,31 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
                 ))}
               </select>
             </td>
-            <td class="col-blank-label">blank:</td>
-            <td class="col-blank-input">
-              <span class="blank-pct-wrap">
-                <input type="number" class="blank-pct-input" value="0" min="0" max="100" aria-label="Blank percent" />
-                <span class="pct-sign">%</span>
+            <td class="col-options">
+              <span class="delim-group">
+                <span class="option-label">delim:</span>
+                <input type="text" class="delim-input" maxlength="5" aria-label="Custom delimiter" />
+                <label class="none-label">
+                  <input type="checkbox" class="delim-none-check" aria-label="No delimiter" />
+                  none
+                </label>
               </span>
+              <div class="brand-picker" hidden>
+                <span class="brand-picker-label">brands:</span>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="Visa" checked /> Visa</label>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="Mastercard" checked /> MC</label>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="American Express" checked /> Amex</label>
+                <label class="brand-label"><input type="checkbox" class="brand-check" value="Discover" checked /> Disc</label>
+              </div>
+            </td>
+            <td class="col-blank">
+              <div class="blank-wrap">
+                <div class="blank-bar"><div class="blank-bar-fill"></div></div>
+                <div class="blank-input-row">
+                  <input type="number" class="blank-pct-input" value="0" min="0" max="100" aria-label="Blank percent" />
+                  <span class="pct-sign">%</span>
+                </div>
+              </div>
             </td>
             <td class="col-remove">
               <button type="button" class="btn-remove" aria-label="Remove field">✕</button>
@@ -97,14 +144,20 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
     <div class="generate-actions">
       <button type="submit" id="generate-btn">Generate</button>
-      <button type="button" id="download-csv-btn" class="btn-secondary">Download CSV</button>
-      <button type="button" id="download-json-btn" class="btn-secondary">Download JSON</button>
+      <div class="export-wrap" id="export-wrap">
+        <button type="button" id="export-btn" class="btn-secondary">Export ▾</button>
+        <ul class="export-menu" id="export-menu" hidden role="menu">
+          <li><button type="button" data-format="csv"  role="menuitem">CSV</button></li>
+          <li><button type="button" data-format="json" role="menuitem">JSON</button></li>
+          <li><button type="button" data-format="xlsx" role="menuitem">Excel (.xlsx)</button></li>
+          <li><button type="button" data-format="docx" role="menuitem">Word (.docx)</button></li>
+          <li><button type="button" data-format="pdf"  role="menuitem">PDF</button></li>
+        </ul>
+      </div>
     </div>
   </form>
 
   <p id="generate-status" class="muted" aria-live="polite"></p>
-
-  </CyberhavenAdSlot>
 
   <div id="generate-results" hidden>
     <p id="seed-echo" class="muted small"></p>
@@ -118,6 +171,29 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 </BaseLayout>
 
 <style>
+  /* ── Preset picker ─────────────────────────────────────────────────────────── */
+  .preset-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .preset-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .preset-select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.95rem;
+    min-width: 20rem;
+  }
+
   /* ── Builder table ─────────────────────────────────────────────────────────── */
   .builder-wrap {
     margin: 1.5rem 0 0;
@@ -138,7 +214,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   .builder-table thead th.col-drag { width: 1.5rem; }
   .builder-table thead th.col-name { width: 26%; }
   .builder-table thead th.col-type { width: 34%; }
-  .builder-table thead th.col-blank { width: 1px; white-space: nowrap; }
+  .builder-table thead th.col-options { width: 1px; white-space: nowrap; }
+  .builder-table thead th.col-blank { width: 5.5rem; white-space: nowrap; }
   .builder-table thead th.col-actions { width: 1px; }
 
   .builder-row td {
@@ -173,13 +250,69 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   }
   .field-type-select { font-family: inherit; }
 
-  .col-blank-label {
-    font-size: 0.85rem;
-    color: var(--muted, #888);
+  .col-options {
     white-space: nowrap;
     padding-right: 0.25rem;
+    vertical-align: middle;
   }
-  .blank-pct-wrap {
+  .delim-group {
+    display: none;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+  }
+  .delim-group.is-visible {
+    display: flex;
+  }
+  .option-label {
+    font-size: 0.85rem;
+    color: var(--muted, #888);
+  }
+  .delim-input {
+    width: 2.5rem;
+    padding: 0.25rem 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: monospace;
+    text-align: center;
+  }
+  .delim-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .none-label {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+    color: var(--muted, #888);
+    cursor: pointer;
+    user-select: none;
+  }
+  .blank-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .blank-bar {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .blank-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent, #7c5cbf);
+    border-radius: 2px;
+    transition: width 0.12s ease;
+  }
+  .blank-input-row {
     display: flex;
     align-items: center;
     gap: 0.2rem;
@@ -261,6 +394,65 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     cursor: wait;
   }
 
+  /* ── Brand picker ─────────────────────────────────────────────────────────── */
+  .brand-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
+  }
+  .brand-picker[hidden] { display: none; }
+  .brand-picker-label {
+    font-size: 0.82rem;
+    color: var(--muted, #888);
+    margin-right: 0.1rem;
+  }
+  .brand-label {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .brand-label input[type="checkbox"] { cursor: pointer; }
+
+  .export-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .export-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0;
+    min-width: 10rem;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .export-menu li button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.4rem 0.85rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 0.92rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .export-menu li button:hover {
+    background: var(--bg);
+  }
+
   .table-scroll { overflow-x: auto; }
 
   :global(.copy-col) {
@@ -307,12 +499,19 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "gender":          "gender",
     "email":           "email",
     "ip-v4":           "ip_address",
-    "ssn":             "ssn",
-    "credit-card":     "credit_card_number",
-    "dob":             "date_of_birth",
-    "phone":           "phone",
-    "zip":             "zip_code",
-    "card-expiry":     "card_expiry",
+    "ip-v6":           "ipv6_address",
+    "mac-address":     "mac_address",
+    "crypto-wallet":   "bitcoin_wallet",
+    "aws-access-key":  "aws_access_key_id",
+    "api-key":         "api_key",
+    "ssn":              "ssn",
+    "credit-card":      "credit_card_number",
+    "credit-card-type": "card_type",
+    "bank-name":        "bank_name",
+    "dob":              "date_of_birth",
+    "phone":            "phone",
+    "zip":              "zip_code",
+    "card-expiry":      "card_expiry",
     "mrn":             "mrn",
     "icd10":           "icd10_code",
     "cpt":             "cpt_code",
@@ -331,7 +530,135 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "country":         "country",
     "eu-vat":          "eu_vat_number",
     "iban":            "iban",
+    "france-insee":    "insee_number",
+    "germany-tax-id":  "germany_tax_id",
+    "japan-my-number": "my_number",
   };
+
+  // ── Preset templates ────────────────────────────────────────────────────────
+
+  type PresetField = { type: string; name: string };
+  const PRESETS: Record<string, PresetField[]> = {
+    "pii-dob-ccn": [
+      { type: "full-name",       name: "full_name"          },
+      { type: "dob",             name: "date_of_birth"      },
+      { type: "credit-card",     name: "credit_card_number" },
+      { type: "credit-card-type", name: "card_type"         },
+    ],
+    "pii-ssn-ccn": [
+      { type: "first-name",  name: "first_name" },
+      { type: "last-name",   name: "last_name" },
+      { type: "ssn",         name: "ssn" },
+      { type: "credit-card", name: "credit_card_number" },
+    ],
+    "pii-ssn-dob": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "ssn",        name: "ssn" },
+      { type: "dob",        name: "date_of_birth" },
+    ],
+    "pci-ccn-zip": [
+      { type: "first-name",  name: "first_name" },
+      { type: "last-name",   name: "last_name" },
+      { type: "credit-card", name: "credit_card_number" },
+      { type: "zip",         name: "zip_code" },
+      { type: "card-expiry", name: "card_expiry" },
+    ],
+    "pii-dob-email": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "dob",        name: "date_of_birth" },
+      { type: "email",      name: "email" },
+    ],
+    "hipaa": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "dob",        name: "date_of_birth" },
+      { type: "mrn",        name: "mrn" },
+      { type: "icd10",      name: "icd10_code" },
+      { type: "cpt",        name: "cpt_code" },
+      { type: "phone",      name: "phone" },
+    ],
+    "banking": [
+      { type: "first-name",      name: "first_name" },
+      { type: "last-name",       name: "last_name" },
+      { type: "routing-number",  name: "routing_number" },
+      { type: "account-number",  name: "account_number" },
+      { type: "phone",           name: "phone" },
+    ],
+    "npi-provider": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "npi",        name: "npi" },
+      { type: "dea-number", name: "dea_number" },
+      { type: "specialty",  name: "specialty" },
+    ],
+    "driver-license": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "dl-number",  name: "dl_number" },
+      { type: "us-state",   name: "state" },
+      { type: "dob",        name: "date_of_birth" },
+    ],
+    "uk-identity": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "uk-nin",     name: "uk_nin" },
+      { type: "nhs-number", name: "nhs_number" },
+      { type: "dob",        name: "date_of_birth" },
+    ],
+    "canada-sin": [
+      { type: "first-name",      name: "first_name" },
+      { type: "last-name",       name: "last_name" },
+      { type: "canada-sin",      name: "sin" },
+      { type: "canada-province", name: "province" },
+      { type: "dob",             name: "date_of_birth" },
+    ],
+    "passport": [
+      { type: "first-name",      name: "first_name" },
+      { type: "last-name",       name: "last_name" },
+      { type: "passport-number", name: "passport_number" },
+      { type: "country",         name: "country" },
+      { type: "dob",             name: "date_of_birth" },
+      { type: "card-expiry",     name: "expiry" },
+    ],
+    "eu-vat": [
+      { type: "full-name", name: "full_name" },
+      { type: "eu-vat",   name: "eu_vat_number" },
+      { type: "iban",     name: "iban" },
+      { type: "country",  name: "country" },
+    ],
+  };
+
+  function applyPreset(fields: PresetField[]) {
+    const rows = getRows();
+    // Update the first row in-place (preserves Astro's scoped CSS attribute)
+    const firstRow = rows[0];
+    const firstTypeSelect = firstRow.querySelector<HTMLSelectElement>(".field-type-select")!;
+    firstTypeSelect.value = fields[0].type;
+    firstTypeSelect.dispatchEvent(new Event("change")); // syncs delimiter + brand picker
+    firstRow.querySelector<HTMLInputElement>(".field-name-input")!.value = fields[0].name;
+    firstRow.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+    // Remove all rows after the first
+    rows.slice(1).forEach((r) => r.remove());
+    // Append remaining preset fields as new rows
+    for (const field of fields.slice(1)) {
+      tbody.appendChild(makeRow(field.type, field.name));
+    }
+    enforceRemoveButtons();
+    lastResult = null;
+  }
+
+  const presetSelect = document.getElementById("preset-select") as HTMLSelectElement;
+  presetSelect.addEventListener("change", () => {
+    const val = presetSelect.value;
+    if (!val) return;
+    const preset = PRESETS[val];
+    if (preset) applyPreset(preset);
+  });
+
+  // Field types that show the brand picker in the Options column
+  const BRAND_PICKER_TYPES = new Set(["credit-card", "credit-card-type"]);
 
   // Columns rendered in <code> tags in the results table
   const CODE_COLUMNS = new Set([
@@ -356,11 +683,27 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const count = Math.max(1, Math.min(500, parseInt(countInput.value, 10) || 50));
     const rawSeed = seedInput.value.trim();
     const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
-    const fields = getRows().map((row) => ({
-      name:     (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
-      type:      row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
-      blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
-    }));
+    const fields = getRows().map((row) => {
+      const type       = row.querySelector<HTMLSelectElement>(".field-type-select")!.value;
+      const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
+      const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
+      const brandPicker = row.querySelector<HTMLElement>(".brand-picker");
+      const cardBrands = brandPicker && !brandPicker.hidden
+        ? Array.from(row.querySelectorAll<HTMLInputElement>(".brand-check:checked")).map((cb) => cb.value)
+        : undefined;
+      const fieldObj: Record<string, unknown> = {
+        name:     row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field",
+        type,
+        blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
+      };
+      if (noneCheck.checked) {
+        fieldObj["delimiter"] = "";
+      } else if (delimInput.value) {
+        fieldObj["delimiter"] = delimInput.value;
+      }
+      if (cardBrands && cardBrands.length > 0) fieldObj["cardBrands"] = cardBrands;
+      return fieldObj;
+    });
     const payload: Record<string, unknown> = { fields, count };
     if (seed !== undefined && !isNaN(seed)) payload["seed"] = seed;
     return payload;
@@ -382,11 +725,13 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     return result;
   }
 
-  function setDownloadBtnLoading(btn: HTMLButtonElement, loading: boolean) {
-    btn.disabled = loading;
-  }
-
   // ── Builder DOM helpers ──────────────────────────────────────────────────────
+
+  const DELIM_DEFAULTS: Record<string, string> = {
+    "ssn": "-", "credit-card": "-", "dob": "/", "phone": "",
+    "card-expiry": "/", "mrn": "-", "uk-nin": " ", "nhs-number": " ", "canada-sin": "-",
+    "mac-address": ":", "france-insee": " ",
+  };
 
   const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
   const addFieldBtn = document.getElementById("add-field-btn") as HTMLButtonElement;
@@ -412,6 +757,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     tr.querySelector<HTMLInputElement>(".field-name-input")!.value = name ?? DEFAULT_NAMES[type] ?? type;
     tr.querySelector<HTMLSelectElement>(".field-type-select")!.value = type;
     tr.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+    tr.querySelector<HTMLDivElement>(".blank-bar-fill")!.style.width = "0%";
+    tr.querySelector<HTMLInputElement>(".delim-input")!.value = "";
+    (tr.querySelector<HTMLInputElement>(".delim-none-check")!).checked = false;
+    (tr.querySelector<HTMLInputElement>(".delim-none-check")!).disabled = false;
+    tr.querySelector<HTMLSpanElement>(".delim-group")!.classList.remove("is-visible");
+    tr.querySelectorAll<HTMLInputElement>(".brand-check").forEach((cb) => { cb.checked = true; });
 
     wireRow(tr);
     return tr;
@@ -428,13 +779,66 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     });
 
     const typeSelect = tr.querySelector<HTMLSelectElement>(".field-type-select")!;
-    const nameInput = tr.querySelector<HTMLInputElement>(".field-name-input")!;
+    const nameInput  = tr.querySelector<HTMLInputElement>(".field-name-input")!;
+    const delimGroup = tr.querySelector<HTMLSpanElement>(".delim-group")!;
+    const delimInput = tr.querySelector<HTMLInputElement>(".delim-input")!;
+    const noneCheck  = tr.querySelector<HTMLInputElement>(".delim-none-check")!;
+    const blankInput = tr.querySelector<HTMLInputElement>(".blank-pct-input")!;
+    const barFill    = tr.querySelector<HTMLDivElement>(".blank-bar-fill")!;
+    const brandPicker = tr.querySelector<HTMLElement>(".brand-picker")!;
+
+    function updateBar() {
+      const pct = Math.max(0, Math.min(100, parseFloat(blankInput.value) || 0));
+      barFill.style.width = `${pct}%`;
+    }
+    blankInput.addEventListener("input", updateBar);
+    updateBar();
+
+    function updateDelimVisibility() {
+      const type = typeSelect.value;
+      const isDelimType = Object.prototype.hasOwnProperty.call(DELIM_DEFAULTS, type);
+      delimGroup.classList.toggle("is-visible", isDelimType);
+      if (isDelimType) {
+        const def = DELIM_DEFAULTS[type];
+        if (def === " ") {
+          delimInput.placeholder = "(space)";
+        } else if (def === "") {
+          delimInput.placeholder = "e.g. -";
+        } else {
+          delimInput.placeholder = def;
+        }
+      } else {
+        delimInput.value = "";
+        noneCheck.checked = false;
+        delimInput.disabled = false;
+      }
+    }
+
+    function syncBrandPicker() {
+      brandPicker.hidden = !BRAND_PICKER_TYPES.has(typeSelect.value);
+    }
+
+    noneCheck.addEventListener("change", () => {
+      if (noneCheck.checked) {
+        delimInput.value = "";
+        delimInput.disabled = true;
+      } else {
+        delimInput.disabled = false;
+      }
+      lastResult = null;
+    });
+
     typeSelect.addEventListener("change", () => {
       const suggested = DEFAULT_NAMES[typeSelect.value];
       // Only auto-fill if the name still matches a known default (user hasn't customised it)
       const currentIsDefault = Object.values(DEFAULT_NAMES).includes(nameInput.value);
       if (suggested && currentIsDefault) nameInput.value = suggested;
+      updateDelimVisibility();
+      syncBrandPicker();
     });
+
+    updateDelimVisibility();
+    syncBrandPicker();
 
     // Drag-and-drop
     tr.addEventListener("dragstart", onDragStart);
@@ -508,8 +912,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   const resultsThead = document.getElementById("results-head") as HTMLTableSectionElement;
   const resultsTbody = document.getElementById("results-body") as HTMLTableSectionElement;
   const seedEcho = document.getElementById("seed-echo") as HTMLParagraphElement;
-  const csvBtn = document.getElementById("download-csv-btn") as HTMLButtonElement;
-  const jsonBtn = document.getElementById("download-json-btn") as HTMLButtonElement;
+  const exportBtn = document.getElementById("export-btn") as HTMLButtonElement;
+  const exportMenu = document.getElementById("export-menu") as HTMLUListElement;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -518,11 +922,27 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const rawSeed = (formData.get("seed") as string).trim();
     const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
 
-    const fields = getRows().map((row) => ({
-      name: (row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field"),
-      type: row.querySelector<HTMLSelectElement>(".field-type-select")!.value,
-      blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
-    }));
+    const fields = getRows().map((row) => {
+      const type       = row.querySelector<HTMLSelectElement>(".field-type-select")!.value;
+      const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
+      const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
+      const brandPicker = row.querySelector<HTMLElement>(".brand-picker");
+      const cardBrands = brandPicker && !brandPicker.hidden
+        ? Array.from(row.querySelectorAll<HTMLInputElement>(".brand-check:checked")).map((cb) => cb.value)
+        : undefined;
+      const fieldObj: Record<string, unknown> = {
+        name:     row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field",
+        type,
+        blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
+      };
+      if (noneCheck.checked) {
+        fieldObj["delimiter"] = "";
+      } else if (delimInput.value) {
+        fieldObj["delimiter"] = delimInput.value;
+      }
+      if (cardBrands && cardBrands.length > 0) fieldObj["cardBrands"] = cardBrands;
+      return fieldObj;
+    });
 
     generateBtn.disabled = true;
     statusEl.textContent = "Generating…";
@@ -549,8 +969,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       renderTable(result);
       seedEcho.textContent = `Generated with seed ${result.seed} — paste this seed to reproduce the exact dataset.`;
       resultsDiv.hidden = false;
-      csvBtn.hidden = false;
-      jsonBtn.hidden = false;
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
@@ -619,13 +1037,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         }
         tr.appendChild(td);
       }
-      const copyTd = document.createElement("td");
-      copyTd.className = "copy-col";
-      copyTd.appendChild(makeCopyBtn("Copy", () =>
-        [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
-          .map((c) => c.textContent?.trim() ?? "").join("\t")
-      ));
-      tr.appendChild(copyTd);
       resultsTbody.appendChild(tr);
     }
   }
@@ -642,7 +1053,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     return `${header}\n${body}`;
   }
 
-  function downloadBlob(content: string, filename: string, mime: string) {
+  function downloadBlob(content: string | ArrayBuffer, filename: string, mime: string) {
     const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -652,47 +1063,105 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     URL.revokeObjectURL(url);
   }
 
-  csvBtn.addEventListener("click", async () => {
-    if (lastResult) {
-      downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
-      return;
-    }
-    setDownloadBtnLoading(csvBtn, true);
-    statusEl.textContent = "Generating…";
-    try {
-      const result = await fetchCurrentData();
-      downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
-      statusEl.textContent = "";
-    } catch (err) {
-      statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
-    } finally {
-      setDownloadBtnLoading(csvBtn, false);
+  // ── Export dropdown ──────────────────────────────────────────────────────────
+
+  exportBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    exportMenu.hidden = !exportMenu.hidden;
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!exportMenu.hidden && !exportMenu.contains(e.target as Node)) {
+      exportMenu.hidden = true;
     }
   });
 
-  jsonBtn.addEventListener("click", async () => {
-    if (lastResult) {
-      downloadBlob(
-        JSON.stringify(lastResult.rows, null, 2),
-        `dlptest-custom-seed${lastResult.seed}.json`,
-        "application/json"
-      );
+  exportMenu.addEventListener("click", async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-format]");
+    if (!btn) return;
+    const format = btn.dataset["format"]!;
+    exportMenu.hidden = true;
+
+    // CSV and JSON: generate client-side when data is already cached
+    if (format === "csv") {
+      if (lastResult) {
+        downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
+        return;
+      }
+      exportBtn.disabled = true;
+      statusEl.textContent = "Generating…";
+      try {
+        const result = await fetchCurrentData();
+        downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
+        statusEl.textContent = "";
+      } catch (err) {
+        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      } finally {
+        exportBtn.disabled = false;
+      }
       return;
     }
-    setDownloadBtnLoading(jsonBtn, true);
+
+    if (format === "json") {
+      if (lastResult) {
+        downloadBlob(
+          JSON.stringify(lastResult.rows, null, 2),
+          `dlptest-custom-seed${lastResult.seed}.json`,
+          "application/json"
+        );
+        return;
+      }
+      exportBtn.disabled = true;
+      statusEl.textContent = "Generating…";
+      try {
+        const result = await fetchCurrentData();
+        downloadBlob(
+          JSON.stringify(result.rows, null, 2),
+          `dlptest-custom-seed${result.seed}.json`,
+          "application/json"
+        );
+        statusEl.textContent = "";
+      } catch (err) {
+        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      } finally {
+        exportBtn.disabled = false;
+      }
+      return;
+    }
+
+    // XLSX, DOCX, PDF: server-side generation
+    exportBtn.disabled = true;
     statusEl.textContent = "Generating…";
     try {
-      const result = await fetchCurrentData();
-      downloadBlob(
-        JSON.stringify(result.rows, null, 2),
-        `dlptest-custom-seed${result.seed}.json`,
-        "application/json"
-      );
+      const payload = collectFieldsPayload();
+      // Use cached seed so the download matches what's shown in the table
+      if (lastResult) payload["seed"] = lastResult.seed;
+      payload["format"] = format;
+
+      const res = await fetch("/api/generate-custom/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
+        statusEl.textContent = `Download failed: ${String(err["error"] ?? res.statusText)}`;
+        return;
+      }
+      const seed = lastResult?.seed ?? "";
+      const ext = format;
+      const buf = await res.arrayBuffer();
+      const mimeMap: Record<string, string> = {
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        pdf:  "application/pdf",
+      };
+      downloadBlob(buf, `dlptest-custom-seed${seed}.${ext}`, mimeMap[format]!);
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
     } finally {
-      setDownloadBtnLoading(jsonBtn, false);
+      exportBtn.disabled = false;
     }
   });
 </script>

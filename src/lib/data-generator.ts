@@ -113,6 +113,17 @@ const UK_NIN_SECOND_LETTERS = [
 
 const DEA_FIRST_LETTERS = ["B", "D", "F", "M", "P", "R"] as const;
 
+const BANK_NAMES = [
+  "JPMorgan Chase", "Bank of America", "Wells Fargo", "Citibank",
+  "U.S. Bank", "PNC Bank", "Goldman Sachs", "TD Bank", "Capital One",
+  "Truist Bank", "Citizens Bank", "Fifth Third Bank", "KeyBank",
+  "Regions Bank", "Huntington National Bank", "BMO Harris Bank",
+  "M&T Bank", "Ally Bank", "Santander Bank", "First National Bank",
+] as const;
+
+const CARD_TYPES = ["Visa", "Mastercard", "American Express", "Discover"] as const;
+export type CardTypeName = typeof CARD_TYPES[number];
+
 // ─── PRNG ─────────────────────────────────────────────────────────────────────
 
 function mulberry32(seed: number): () => number {
@@ -152,14 +163,14 @@ function generateName(rng: ScopedRandom): { first: string; last: string; full: s
   return { first, last, full: `${first} ${last}` };
 }
 
-function generateSSN(rng: ScopedRandom): string {
+function generateSSN(rng: ScopedRandom, delim = "-"): string {
   let area: number;
   do {
     area = rng.int(1, 899);
   } while (area === 666);
   const group = rng.int(1, 99);
   const serial = rng.int(1, 9999);
-  return `${area.toString().padStart(3, "0")}-${group.toString().padStart(2, "0")}-${serial.toString().padStart(4, "0")}`;
+  return `${area.toString().padStart(3, "0")}${delim}${group.toString().padStart(2, "0")}${delim}${serial.toString().padStart(4, "0")}`;
 }
 
 function luhnCheckDigit(digits: number[]): number {
@@ -177,21 +188,22 @@ function luhnCheckDigit(digits: number[]): number {
   return (10 - (sum % 10)) % 10;
 }
 
-function generateCreditCard(rng: ScopedRandom): string {
-  const type = rng.int(0, 3); // 0=Visa, 1=MC, 2=AMEX, 3=Discover
+function generateCreditCard(rng: ScopedRandom, cardType?: CardTypeName, delim = "-"): string {
+  const resolved = cardType ?? rng.pick(CARD_TYPES);
   let prefix: number[];
   let length: number;
 
-  if (type === 0) {
+  if (resolved === "Visa") {
     prefix = [4];
     length = 16;
-  } else if (type === 1) {
+  } else if (resolved === "Mastercard") {
     prefix = [5, rng.int(1, 5)];
     length = 16;
-  } else if (type === 2) {
+  } else if (resolved === "American Express") {
     prefix = [3, rng.pick([4, 7] as const)];
     length = 15;
   } else {
+    // Discover
     prefix = [6, 0, 1, 1];
     length = 16;
   }
@@ -203,17 +215,17 @@ function generateCreditCard(rng: ScopedRandom): string {
   digits.push(luhnCheckDigit(digits));
 
   if (length === 15) {
-    return `${digits.slice(0, 4).join("")}-${digits.slice(4, 10).join("")}-${digits.slice(10).join("")}`;
+    return `${digits.slice(0, 4).join("")}${delim}${digits.slice(4, 10).join("")}${delim}${digits.slice(10).join("")}`;
   }
-  return `${digits.slice(0, 4).join("")}-${digits.slice(4, 8).join("")}-${digits.slice(8, 12).join("")}-${digits.slice(12).join("")}`;
+  return `${digits.slice(0, 4).join("")}${delim}${digits.slice(4, 8).join("")}${delim}${digits.slice(8, 12).join("")}${delim}${digits.slice(12).join("")}`;
 }
 
-function generateDOB(rng: ScopedRandom): string {
+function generateDOB(rng: ScopedRandom, delim = "/"): string {
   const year = rng.int(new Date().getFullYear() - 80, new Date().getFullYear() - 21);
   const month = rng.int(1, 12);
   const maxDay = new Date(year, month, 0).getDate();
   const day = rng.int(1, maxDay);
-  return `${month}/${day}/${year}`;
+  return `${month}${delim}${day}${delim}${year}`;
 }
 
 function generateEmail(rng: ScopedRandom, first: string, last: string): string {
@@ -227,10 +239,13 @@ function generateEmail(rng: ScopedRandom, first: string, last: string): string {
   return `${local}@${domain}`;
 }
 
-function generatePhone(rng: ScopedRandom): string {
+function generatePhone(rng: ScopedRandom, delim?: string): string {
   const area = rng.int(200, 999);
   const exchange = rng.int(200, 999);
   const line = rng.int(1000, 9999);
+  if (delim !== undefined) {
+    return `${area}${delim}${exchange}${delim}${line}`;
+  }
   return `(${area}) ${exchange}-${line}`;
 }
 
@@ -238,15 +253,15 @@ function generateZip(rng: ScopedRandom): string {
   return rng.pick(ZIP_CODES);
 }
 
-function generateCardExpiry(rng: ScopedRandom): string {
+function generateCardExpiry(rng: ScopedRandom, delim = "/"): string {
   const year = new Date().getFullYear() + rng.int(1, 4);
   const month = rng.int(1, 12);
-  return `${month}/${year}`;
+  return `${month}${delim}${year}`;
 }
 
-function generateMRN(rng: ScopedRandom): string {
+function generateMRN(rng: ScopedRandom, delim = "-"): string {
   const num = Array.from({ length: 8 }, () => rng.int(0, 9)).join("");
-  return `MRN-${num}`;
+  return `MRN${delim}${num}`;
 }
 
 function generateICD10(rng: ScopedRandom): string {
@@ -273,17 +288,17 @@ function generateAccountNumber(rng: ScopedRandom): string {
   return Array.from({ length: len }, () => rng.int(0, 9)).join("");
 }
 
-function generateUKNIN(rng: ScopedRandom): string {
+function generateUKNIN(rng: ScopedRandom, delim = " "): string {
   const l1 = rng.pick(UK_NIN_FIRST_LETTERS);
   const l2 = rng.pick(UK_NIN_SECOND_LETTERS);
   const d1 = rng.int(10, 99).toString().padStart(2, "0");
   const d2 = rng.int(10, 99).toString().padStart(2, "0");
   const d3 = rng.int(10, 99).toString().padStart(2, "0");
   const suffix = rng.pick(["A", "B", "C", "D"] as const);
-  return `${l1}${l2} ${d1} ${d2} ${d3} ${suffix}`;
+  return `${l1}${l2}${delim}${d1}${delim}${d2}${delim}${d3}${delim}${suffix}`;
 }
 
-function generateNHSNumber(rng: ScopedRandom): string {
+function generateNHSNumber(rng: ScopedRandom, delim = " "): string {
   // Generate 9 digits then compute modulus-11 check digit
   let digits: number[];
   let check: number;
@@ -294,10 +309,10 @@ function generateNHSNumber(rng: ScopedRandom): string {
     check = 11 - (sum % 11);
   } while (check === 11 || check === 10); // 10 = invalid, 11 = use 0
   const all = [...digits, check === 11 ? 0 : check];
-  return `${all.slice(0, 3).join("")} ${all.slice(3, 6).join("")} ${all.slice(6).join("")}`;
+  return `${all.slice(0, 3).join("")}${delim}${all.slice(3, 6).join("")}${delim}${all.slice(6).join("")}`;
 }
 
-function generateCanadianSIN(rng: ScopedRandom): string {
+function generateCanadianSIN(rng: ScopedRandom, delim = "-"): string {
   // First digit 1-8; 9-prefix reserved for temporary residents
   let digits: number[];
   let check: number;
@@ -306,7 +321,7 @@ function generateCanadianSIN(rng: ScopedRandom): string {
     check = luhnCheckDigit(digits);
   } while (check < 0);
   const all = [...digits, check];
-  return `${all.slice(0, 3).join("")}-${all.slice(3, 6).join("")}-${all.slice(6).join("")}`;
+  return `${all.slice(0, 3).join("")}${delim}${all.slice(3, 6).join("")}${delim}${all.slice(6).join("")}`;
 }
 
 function generatePassportNumber(rng: ScopedRandom): string {
@@ -662,15 +677,40 @@ export function generateDataset(options: GenerateOptions): GenerateResult {
   return { rows, columns: COLUMNS[dataset], dataset, seed, count };
 }
 
-function csvEscape(value: string): string {
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
-    return `"${value.replace(/"/g, '""')}"`;
+// Characters that Excel / Google Sheets / LibreOffice Calc interpret as the
+// start of a formula when they appear as the first character of a cell. A
+// field name like `=cmd|'/c calc'!A1` would otherwise execute on open.
+// OWASP CSV Injection Prevention Cheat Sheet:
+// https://cheatsheetseries.owasp.org/cheatsheets/CSV_Injection_Prevention_Cheat_Sheet.html
+const FORMULA_PREFIX_CHARS = new Set(["=", "+", "-", "@", "\t", "\r"]);
+
+/**
+ * Prefix a single quote onto any value whose first character would be
+ * interpreted as a formula by a spreadsheet app. The single quote is the
+ * standard literal-string escape and is hidden from the user when the sheet
+ * is rendered. Applied to both header cells and body cells before they
+ * reach the CSV / xlsx output.
+ */
+export function sanitizeForSpreadsheet(value: string): string {
+  if (value.length > 0 && FORMULA_PREFIX_CHARS.has(value[0]!)) {
+    return `'${value}`;
   }
   return value;
 }
 
+function csvEscape(value: string): string {
+  const safe = sanitizeForSpreadsheet(value);
+  if (safe.includes(",") || safe.includes('"') || safe.includes("\n")) {
+    return `"${safe.replace(/"/g, '""')}"`;
+  }
+  return safe;
+}
+
 export function rowsToCsv(result: GenerateResult): string {
-  const header = result.columns.join(",");
+  // Escape headers as well as body cells — a field name like `a,b` or one
+  // containing a newline would otherwise corrupt the CSV structure, and a
+  // name starting with `=` would be a formula in Excel.
+  const header = result.columns.map(csvEscape).join(",");
   const rowKeys = Object.keys(result.rows[0] ?? {});
   const body = result.rows
     .map((row) =>
@@ -721,20 +761,116 @@ function generateIBANStandalone(rng: ScopedRandom): string {
   return generateIBAN(rng, country.code);
 }
 
+function generateCardType(rng: ScopedRandom): string {
+  return rng.pick(CARD_TYPES);
+}
+
+function generateBankName(rng: ScopedRandom): string {
+  return rng.pick(BANK_NAMES);
+}
+
+// ─── Network / Tech generators ───────────────────────────────────────────────
+
+function generateIPv6(rng: ScopedRandom): string {
+  return Array.from({ length: 8 }, () =>
+    rng.int(0, 0xffff).toString(16).padStart(4, "0")
+  ).join(":");
+}
+
+function generateMACAddress(rng: ScopedRandom, delim = ":"): string {
+  const octets = Array.from({ length: 6 }, () =>
+    rng.int(0, 255).toString(16).padStart(2, "0").toUpperCase()
+  );
+  if (delim === ".") {
+    // Cisco style: AAAA.BBBB.CCCC
+    return [
+      octets.slice(0, 2).join(""),
+      octets.slice(2, 4).join(""),
+      octets.slice(4, 6).join(""),
+    ].join(".");
+  }
+  return octets.join(delim);
+}
+
+const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+function generateBitcoinWallet(rng: ScopedRandom): string {
+  const length = rng.int(24, 33);
+  const body = Array.from({ length }, () => BASE58_ALPHABET[rng.int(0, 57)]).join("");
+  return "1" + body;
+}
+
+const AWS_KEY_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+function generateAWSAccessKey(rng: ScopedRandom): string {
+  const suffix = Array.from({ length: 16 }, () =>
+    AWS_KEY_CHARS[rng.int(0, AWS_KEY_CHARS.length - 1)]
+  ).join("");
+  return "AKIA" + suffix;
+}
+
+function generateAPIKey(rng: ScopedRandom): string {
+  return Array.from({ length: 32 }, () => rng.int(0, 15).toString(16)).join("");
+}
+
+// ─── Multi-language PII generators ───────────────────────────────────────────
+
+function generateFranceINSEE(rng: ScopedRandom, delim = " "): string {
+  const sex = rng.int(1, 2);
+  const year = rng.int(0, 99).toString().padStart(2, "0");
+  const month = rng.int(1, 12).toString().padStart(2, "0");
+  // Departments 01–95; skip 20 (split into 2A/2B Corsica) for numeric simplicity
+  const dept = rng.int(1, 95).toString().padStart(2, "0");
+  const commune = rng.int(1, 999).toString().padStart(3, "0");
+  const order = rng.int(1, 999).toString().padStart(3, "0");
+  const base13 = `${sex}${year}${month}${dept}${commune}${order}`;
+  const key = (97 - (parseInt(base13, 10) % 97)).toString().padStart(2, "0");
+  return `${sex}${delim}${year}${delim}${month}${delim}${dept}${delim}${commune}${delim}${order}${delim}${key}`;
+}
+
+function generateGermanyTaxID(rng: ScopedRandom): string {
+  // Steueridentifikationsnummer: 11 digits, first digit 1–9
+  const digits: number[] = [rng.int(1, 9)];
+  for (let i = 1; i < 10; i++) digits.push(rng.int(0, 9));
+  // Check digit via ISO/IEC 7064 MOD 11,10 variant
+  let product = 10;
+  for (const d of digits) {
+    let sum = (d + product) % 10;
+    if (sum === 0) sum = 10;
+    product = (sum * 2) % 11;
+  }
+  const check = (11 - product) % 10;
+  return digits.join("") + check;
+}
+
+const MY_NUMBER_WEIGHTS = [6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2] as const;
+function generateJapanMyNumber(rng: ScopedRandom): string {
+  const digits = Array.from({ length: 11 }, () => rng.int(0, 9));
+  const sum = digits.reduce((acc, d, i) => acc + d * MY_NUMBER_WEIGHTS[i], 0);
+  const remainder = sum % 11;
+  const check = remainder <= 1 ? 0 : 11 - remainder;
+  return digits.join("") + check;
+}
+
 // ─── Custom field types ───────────────────────────────────────────────────────
 
 export type FieldTypeKey =
   | "row-number" | "first-name" | "last-name" | "full-name" | "gender" | "email" | "ip-v4"
-  | "ssn" | "credit-card" | "dob" | "phone" | "zip" | "card-expiry"
+  | "ip-v6" | "mac-address" | "crypto-wallet" | "aws-access-key" | "api-key"
+  | "ssn" | "credit-card" | "credit-card-type" | "bank-name"
+  | "dob" | "phone" | "zip" | "card-expiry"
   | "mrn" | "icd10" | "cpt" | "routing-number" | "account-number" | "npi" | "dea-number"
   | "specialty" | "us-state" | "dl-number"
   | "uk-nin" | "nhs-number" | "canada-sin" | "canada-province" | "passport-number"
-  | "country" | "eu-vat" | "iban";
+  | "country" | "eu-vat" | "iban"
+  | "france-insee" | "germany-tax-id" | "japan-my-number";
+
+export interface CustomFieldOptions {
+  cardBrands?: CardTypeName[];
+}
 
 interface FieldTypeDef {
   label: string;
   group: string;
-  generate: (rng: ScopedRandom, rowIndex: number) => string;
+  generate: (rng: ScopedRandom, rowIndex: number, options?: CustomFieldOptions) => string;
 }
 
 export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
@@ -745,12 +881,25 @@ export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
   "gender":          { label: "Gender",                  group: "Basic",          generate: (rng)  => generateGender(rng) },
   "email":           { label: "Email Address",           group: "Basic",          generate: (rng)  => generateEmailStandalone(rng) },
   "ip-v4":           { label: "IP Address v4",           group: "Basic",          generate: (rng)  => generateIPv4(rng) },
-  "ssn":             { label: "SSN",                     group: "US PII / PCI",   generate: (rng)  => generateSSN(rng) },
-  "credit-card":     { label: "Credit Card Number",      group: "US PII / PCI",   generate: (rng)  => generateCreditCard(rng) },
-  "dob":             { label: "Date of Birth",           group: "US PII / PCI",   generate: (rng)  => generateDOB(rng) },
-  "phone":           { label: "Phone Number",            group: "US PII / PCI",   generate: (rng)  => generatePhone(rng) },
-  "zip":             { label: "ZIP Code",                group: "US PII / PCI",   generate: (rng)  => generateZip(rng) },
-  "card-expiry":     { label: "Card Expiry",             group: "US PII / PCI",   generate: (rng)  => generateCardExpiry(rng) },
+  "ip-v6":           { label: "IPv6 Address",            group: "Network / Tech", generate: (rng)  => generateIPv6(rng) },
+  "mac-address":     { label: "MAC Address",             group: "Network / Tech", generate: (rng)  => generateMACAddress(rng) },
+  "crypto-wallet":   { label: "Bitcoin Wallet",          group: "Network / Tech", generate: (rng)  => generateBitcoinWallet(rng) },
+  "aws-access-key":  { label: "AWS Access Key ID",       group: "Network / Tech", generate: (rng)  => generateAWSAccessKey(rng) },
+  "api-key":         { label: "API Key / Secret",        group: "Network / Tech", generate: (rng)  => generateAPIKey(rng) },
+  "ssn":             { label: "SSN",                group: "US PII / PCI", generate: (rng)        => generateSSN(rng) },
+  "credit-card":     { label: "Credit Card Number", group: "US PII / PCI", generate: (rng, _, opts) => {
+    const brands = opts?.cardBrands;
+    return generateCreditCard(rng, brands && brands.length > 0 ? rng.pick(brands) : undefined);
+  }},
+  "credit-card-type": { label: "Credit Card Type",  group: "US PII / PCI", generate: (rng, _, opts) => {
+    const brands = opts?.cardBrands;
+    return brands && brands.length > 0 ? rng.pick(brands) : generateCardType(rng);
+  }},
+  "bank-name":       { label: "Bank Name",          group: "US PII / PCI", generate: (rng)        => generateBankName(rng) },
+  "dob":             { label: "Date of Birth",       group: "US PII / PCI", generate: (rng)        => generateDOB(rng) },
+  "phone":           { label: "Phone Number",        group: "US PII / PCI", generate: (rng)        => generatePhone(rng) },
+  "zip":             { label: "ZIP Code",            group: "US PII / PCI", generate: (rng)        => generateZip(rng) },
+  "card-expiry":     { label: "Card Expiry",         group: "US PII / PCI", generate: (rng)        => generateCardExpiry(rng) },
   "mrn":             { label: "Medical Record Number",   group: "US Specialized", generate: (rng)  => generateMRN(rng) },
   "icd10":           { label: "ICD-10 Code",             group: "US Specialized", generate: (rng)  => generateICD10(rng) },
   "cpt":             { label: "CPT Code",                group: "US Specialized", generate: (rng)  => generateCPT(rng) },
@@ -769,13 +918,50 @@ export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
   "country":         { label: "Country",                 group: "International",  generate: (rng)  => rng.pick(PASSPORT_COUNTRIES) },
   "eu-vat":          { label: "EU VAT Number",           group: "International",  generate: (rng)  => generateEUVATStandalone(rng) },
   "iban":            { label: "IBAN",                    group: "International",  generate: (rng)  => generateIBANStandalone(rng) },
+  "france-insee":    { label: "French INSEE Number",     group: "International",  generate: (rng)  => generateFranceINSEE(rng) },
+  "germany-tax-id":  { label: "German Tax ID",           group: "International",  generate: (rng)  => generateGermanyTaxID(rng) },
+  "japan-my-number": { label: "Japanese My Number",      group: "International",  generate: (rng)  => generateJapanMyNumber(rng) },
 };
 
 export interface CustomField {
   name: string;
   type: FieldTypeKey;
   blankPct: number;
+  delimiter?: string;
+  cardBrands?: CardTypeName[];
 }
+
+// Maps field types that support custom delimiters to their default delimiter character.
+// "" means the default format uses no single delimiter (e.g. phone uses parens).
+export const DELIMITER_DEFAULTS: Partial<Record<FieldTypeKey, string>> = {
+  "ssn":          "-",
+  "credit-card":  "-",
+  "dob":          "/",
+  "phone":        "",
+  "card-expiry":  "/",
+  "mrn":          "-",
+  "uk-nin":       " ",
+  "nhs-number":   " ",
+  "canada-sin":   "-",
+  "mac-address":  ":",
+  "france-insee": " ",
+};
+
+type DelimGen = (rng: ScopedRandom, rowIndex: number, delimiter: string) => string;
+
+const DELIMITER_GENERATORS: Partial<Record<FieldTypeKey, DelimGen>> = {
+  "ssn":          (rng, _, d) => generateSSN(rng, d),
+  "credit-card":  (rng, _, d) => generateCreditCard(rng, undefined, d),
+  "dob":          (rng, _, d) => generateDOB(rng, d),
+  "phone":        (rng, _, d) => generatePhone(rng, d),
+  "card-expiry":  (rng, _, d) => generateCardExpiry(rng, d),
+  "mrn":          (rng, _, d) => generateMRN(rng, d),
+  "uk-nin":       (rng, _, d) => generateUKNIN(rng, d),
+  "nhs-number":   (rng, _, d) => generateNHSNumber(rng, d),
+  "canada-sin":   (rng, _, d) => generateCanadianSIN(rng, d),
+  "mac-address":  (rng, _, d) => generateMACAddress(rng, d),
+  "france-insee": (rng, _, d) => generateFranceINSEE(rng, d),
+};
 
 export function generateCustom(
   fields: CustomField[],
@@ -783,13 +969,43 @@ export function generateCustom(
   seed: number
 ): GenerateResult {
   const rng = createScopedRandom(seed);
+
+  const hasCCN    = fields.some(f => f.type === "credit-card");
+  const hasCCType = fields.some(f => f.type === "credit-card-type");
+
   const rows = Array.from({ length: count }, (_, rowIndex) => {
     const row: Record<string, string> = {};
+
+    // When both credit-card and credit-card-type are in the same row, pick one
+    // brand up-front so the number and type always match.
+    let sharedBrand: CardTypeName | undefined;
+    if (hasCCN && hasCCType) {
+      const brandsSource = fields.find(f => f.type === "credit-card" || f.type === "credit-card-type");
+      const brands = brandsSource?.cardBrands;
+      sharedBrand = brands && brands.length > 0 ? rng.pick(brands) : rng.pick(CARD_TYPES);
+    }
+
     for (const field of fields) {
       if (field.blankPct > 0 && rng.float() * 100 < field.blankPct) {
         row[field.name] = "";
       } else {
-        row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex);
+        const delimGen = DELIMITER_GENERATORS[field.type];
+        if (typeof field.delimiter === "string" && delimGen) {
+          if (field.type === "credit-card") {
+            const brand = sharedBrand ?? (field.cardBrands?.length ? rng.pick(field.cardBrands) : undefined);
+            row[field.name] = generateCreditCard(rng, brand, field.delimiter);
+          } else {
+            row[field.name] = delimGen(rng, rowIndex, field.delimiter);
+          }
+        } else {
+          if (sharedBrand && field.type === "credit-card-type") {
+            row[field.name] = sharedBrand;
+          } else if (sharedBrand && field.type === "credit-card") {
+            row[field.name] = generateCreditCard(rng, sharedBrand);
+          } else {
+            row[field.name] = FIELD_TYPE_DEFS[field.type].generate(rng, rowIndex, { cardBrands: field.cardBrands });
+          }
+        }
       }
     }
     return row;

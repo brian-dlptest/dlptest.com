@@ -3,18 +3,18 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
 import CopyRowScript from "@/components/CopyRowScript.astro";
-import { sampleNameSsnDob, downloadFiles, humanSize } from "@/data/sample-data";
+import { sampleData, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + SSN + DOB" description="Test PII data: fabricated names, Social Security Numbers, and dates of birth for DLP testing.">
-  <h1>Name + SSN + Date of Birth</h1>
+<BaseLayout title="Sample Data — Names + SSN + CCN" description="Test PII/PCI data: fabricated names, Social Security Numbers, and credit card numbers for DLP testing.">
+  <h1>Name + SSN + Credit Card Number</h1>
   <p>
-    Fabricated PII test rows. Useful for verifying that your DLP detects
-    composite patterns (e.g. an SSN within a row of a known birth date).
+    Fabricated PII/PCI test rows. Useful for verifying that your DLP detects
+    composite patterns (e.g. an SSN alongside a credit card number).
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">
-  <SampleDataNav active="ssndob" />
+  <SampleDataNav active="ssncc" />
 
   <div class="table-scroll" data-copy-table>
     <table>
@@ -22,15 +22,15 @@ export const prerender = true;
         <tr>
           <th>First and Last Name</th>
           <th>SSN</th>
-          <th>Date of Birth</th>
+          <th>Credit Card Number</th>
         </tr>
       </thead>
       <tbody>
-        {sampleNameSsnDob.map((row) => (
+        {sampleData.map((row) => (
           <tr>
             <td>{row.name}</td>
             <td><code>{row.ssn}</code></td>
-            <td><code>{row.dob}</code></td>
+            <td><code>{row.ccn}</code></td>
           </tr>
         ))}
       </tbody>
@@ -38,9 +38,9 @@ export const prerender = true;
   </div>
   <CopyRowScript />
   <h2>Sample files</h2>
-  <h3>Sample SSN &amp; DOB files</h3>
+  <h3>Sample SSN &amp; CCN files</h3>
   <ul class="download-list">
-    {downloadFiles.filter((f) => f.group === "ssndob").map((f) => (
+    {downloadFiles.filter((f) => f.group === "sample").map((f) => (
       <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
     ))}
   </ul>

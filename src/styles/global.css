@@ -508,6 +508,12 @@ main {
 .site-footer-links {
   font-size: 0.88rem;
 }
+.site-footer-end {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
 .site-footer a { color: var(--text-dim); }
 .site-footer a:hover { color: var(--text); }
 
@@ -517,14 +523,14 @@ main {
   background: var(--gradient-hero);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: clamp(1.75rem, 3.5vw, 2.75rem) clamp(1.5rem, 3vw, 2.5rem);
-  margin-bottom: 2.5rem;
+  padding: clamp(1.25rem, 2.5vw, 2rem) clamp(1.5rem, 3vw, 2.5rem);
+  margin-bottom: 1.5rem;
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
 }
 @media (min-width: 900px) {
@@ -703,7 +709,7 @@ main {
   font-size: clamp(1rem, 1.4vw, 1.15rem);
   color: var(--text-dim);
   max-width: 65ch;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
 /* ============ CARDS ============ */
@@ -968,73 +974,6 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
   margin: 2.5rem 0 0;
 }
 
-.faq-subscribe-row {
-  display: grid;
-  gap: 1.25rem;
-  width: 100%;
-  margin: 2.5rem 0 0;
-}
-
-.faq-subscribe-row .faq-section {
-  min-width: 0;
-}
-
-.faq-subscribe-row .subscribe-section {
-  margin: 0;
-  min-width: 0;
-}
-
-.faq-subscribe-row .subscribe-section > .muted {
-  max-width: none;
-}
-
-/* Beat SubscribeForm scoped max-width: 32rem so the card fills the 550px column */
-.faq-subscribe-row .subscribe-section .subscribe-form {
-  width: 100%;
-  max-width: none;
-  box-sizing: border-box;
-}
-
-@media (min-width: 720px) {
-  .faq-subscribe-row {
-    grid-template-columns: minmax(0, 1fr) 550px;
-    column-gap: 2rem;
-    align-items: start;
-  }
-}
-
-.subscribe-ad-row {
-  display: grid;
-  gap: 1.25rem 2rem;
-  align-items: start;
-  margin: 2.5rem 0 0;
-}
-
-.subscribe-ad-row .subscribe-section {
-  margin: 0;
-}
-
-.subscribe-ad-row .subscribe-form {
-  max-width: none;
-}
-
-.subscribe-ad-row .cyberhaven-ad {
-  margin: 0;
-}
-
-@media (min-width: 720px) {
-  .subscribe-ad-row {
-    grid-template-columns: minmax(0, 32rem) auto;
-    justify-content: start;
-  }
-}
-
-@media (max-width: 719px) {
-  .subscribe-ad-row {
-    justify-items: center;
-  }
-}
-
 .cyberhaven-ad-layout--sidebar {
   display: grid;
   gap: 1.5rem 2rem;
@@ -1071,5 +1010,5 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
 }
 
 @media (min-width: 1400px) {
-  .hero { padding: 3rem 3rem; }
+  .hero { padding: 2rem 3rem; }
 }
