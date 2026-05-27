@@ -769,16 +769,99 @@ function generateBankName(rng: ScopedRandom): string {
   return rng.pick(BANK_NAMES);
 }
 
+// ─── Network / Tech generators ───────────────────────────────────────────────
+
+function generateIPv6(rng: ScopedRandom): string {
+  return Array.from({ length: 8 }, () =>
+    rng.int(0, 0xffff).toString(16).padStart(4, "0")
+  ).join(":");
+}
+
+function generateMACAddress(rng: ScopedRandom, delim = ":"): string {
+  const octets = Array.from({ length: 6 }, () =>
+    rng.int(0, 255).toString(16).padStart(2, "0").toUpperCase()
+  );
+  if (delim === ".") {
+    // Cisco style: AAAA.BBBB.CCCC
+    return [
+      octets.slice(0, 2).join(""),
+      octets.slice(2, 4).join(""),
+      octets.slice(4, 6).join(""),
+    ].join(".");
+  }
+  return octets.join(delim);
+}
+
+const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+function generateBitcoinWallet(rng: ScopedRandom): string {
+  const length = rng.int(24, 33);
+  const body = Array.from({ length }, () => BASE58_ALPHABET[rng.int(0, 57)]).join("");
+  return "1" + body;
+}
+
+const AWS_KEY_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+function generateAWSAccessKey(rng: ScopedRandom): string {
+  const suffix = Array.from({ length: 16 }, () =>
+    AWS_KEY_CHARS[rng.int(0, AWS_KEY_CHARS.length - 1)]
+  ).join("");
+  return "AKIA" + suffix;
+}
+
+function generateAPIKey(rng: ScopedRandom): string {
+  return Array.from({ length: 32 }, () => rng.int(0, 15).toString(16)).join("");
+}
+
+// ─── Multi-language PII generators ───────────────────────────────────────────
+
+function generateFranceINSEE(rng: ScopedRandom, delim = " "): string {
+  const sex = rng.int(1, 2);
+  const year = rng.int(0, 99).toString().padStart(2, "0");
+  const month = rng.int(1, 12).toString().padStart(2, "0");
+  // Departments 01–95; skip 20 (split into 2A/2B Corsica) for numeric simplicity
+  const dept = rng.int(1, 95).toString().padStart(2, "0");
+  const commune = rng.int(1, 999).toString().padStart(3, "0");
+  const order = rng.int(1, 999).toString().padStart(3, "0");
+  const base13 = `${sex}${year}${month}${dept}${commune}${order}`;
+  const key = (97 - (parseInt(base13, 10) % 97)).toString().padStart(2, "0");
+  return `${sex}${delim}${year}${delim}${month}${delim}${dept}${delim}${commune}${delim}${order}${delim}${key}`;
+}
+
+function generateGermanyTaxID(rng: ScopedRandom): string {
+  // Steueridentifikationsnummer: 11 digits, first digit 1–9
+  const digits: number[] = [rng.int(1, 9)];
+  for (let i = 1; i < 10; i++) digits.push(rng.int(0, 9));
+  // Check digit via ISO/IEC 7064 MOD 11,10 variant
+  let product = 10;
+  for (const d of digits) {
+    let sum = (d + product) % 10;
+    if (sum === 0) sum = 10;
+    product = (sum * 2) % 11;
+  }
+  const check = (11 - product) % 10;
+  return digits.join("") + check;
+}
+
+const MY_NUMBER_WEIGHTS = [6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2] as const;
+function generateJapanMyNumber(rng: ScopedRandom): string {
+  const digits = Array.from({ length: 11 }, () => rng.int(0, 9));
+  const sum = digits.reduce((acc, d, i) => acc + d * MY_NUMBER_WEIGHTS[i], 0);
+  const remainder = sum % 11;
+  const check = remainder <= 1 ? 0 : 11 - remainder;
+  return digits.join("") + check;
+}
+
 // ─── Custom field types ───────────────────────────────────────────────────────
 
 export type FieldTypeKey =
   | "row-number" | "first-name" | "last-name" | "full-name" | "gender" | "email" | "ip-v4"
+  | "ip-v6" | "mac-address" | "crypto-wallet" | "aws-access-key" | "api-key"
   | "ssn" | "credit-card" | "credit-card-type" | "bank-name"
   | "dob" | "phone" | "zip" | "card-expiry"
   | "mrn" | "icd10" | "cpt" | "routing-number" | "account-number" | "npi" | "dea-number"
   | "specialty" | "us-state" | "dl-number"
   | "uk-nin" | "nhs-number" | "canada-sin" | "canada-province" | "passport-number"
-  | "country" | "eu-vat" | "iban";
+  | "country" | "eu-vat" | "iban"
+  | "france-insee" | "germany-tax-id" | "japan-my-number";
 
 export interface CustomFieldOptions {
   cardBrands?: CardTypeName[];
@@ -798,6 +881,11 @@ export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
   "gender":          { label: "Gender",                  group: "Basic",          generate: (rng)  => generateGender(rng) },
   "email":           { label: "Email Address",           group: "Basic",          generate: (rng)  => generateEmailStandalone(rng) },
   "ip-v4":           { label: "IP Address v4",           group: "Basic",          generate: (rng)  => generateIPv4(rng) },
+  "ip-v6":           { label: "IPv6 Address",            group: "Network / Tech", generate: (rng)  => generateIPv6(rng) },
+  "mac-address":     { label: "MAC Address",             group: "Network / Tech", generate: (rng)  => generateMACAddress(rng) },
+  "crypto-wallet":   { label: "Bitcoin Wallet",          group: "Network / Tech", generate: (rng)  => generateBitcoinWallet(rng) },
+  "aws-access-key":  { label: "AWS Access Key ID",       group: "Network / Tech", generate: (rng)  => generateAWSAccessKey(rng) },
+  "api-key":         { label: "API Key / Secret",        group: "Network / Tech", generate: (rng)  => generateAPIKey(rng) },
   "ssn":             { label: "SSN",                group: "US PII / PCI", generate: (rng)        => generateSSN(rng) },
   "credit-card":     { label: "Credit Card Number", group: "US PII / PCI", generate: (rng, _, opts) => {
     const brands = opts?.cardBrands;
@@ -830,6 +918,9 @@ export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
   "country":         { label: "Country",                 group: "International",  generate: (rng)  => rng.pick(PASSPORT_COUNTRIES) },
   "eu-vat":          { label: "EU VAT Number",           group: "International",  generate: (rng)  => generateEUVATStandalone(rng) },
   "iban":            { label: "IBAN",                    group: "International",  generate: (rng)  => generateIBANStandalone(rng) },
+  "france-insee":    { label: "French INSEE Number",     group: "International",  generate: (rng)  => generateFranceINSEE(rng) },
+  "germany-tax-id":  { label: "German Tax ID",           group: "International",  generate: (rng)  => generateGermanyTaxID(rng) },
+  "japan-my-number": { label: "Japanese My Number",      group: "International",  generate: (rng)  => generateJapanMyNumber(rng) },
 };
 
 export interface CustomField {
@@ -852,20 +943,24 @@ export const DELIMITER_DEFAULTS: Partial<Record<FieldTypeKey, string>> = {
   "uk-nin":       " ",
   "nhs-number":   " ",
   "canada-sin":   "-",
+  "mac-address":  ":",
+  "france-insee": " ",
 };
 
 type DelimGen = (rng: ScopedRandom, rowIndex: number, delimiter: string) => string;
 
 const DELIMITER_GENERATORS: Partial<Record<FieldTypeKey, DelimGen>> = {
-  "ssn":         (rng, _, d) => generateSSN(rng, d),
-  "credit-card": (rng, _, d) => generateCreditCard(rng, undefined, d),
-  "dob":         (rng, _, d) => generateDOB(rng, d),
-  "phone":       (rng, _, d) => generatePhone(rng, d),
-  "card-expiry": (rng, _, d) => generateCardExpiry(rng, d),
-  "mrn":         (rng, _, d) => generateMRN(rng, d),
-  "uk-nin":      (rng, _, d) => generateUKNIN(rng, d),
-  "nhs-number":  (rng, _, d) => generateNHSNumber(rng, d),
-  "canada-sin":  (rng, _, d) => generateCanadianSIN(rng, d),
+  "ssn":          (rng, _, d) => generateSSN(rng, d),
+  "credit-card":  (rng, _, d) => generateCreditCard(rng, undefined, d),
+  "dob":          (rng, _, d) => generateDOB(rng, d),
+  "phone":        (rng, _, d) => generatePhone(rng, d),
+  "card-expiry":  (rng, _, d) => generateCardExpiry(rng, d),
+  "mrn":          (rng, _, d) => generateMRN(rng, d),
+  "uk-nin":       (rng, _, d) => generateUKNIN(rng, d),
+  "nhs-number":   (rng, _, d) => generateNHSNumber(rng, d),
+  "canada-sin":   (rng, _, d) => generateCanadianSIN(rng, d),
+  "mac-address":  (rng, _, d) => generateMACAddress(rng, d),
+  "france-insee": (rng, _, d) => generateFranceINSEE(rng, d),
 };
 
 export function generateCustom(

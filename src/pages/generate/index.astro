@@ -10,7 +10,7 @@ for (const [key, def] of Object.entries(FIELD_TYPE_DEFS) as [FieldTypeKey, { lab
   if (!groups[def.group]) groups[def.group] = [];
   groups[def.group].push({ key, label: def.label });
 }
-const GROUP_ORDER = ["Basic", "US PII / PCI", "US Specialized", "International"];
+const GROUP_ORDER = ["Basic", "Network / Tech", "US PII / PCI", "US Specialized", "International"];
 
 const defaultFields: { name: string; type: FieldTypeKey }[] = [
   { name: "id",         type: "row-number" },
@@ -499,6 +499,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "gender":          "gender",
     "email":           "email",
     "ip-v4":           "ip_address",
+    "ip-v6":           "ipv6_address",
+    "mac-address":     "mac_address",
+    "crypto-wallet":   "bitcoin_wallet",
+    "aws-access-key":  "aws_access_key_id",
+    "api-key":         "api_key",
     "ssn":              "ssn",
     "credit-card":      "credit_card_number",
     "credit-card-type": "card_type",
@@ -525,6 +530,9 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "country":         "country",
     "eu-vat":          "eu_vat_number",
     "iban":            "iban",
+    "france-insee":    "insee_number",
+    "germany-tax-id":  "germany_tax_id",
+    "japan-my-number": "my_number",
   };
 
   // ── Preset templates ────────────────────────────────────────────────────────
@@ -722,6 +730,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   const DELIM_DEFAULTS: Record<string, string> = {
     "ssn": "-", "credit-card": "-", "dob": "/", "phone": "",
     "card-expiry": "/", "mrn": "-", "uk-nin": " ", "nhs-number": " ", "canada-sin": "-",
+    "mac-address": ":", "france-insee": " ",
   };
 
   const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
