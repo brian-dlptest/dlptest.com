@@ -34,7 +34,7 @@ const SERVER_INSTRUCTIONS =
   "correspond to any real person or account. See https://dlptest.com/mcp/ for " +
   "details.";
 
-export function handleRpc(req: unknown): JsonRpcResponse | null {
+export function handleRpc(req: unknown, httpRequest?: Request): JsonRpcResponse | null {
   // Validate envelope shape before we trust any field.
   if (typeof req !== "object" || req === null || Array.isArray(req)) {
     return rpcError(null, ERR.INVALID_REQUEST, "request must be a JSON object");
@@ -107,7 +107,7 @@ export function handleRpc(req: unknown): JsonRpcResponse | null {
         });
       }
       try {
-        const text = tool.handler(args);
+        const text = tool.handler(args, httpRequest);
         return success(id, {
           content: [{ type: "text", text }],
         });
