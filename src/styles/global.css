@@ -423,34 +423,28 @@ textarea { min-height: 6rem; resize: vertical; }
 
 /* ============ FEEDBACK BUTTON + MODAL ============ */
 
-/* Trigger button — subtle ghost style sitting in the site-header-toolbar */
+/* Trigger button — inline text style matching footer links */
 .feedback-trigger-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  display: inline;
+  padding: 0;
+  border: none;
+  border-radius: 0;
   background: transparent;
-  color: var(--text-dim);
-  font-size: 0.78rem;
-  font-weight: 500;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
   box-shadow: none;
   transform: none;
-  transition:
-    background var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: color var(--transition-fast);
 }
 .feedback-trigger-btn:hover {
-  background: var(--bg-elev);
   color: var(--text);
-  border-color: var(--text-dim);
+  text-decoration: underline;
   box-shadow: none;
   transform: none;
-  text-decoration: none;
 }
 .feedback-trigger-btn:active {
   transform: none;
@@ -459,15 +453,6 @@ textarea { min-height: 6rem; resize: vertical; }
 .feedback-trigger-btn:focus-visible {
   outline: none;
   box-shadow: var(--shadow-accent);
-}
-/* Show icon only on very small screens; reveal label at 640 px */
-.feedback-trigger-label {
-  display: none;
-}
-@media (min-width: 640px) {
-  .feedback-trigger-label {
-    display: inline;
-  }
 }
 
 /* Modal dialog */
