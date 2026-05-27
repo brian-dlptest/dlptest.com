@@ -40,6 +40,16 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   const hostname = url.hostname;
   const blockIndexing = shouldBlockIndexing(env.ENVIRONMENT, hostname);
 
+  // MCP subdomain: route every request on mcp.dlptest.com (and any
+  // mcp.* preview host) to the single MCP endpoint at /api/mcp. The
+  // subdomain is configured as a Custom Domain in the Cloudflare dashboard
+  // and points at the same Worker; this rewrite lets the canonical URL be
+  // `https://mcp.dlptest.com/` while keeping the implementation as a
+  // standard Astro API route.
+  if (hostname === "mcp.dlptest.com" || hostname.startsWith("mcp.")) {
+    return context.rewrite("/api/mcp/");
+  }
+
   // Legacy permalink: /https-post/ merged into /http-post/
   const normalizedPath = url.pathname.replace(/\/+$/, "") || "/";
   if (normalizedPath === "/https-post") {
