@@ -1,0 +1,176 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+export const prerender = true;
+---
+<BaseLayout
+  title="Security Policy"
+  description="Vulnerability disclosure policy for dlptest.com — how to report a security issue, what's in scope, what's intentionally out of scope, and what to expect after reporting."
+>
+  <h1>Security Policy</h1>
+  <p>
+    dlptest.com is a public resource for testing Data Loss Prevention
+    products. Because the entire purpose of the site is to receive,
+    inspect, and discard sensitive-looking traffic, several pieces of
+    expected security behavior look unusual at first glance. This page
+    describes what is and isn't a vulnerability, how to report something
+    that genuinely is, and what to expect after you do.
+  </p>
+
+  <h2>Reporting a vulnerability</h2>
+  <p>
+    Email <a href="mailto:brian@dlptest.com">brian@dlptest.com</a> with
+    the subject prefix <code>Security:</code> and include:
+  </p>
+  <ul>
+    <li>A description of the issue and its potential impact.</li>
+    <li>Reproduction steps detailed enough to verify (a curl command or a short script is ideal).</li>
+    <li>The affected URL, endpoint, or component.</li>
+    <li>Your name or handle if you'd like to be credited after a fix ships.</li>
+    <li>Optional: a suggested fix or relevant references.</li>
+  </ul>
+  <p>
+    Encrypted reports are not currently supported. If you need to send
+    encrypted material before we can arrange a key, contact us first to
+    coordinate.
+  </p>
+
+  <h2>What to expect after reporting</h2>
+  <ul>
+    <li>Acknowledgment of receipt within <strong>3 business days</strong>.</li>
+    <li>An initial triage decision (in scope, out of scope, duplicate, or needs-more-info) within <strong>7 business days</strong>.</li>
+    <li>
+      A fix timeline scaled to severity. Critical issues affecting other
+      users' data or the integrity of the site target a fix within
+      14 days; lower-severity items may take longer.
+    </li>
+    <li>
+      Public acknowledgment after a fix ships, if you'd like to be
+      credited.
+    </li>
+  </ul>
+
+  <h2>In scope</h2>
+  <ul>
+    <li><code>dlptest.com</code>, <code>www.dlptest.com</code>, and <code>staging.dlptest.com</code> (the Astro on Cloudflare Workers application).</li>
+    <li>The <code>/api/*</code> endpoints (HTTP POST acceptor, data generator, contact, subscribe).</li>
+    <li>Authentication, session handling, and any user-supplied input that affects another user.</li>
+    <li>Data exposure that goes beyond what is intentionally public (see below).</li>
+    <li>Misconfiguration of Cloudflare WAF rules, rate-limit rules, or other security controls that the site relies on.</li>
+  </ul>
+
+  <h2>Explicitly out of scope (by design)</h2>
+  <p>
+    The following are intentional design decisions, documented elsewhere
+    on this site. Reports on these are not considered vulnerabilities
+    and will be closed as <em>working as intended</em>.
+  </p>
+
+  <h3>The public FTP credentials on <code>/ftp-test/</code></h3>
+  <p>
+    The FTP server username and password are deliberately published on
+    that page so anyone can run anonymous DLP test uploads. The host
+    (<code>ftp.dlptest.com</code>) is a separate, segregated environment;
+    uploaded files are automatically deleted after roughly 10 minutes;
+    and an IP block list mitigates obvious abuse. Republishing the
+    credentials is not a disclosure.
+  </p>
+
+  <h3><code>/api/http-post</code> accepting arbitrary payloads</h3>
+  <p>
+    This endpoint is the primary purpose of the site. It deliberately
+    accepts any request body — SQL-injection-shaped strings, fake
+    credit card numbers, malware test files, binary blobs, anything —
+    reads the bytes so DLP appliances and proxies can inspect them in
+    flight, and then immediately discards them. Nothing is logged,
+    stored, or forwarded. Sending an attack-shaped payload to this
+    endpoint and receiving a 200 response is the expected behavior, not
+    a vulnerability.
+  </p>
+
+  <h3>Generator output being predictable for a given seed</h3>
+  <p>
+    The <code>/generate/</code> tool uses a seeded pseudo-random number
+    generator so that practitioners can reproduce the exact same
+    dataset by re-using a seed. This is a deliberate feature for
+    repeatable test cases. The outputs are synthetic and do not
+    correspond to any real person, account, or institution.
+  </p>
+
+  <h3>Self-impacting input rendering on <code>/generate/</code></h3>
+  <p>
+    The field-name input on the data generator accepts arbitrary text.
+    The resulting dataset is only ever downloaded by the user who
+    entered the field name — there is no cross-user vector. Spreadsheet
+    formula characters in field names are already sanitized in CSV and
+    XLSX exports; HTML-shaped input is rendered with
+    <code>textContent</code> and cannot execute.
+  </p>
+
+  <h3>Sample data and pre-generated downloads matching real-looking PII</h3>
+  <p>
+    The contents of <code>/sample-data/</code> and the larger
+    R2-hosted test files are synthetic patterns deliberately designed
+    to satisfy DLP detection rules (valid Luhn check digits, SSN
+    area-group conformance, etc.). The values are fabricated and do not
+    correspond to real people. Hosting them publicly is not a data
+    leak.
+  </p>
+
+  <h3>Email enumeration on subscribe</h3>
+  <p>
+    <code>/api/subscribe/</code> returns a distinct 409 response for an
+    already-subscribed email. This is a deliberate UX signal on a
+    public newsletter signup so users understand why a resubmission
+    didn't change anything. The site does not consider this enumeration
+    sensitive.
+  </p>
+
+  <h3>Third-party services we depend on</h3>
+  <p>
+    Issues in Cloudflare's infrastructure, the Railway-hosted subscribe
+    upstream, MailChannels, Google Tag Manager, or any other vendor we
+    integrate with should be reported directly to those vendors. How
+    dlptest.com integrates with them is in scope; the underlying
+    services themselves are not.
+  </p>
+
+  <h2>Safe harbor</h2>
+  <p>
+    Good-faith security research is welcome on this site. We will not
+    pursue legal action against, support claims against, or report to
+    law enforcement researchers who:
+  </p>
+  <ul>
+    <li>Make a good-faith effort to avoid privacy violations, service degradation, and data destruction.</li>
+    <li>Only interact with accounts and data they own or have explicit permission to access (note: this site has no user accounts).</li>
+    <li>Do not pivot to attack other systems hosted by Cloudflare, Railway, MailChannels, or anyone else.</li>
+    <li>Report findings privately to the address above and give us reasonable time to remediate before any public disclosure.</li>
+    <li>Stay within the scope defined on this page.</li>
+  </ul>
+  <p>
+    Activities that fall outside good-faith research — including but
+    not limited to data destruction, denial-of-service attempts beyond
+    a brief proof of concept, persistence on systems, and lateral
+    movement — are not authorized.
+  </p>
+
+  <h2>Acknowledgments</h2>
+  <p>
+    Researchers who report responsibly are gratefully thanked. As
+    credited disclosures accumulate, this section will be updated with a
+    public list.
+  </p>
+
+  <h2>Policy machine-readable summary</h2>
+  <p>
+    A <a href="/.well-known/security.txt"><code>security.txt</code></a>
+    file (RFC 9116) is published at the canonical location and points
+    back to this policy. It is the appropriate destination for
+    automated security tools and bug-bounty platform scrapers.
+  </p>
+
+  <p class="muted small">
+    Last updated: 2026-05-25. The <code>security.txt</code> file
+    expires on 2027-05-25 and will be re-issued before then.
+  </p>
+</BaseLayout>
