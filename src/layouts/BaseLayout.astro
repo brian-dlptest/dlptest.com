@@ -138,7 +138,9 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
           <a href="/security-policy/">Security</a>
           {" · "}
           <a href="/contact/">Contact</a>
-          {" · "}
+          </div>
+        </div>
+        <div class="site-footer-end">
           <button
             type="button"
             class="feedback-trigger-btn"
@@ -146,9 +148,6 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
             aria-haspopup="dialog"
             aria-label="Share feedback — report a bug or suggest a feature"
           >Have an idea? Found a bug?</button>
-          </div>
-        </div>
-        <div class="site-footer-end">
           <SubscribeModal />
           <ThemeToggle />
         </div>
