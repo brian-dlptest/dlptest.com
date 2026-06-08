@@ -16,8 +16,10 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
+    // Shared mailbox we send AS (also the Graph sendMail user id).
     "CONTACT_FROM_EMAIL": "contact@dlptest.com",
-    "CONTACT_TO_EMAIL": ""
+    // Inbox that receives submissions; submitter is set as Reply-To.
+    "CONTACT_TO_EMAIL": "brian@dlptest.com"
   },
   // R2 bucket holding the legacy DLP test downloads (sample-data.csv,
   // 1-MB-Test.xlsx, 334-MB-Test-CSV.csv, etc). Populated by
@@ -37,7 +39,7 @@
       "vars": {
         "ENVIRONMENT": "staging",
         "CONTACT_FROM_EMAIL": "contact@dlptest.com",
-        "CONTACT_TO_EMAIL": ""
+        "CONTACT_TO_EMAIL": "brian@dlptest.com"
       },
       "r2_buckets": [
         { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
