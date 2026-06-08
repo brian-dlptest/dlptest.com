@@ -19,7 +19,11 @@
     // Shared mailbox we send AS (also the Graph sendMail user id).
     "CONTACT_FROM_EMAIL": "contact@dlptest.com",
     // Inbox that receives submissions; submitter is set as Reply-To.
-    "CONTACT_TO_EMAIL": "brian@dlptest.com"
+    "CONTACT_TO_EMAIL": "brian@dlptest.com",
+    // Cloudflare Turnstile site key for the feedback form. Public by design
+    // (rendered into the page); baked into prerendered pages at build time.
+    // The matching secret is set via `wrangler secret put CF_TURNSTILE_SECRET_KEY`.
+    "CF_TURNSTILE_SITE_KEY": "0x4AAAAAADgkyesHv85sOwDD"
   },
   // R2 bucket holding the legacy DLP test downloads (sample-data.csv,
   // 1-MB-Test.xlsx, 334-MB-Test-CSV.csv, etc). Populated by
@@ -39,7 +43,9 @@
       "vars": {
         "ENVIRONMENT": "staging",
         "CONTACT_FROM_EMAIL": "contact@dlptest.com",
-        "CONTACT_TO_EMAIL": "brian@dlptest.com"
+        "CONTACT_TO_EMAIL": "brian@dlptest.com",
+        // Same Turnstile widget covers dlptest.com + staging.dlptest.com.
+        "CF_TURNSTILE_SITE_KEY": "0x4AAAAAADgkyesHv85sOwDD"
       },
       "r2_buckets": [
         { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
