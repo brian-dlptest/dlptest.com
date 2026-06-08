@@ -13,55 +13,59 @@ const ftpPassword = "rNrKYTX9g7z3RgJRmxWuGHbeu";
 const retentionMinutes = 10;
 ---
 <BaseLayout title="FTP Test" description="Public FTP server credentials for testing DLP. Files are kept for 10 minutes then deleted.">
-  <h1>FTP Test</h1>
-  <p>
-    Public FTP test server for uploading DLP test files. Uploaded files are
-    deleted after about {retentionMinutes} minutes.
-  </p>
+  <div class="ftp-layout">
+    <div class="ftp-content">
+      <h1>FTP Test</h1>
+      <p>
+        Public FTP test server for uploading DLP test files. Uploaded files are
+        deleted after about {retentionMinutes} minutes.
+      </p>
 
-  <div class="ftp-credentials-with-ad">
-    <table class="ftp-credentials-table">
-      <tbody>
-        <tr><th>FTP host</th><td><code>{ftpHost}</code></td></tr>
-        <tr><th>User</th><td><code>{ftpUser}</code></td></tr>
-        <tr><th>Password</th><td><code>{ftpPassword}</code></td></tr>
-        <tr><th>Mode</th><td>Passive (active is not supported)</td></tr>
-        <tr><th>Retention</th><td>{retentionMinutes} minutes</td></tr>
-      </tbody>
-    </table>
-    <CyberhavenAd unit="medium-rectangle" />
+      <table class="ftp-credentials-table">
+        <tbody>
+          <tr><th>FTP host</th><td><code>{ftpHost}</code></td></tr>
+          <tr><th>User</th><td><code>{ftpUser}</code></td></tr>
+          <tr><th>Password</th><td><code>{ftpPassword}</code></td></tr>
+          <tr><th>Mode</th><td>Passive (active is not supported)</td></tr>
+          <tr><th>Retention</th><td>{retentionMinutes} minutes</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        On Windows, use a client like
+        <a href="https://filezilla-project.org/">FileZilla</a>; the active FTP
+        transport built into <code>cmd.exe</code> does not support passive mode.
+        Import our pre-configured FileZilla profile:
+        <a href="/DLP_Test_FTP_FileZilla.xml">DLP_Test_FTP_FileZilla.xml</a>.
+      </p>
+
+      <h2>IP block list</h2>
+      <p class="muted">
+        To limit hosting costs from automated upload abuse, an IP block list is
+        enforced. If you believe your address has been blocked in error, use the
+        <a href="/contact/">contact page</a>.
+      </p>
+    </div>
+
+    <CyberhavenAd unit="skyscraper" />
   </div>
-
-  <p>
-    On Windows, use a client like
-    <a href="https://filezilla-project.org/">FileZilla</a>; the active FTP
-    transport built into <code>cmd.exe</code> does not support passive mode.
-    Import our pre-configured FileZilla profile:
-    <a href="/DLP_Test_FTP_FileZilla.xml">DLP_Test_FTP_FileZilla.xml</a>.
-  </p>
-
-  <h2>IP block list</h2>
-  <p class="muted">
-    To limit hosting costs from automated upload abuse, an IP block list is
-    enforced. If you believe your address has been blocked in error, use the
-    <a href="/contact/">contact page</a>.
-  </p>
-
-  <CyberhavenAd unit="medium-rectangle" />
 </BaseLayout>
 
 <style>
-  .ftp-credentials-with-ad {
+  .ftp-layout {
     display: grid;
-    gap: 1.25rem 2rem;
+    gap: 2rem;
     align-items: start;
-    margin: 1.25rem 0 2rem;
+  }
+
+  .ftp-content {
+    min-width: 0;
   }
 
   .ftp-credentials-table {
     width: auto;
     max-width: 100%;
-    margin: 0;
+    margin: 1.25rem 0 2rem;
     font-size: 0.92rem;
   }
 
@@ -76,20 +80,19 @@ const retentionMinutes = 10;
     font-weight: 600;
   }
 
-  .ftp-credentials-with-ad .cyberhaven-ad {
+  .ftp-layout .cyberhaven-ad {
     margin: 0;
   }
 
-  @media (min-width: 720px) {
-    .ftp-credentials-with-ad {
-      grid-template-columns: auto auto;
-      justify-content: start;
+  @media (min-width: 900px) {
+    .ftp-layout {
+      grid-template-columns: minmax(0, 1fr) auto;
     }
   }
 
-  @media (max-width: 719px) {
-    .ftp-credentials-with-ad {
-      justify-items: center;
+  @media (max-width: 899px) {
+    .ftp-layout .cyberhaven-ad {
+      justify-self: center;
     }
   }
 </style>
