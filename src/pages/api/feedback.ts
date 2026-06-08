@@ -57,31 +57,63 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // TODO: Create GitHub issue — uncomment and set GITHUB_TOKEN when ready.
-  // const ghRes = await fetch(
-  //   "https://api.github.com/repos/brian-dlptest/dlptest.com/issues",
-  //   {
-  //     method: "POST",
-  //     headers: {
-  //       Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-  //       "Content-Type": "application/json",
-  //       Accept: "application/vnd.github+json",
-  //       "X-GitHub-Api-Version": "2022-11-28",
-  //       "User-Agent": "dlptest.com",
-  //     },
-  //     body: JSON.stringify({
-  //       title,
-  //       body: `**Submitted via dlptest.com feedback form**\n\n${description}`,
-  //       labels: [category],
-  //     }),
-  //   },
-  // );
-  // if (!ghRes.ok) return jsonResponse({ ok: false, error: "github_error" }, 502);
+  // Create a GitHub issue from the submission.
+  // Skip if the token isn't configured (local dev fallback) — mirrors the
+  // Turnstile skip above so the form still "works" locally without secrets.
+  const ghToken = env.GITHUB_TOKEN?.trim();
+  if (ghToken) {
+    const ghRes = await fetch(
+      `https://api.github.com/repos/${FEEDBACK_REPO}/issues`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${ghToken}`,
+          "Content-Type": "application/json",
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          // GitHub rejects requests without a User-Agent.
+          "User-Agent": "dlptest.com-feedback",
+        },
+        body: JSON.stringify({
+          title,
+          body: issueBody(description),
+          labels: [category],
+        }),
+      },
+    );
+    if (!ghRes.ok) {
+      // Log status + detail server-side; don't leak GitHub internals to the client.
+      const detail = await ghRes.text().catch(() => "");
+      console.error("[feedback] GitHub issue creation failed", ghRes.status, detail);
+      return jsonResponse({ ok: false, error: "github_error" }, 502);
+    }
+  } else {
+    console.warn(
+      "[feedback] GITHUB_TOKEN not configured — skipping issue creation",
+    );
+  }
 
   console.log("[feedback]", { category, title, descriptionLength: description.length });
 
   return jsonResponse({ ok: true }, 200);
 };
+
+/** owner/repo that receives feedback issues. */
+const FEEDBACK_REPO = "brian-dlptest/dlptest.com";
+
+/**
+ * Wrap the user-submitted description for the issue body. The content is
+ * untrusted free text rendered as Markdown — note that for the maintainer
+ * reading the issue. We don't attempt to neutralise @-mentions; the repo is
+ * single-maintainer so stray mentions are low-impact.
+ */
+function issueBody(description: string): string {
+  return [
+    "_Submitted anonymously via the dlptest.com feedback form._",
+    "",
+    description,
+  ].join("\n");
+}
 
 function jsonResponse(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
