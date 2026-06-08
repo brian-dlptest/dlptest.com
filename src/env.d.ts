@@ -9,12 +9,16 @@ declare namespace Cloudflare {
     ENVIRONMENT: string;
     ASSETS: Fetcher;
     DOWNLOADS: R2Bucket;
-    /** Inbox for /api/contact/ submissions (MailChannels). */
+    /** Inbox for /api/contact/ submissions. */
     CONTACT_TO_EMAIL: string;
-    /** From address on dlptest.com (must be authorized via MailChannels DNS). */
+    /** Mailbox to send AS — also the Microsoft Graph user id for sendMail. */
     CONTACT_FROM_EMAIL: string;
-    /** MailChannels Email API key (paid API; optional if lockdown-only). */
-    MAILCHANNELS_API_KEY: string;
+    /** Entra ID directory/tenant ID for the Graph app registration (secret). */
+    GRAPH_TENANT_ID: string;
+    /** Microsoft Graph app registration client ID (secret). */
+    GRAPH_CLIENT_ID: string;
+    /** Microsoft Graph app registration client secret (secret). */
+    GRAPH_CLIENT_SECRET: string;
   }
 }
 
