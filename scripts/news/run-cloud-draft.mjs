@@ -18,7 +18,20 @@
  *   NEWS_BASE_REF        — branch to fork from (default: staging)
  */
 
+import { appendFileSync } from "node:fs";
+
 import { Agent, CursorAgentError } from "@cursor/sdk";
+
+/**
+ * Expose key=value to later workflow steps via $GITHUB_OUTPUT (no-op locally).
+ * The port-to-main step keys off `agent_branch`; an empty value means the agent
+ * created no branch (no qualifying stories), so the port is skipped.
+ */
+function emitOutput(key, value) {
+  const file = process.env.GITHUB_OUTPUT;
+  if (!file) return;
+  appendFileSync(file, `${key}=${value ?? ""}\n`);
+}
 
 function repoCloneUrl() {
   if (process.env.NEWS_REPO_URL?.trim()) return process.env.NEWS_REPO_URL.trim();
@@ -84,11 +97,21 @@ async function main() {
 
     console.log("run status:", result.status);
     console.log("run id:    ", result.id);
+
+    // The agent only pushes a branch when it actually drafted posts. Surface the
+    // first one it created off startingRef so the port-to-main step can copy the
+    // new files onto `main`. No branch → no qualifying stories → nothing to port.
+    const created = result.git?.branches?.find(
+      (b) => b.branch && b.branch !== startingRef,
+    );
     if (result.git?.branches?.length) {
       for (const b of result.git.branches) {
         console.log("git branch:", JSON.stringify(b));
       }
     }
+    emitOutput("agent_branch", created?.branch ?? "");
+    emitOutput("staging_pr_url", created?.prUrl ?? "");
+
     if (result.result) console.log("summary:\n", result.result);
 
     if (result.status === "error") {
