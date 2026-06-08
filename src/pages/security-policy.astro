@@ -17,6 +17,17 @@ export const prerender = true;
   </p>
 
   <h2>Reporting a vulnerability</h2>
+
+  <aside class="triage-callout">
+    <p>
+      <strong>Not reporting a security vulnerability?</strong> For general
+      bugs, broken pages, or feature ideas, use the
+      <strong>“Have an idea? Found a bug?”</strong> button in the site footer.
+      It files a public issue we track on GitHub. Please reserve the email
+      address below for genuine security issues, which we handle privately.
+    </p>
+  </aside>
+
   <p>
     Email <a href="mailto:brian@dlptest.com">brian@dlptest.com</a> with
     the subject prefix <code>Security:</code> and include:
@@ -174,4 +185,23 @@ export const prerender = true;
     Last updated: 2026-05-25. The <code>security.txt</code> file
     expires on 2027-05-25 and will be re-issued before then.
   </p>
+
+  <style>
+    .triage-callout {
+      margin: 0 0 1.25rem;
+      padding: 0.9rem 1.1rem;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+    }
+    .triage-callout p {
+      margin: 0;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .triage-callout strong {
+      color: var(--text);
+    }
+  </style>
 </BaseLayout>
