@@ -25,7 +25,7 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
   description="Submit text and files with the HTTP POST method to a safe HTTPS endpoint that discards the body. Use it to verify DLP, proxies, and SSL inspection without storing data."
 >
   <h1>HTTP POST Test</h1>
-  <p>
+  <p class="intro">
     Use the forms below to send a test message or upload a file to dlptest.com using the
     HTTP POST method over TLS (HTTPS). Most browsers and Cloudflare configurations
     no longer offer this site over cleartext HTTP, but the POST method is the same
@@ -36,6 +36,12 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
   </p>
 
   <PostTestForm />
+
+  <style>
+    .intro {
+      max-width: none;
+    }
+  </style>
 
   <p class="muted">
     Bookmark note: the former <code>/https-post/</code> page redirects here with HTTP 301.
