@@ -94,6 +94,25 @@ export const prerender = true;
     </aside>
   </div>
 
+  <section class="feedback-callout">
+    <div class="feedback-callout__copy">
+      <h2>Found a bug or have an idea?</h2>
+      <p>
+        Spotted something broken or have a feature request for the site? File it
+        straight to our issue tracker on GitHub — no account form required.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="feedback-callout__btn"
+      data-feedback-trigger
+      aria-haspopup="dialog"
+      aria-label="Share feedback — report a bug or suggest a feature"
+    >
+      🐛 Report a bug / 💡 Suggest an idea
+    </button>
+  </section>
+
   <style>
     .contact-grid {
       display: grid;
@@ -178,6 +197,34 @@ export const prerender = true;
     }
     .linkedin-link__icon {
       flex-shrink: 0;
+    }
+
+    .feedback-callout {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      margin-top: 2rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .feedback-callout__copy { flex: 1 1 18rem; }
+    .feedback-callout h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1.15rem;
+    }
+    .feedback-callout p {
+      margin: 0;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .feedback-callout__btn {
+      flex-shrink: 0;
+      white-space: nowrap;
     }
   </style>
 

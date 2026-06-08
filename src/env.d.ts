@@ -19,6 +19,12 @@ declare namespace Cloudflare {
     GRAPH_CLIENT_ID: string;
     /** Microsoft Graph app registration client secret (secret). */
     GRAPH_CLIENT_SECRET: string;
+    /** Cloudflare Turnstile site key (public — safe to expose in HTML). */
+    CF_TURNSTILE_SITE_KEY: string;
+    /** Cloudflare Turnstile secret key (server-only — set via wrangler secret put). */
+    CF_TURNSTILE_SECRET_KEY: string;
+    /** GitHub PAT for creating issues on brian-dlptest/dlptest.com (set via wrangler secret put). */
+    GITHUB_TOKEN: string;
   }
 }
 

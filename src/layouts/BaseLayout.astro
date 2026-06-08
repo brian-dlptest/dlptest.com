@@ -4,6 +4,7 @@ import SiteAnalytics from "@/components/SiteAnalytics.astro";
 import SiteHeader, { type HeaderNavItem } from "@/components/SiteHeader.astro";
 import SubscribeModal from "@/components/SubscribeModal.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
+import FeedbackModal from "@/components/FeedbackModal.astro";
 import { GTM_CONTAINER_ID } from "@/lib/analytics";
 import { env } from "cloudflare:workers";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
@@ -136,6 +137,14 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
           <a href="/security-policy/">Security</a>
           {" · "}
           <a href="/contact/">Contact</a>
+          {" · "}
+          <button
+            type="button"
+            class="feedback-trigger-btn"
+            data-feedback-trigger
+            aria-haspopup="dialog"
+            aria-label="Share feedback — report a bug or suggest a feature"
+          >Have an idea? Found a bug?</button>
           </div>
         </div>
         <div class="site-footer-end">
@@ -144,5 +153,6 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
         </div>
       </div>
     </footer>
+    <FeedbackModal />
   </body>
 </html>
