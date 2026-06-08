@@ -25,6 +25,10 @@ declare namespace Cloudflare {
     CF_TURNSTILE_SECRET_KEY: string;
     /** GitHub PAT for creating issues on brian-dlptest/dlptest.com (set via wrangler secret put). */
     GITHUB_TOKEN: string;
+    /** Railway subscribe API key (server-only secret; set via wrangler secret put). */
+    SUBSCRIBE_API_KEY: string;
+    /** Railway subscribe upstream URL (optional override; code has a default). */
+    SUBSCRIBE_API_URL: string;
   }
 }
 
