@@ -8,11 +8,18 @@ const NO_INDEX_HEADER =
 // ────────────────────────────────────────────────────────────────────────────
 // Security headers applied to every response that exits the Worker.
 //
-// CSP allowances are narrow on purpose: the only external resources the
-// browser actually loads are Google Tag Manager and the GA endpoints it
-// chains to. Server-to-server fetches (MailChannels, the Railway subscribe
-// upstream) don't need CSP allowances because they originate from the Worker,
-// not the browser.
+// CSP allowances are narrow on purpose. Browser-loaded externals:
+//   * Google Tag Manager (+ the GA endpoints it chains to) — analytics.
+//   * Cloudflare Turnstile (challenges.cloudflare.com) — the feedback modal's
+//     CAPTCHA. The modal lives in BaseLayout, so it renders on every page;
+//     its api.js (script-src) and challenge iframe (frame-src) must be allowed.
+// Server-to-server fetches (Microsoft Graph for contact email, the Railway
+// subscribe upstream, GitHub issues) don't need CSP allowances because they
+// originate from the Worker, not the browser.
+//
+// NOTE: keep this CSP in sync with `public/_headers`, which applies the same
+// headers to prerendered static pages (the Worker — and thus this middleware —
+// does not run for static asset responses).
 //
 // 'unsafe-inline' is required for both script and style:
 //   * script — the head-of-document theme bootstrap, GTM bootstrap, and
@@ -30,12 +37,12 @@ const CSP_DIRECTIVES = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com",
   "font-src 'self' data:",
   "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
-  "frame-src https://www.googletagmanager.com",
+  "frame-src https://www.googletagmanager.com https://challenges.cloudflare.com",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "upgrade-insecure-requests",
