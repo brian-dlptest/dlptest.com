@@ -489,7 +489,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   }
 </style>
 
-<script define:vars={{ delimDefaults: DELIMITER_DEFAULTS }}>
+<!-- Server-side DELIMITER_DEFAULTS passed to the bundled script as inert JSON data.
+     (Using define:vars on the <script> below would mark it is:inline and skip Astro's
+     TypeScript transpilation, breaking the whole script — see PR fixing the dead buttons.) -->
+<script type="application/json" id="delim-defaults" set:html={JSON.stringify(DELIMITER_DEFAULTS)}></script>
+
+<script>
   // ── Type registry (mirrors FIELD_TYPE_DEFS keys, used for default name suggestions) ──
   const DEFAULT_NAMES: Record<string, string> = {
     "row-number":      "id",
@@ -727,7 +732,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   // ── Builder DOM helpers ──────────────────────────────────────────────────────
 
-  const DELIM_DEFAULTS: Record<string, string> = delimDefaults as Record<string, string>;
+  const DELIM_DEFAULTS: Record<string, string> =
+    JSON.parse(document.getElementById("delim-defaults")?.textContent || "{}");
 
   const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
   const addFieldBtn = document.getElementById("add-field-btn") as HTMLButtonElement;
