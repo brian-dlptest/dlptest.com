@@ -10,10 +10,10 @@
 # Why two rules:
 #   The Cloudflare Pro plan caps http_ratelimit rules at 2 per zone. We
 #   prioritized the two highest-value abuse vectors:
-#     1. Contact + subscribe — real $ cost per request (MailChannels per
-#        email, Railway per subscriber). Combined into one rule with a
-#        soft action so real users with typos pass through after a
-#        managed challenge.
+#     1. Contact + subscribe — real side effects per request (contact sends
+#        email via Microsoft Graph / O365; subscribe writes to the Railway
+#        list). Combined into one rule with a soft action so real users with
+#        typos pass through after a managed challenge.
 #     2. http-post — highest-volume DLP test endpoint; without a ceiling
 #        a malicious client can burn bandwidth / Worker invocations.
 #

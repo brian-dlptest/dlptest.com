@@ -9,12 +9,26 @@ declare namespace Cloudflare {
     ENVIRONMENT: string;
     ASSETS: Fetcher;
     DOWNLOADS: R2Bucket;
-    /** Inbox for /api/contact/ submissions (MailChannels). */
+    /** Inbox for /api/contact/ submissions. */
     CONTACT_TO_EMAIL: string;
-    /** From address on dlptest.com (must be authorized via MailChannels DNS). */
+    /** Mailbox to send AS — also the Microsoft Graph user id for sendMail. */
     CONTACT_FROM_EMAIL: string;
-    /** MailChannels Email API key (paid API; optional if lockdown-only). */
-    MAILCHANNELS_API_KEY: string;
+    /** Entra ID directory/tenant ID for the Graph app registration (secret). */
+    GRAPH_TENANT_ID: string;
+    /** Microsoft Graph app registration client ID (secret). */
+    GRAPH_CLIENT_ID: string;
+    /** Microsoft Graph app registration client secret (secret). */
+    GRAPH_CLIENT_SECRET: string;
+    /** Cloudflare Turnstile site key (public — safe to expose in HTML). */
+    CF_TURNSTILE_SITE_KEY: string;
+    /** Cloudflare Turnstile secret key (server-only — set via wrangler secret put). */
+    CF_TURNSTILE_SECRET_KEY: string;
+    /** GitHub PAT for creating issues on brian-dlptest/dlptest.com (set via wrangler secret put). */
+    GITHUB_TOKEN: string;
+    /** Railway subscribe API key (server-only secret; set via wrangler secret put). */
+    SUBSCRIBE_API_KEY: string;
+    /** Railway subscribe upstream URL (optional override; code has a default). */
+    SUBSCRIBE_API_URL: string;
   }
 }
 

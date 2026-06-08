@@ -1,7 +1,12 @@
-const upstreamUrl =
-  import.meta.env.PUBLIC_SUBSCRIBE_API_URL ??
+import { env } from "cloudflare:workers";
+
+// Upstream the subscribe service POSTs to. The URL isn't secret, so a
+// hardcoded default is fine; SUBSCRIBE_API_URL overrides it to point a given
+// Worker at a different upstream. The API key, however, is read from the
+// Worker's secret store at runtime (set via `wrangler secret put`) and is
+// NEVER inlined into the build — mirroring src/lib/contact-email.ts.
+const DEFAULT_SUBSCRIBE_URL =
   "https://dlp-test-subscribe-email-database-production.up.railway.app/api/contacts";
-const apiKey = import.meta.env.PUBLIC_SUBSCRIBE_API_KEY ?? "";
 
 export type SubscribeResult =
   | { status: "added" }
@@ -15,6 +20,9 @@ export async function addSubscriber(params: {
   name: string;
   company?: string;
 }): Promise<SubscribeResult> {
+  const upstreamUrl = env.SUBSCRIBE_API_URL?.trim() || DEFAULT_SUBSCRIBE_URL;
+  const apiKey = env.SUBSCRIBE_API_KEY?.trim();
+
   if (!apiKey) {
     return { status: "skipped" };
   }

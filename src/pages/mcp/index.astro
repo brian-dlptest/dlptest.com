@@ -3,6 +3,67 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
 export const prerender = true;
 
+const claudeCodeCliExample = `# Add via the Claude Code CLI (one-time setup)
+claude mcp add dlptest --transport http https://mcp.dlptest.com/`;
+
+const claudeCodeJsonExample = `// .claude/settings.json (project) or ~/.claude.json (global)
+{
+  "mcpServers": {
+    "dlptest": {
+      "type": "http",
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+
+const claudeDesktopConfig = `// claude_desktop_config.json
+// macOS: ~/Library/Application Support/Claude/
+// Windows: %APPDATA%\\Claude\\
+{
+  "mcpServers": {
+    "dlptest": {
+      "type": "http",
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+
+const cursorConfig = `// .cursor/mcp.json (project) or ~/.cursor/mcp.json (global)
+{
+  "mcpServers": {
+    "dlptest": {
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+
+const windsurfConfig = `// ~/.codeium/windsurf/mcp_config.json
+{
+  "mcpServers": {
+    "dlptest": {
+      "serverUrl": "https://mcp.dlptest.com/sse"
+    }
+  }
+}`;
+
+const vsCodeConfig = `// .vscode/mcp.json (project root)
+{
+  "servers": {
+    "dlptest": {
+      "type": "http",
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+
+const genericConfig = `{
+  "mcpServers": {
+    "dlptest": {
+      "url": "https://mcp.dlptest.com/"
+    }
+  }
+}`;
+
 const initExample = `# 1. initialize — protocol handshake
 curl -sS -X POST "https://mcp.dlptest.com/" \\
   -H "Content-Type: application/json" \\
@@ -22,7 +83,7 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'`;
 
-const callExample = `# 3. tools/call — invoke a tool
+const callExample = `# 3. tools/call — invoke a tool (response-side DLP test)
 curl -sS -X POST "https://mcp.dlptest.com/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -35,146 +96,504 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
     }
   }'`;
 
-const claudeDesktopConfig = `{
-  "mcpServers": {
-    "dlptest": {
-      "type": "http",
-      "url": "https://mcp.dlptest.com/"
+const echoExample = `# echo_sensitive_data — PII travels in the *request* arguments
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "echo_sensitive_data",
+      "arguments": {
+        "label": "test-run-1",
+        "payload": "Patient: Jane Smith  SSN: 123-45-6789  CCN: 4111111111111111"
+      }
     }
-  }
-}`;
+  }'`;
 
-const cursorConfig = `{
+const promptContextExample = `# generate_prompt_context — simulate RAG / system-prompt PII
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "tools/call",
+    "params": {
+      "name": "generate_prompt_context",
+      "arguments": { "scenario": "medical-record", "count": 3, "format": "text" }
+    }
+  }'`;
+
+const probeExample = `# probe_request — verify DLP is on the right network leg
+curl -sS -X POST "https://mcp.dlptest.com/" \\
+  -H "Content-Type: application/json" \\
+  -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"probe_request","arguments":{}}}'`;
+
+const localConfig = `// Local instance (npm run dev → http://localhost:4321)
+{
   "mcpServers": {
-    "dlptest": {
-      "url": "https://mcp.dlptest.com/"
+    "dlptest-local": {
+      "type": "http",
+      "url": "http://localhost:4321/api/mcp/"
     }
   }
 }`;
 ---
 <BaseLayout
   title="MCP Server Test"
-  description="A public MCP (Model Context Protocol) server that returns synthetic PII, PCI, and PHI data. Use it to test whether your DLP, CASB, or endpoint agent can inspect agentic tool traffic."
+  description="A public MCP (Model Context Protocol) server that returns synthetic PII, PCI, and PHI data. Use it to test whether your DLP, CASB, or endpoint agent can inspect agentic tool traffic — including prompt-side data and unapproved external MCP connections."
 >
   <h1>MCP Server Test</h1>
   <p>
     <strong><code>https://mcp.dlptest.com/</code></strong> is a public
     <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-    server. It exposes the same synthetic PII, PCI, and PHI generators that
-    power the rest of this site, but reachable over the MCP wire protocol
-    instead of an HTML page or a REST endpoint. Point an LLM client at it
-    — Claude Desktop, Cursor, an Anthropic Agent, anything that speaks MCP
-    — and the tool calls will flow over real HTTP that your DLP can inspect.
+    server that exposes the same synthetic PII, PCI, and PHI generators that power this site —
+    but over the MCP wire protocol instead of a web page. Point any MCP-capable agent at it
+    and the tool calls will flow over real HTTP that your DLP can inspect.
   </p>
-
-  <p>
-    The data is fake. Credit-card numbers are Luhn-valid, NHS numbers pass
-    the mod-11 check, ABA routing numbers have the right check digit. None of
-    it corresponds to a real person or account. As with the rest of dlptest.com,
-    nothing you send is stored, logged, or forwarded.
+  <p class="muted small">
+    Data is entirely synthetic. Nothing sent to this endpoint is stored, logged, or forwarded.
+    The endpoint is also reachable at <code>https://dlptest.com/api/mcp/</code> as a fallback.
   </p>
 
   <CyberhavenAd unit="leaderboard" />
 
-  <h2>Why this exists</h2>
-  <p>
-    DLP, CASB, and endpoint vendors increasingly claim that they can inspect
-    "agentic" or "AI tool" traffic. Under the hood, the most common transport
-    for that traffic today is MCP — JSON-RPC 2.0 over HTTP, sometimes with an
-    SSE upgrade. If a product can inspect MCP, it can inspect this endpoint.
-    There are three distinct things to test:
-  </p>
-  <ul>
-    <li>
-      <strong>Network / SSL inspection.</strong> Does your proxy decrypt and
-      scan the response body of a <code>tools/call</code> that returns
-      hundreds of fake SSNs?
-    </li>
-    <li>
-      <strong>Endpoint agent.</strong> Does the agent see the tool call and
-      the data returned to the LLM, or only the final assistant message?
-    </li>
-    <li>
-      <strong>CASB / browser extension.</strong> Does anything flag a request
-      to an unfamiliar external MCP server during the initial handshake?
-    </li>
-  </ul>
+  <!-- ── SETUP ─────────────────────────────────────────────── -->
+  <h2>Setup</h2>
 
-  <h2>Transport</h2>
-  <p>
-    The endpoint speaks the
-    <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a>
-    transport in <em>stateless</em> mode. Each request is a self-contained
-    <code>POST</code> with a JSON-RPC 2.0 body, and the response is a single
-    JSON-RPC reply. No session IDs are issued, no <code>GET</code> stream is
-    held open, and there is no authentication. Cross-origin requests are
-    allowed.
-  </p>
+  <div class="setup-grid">
 
-  <h2>Try it with curl</h2>
-  <pre><code>{initExample}</code></pre>
-  <pre><code>{listExample}</code></pre>
-  <pre><code>{callExample}</code></pre>
+    <div class="setup-card setup-card--difm">
+      <div class="setup-card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <h3>Do It For Me</h3>
+      </div>
+      <p>
+        Download the setup file and drop it anywhere in your repository.
+        When you ask your AI coding agent to set up the DLPTest MCP server, it
+        will use this file to configure the connection.
+      </p>
+      <a href="/mcp-setup-readme.md" download class="download-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download mcp-setup-readme.md
+      </a>
+    </div>
 
-  <h2>Add it to an MCP client</h2>
-  <p>
-    Claude Desktop, Cursor, and most other MCP-capable clients can connect
-    to a remote server with a small config entry. Use whichever the client
-    expects:
-  </p>
-  <h3>Claude Desktop / Anthropic Agent</h3>
-  <pre><code>{claudeDesktopConfig}</code></pre>
-  <h3>Cursor</h3>
-  <pre><code>{cursorConfig}</code></pre>
+    <div class="setup-card setup-card--diy">
+      <div class="setup-card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <h3>Do It Yourself</h3>
+      </div>
+      <p>Pick your tool and follow the steps to connect manually.</p>
 
-  <h2>Available tools</h2>
-  <p>
-    Each tool returns 1–500 rows of synthetic data. Accepts <code>count</code>
-    (integer 1–500, default 50) and <code>format</code> (<code>"json"</code> or
-    <code>"csv"</code>, default <code>"json"</code>).
-  </p>
-  <ul>
-    <li><code>generate_pii_ssn_ccn</code> — name + SSN + credit card</li>
-    <li><code>generate_pii_ssn_dob</code> — name + SSN + date of birth</li>
-    <li><code>generate_pci_credit_card</code> — name + ZIP + CCN + expiry</li>
-    <li><code>generate_pii_email</code> — name + DOB + email</li>
-    <li><code>generate_hipaa_phi</code> — name + DOB + MRN + ICD-10 + CPT + phone</li>
-    <li><code>generate_banking</code> — name + routing + account + phone</li>
-    <li><code>generate_uk_identity</code> — name + UK NI + NHS + DOB</li>
-    <li><code>generate_canada_sin</code> — name + Canadian SIN + province + DOB</li>
-    <li><code>generate_passport</code> — name + passport + country + DOB + expiry</li>
-    <li><code>generate_eu_vat</code> — name + EU VAT + IBAN + country</li>
-    <li><code>generate_npi_provider</code> — name + NPI + DEA + specialty</li>
-    <li><code>generate_driver_license</code> — name + DL + state + DOB</li>
-    <li>
-      <code>generate_custom</code> — arbitrary fields. Takes a <code>fields</code>
-      array of <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code>;
-      same field types as the <a href="/generate/">/generate/</a> page (SSN,
-      credit-card, DOB, email, IPv4, MRN, NPI, IBAN, UK NI, NHS, Canadian SIN,
-      EU VAT, passport, driver's license, and more).
-    </li>
-  </ul>
+      <details class="accordion">
+        <summary>Claude Code <span class="badge">CLI</span></summary>
+        <div class="accordion-body">
+          <p class="step">Step 1 — Run the CLI command (adds to your user config):</p>
+          <pre><code>{claudeCodeCliExample}</code></pre>
+          <p class="step">Step 2 — Or add JSON directly to <code>.claude/settings.json</code> (project) or <code>~/.claude.json</code> (global):</p>
+          <pre><code>{claudeCodeJsonExample}</code></pre>
+          <p class="step">Step 3 — Verify: ask your agent <em>"List the tools on the dlptest MCP server."</em></p>
+        </div>
+      </details>
 
-  <h2>What to look for in your DLP console</h2>
-  <p>
-    After running a few <code>tools/call</code>s — either from curl or from
-    a real MCP client — check whether your DLP product:
-  </p>
-  <ul>
-    <li>Caught the synthetic SSNs, CCNs, or IBANs in the response body.</li>
-    <li>
-      Logged a connection to <code>mcp.dlptest.com</code> as an outbound
-      MCP server.
-    </li>
-    <li>
-      Surfaced the <code>tools/list</code> response, which advertises every
-      tool name and its description (a useful keyword surface for pattern
-      scanners).
-    </li>
-  </ul>
+      <details class="accordion">
+        <summary>Claude Desktop / Anthropic Agent</summary>
+        <div class="accordion-body">
+          <p class="step">Step 1 — Open <code>claude_desktop_config.json</code>:</p>
+          <ul>
+            <li>macOS: <code>~/Library/Application Support/Claude/</code></li>
+            <li>Windows: <code>%APPDATA%\Claude\</code></li>
+          </ul>
+          <p class="step">Step 2 — Add the server entry:</p>
+          <pre><code>{claudeDesktopConfig}</code></pre>
+          <p class="step">Step 3 — Restart Claude Desktop and verify the dlptest tools appear.</p>
+        </div>
+      </details>
 
+      <details class="accordion">
+        <summary>Cursor</summary>
+        <div class="accordion-body">
+          <p class="step">Step 1 — Create or edit <code>.cursor/mcp.json</code> in your project root (or <code>~/.cursor/mcp.json</code> for global access):</p>
+          <pre><code>{cursorConfig}</code></pre>
+          <p class="step">Step 2 — Reload Cursor. The dlptest tools should appear in the MCP panel.</p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Windsurf</summary>
+        <div class="accordion-body">
+          <p class="step">Step 1 — Edit <code>~/.codeium/windsurf/mcp_config.json</code>. Windsurf uses SSE transport, so the URL ends in <code>/sse</code>:</p>
+          <pre><code>{windsurfConfig}</code></pre>
+          <p class="step">Step 2 — Reload Windsurf and confirm the server is listed under MCP Servers.</p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>VS Code <span class="badge">GitHub Copilot</span></summary>
+        <div class="accordion-body">
+          <p class="step">Step 1 — Create <code>.vscode/mcp.json</code> in your project root:</p>
+          <pre><code>{vsCodeConfig}</code></pre>
+          <p class="step">Step 2 — Open the Copilot chat panel. The dlptest tools should appear in the tool list.</p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Other MCP Clients</summary>
+        <div class="accordion-body">
+          <p>Use the standard <code>mcpServers</code> config format your client expects:</p>
+          <pre><code>{genericConfig}</code></pre>
+        </div>
+      </details>
+    </div>
+
+  </div>
+
+  <!-- ── HOW TO USE ─────────────────────────────────────────── -->
+  <h2>How to Use</h2>
+
+  <details class="accordion" open>
+    <summary>Try it with curl</summary>
+    <div class="accordion-body">
+      <p>These three requests cover the full MCP handshake — from protocol init through a tool call.</p>
+      <pre><code>{initExample}</code></pre>
+      <pre><code>{listExample}</code></pre>
+      <pre><code>{callExample}</code></pre>
+    </div>
+  </details>
+
+  <details class="accordion">
+    <summary>Test prompt-side DLP</summary>
+    <div class="accordion-body">
+      <p>
+        Most DLP products only inspect the <em>response</em> body. But in a real agent pipeline,
+        sensitive content can also flow <em>outward</em> in the tool-call arguments — for example,
+        a user pastes a document containing real SSNs and that text gets forwarded as a tool argument.
+      </p>
+      <h4><code>echo_sensitive_data</code> — outbound argument inspection</h4>
+      <p>
+        Accepts any text as a <code>payload</code> argument and echoes it back unchanged.
+        PII travels in the <em>outbound</em> request — a DLP product that only inspects responses will miss it.
+      </p>
+      <pre><code>{echoExample}</code></pre>
+      <h4><code>generate_prompt_context</code> — RAG / system-prompt simulation</h4>
+      <p>
+        Returns prose paragraphs with PII embedded inline, mimicking how sensitive data arrives via
+        RAG retrieval or an injected system prompt. Scenarios: <code>medical-record</code>,
+        <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.
+      </p>
+      <pre><code>{promptContextExample}</code></pre>
+      <h4><code>probe_request</code> — verify interception point</h4>
+      <p>
+        Returns the User-Agent, client IP, and timestamp seen by the server.
+        Use it to confirm your proxy or endpoint agent is on the expected network leg.
+      </p>
+      <pre><code>{probeExample}</code></pre>
+    </div>
+  </details>
+
+  <details class="accordion">
+    <summary>Test with a local instance</summary>
+    <div class="accordion-body">
+      <p>
+        To test <em>internal</em> traffic inspection separately from internet egress,
+        clone this repo and run <code>npm run dev</code>. The MCP endpoint is available
+        at <code>http://localhost:4321/api/mcp/</code>.
+      </p>
+      <pre><code>{localConfig}</code></pre>
+    </div>
+  </details>
+
+  <details class="accordion">
+    <summary>What to look for in your DLP console</summary>
+    <div class="accordion-body">
+      <p>After running a few tool calls, check whether your product:</p>
+      <ul>
+        <li>Caught synthetic SSNs, CCNs, or IBANs in the <strong>response</strong> body.</li>
+        <li>Caught PII in the <strong>request</strong> body (tool-call arguments) — use <code>echo_sensitive_data</code> to test this specifically.</li>
+        <li>Saw PII arriving as prose context, not tabular data — use <code>generate_prompt_context</code>.</li>
+        <li>Logged a connection to <code>mcp.dlptest.com</code> as an outbound MCP server contact.</li>
+        <li>Surfaced the <code>tools/list</code> handshake — a keyword-rich signal for pattern scanners.</li>
+        <li>Flagged the initial connection to an unapproved external MCP endpoint (CASB / network policy).</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- ── TOOLS AVAILABLE ───────────────────────────────────── -->
+  <h2>Tools Available</h2>
   <p class="muted small">
-    The endpoint is also reachable at <code>https://dlptest.com/api/mcp/</code>
-    as a fallback. The subdomain is the canonical URL.
+    Data-generation tools accept <code>count</code> (1–500, default 50) and
+    <code>format</code> (<code>"json"</code> or <code>"csv"</code>, default <code>"json"</code>).
   </p>
+
+  <details class="accordion" open>
+    <summary>Synthetic data generation</summary>
+    <div class="accordion-body">
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>Data returned</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>generate_pii_ssn_ccn</code></td><td>Name + SSN + credit card</td></tr>
+          <tr><td><code>generate_pii_ssn_dob</code></td><td>Name + SSN + date of birth</td></tr>
+          <tr><td><code>generate_pci_credit_card</code></td><td>Name + ZIP + CCN + expiry</td></tr>
+          <tr><td><code>generate_pii_email</code></td><td>Name + DOB + email</td></tr>
+          <tr><td><code>generate_hipaa_phi</code></td><td>Name + DOB + MRN + ICD-10 + CPT + phone</td></tr>
+          <tr><td><code>generate_banking</code></td><td>Name + routing + account + phone</td></tr>
+          <tr><td><code>generate_uk_identity</code></td><td>Name + UK NI + NHS + DOB</td></tr>
+          <tr><td><code>generate_canada_sin</code></td><td>Name + Canadian SIN + province + DOB</td></tr>
+          <tr><td><code>generate_passport</code></td><td>Name + passport + country + DOB + expiry</td></tr>
+          <tr><td><code>generate_eu_vat</code></td><td>Name + EU VAT + IBAN + country</td></tr>
+          <tr><td><code>generate_npi_provider</code></td><td>Name + NPI + DEA + specialty</td></tr>
+          <tr><td><code>generate_driver_license</code></td><td>Name + DL + state + DOB</td></tr>
+          <tr>
+            <td><code>generate_custom</code></td>
+            <td>
+              Arbitrary fields. Takes a <code>fields</code> array of
+              <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code> —
+              same types as the <a href="/generate/">/generate/</a> page.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="accordion">
+    <summary>Prompt-side &amp; diagnostic tools</summary>
+    <div class="accordion-body">
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>echo_sensitive_data</code></td>
+            <td>Echoes a <code>payload</code> string back unchanged. PII travels in the outbound request arguments.</td>
+          </tr>
+          <tr>
+            <td><code>generate_prompt_context</code></td>
+            <td>Returns prose paragraphs with inline PII simulating RAG retrieval or system-prompt injection. Scenarios: <code>medical-record</code>, <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.</td>
+          </tr>
+          <tr>
+            <td><code>probe_request</code></td>
+            <td>Returns User-Agent, client IP, and timestamp to confirm the interception point.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <CyberhavenAd unit="medium-rectangle" />
+
+  <!-- ── BACKGROUND ────────────────────────────────────────── -->
+  <details class="accordion accordion--section">
+    <summary>Background: Why this exists &amp; sanctioned vs unsanctioned servers</summary>
+    <div class="accordion-body">
+      <p>
+        DLP, CASB, and endpoint vendors increasingly claim they can inspect "agentic" or "AI tool"
+        traffic. The most common transport for that traffic today is MCP — JSON-RPC 2.0 over HTTP.
+        There are three distinct vectors to test:
+      </p>
+      <ul>
+        <li><strong>Network / SSL inspection.</strong> Does your proxy decrypt and scan a <code>tools/call</code> response containing hundreds of fake SSNs?</li>
+        <li><strong>Endpoint agent.</strong> Does the agent see both the outbound tool-call arguments <em>and</em> the data returned to the LLM?</li>
+        <li><strong>CASB / browser extension.</strong> Does anything flag a connection to an unfamiliar external MCP server during the initial handshake?</li>
+      </ul>
+      <p>
+        This endpoint is intentionally public and unauthenticated — it represents an <em>unsanctioned</em>
+        external server. A sanctioned internal MCP server, by contrast, requires an
+        <code>Authorization: Bearer &lt;token&gt;</code> header and is reachable only from the corporate
+        network or via VPN. The presence of an auth token flowing to an external endpoint is itself a DLP
+        signal worth alerting on.
+      </p>
+      <p>What your CASB or network DLP should detect when an agent connects here:</p>
+      <ul>
+        <li>An outbound connection to <code>mcp.dlptest.com</code> (or any <code>mcp.*</code> domain not in the approved list).</li>
+        <li>A <code>tools/list</code> response — the fingerprint of an MCP handshake — from an unknown host.</li>
+        <li>Any <code>Authorization</code> token leaving the network to an unapproved destination.</li>
+      </ul>
+      <p>
+        The endpoint speaks the
+        <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a>
+        transport in stateless mode. Each request is a self-contained <code>POST</code>; no session IDs
+        are issued and no <code>GET</code> stream is held open.
+      </p>
+    </div>
+  </details>
+
 </BaseLayout>
+
+<style>
+  /* ── Accordion ─────────────────────────────────────── */
+  .accordion {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin: 0.5rem 0;
+    overflow: hidden;
+  }
+
+  .accordion summary {
+    cursor: pointer;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    user-select: none;
+    background: var(--bg-elev);
+    transition: background var(--transition-fast);
+  }
+
+  .accordion summary::-webkit-details-marker { display: none; }
+
+  .accordion summary::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--text-dim);
+    border-bottom: 2px solid var(--text-dim);
+    transform: rotate(45deg);
+    transition: transform var(--transition-fast);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .accordion[open] > summary::after {
+    transform: rotate(-135deg);
+  }
+
+  .accordion summary:hover {
+    background: var(--surface);
+  }
+
+  .accordion-body {
+    padding: 1rem 1rem 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .accordion-body > *:first-child { margin-top: 0; }
+  .accordion-body > *:last-child  { margin-bottom: 0; }
+
+  .accordion-body pre { margin: 0.75rem 0; }
+
+  .accordion h4 {
+    font-size: 0.9rem;
+    margin: 1.25rem 0 0.35rem;
+    color: var(--text);
+  }
+
+  .accordion--section {
+    margin-top: 2rem;
+    border-color: var(--border);
+  }
+
+  .accordion--section > summary {
+    font-size: 1rem;
+    color: var(--text-dim);
+  }
+
+  /* ── Step labels ───────────────────────────────────── */
+  .step {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin: 1rem 0 0.35rem;
+  }
+  .step:first-child { margin-top: 0; }
+
+  /* ── Badge ─────────────────────────────────────────── */
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15em 0.5em;
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    vertical-align: middle;
+    margin-left: 0.25rem;
+  }
+
+  /* ── Setup grid ────────────────────────────────────── */
+  .setup-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    margin: 1.25rem 0 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .setup-grid { grid-template-columns: 1fr; }
+  }
+
+  .setup-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    background: var(--bg-elev);
+  }
+
+  .setup-card--difm {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg-elev));
+  }
+
+  .setup-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+  }
+
+  .setup-card-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  .setup-card > p {
+    margin-top: 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  .setup-card .accordion {
+    border-color: var(--border);
+  }
+
+  .setup-card .accordion summary {
+    background: var(--bg);
+    font-size: 0.9rem;
+  }
+
+  .setup-card .accordion summary:hover {
+    background: var(--bg-elev);
+  }
+
+  /* ── Download button ───────────────────────────────── */
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background var(--transition-fast), box-shadow var(--transition-fast);
+    margin-top: 0.25rem;
+  }
+
+  .download-btn:hover {
+    background: var(--accent-hover);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+  }
+</style>

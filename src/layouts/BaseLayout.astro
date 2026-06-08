@@ -4,6 +4,7 @@ import SiteAnalytics from "@/components/SiteAnalytics.astro";
 import SiteHeader, { type HeaderNavItem } from "@/components/SiteHeader.astro";
 import SubscribeModal from "@/components/SubscribeModal.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
+import FeedbackModal from "@/components/FeedbackModal.astro";
 import { GTM_CONTAINER_ID } from "@/lib/analytics";
 import { env } from "cloudflare:workers";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
@@ -33,7 +34,9 @@ const nav: Array<{ href: string; label: string }> = [
   { href: "/generate/", label: "Data Generator" },
   { href: "/http-post/", label: "HTTP POST Test" },
   { href: "/ftp-test/", label: "FTP Test" },
-  { href: "/inspect-data/", label: "Classification Test" },
+  { href: "/mcp/", label: "MCP Server" },
+  // Classification Test (/inspect-data/) is hidden from nav until the real UI
+  // ships — page still exists (noindex) but is unlinked. Tracked in issue #44.
   { href: "/blog/", label: "Blog" },
   { href: "/contact/", label: "Contact" },
 ];
@@ -52,6 +55,7 @@ const TOP_LEVEL_PATHS = new Set<string>([
   "/privacy-policy",
   "/terms-and-conditions",
   "/generate",
+  "/mcp",
 ]);
 
 function isActive(href: string) {
@@ -131,7 +135,17 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
           {" · "}
           <a href="/terms-and-conditions/">Terms</a>
           {" · "}
+          <a href="/security-policy/">Security</a>
+          {" · "}
           <a href="/contact/">Contact</a>
+          {" · "}
+          <button
+            type="button"
+            class="feedback-trigger-btn"
+            data-feedback-trigger
+            aria-haspopup="dialog"
+            aria-label="Share feedback — report a bug or suggest a feature"
+          >Have an idea? Found a bug?</button>
           </div>
         </div>
         <div class="site-footer-end">
@@ -140,5 +154,6 @@ const headerNav: HeaderNavItem[] = nav.map((item) => ({
         </div>
       </div>
     </footer>
+    <FeedbackModal />
   </body>
 </html>

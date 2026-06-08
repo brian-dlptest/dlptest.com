@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
-import { FIELD_TYPE_DEFS } from "@/lib/data-generator";
+import { FIELD_TYPE_DEFS, DELIMITER_DEFAULTS } from "@/lib/data-generator";
 import type { FieldTypeKey } from "@/lib/data-generator";
 
 // Build grouped options for the type <select>
@@ -489,7 +489,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   }
 </style>
 
-<script>
+<script define:vars={{ delimDefaults: DELIMITER_DEFAULTS }}>
   // ── Type registry (mirrors FIELD_TYPE_DEFS keys, used for default name suggestions) ──
   const DEFAULT_NAMES: Record<string, string> = {
     "row-number":      "id",
@@ -727,11 +727,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   // ── Builder DOM helpers ──────────────────────────────────────────────────────
 
-  const DELIM_DEFAULTS: Record<string, string> = {
-    "ssn": "-", "credit-card": "-", "dob": "/", "phone": "",
-    "card-expiry": "/", "mrn": "-", "uk-nin": " ", "nhs-number": " ", "canada-sin": "-",
-    "mac-address": ":", "france-insee": " ",
-  };
+  const DELIM_DEFAULTS: Record<string, string> = delimDefaults as Record<string, string>;
 
   const tbody = document.getElementById("builder-body") as HTMLTableSectionElement;
   const addFieldBtn = document.getElementById("add-field-btn") as HTMLButtonElement;
