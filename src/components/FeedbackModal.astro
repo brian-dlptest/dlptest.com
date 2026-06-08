@@ -64,6 +64,23 @@ const siteKey = env.CF_TURNSTILE_SITE_KEY?.trim() || "1x00000000000000000000AA";
         ></textarea>
       </div>
 
+      <!-- Optional GitHub username — links the issue back to the submitter -->
+      <div class="feedback-field">
+        <label class="feedback-field-label" for="feedback-github">GitHub username <span class="feedback-field-optional">(optional)</span></label>
+        <input
+          type="text"
+          id="feedback-github"
+          name="githubUsername"
+          class="feedback-input"
+          placeholder="your-handle"
+          maxlength="40"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+        <span class="feedback-field-hint">Added as a link on the issue so we can follow up. Issues are public.</span>
+      </div>
+
       <!-- Cloudflare Turnstile widget (rendered explicitly via JS) -->
       <div id="cf-turnstile" class="feedback-turnstile"></div>
 
@@ -180,11 +197,13 @@ const siteKey = env.CF_TURNSTILE_SITE_KEY?.trim() || "1x00000000000000000000AA";
       const categoryInput = form.querySelector("input[name='category']:checked");
       const titleInput = form.querySelector("#feedback-title");
       const descInput = form.querySelector("#feedback-description");
+      const githubInput = form.querySelector("#feedback-github");
       const honeypotInput = form.querySelector("input[name='website']");
 
       const category = categoryInput?.value ?? "";
       const title = titleInput?.value?.trim() ?? "";
       const description = descInput?.value?.trim() ?? "";
+      const githubUsername = githubInput?.value?.trim() ?? "";
       const honeypot = honeypotInput?.value ?? "";
 
       if (!category) { setStatus("Please select a category.", "error"); return; }
@@ -199,7 +218,7 @@ const siteKey = env.CF_TURNSTILE_SITE_KEY?.trim() || "1x00000000000000000000AA";
         const res = await fetch("/api/feedback/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ category, title, description, website: honeypot, turnstileToken }),
+          body: JSON.stringify({ category, title, description, githubUsername, website: honeypot, turnstileToken }),
         });
         const data = await res.json();
 

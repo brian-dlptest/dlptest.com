@@ -24,6 +24,9 @@ export const POST: APIRoute = async ({ request }) => {
     typeof body.description === "string" ? body.description.trim() : "";
   const turnstileToken =
     typeof body.turnstileToken === "string" ? body.turnstileToken.trim() : "";
+  // Optional self-attribution. Validated as a real GitHub handle; anything
+  // else (including empty) is treated as anonymous.
+  const githubUser = parseGithubUsername(body.githubUsername);
 
   if (!category || !title || !description || !turnstileToken) {
     return jsonResponse({ ok: false, error: "missing_field" }, 400);
@@ -76,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
         },
         body: JSON.stringify({
           title,
-          body: issueBody(description),
+          body: issueBody(description, githubUser),
           labels: [category],
         }),
       },
@@ -102,17 +105,32 @@ export const POST: APIRoute = async ({ request }) => {
 const FEEDBACK_REPO = "brian-dlptest/dlptest.com";
 
 /**
- * Wrap the user-submitted description for the issue body. The content is
- * untrusted free text rendered as Markdown — note that for the maintainer
- * reading the issue. We don't attempt to neutralise @-mentions; the repo is
- * single-maintainer so stray mentions are low-impact.
+ * Validate an optional, user-supplied GitHub username. Strips a leading "@"
+ * and enforces GitHub's handle rules (1–39 chars, alphanumeric or single
+ * internal hyphens, no leading/trailing hyphen). Returns "" for anything that
+ * doesn't match — so a junk value silently falls back to anonymous rather than
+ * producing a broken profile link.
  */
-function issueBody(description: string): string {
-  return [
-    "_Submitted anonymously via the dlptest.com feedback form._",
-    "",
-    description,
-  ].join("\n");
+function parseGithubUsername(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  const handle = raw.trim().replace(/^@/, "");
+  return /^[a-zA-Z0-9](?:-?[a-zA-Z0-9])*$/.test(handle) && handle.length <= 39
+    ? handle
+    : "";
+}
+
+/**
+ * Wrap the user-submitted description for the issue body. The description is
+ * untrusted free text rendered as Markdown — note that for the maintainer
+ * reading the issue. `githubUser` is already validated; it's rendered as a
+ * plain profile link (NOT a bare @-mention), so a submitter can self-attribute
+ * without us pinging arbitrary GitHub users.
+ */
+function issueBody(description: string, githubUser: string): string {
+  const attribution = githubUser
+    ? `_Submitted via the dlptest.com feedback form by [@${githubUser}](https://github.com/${githubUser})._`
+    : "_Submitted anonymously via the dlptest.com feedback form._";
+  return [attribution, "", description].join("\n");
 }
 
 function jsonResponse(body: unknown, status: number): Response {

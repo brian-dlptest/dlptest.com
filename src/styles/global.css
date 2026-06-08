@@ -537,6 +537,17 @@ textarea { min-height: 6rem; resize: vertical; }
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+.feedback-field-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.75;
+}
+.feedback-field-hint {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  opacity: 0.85;
+}
 /* Category pill radio buttons */
 .feedback-pills {
   display: flex;
