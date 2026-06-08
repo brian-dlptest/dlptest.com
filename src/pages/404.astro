@@ -1,0 +1,89 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+// Prerendered to 404.html; the Cloudflare adapter serves this with a 404
+// status for any route that doesn't match a page or static asset. Important
+// after the WordPress → Workers cutover, when stale inbound links will 404.
+export const prerender = true;
+
+const destinations = [
+  { href: "/", label: "Home" },
+  { href: "/sample-data/", label: "Sample Data Library" },
+  { href: "/generate/", label: "Data Generator" },
+  { href: "/http-post/", label: "HTTP POST Test" },
+  { href: "/ftp-test/", label: "FTP Test" },
+  { href: "/blog/", label: "Blog" },
+  { href: "/contact/", label: "Contact" },
+];
+---
+<BaseLayout
+  title="Page not found"
+  description="The page you’re looking for doesn’t exist."
+  noindex={true}
+>
+  <div class="notfound">
+    <p class="notfound__code">404</p>
+    <h1>Page not found</h1>
+    <p class="notfound__lead">
+      The page you’re looking for doesn’t exist or may have moved. If you
+      followed a link to an older DLPTest.com URL, try one of these instead:
+    </p>
+    <ul class="notfound__links">
+      {destinations.map((d) => (
+        <li><a href={d.href}>{d.label}</a></li>
+      ))}
+    </ul>
+    <p class="notfound__foot">
+      Still stuck? <a href="/contact/">Let us know</a> what you were looking for.
+    </p>
+  </div>
+
+  <style>
+    .notfound {
+      max-width: 40rem;
+      margin: 2rem auto;
+      text-align: center;
+    }
+    .notfound__code {
+      font-size: clamp(3.5rem, 12vw, 6rem);
+      font-weight: 800;
+      line-height: 1;
+      margin: 0;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .notfound h1 {
+      margin: 0.5rem 0 1rem;
+    }
+    .notfound__lead {
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .notfound__links {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+    .notfound__links a {
+      display: inline-block;
+      padding: 0.45rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: border-color var(--transition-fast), color var(--transition-fast);
+    }
+    .notfound__links a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .notfound__foot {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+  </style>
+</BaseLayout>
