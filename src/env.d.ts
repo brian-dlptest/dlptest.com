@@ -29,6 +29,12 @@ declare namespace Cloudflare {
     CF_TURNSTILE_SECRET_KEY: string;
     /** GitHub PAT for creating issues on brian-dlptest/dlptest.com (set via wrangler secret put). */
     GITHUB_TOKEN: string;
+    /** GitHub PAT with contents:write used to publish news posts (secret); falls back to GITHUB_TOKEN. */
+    NEWS_COMMIT_TOKEN: string;
+    /** Cloudflare Access team domain, e.g. "yourteam.cloudflareaccess.com" (for /admin JWT verification). */
+    CF_ACCESS_TEAM_DOMAIN: string;
+    /** Cloudflare Access application Audience (AUD) tag for /admin and /api/news mutations. */
+    CF_ACCESS_AUD: string;
     /** Railway subscribe API key (server-only secret; set via wrangler secret put). */
     SUBSCRIBE_API_KEY: string;
     /** Railway subscribe upstream URL (optional override; code has a default). */

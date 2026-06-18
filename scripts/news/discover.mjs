@@ -68,7 +68,7 @@ function repoSlugs(newsDir) {
 /** Slugs already in the queue (published + rejected + pending). Best-effort. */
 async function fetchKnownSlugs(siteUrl, secret) {
   try {
-    const res = await fetch(new URL("/api/news/candidates", siteUrl), {
+    const res = await fetch(new URL("/api/news/candidates/", siteUrl), {
       headers: { authorization: `Bearer ${secret}` },
     });
     if (!res.ok) {
@@ -188,7 +188,7 @@ async function extract(client, { report, cutoffIso }) {
 }
 
 async function ingest(siteUrl, secret, candidates) {
-  const res = await fetch(new URL("/api/news/candidates", siteUrl), {
+  const res = await fetch(new URL("/api/news/candidates/", siteUrl), {
     method: "POST",
     headers: {
       authorization: `Bearer ${secret}`,

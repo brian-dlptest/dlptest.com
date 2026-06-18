@@ -91,7 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
   // fail the ingest (the candidates are already safely stored).
   let digestSent = false;
   if (insertedDrafts.length > 0) {
-    const reviewUrl = new URL("/admin/news", request.url).toString();
+    const reviewUrl = new URL("/admin/news/", request.url).toString();
     try {
       const digest = await sendNewsDigest(insertedDrafts, reviewUrl);
       digestSent = digest.ok;
