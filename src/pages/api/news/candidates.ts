@@ -3,12 +3,28 @@ import { env } from "cloudflare:workers";
 
 import {
   insertCandidate,
+  knownSlugs,
   SLUG_PATTERN,
   type DraftCandidate,
 } from "@/lib/news-candidates";
 import { sendNewsDigest } from "@/lib/news-digest";
 
 export const prerender = false;
+
+// GET returns every slug already known to the queue (any status) so the
+// discovery job can skip stories it has seen — including ones already rejected,
+// which never appear in the repo. Same Bearer secret as POST.
+export const GET: APIRoute = async ({ request }) => {
+  const auth = await authorize(request);
+  if (auth) return auth;
+  try {
+    const slugs = await knownSlugs();
+    return json({ ok: true, slugs }, 200);
+  } catch (error) {
+    console.error("knownSlugs failed:", error);
+    return json({ ok: false, error: "db_error" }, 500);
+  }
+};
 
 // Ingest endpoint for the daily Claude discovery job (scripts/news/discover.mjs).
 // It POSTs drafted candidates here; we validate, insert them as `pending`, and
@@ -31,15 +47,8 @@ type IncomingCandidate = {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  const secret = env.NEWS_INGEST_SECRET?.trim();
-  if (!secret) {
-    return json({ ok: false, error: "not_configured" }, 503);
-  }
-
-  const provided = bearer(request.headers.get("authorization"));
-  if (!provided || !(await timingSafeEqual(provided, secret))) {
-    return json({ ok: false, error: "unauthorized" }, 401);
-  }
+  const auth = await authorize(request);
+  if (auth) return auth;
 
   let payload: { candidates?: unknown };
   try {
@@ -179,6 +188,20 @@ function httpUrl(value: unknown): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Shared Bearer-secret gate for both verbs. Returns a Response to short-circuit
+ * with on failure, or null when the request is authorized.
+ */
+async function authorize(request: Request): Promise<Response | null> {
+  const secret = env.NEWS_INGEST_SECRET?.trim();
+  if (!secret) return json({ ok: false, error: "not_configured" }, 503);
+  const provided = bearer(request.headers.get("authorization"));
+  if (!provided || !(await timingSafeEqual(provided, secret))) {
+    return json({ ok: false, error: "unauthorized" }, 401);
+  }
+  return null;
 }
 
 function bearer(header: string | null): string | null {

@@ -1,22 +1,21 @@
-name: News discovery (Cursor Cloud Agent)
+name: News discovery (Claude → review queue)
 
-# Daily Cursor Cloud Agent pass: clones NEWS_BASE_REF (default staging),
-# searches for industry stories newer than the newest news pubDate, drafts
-# Markdown posts, commits, opens a PR via @cursor/sdk (autoCreatePR).
+# Daily Claude pass: searches for industry stories newer than the newest news
+# pubDate, drafts Markdown candidate posts, and POSTs them to the site's review
+# queue (/api/news/candidates). No pull requests are opened — candidates wait in
+# D1 for a human Publish/Delete decision on /admin/news (behind Cloudflare
+# Access). The ingest endpoint sends a single digest email when new stories land.
 #
-# Dual publish: the agent opens the staging PR (→ staging.dlptest.com on merge).
-# A follow-up step copies the SAME new markdown onto a branch off main and opens
-# a second PR into main (→ dlptest.com on merge). Same files in both PRs, so the
-# two environments never drift. Both PRs are human-reviewed; nothing auto-merges.
+# Requires (GitHub Actions secrets):
+#   ANTHROPIC_API_KEY   — Claude API key (https://console.anthropic.com)
+#   NEWS_INGEST_SECRET  — must match the wrangler secret of the same name on the
+#                         Worker; authorizes POSTs to the ingest endpoint.
+# Optional:
+#   NEWS_SITE_URL var   — defaults to https://dlptest.com
 #
-# Requires:
-#   Secret CURSOR_API_KEY — https://cursor.com/dashboard/cloud-agents
-#   Repo connected for Cursor Cloud Agents (same dashboard).
-#   Optional secret NEWS_PR_TOKEN (PAT) — lets the prod PR trigger deploy.yml's
-#     typecheck/build checks; without it the port falls back to GITHUB_TOKEN,
-#     whose PRs do not trigger other workflows.
-#
-# Notifications: two GitHub PRs (staging + main) → normal PR alerts.
+# Security note: this workflow runs on `schedule` / `workflow_dispatch` only —
+# NEVER add a `pull_request` trigger, or fork PRs could run it with these
+# secrets.
 
 on:
   schedule:
@@ -25,16 +24,13 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: news-draft-${{ github.repository }}
+  group: news-discovery-${{ github.repository }}
   cancel-in-progress: false
 
 jobs:
-  cursor-news-draft:
-    name: Cursor Cloud Agent → draft PR
+  discover:
+    name: Claude → review queue
     runs-on: ubuntu-latest
-    permissions:
-      contents: write          # port step pushes a branch off main
-      pull-requests: write     # port step opens the prod PR via gh
     steps:
       - uses: actions/checkout@v4
 
@@ -45,63 +41,9 @@ jobs:
 
       - run: npm ci
 
-      - name: Run Cursor Cloud Agent (opens staging PR when stories exist)
-        id: draft
+      - name: Discover and queue candidate posts
         env:
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          NEWS_BASE_REF: staging
-        run: node scripts/news/run-cloud-draft.mjs
-
-      # The agent drafts off staging and opens the staging PR. To publish the
-      # same posts to prod, copy ONLY the newly-added news markdown onto a branch
-      # off main and open a second PR into main — identical files, no drift.
-      # Skipped automatically when the agent created no branch (no stories).
-      - name: Port new posts to a prod (main) PR
-        if: steps.draft.outputs.agent_branch != ''
-        env:
-          AGENT_BRANCH: ${{ steps.draft.outputs.agent_branch }}
-          STAGING_PR_URL: ${{ steps.draft.outputs.staging_pr_url }}
-          # Prefer a PAT so the prod PR triggers deploy.yml's typecheck/build
-          # checks; GITHUB_TOKEN-created PRs do not trigger other workflows.
-          GH_TOKEN: ${{ secrets.NEWS_PR_TOKEN || secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch --no-tags --depth=1 origin "$AGENT_BRANCH" staging main
-
-          # New posts = news files on the agent branch that aren't on staging.
-          NEW_FILES=$(comm -23 \
-            <(git ls-tree -r --name-only "origin/$AGENT_BRANCH" -- src/content/news | sort) \
-            <(git ls-tree -r --name-only origin/staging            -- src/content/news | sort))
-
-          if [ -z "$NEW_FILES" ]; then
-            echo "Agent branch added no new news files vs staging — nothing to port."
-            exit 0
-          fi
-
-          echo "Porting these posts to main:"
-          echo "$NEW_FILES"
-
-          PORT_BRANCH="news/port-to-main-${GITHUB_RUN_ID}"
-          git checkout -B "$PORT_BRANCH" origin/main
-
-          # shellcheck disable=SC2086
-          git checkout "origin/$AGENT_BRANCH" -- $NEW_FILES
-          git add src/content/news
-          git commit -m "feat(news): publish industry posts to prod"
-          git push origin "$PORT_BRANCH"
-
-          BODY=$(printf '%s\n\n%s\n\n%s\n' \
-            "Prod copy of the news posts drafted by the daily Cursor agent." \
-            "Staging PR: ${STAGING_PR_URL:-(none)}" \
-            "Same markdown files as the staging PR — review there first, then merge this to ship to dlptest.com.")
-
-          gh pr create \
-            --base main \
-            --head "$PORT_BRANCH" \
-            --title "feat(news): publish industry posts to prod" \
-            --body "$BODY"
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NEWS_INGEST_SECRET: ${{ secrets.NEWS_INGEST_SECRET }}
+          NEWS_SITE_URL: ${{ vars.NEWS_SITE_URL || 'https://dlptest.com' }}
+        run: node scripts/news/discover.mjs
