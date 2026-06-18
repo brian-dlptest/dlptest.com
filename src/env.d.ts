@@ -9,6 +9,10 @@ declare namespace Cloudflare {
     ENVIRONMENT: string;
     ASSETS: Fetcher;
     DOWNLOADS: R2Bucket;
+    /** D1 database backing the News Review Queue (news_candidates table). */
+    NEWS_DB: D1Database;
+    /** Shared bearer secret the Claude discovery job uses to POST candidates (secret). */
+    NEWS_INGEST_SECRET: string;
     /** Inbox for /api/contact/ submissions. */
     CONTACT_TO_EMAIL: string;
     /** Mailbox to send AS — also the Microsoft Graph user id for sendMail. */
