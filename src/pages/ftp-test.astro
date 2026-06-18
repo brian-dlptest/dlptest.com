@@ -11,11 +11,17 @@ const ftpHost = "ftp.dlptest.com";
 const ftpUser = "dlpuser";
 const ftpPassword = "rNrKYTX9g7z3RgJRmxWuGHbeu";
 const retentionMinutes = 10;
+
+const s3Bucket = "dlptest-public-bucket";
+const s3Region = "us-west-2";
+const s3Endpoint = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com`;
 ---
-<BaseLayout title="FTP Test" description="Public FTP server credentials for testing DLP. Files are kept for 10 minutes then deleted.">
+<BaseLayout title="FTP & S3 Test" description="Public FTP and S3 endpoints for testing DLP. Upload files without authentication; they are automatically deleted after a short retention period.">
   <div class="ftp-layout">
     <div class="ftp-content">
-      <h1>FTP Test</h1>
+      <h1>FTP &amp; S3 Test</h1>
+
+      <h2>FTP</h2>
       <p>
         Public FTP test server for uploading DLP test files. Uploaded files are
         deleted after about {retentionMinutes} minutes.
@@ -39,12 +45,46 @@ const retentionMinutes = 10;
         <a href="/DLP_Test_FTP_FileZilla.xml">DLP_Test_FTP_FileZilla.xml</a>.
       </p>
 
-      <h2>IP block list</h2>
+      <h3>IP block list</h3>
       <p class="muted">
         To limit hosting costs from automated upload abuse, an IP block list is
         enforced. If you believe your address has been blocked in error, use the
         <a href="/contact/">contact page</a>.
       </p>
+
+      <hr />
+
+      <h2>S3</h2>
+      <p>
+        Public S3 bucket for testing cloud-storage DLP policies. No authentication
+        required — upload any file with an HTTP <code>PUT</code>. Objects are
+        automatically deleted after 24–48 hours via a lifecycle rule.
+      </p>
+
+      <table class="ftp-credentials-table">
+        <tbody>
+          <tr><th>Bucket</th><td><code>{s3Bucket}</code></td></tr>
+          <tr><th>Region</th><td><code>{s3Region}</code></td></tr>
+          <tr><th>Endpoint</th><td><code>{s3Endpoint}/FILENAME</code></td></tr>
+          <tr><th>Auth</th><td>None (public PutObject)</td></tr>
+          <tr><th>Retention</th><td>24–48 hours</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Upload (curl)</h3>
+      <pre><code>curl -X PUT --upload-file "/path/to/testfile.txt" \
+  {s3Endpoint}/testfile.txt</code></pre>
+
+      <h3>Download (curl)</h3>
+      <pre><code>curl -O {s3Endpoint}/testfile.txt</code></pre>
+
+      <h3>Upload (Python boto3)</h3>
+      <pre><code>import boto3
+from botocore import UNSIGNED
+from botocore.client import Config
+
+s3 = boto3.client("s3", region_name="{s3Region}", config=Config(signature_version=UNSIGNED))
+s3.upload_file("testfile.txt", "{s3Bucket}", "testfile.txt")</code></pre>
     </div>
 
     <CyberhavenAd unit="skyscraper" />
