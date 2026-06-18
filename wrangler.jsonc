@@ -42,7 +42,7 @@
     {
       "binding": "NEWS_DB",
       "database_name": "dlptest-news",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "da42b130-710b-4023-99b9-b01070a3a675"
     }
   ],
   "env": {
@@ -67,7 +67,7 @@
         {
           "binding": "NEWS_DB",
           "database_name": "dlptest-news",
-          "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+          "database_id": "da42b130-710b-4023-99b9-b01070a3a675"
         }
       ]
     }
