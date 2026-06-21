@@ -1,0 +1,55 @@
+# Static redirects evaluated by the Cloudflare Workers Assets layer.
+#
+# These MUST live here (not in src/middleware.ts): Workers Assets serves static
+# files / the 404 for any path that isn't a real Astro route WITHOUT invoking
+# the Worker, so middleware never runs for these paths in production. The Assets
+# layer DOES honor this file (same mechanism as public/_headers).
+#
+# Format: <from>  <to>  <status>
+
+# ── Legacy WordPress permalinks ──────────────────────────────────────────────
+/https-post/                        /http-post/             301
+/https-post                         /http-post/             301
+/classification/                    /inspect-data/          301
+/classification                     /inspect-data/          301
+/category/news/                     /blog/                  301
+/category/news                      /blog/                  301
+/feed/                              /feed.xml               301
+/feed                               /feed.xml               301
+/comments/feed/                     /feed.xml               301
+/comments/feed                      /feed.xml               301
+/wpautoterms/privacy-policy/        /privacy-policy/        301
+/wpautoterms/privacy-policy         /privacy-policy/        301
+/wpautoterms/terms-and-conditions/  /terms-and-conditions/  301
+/wpautoterms/terms-and-conditions   /terms-and-conditions/  301
+
+# ── Legacy root download permalinks → canonical /downloads/<key> ─────────────
+# Keep in sync with DOWNLOAD_KEYS in src/lib/downloads.ts.
+/sample-data.csv                 /downloads/sample-data.csv                 301
+/sample-data.xls                 /downloads/sample-data.xls                 301
+/sample-data.xlsx                /downloads/sample-data.xlsx                301
+/sample-data.pdf                 /downloads/sample-data.pdf                 301
+/1-MB-Test.docx                  /downloads/1-MB-Test.docx                  301
+/10-MB-Test.docx                 /downloads/10-MB-Test.docx                 301
+/1-MB-Test.xlsx                  /downloads/1-MB-Test.xlsx                  301
+/10-MB-Test.xlsx                 /downloads/10-MB-Test.xlsx                 301
+/30-MB-Test.xlsx                 /downloads/30-MB-Test.xlsx                 301
+/103-MB-Test.xlsx                /downloads/103-MB-Test.xlsx                301
+/111-MB-Test.csv                 /downloads/111-MB-Test.csv                 301
+/334-MB-Test-CSV.csv             /downloads/334-MB-Test-CSV.csv             301
+/AIP_Test_Doc.docx               /downloads/AIP_Test_Doc.docx               301
+/DLP_Test_FTP_FileZilla.xml      /downloads/DLP_Test_FTP_FileZilla.xml      301
+/DLP_Test_FTP_FileZilla_old.xml  /downloads/DLP_Test_FTP_FileZilla_old.xml  301
+/DLP-Test-State-Data.zip         /downloads/DLP-Test-State-Data.zip         301
+/sample-ssndob.csv               /downloads/sample-ssndob.csv               301
+/sample-ssndob.xls               /downloads/sample-ssndob.xls               301
+/sample-ssndob.xlsx              /downloads/sample-ssndob.xlsx              301
+/sample-ssndob.pdf               /downloads/sample-ssndob.pdf               301
+/sample-ccnzip.csv               /downloads/sample-ccnzip.csv               301
+/sample-ccnzip.xls               /downloads/sample-ccnzip.xls               301
+/sample-ccnzip.xlsx              /downloads/sample-ccnzip.xlsx              301
+/sample-ccnzip.pdf               /downloads/sample-ccnzip.pdf               301
+/sample-dobemail.csv             /downloads/sample-dobemail.csv             301
+/sample-dobemail.xls             /downloads/sample-dobemail.xls             301
+/sample-dobemail.xlsx            /downloads/sample-dobemail.xlsx            301
+/sample-dobemail.pdf             /downloads/sample-dobemail.pdf             301
