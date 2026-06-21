@@ -18,21 +18,28 @@ Cloudflare Worker ── D1 `news_candidates` ── digest email (Graph)
 ## One-time setup
 
 ### 1. Create the D1 database + apply the schema
+wrangler is a dev dependency here, so call it with `npx` (or `npx wrangler login`
+first if you aren't authenticated). Run each command on its own line — don't
+paste the `#` comments.
+
 ```sh
-wrangler d1 create dlptest-news          # copy the printed database_id
-# paste it into BOTH database_id fields in wrangler.jsonc (prod + staging env)
-wrangler d1 execute dlptest-news --remote --file=migrations/0001_news_candidates.sql
+npx wrangler d1 create dlptest-news
+```
+Copy the printed `database_id` into BOTH `database_id` fields in `wrangler.jsonc`
+(the top-level block and the `env.staging` block), then:
+```sh
+npx wrangler d1 execute dlptest-news --remote --file=migrations/0001_news_candidates.sql
 ```
 
 ### 2. Worker secrets (Cloudflare)
 ```sh
-wrangler secret put NEWS_INGEST_SECRET   # long random string; shared with GH Actions
-wrangler secret put NEWS_COMMIT_TOKEN    # GitHub PAT with contents:write on brian-dlptest/dlptest.com
-                                         # (optional — falls back to the existing GITHUB_TOKEN)
-wrangler secret put CF_ACCESS_AUD        # Access application Audience (AUD) tag from step 4
-# CF_ACCESS_TEAM_DOMAIN can be a var or secret, e.g. yourteam.cloudflareaccess.com
-# Repeat with `--env staging` for the staging Worker.
+npx wrangler secret put NEWS_INGEST_SECRET   # long random string; shared with GH Actions
+npx wrangler secret put NEWS_COMMIT_TOKEN    # GitHub PAT, contents:write on brian-dlptest/dlptest.com
+                                             # (optional — falls back to the existing GITHUB_TOKEN)
+npx wrangler secret put CF_ACCESS_AUD        # Access application Audience (AUD) tag from step 4
 ```
+`CF_ACCESS_TEAM_DOMAIN` can be a var or secret, e.g. `yourteam.cloudflareaccess.com`.
+Repeat each `secret put` with `--env staging` for the staging Worker.
 
 ### 3. GitHub Actions secrets
 In the repo settings → Secrets and variables → Actions:
@@ -65,7 +72,7 @@ are protected even if a request reaches the origin directly.
 `astro dev` has no Access in front of it, so the admin page is open locally
 (`import.meta.env.DEV` bypass). To see real cards, seed the local D1:
 ```sh
-wrangler d1 execute dlptest-news --local --file=migrations/0001_news_candidates.sql
-wrangler d1 execute dlptest-news --local --file=scripts/news/seed-local.sql
+npx wrangler d1 execute dlptest-news --local --file=migrations/0001_news_candidates.sql
+npx wrangler d1 execute dlptest-news --local --file=scripts/news/seed-local.sql
 npm run dev   # → http://localhost:4321/admin/news/
 ```
