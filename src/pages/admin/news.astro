@@ -1,0 +1,151 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { verifyAccess } from "@/lib/access";
+import { listByStatus, type CandidateRow } from "@/lib/news-candidates";
+
+// Review queue — the single pane for triaging discovered news. Server-rendered
+// and gated by Cloudflare Access (verified again here at the origin). Each
+// pending candidate renders with a full preview and Publish / Delete buttons;
+// Publish commits straight to the live site, Delete drops it for good.
+export const prerender = false;
+
+const access = await verifyAccess(Astro.request);
+if (!access.ok) {
+  // Edge Access should have caught this; if we got here unauthenticated, fail
+  // closed rather than render the queue.
+  return new Response(`Forbidden: ${access.reason}`, { status: access.ok ? 200 : access.status });
+}
+
+let candidates: CandidateRow[] = [];
+let loadError: string | null = null;
+try {
+  candidates = await listByStatus("pending");
+} catch (error) {
+  console.error("[admin/news] failed to load candidates:", error);
+  loadError = "Could not load the review queue (is the D1 database bound?).";
+}
+
+const params = Astro.url.searchParams;
+const published = params.get("published");
+const rejected = params.get("rejected");
+const errorCode = params.get("error");
+
+function fmtDate(iso: string): string {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : d.toISOString().slice(0, 10);
+}
+---
+
+<BaseLayout title="News Review Queue" description="Internal review queue for discovered news.">
+  <h1>News Review Queue</h1>
+  <p class="muted">
+    Stories discovered by the daily Claude pass. Publish commits the post to the
+    live site; Delete removes it from the queue for good.
+    {access.email && <span> Signed in as {access.email}.</span>}
+  </p>
+
+  {published && <div class="flash flash--ok">Published <strong>{published}</strong> to the live site.</div>}
+  {rejected && <div class="flash flash--ok">Deleted <strong>{rejected}</strong>.</div>}
+  {errorCode && <div class="flash flash--err">Action failed: <code>{errorCode}</code></div>}
+  {loadError && <div class="flash flash--err">{loadError}</div>}
+
+  {!loadError && candidates.length === 0 && (
+    <p class="empty">Nothing waiting for review. 🎉</p>
+  )}
+
+  <ul class="queue">
+    {candidates.map((c) => (
+      <li class="card">
+        <header>
+          <h2>{c.title}</h2>
+          <div class="meta">
+            <span>{fmtDate(c.pubDate)}</span>
+            <span>·</span>
+            <span>discovered {fmtDate(c.discoveredAt)}</span>
+            {c.sourceUrl && (
+              <>
+                <span>·</span>
+                <a href={c.sourceUrl} rel="noopener noreferrer nofollow" target="_blank">source</a>
+              </>
+            )}
+          </div>
+        </header>
+
+        {c.why && <p class="why"><strong>Why:</strong> {c.why}</p>}
+
+        <div class="tags">
+          {c.categories.map((cat) => <span class="tag">{cat}</span>)}
+        </div>
+
+        <p class="excerpt">{c.excerpt}</p>
+
+        <details>
+          <summary>Preview the full post ({c.slug}.md)</summary>
+          <pre class="body">{c.body}</pre>
+        </details>
+
+        <div class="actions">
+          <form method="POST" action="/api/news/publish/">
+            <input type="hidden" name="id" value={c.id} />
+            <button type="submit" class="btn btn--publish">Publish</button>
+          </form>
+          <form method="POST" action="/api/news/reject/" onsubmit="return confirm('Delete this candidate? This cannot be undone.')">
+            <input type="hidden" name="id" value={c.id} />
+            <button type="submit" class="btn btn--delete">Delete</button>
+          </form>
+        </div>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  .muted { color: #666; }
+  .flash {
+    padding: 0.6rem 0.9rem;
+    border-radius: 6px;
+    margin: 0.75rem 0;
+    font-size: 0.95rem;
+  }
+  .flash--ok { background: #e7f6ec; border: 1px solid #b6e0c4; }
+  .flash--err { background: #fdecec; border: 1px solid #f3b6b6; }
+  .empty { color: #666; font-size: 1.1rem; padding: 2rem 0; }
+  .queue { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1.25rem; }
+  .card {
+    border: 1px solid #e2e2e2;
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    background: #fff;
+  }
+  .card h2 { margin: 0 0 0.25rem; font-size: 1.2rem; }
+  .meta { color: #777; font-size: 0.85rem; display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+  .why { margin: 0.6rem 0; font-size: 0.95rem; }
+  .tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.5rem 0; }
+  .tag { background: #eef2ff; color: #3340a0; border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.75rem; }
+  .excerpt { color: #333; }
+  details { margin: 0.5rem 0 0.9rem; }
+  summary { cursor: pointer; color: #3340a0; font-size: 0.9rem; }
+  .body {
+    background: #f7f7f9;
+    border: 1px solid #e2e2e2;
+    border-radius: 6px;
+    padding: 0.8rem;
+    margin-top: 0.6rem;
+    max-height: 22rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.85rem;
+  }
+  .actions { display: flex; gap: 0.6rem; }
+  .actions form { margin: 0; }
+  .btn {
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .btn--publish { background: #0b5fff; color: #fff; }
+  .btn--delete { background: #fff; color: #b42318; border: 1px solid #e3a0a0; }
+</style>

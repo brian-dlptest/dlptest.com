@@ -89,28 +89,6 @@ function shouldBlockIndexing(environment: string | undefined, hostname: string):
   return false;
 }
 
-/** Generate the no-index robots.txt body used on staging hosts. */
-function noIndexRobots(): string {
-  return [
-    "# Staging — do not crawl",
-    "User-agent: *",
-    "Disallow: /",
-    "",
-    "# Common AI crawlers",
-    "User-agent: GPTBot",
-    "Disallow: /",
-    "User-agent: Google-Extended",
-    "Disallow: /",
-    "User-agent: ClaudeBot",
-    "Disallow: /",
-    "User-agent: Bytespider",
-    "Disallow: /",
-    "User-agent: CCBot",
-    "Disallow: /",
-    "",
-  ].join("\n");
-}
-
 export const onRequest: MiddlewareHandler = async (context, next) => {
   const url = new URL(context.request.url);
   const hostname = url.hostname;
@@ -130,19 +108,6 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   const normalizedPath = url.pathname.replace(/\/+$/, "") || "/";
   if (normalizedPath === "/https-post") {
     return Response.redirect(new URL("/http-post/", url), 301);
-  }
-
-  // robots.txt — only override the static asset when we want to block crawling.
-  if (url.pathname === "/robots.txt" && blockIndexing) {
-    return setSecurityHeaders(
-      new Response(noIndexRobots(), {
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-          "Cache-Control": "public, max-age=600",
-          "X-Robots-Tag": NO_INDEX_HEADER,
-        },
-      }),
-    );
   }
 
   // Serve R2-backed downloads at both /downloads/<key> and the legacy root path

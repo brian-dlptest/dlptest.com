@@ -32,6 +32,19 @@
   "r2_buckets": [
     { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
   ],
+  // D1 database backing the News Review Queue (news_candidates table). Create it
+  // once with `wrangler d1 create dlptest-news`, then paste the printed
+  // database_id below (and in the staging env). Schema:
+  // migrations/0001_news_candidates.sql. Prod and staging share one database so
+  // there's a single queue to set up; split into a separate staging DB later if
+  // staging testing starts polluting the real queue.
+  "d1_databases": [
+    {
+      "binding": "NEWS_DB",
+      "database_name": "dlptest-news",
+      "database_id": "da42b130-710b-4023-99b9-b01070a3a675"
+    }
+  ],
   "env": {
     "staging": {
       "name": "dlptest-com-staging",
@@ -49,6 +62,13 @@
       },
       "r2_buckets": [
         { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
+      ],
+      "d1_databases": [
+        {
+          "binding": "NEWS_DB",
+          "database_name": "dlptest-news",
+          "database_id": "da42b130-710b-4023-99b9-b01070a3a675"
+        }
       ]
     }
   }

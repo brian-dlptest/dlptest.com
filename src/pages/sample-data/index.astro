@@ -50,6 +50,12 @@ const libraryJson = libraryCategories.map((c) => ({
   description: c.description,
   files: c.files.map((f) => ({ displayName: f.displayName, url: f.url, filename: f.filename })),
 }));
+
+// Serialize as JSON data islands rather than via `define:vars`. A `<script>` with
+// `define:vars` is emitted inline and is NOT bundled by Vite, which would leave the
+// bare-specifier dynamic imports (xlsx / pdf-lib / docx) unresolved in the browser.
+// Escape `<` so a stray "</script>" in the data can't break out of the tag.
+const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003c");
 ---
 <BaseLayout
   title="Sample Data Library"
@@ -380,9 +386,12 @@ const libraryJson = libraryCategories.map((c) => ({
   }
 </style>
 
-<script define:vars={{ datasetsJson, libraryJson }}>
-  const datasets = datasetsJson;
-  const libraryData = libraryJson;
+<script type="application/json" id="datasets-data" set:html={toJsonIsland(datasetsJson)}></script>
+<script type="application/json" id="library-data" set:html={toJsonIsland(libraryJson)}></script>
+
+<script>
+  const datasets = JSON.parse(document.getElementById("datasets-data").textContent);
+  const libraryData = JSON.parse(document.getElementById("library-data").textContent);
 
   const modal = document.getElementById("lib-modal");
   const modalTitle = document.getElementById("modal-title");
