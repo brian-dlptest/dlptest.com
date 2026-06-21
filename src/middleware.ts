@@ -1,18 +1,15 @@
 import type { MiddlewareHandler } from "astro";
 import { env } from "cloudflare:workers";
-import { DOWNLOAD_KEYS, serveR2Object } from "@/lib/downloads";
 
 const NO_INDEX_HEADER =
   "noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate";
 
-// NOTE: legacy permalink *redirects* are NOT handled here — Cloudflare Workers
-// Assets serves static files / the 404 for any non-route path WITHOUT invoking
-// the Worker, so middleware never runs for them. Those live in public/_redirects
-// (Assets layer). R2 downloads under /downloads/* ARE handled here, but only
-// work because the generated wrangler config sets assets.run_worker_first for
-// "/downloads/*" (injected by scripts/patch-wrangler-assets.mjs) so the Worker —
-// and thus this middleware — runs first for those paths, ahead of Astro's
-// trailing-slash routing.
+// NOTE: legacy permalink redirects and R2 file downloads are NOT handled here.
+// Cloudflare Workers Assets serves static files / the 404 for any path that
+// isn't a real Astro route (notably extension-bearing paths) WITHOUT invoking
+// the Worker, so middleware never runs for them. Redirects live in
+// public/_redirects (Assets layer); downloads are served by the extensionless
+// route src/pages/downloads/index.ts (/downloads/?file=<key>).
 
 // ────────────────────────────────────────────────────────────────────────────
 // Security headers applied to every response that exits the Worker.
@@ -111,20 +108,6 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   // standard Astro API route.
   if (hostname === "mcp.dlptest.com" || hostname.startsWith("mcp.")) {
     return context.rewrite("/api/mcp/");
-  }
-
-  // Serve R2-backed downloads at /downloads/<key>. Runs ahead of Astro routing
-  // (so the trailing-slash policy doesn't reject the extension-bearing URL).
-  // Requires assets.run_worker_first to cover "/downloads/*" — see the note at
-  // the top of this file. Legacy root permalinks (/sample-data.csv, …) 301 here
-  // via public/_redirects.
-  if (env.DOWNLOADS && url.pathname.startsWith("/downloads/")) {
-    const key = url.pathname.slice("/downloads/".length).replace(/\/+$/, "");
-    if (key && DOWNLOAD_KEYS.has(key)) {
-      return setSecurityHeaders(
-        await serveR2Object(env.DOWNLOADS, key, context.request),
-      );
-    }
   }
 
   const response = await next();
