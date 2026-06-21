@@ -51,4 +51,21 @@ export const libraryCategories: LibraryCategory[] = [
       { filename: "U.S._passport_card.jpg", displayName: "U.S. Passport Card", url: "/library/passport-images/U.S._passport_card.jpg" },
     ],
   },
+  {
+    id: "large-files",
+    label: "Large Files",
+    description: "Large multi-megabyte files for throughput, upload-limit, and performance DLP testing",
+    // Served from the R2 bucket via src/middleware.ts, not from /public.
+    // Filenames must stay in sync with DOWNLOAD_KEYS in src/lib/downloads.ts.
+    basePath: "/downloads",
+    files: [
+      { filename: "10-MB-Test.xlsx", displayName: "10 MB — Excel (.xlsx)", url: "/downloads/10-MB-Test.xlsx" },
+      { filename: "10-MB-Test.docx", displayName: "10 MB — Word (.docx)", url: "/downloads/10-MB-Test.docx" },
+      { filename: "30-MB-Test.xlsx", displayName: "30 MB — Excel (.xlsx)", url: "/downloads/30-MB-Test.xlsx" },
+      { filename: "DLP-Test-State-Data.zip", displayName: "69 MB — State Data (.zip)", url: "/downloads/DLP-Test-State-Data.zip" },
+      { filename: "103-MB-Test.xlsx", displayName: "103 MB — Excel (.xlsx)", url: "/downloads/103-MB-Test.xlsx" },
+      { filename: "111-MB-Test.csv", displayName: "111 MB — CSV (.csv)", url: "/downloads/111-MB-Test.csv" },
+      { filename: "334-MB-Test-CSV.csv", displayName: "334 MB — CSV (.csv)", url: "/downloads/334-MB-Test-CSV.csv" },
+    ],
+  },
 ];
