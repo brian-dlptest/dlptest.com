@@ -5,23 +5,14 @@ import { DOWNLOAD_KEYS, serveR2Object } from "@/lib/downloads";
 const NO_INDEX_HEADER =
   "noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate";
 
-// Legacy WordPress permalinks → their new locations on the Astro/Worker site.
-// Applied as 301s in onRequest. Keys are paths with trailing slashes stripped.
-//   - /https-post  : the HTTP/HTTPS post tests were merged into one page.
-//   - /classification : the inspect-data classifier isn't ported yet; point at
-//                       the placeholder so the URL doesn't 404 post-cutover.
-//   - /feed, /comments/feed : WordPress RSS → the new /feed.xml.
-//   - /category/news : WordPress category archive → the blog index.
-//   - /wpautoterms/* : legacy auto-generated legal pages → the new legal pages.
-const LEGACY_REDIRECTS: Record<string, string> = {
-  "/https-post": "/http-post/",
-  "/classification": "/inspect-data/",
-  "/feed": "/feed.xml",
-  "/comments/feed": "/feed.xml",
-  "/category/news": "/blog/",
-  "/wpautoterms/privacy-policy": "/privacy-policy/",
-  "/wpautoterms/terms-and-conditions": "/terms-and-conditions/",
-};
+// NOTE: legacy permalink *redirects* are NOT handled here — Cloudflare Workers
+// Assets serves static files / the 404 for any non-route path WITHOUT invoking
+// the Worker, so middleware never runs for them. Those live in public/_redirects
+// (Assets layer). R2 downloads under /downloads/* ARE handled here, but only
+// work because the generated wrangler config sets assets.run_worker_first for
+// "/downloads/*" (injected by scripts/patch-wrangler-assets.mjs) so the Worker —
+// and thus this middleware — runs first for those paths, ahead of Astro's
+// trailing-slash routing.
 
 // ────────────────────────────────────────────────────────────────────────────
 // Security headers applied to every response that exits the Worker.
@@ -122,35 +113,17 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     return context.rewrite("/api/mcp/");
   }
 
-  // Legacy permalinks from the WordPress site, 301'd to their new homes so the
-  // WordPress→Worker domain cutover doesn't break inbound links or SEO. Keyed by
-  // path with trailing slash(es) stripped.
-  const normalizedPath = url.pathname.replace(/\/+$/, "") || "/";
-  const legacyTarget = LEGACY_REDIRECTS[normalizedPath];
-  if (legacyTarget) {
-    return Response.redirect(new URL(legacyTarget, url), 301);
-  }
-
-  // Serve R2-backed downloads at both /downloads/<key> and the legacy root path
-  // /<key> (e.g. /sample-data.csv, /334-MB-Test-CSV.csv). This preserves
-  // permalinks that exist in the wild while letting us host the actual
-  // bytes in R2 instead of bundling them with the Worker.
-  if (env.DOWNLOADS) {
-    const downloadsPrefix = "/downloads/";
-    if (url.pathname.startsWith(downloadsPrefix)) {
-      const key = url.pathname.slice(downloadsPrefix.length);
-      if (key && DOWNLOAD_KEYS.has(key)) {
-        return setSecurityHeaders(
-          await serveR2Object(env.DOWNLOADS, key, context.request),
-        );
-      }
-    } else {
-      const key = url.pathname.replace(/^\//, "");
-      if (key && DOWNLOAD_KEYS.has(key)) {
-        return setSecurityHeaders(
-          await serveR2Object(env.DOWNLOADS, key, context.request),
-        );
-      }
+  // Serve R2-backed downloads at /downloads/<key>. Runs ahead of Astro routing
+  // (so the trailing-slash policy doesn't reject the extension-bearing URL).
+  // Requires assets.run_worker_first to cover "/downloads/*" — see the note at
+  // the top of this file. Legacy root permalinks (/sample-data.csv, …) 301 here
+  // via public/_redirects.
+  if (env.DOWNLOADS && url.pathname.startsWith("/downloads/")) {
+    const key = url.pathname.slice("/downloads/".length).replace(/\/+$/, "");
+    if (key && DOWNLOAD_KEYS.has(key)) {
+      return setSecurityHeaders(
+        await serveR2Object(env.DOWNLOADS, key, context.request),
+      );
     }
   }
 

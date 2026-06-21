@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build:staging": "CLOUDFLARE_ENV=staging astro build",
+    "build": "astro build && node scripts/patch-wrangler-assets.mjs",
+    "build:staging": "CLOUDFLARE_ENV=staging astro build && node scripts/patch-wrangler-assets.mjs",
     "preview": "wrangler dev --config dist/server/wrangler.json",
     "sync": "astro sync",
     "check": "astro sync && tsc --noEmit",
