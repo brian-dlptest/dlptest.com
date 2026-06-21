@@ -1197,9 +1197,18 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
     position: sticky;
     top: 1rem;
   }
+  /* Skyscraper is the desktop sidebar; hide the mobile leaderboard. */
+  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--leaderboard {
+    display: none;
+  }
 }
 @media (max-width: 899px) {
+  /* A 160x600 skyscraper stretched full-width looks bad on narrow screens;
+     swap it for the 970x250 leaderboard, which scales down gracefully. */
   .cyberhaven-ad-layout--sidebar .cyberhaven-ad--skyscraper {
+    display: none;
+  }
+  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--leaderboard {
     order: -1;
     margin-bottom: 0;
   }
