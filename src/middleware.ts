@@ -5,6 +5,24 @@ import { DOWNLOAD_KEYS, serveR2Object } from "@/lib/downloads";
 const NO_INDEX_HEADER =
   "noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate";
 
+// Legacy WordPress permalinks → their new locations on the Astro/Worker site.
+// Applied as 301s in onRequest. Keys are paths with trailing slashes stripped.
+//   - /https-post  : the HTTP/HTTPS post tests were merged into one page.
+//   - /classification : the inspect-data classifier isn't ported yet; point at
+//                       the placeholder so the URL doesn't 404 post-cutover.
+//   - /feed, /comments/feed : WordPress RSS → the new /feed.xml.
+//   - /category/news : WordPress category archive → the blog index.
+//   - /wpautoterms/* : legacy auto-generated legal pages → the new legal pages.
+const LEGACY_REDIRECTS: Record<string, string> = {
+  "/https-post": "/http-post/",
+  "/classification": "/inspect-data/",
+  "/feed": "/feed.xml",
+  "/comments/feed": "/feed.xml",
+  "/category/news": "/blog/",
+  "/wpautoterms/privacy-policy": "/privacy-policy/",
+  "/wpautoterms/terms-and-conditions": "/terms-and-conditions/",
+};
+
 // ────────────────────────────────────────────────────────────────────────────
 // Security headers applied to every response that exits the Worker.
 //
@@ -104,10 +122,13 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     return context.rewrite("/api/mcp/");
   }
 
-  // Legacy permalink: /https-post/ merged into /http-post/
+  // Legacy permalinks from the WordPress site, 301'd to their new homes so the
+  // WordPress→Worker domain cutover doesn't break inbound links or SEO. Keyed by
+  // path with trailing slash(es) stripped.
   const normalizedPath = url.pathname.replace(/\/+$/, "") || "/";
-  if (normalizedPath === "/https-post") {
-    return Response.redirect(new URL("/http-post/", url), 301);
+  const legacyTarget = LEGACY_REDIRECTS[normalizedPath];
+  if (legacyTarget) {
+    return Response.redirect(new URL(legacyTarget, url), 301);
   }
 
   // Serve R2-backed downloads at both /downloads/<key> and the legacy root path

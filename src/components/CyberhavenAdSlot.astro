@@ -16,7 +16,11 @@ const inlineUnits = units.filter((u) => u !== "skyscraper");
     <div class="cyberhaven-ad-main">
       <slot />
     </div>
+    {/* Skyscraper sidebar on desktop; a leaderboard replaces it on narrow
+        viewports, where a 160x600 unit stretched full-width looks bad. CSS
+        toggles which one is visible at the 900px breakpoint. */}
     <CyberhavenAd unit="skyscraper" />
+    <CyberhavenAd unit="leaderboard" />
   </div>
 ) : (
   <slot />
