@@ -1,0 +1,59 @@
+# Static redirects evaluated by the Cloudflare Workers Assets layer.
+#
+# These MUST live here (not in src/middleware.ts): Workers Assets serves static
+# files / the 404 for any path that isn't a real Astro route WITHOUT invoking
+# the Worker, so middleware never runs for these paths in production. The Assets
+# layer DOES honor this file (same mechanism as public/_headers).
+#
+# Format: <from>  <to>  <status>
+
+# ── Legacy WordPress permalinks ──────────────────────────────────────────────
+/https-post/                        /http-post/             301
+/https-post                         /http-post/             301
+/classification/                    /inspect-data/          301
+/classification                     /inspect-data/          301
+/category/news/                     /blog/                  301
+/category/news                      /blog/                  301
+/feed/                              /feed.xml               301
+/feed                               /feed.xml               301
+/comments/feed/                     /feed.xml               301
+/comments/feed                      /feed.xml               301
+/wpautoterms/privacy-policy/        /privacy-policy/        301
+/wpautoterms/privacy-policy         /privacy-policy/        301
+/wpautoterms/terms-and-conditions/  /terms-and-conditions/  301
+/wpautoterms/terms-and-conditions   /terms-and-conditions/  301
+
+# ── Legacy root download permalinks ──────────────────────────────────────────
+# Old WordPress served sample files at the site root (e.g. /sample-data.csv,
+# /334-MB-Test-CSV.csv). The new site generates sample data client-side and
+# serves the large prebuilt files from the Large Files card — both live on
+# /sample-data/. Point any stray old links there instead of 404ing.
+# Keep in sync with DOWNLOAD_KEYS in src/lib/downloads.ts.
+/sample-data.csv                 /sample-data/  301
+/sample-data.xls                 /sample-data/  301
+/sample-data.xlsx                /sample-data/  301
+/sample-data.pdf                 /sample-data/  301
+/1-MB-Test.docx                  /sample-data/  301
+/10-MB-Test.docx                 /sample-data/  301
+/1-MB-Test.xlsx                  /sample-data/  301
+/10-MB-Test.xlsx                 /sample-data/  301
+/30-MB-Test.xlsx                 /sample-data/  301
+/103-MB-Test.xlsx                /sample-data/  301
+/111-MB-Test.csv                 /sample-data/  301
+/334-MB-Test-CSV.csv             /sample-data/  301
+/AIP_Test_Doc.docx               /sample-data/  301
+/DLP_Test_FTP_FileZilla.xml      /sample-data/  301
+/DLP_Test_FTP_FileZilla_old.xml  /sample-data/  301
+/DLP-Test-State-Data.zip         /sample-data/  301
+/sample-ssndob.csv               /sample-data/  301
+/sample-ssndob.xls               /sample-data/  301
+/sample-ssndob.xlsx              /sample-data/  301
+/sample-ssndob.pdf               /sample-data/  301
+/sample-ccnzip.csv               /sample-data/  301
+/sample-ccnzip.xls               /sample-data/  301
+/sample-ccnzip.xlsx              /sample-data/  301
+/sample-ccnzip.pdf               /sample-data/  301
+/sample-dobemail.csv             /sample-data/  301
+/sample-dobemail.xls             /sample-data/  301
+/sample-dobemail.xlsx            /sample-data/  301
+/sample-dobemail.pdf             /sample-data/  301
