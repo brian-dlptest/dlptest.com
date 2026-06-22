@@ -4,14 +4,14 @@ import CyberhavenAd from "@/components/CyberhavenAd.astro";
 export const prerender = true;
 
 const claudeCodeCliExample = `# Add via the Claude Code CLI (one-time setup)
-claude mcp add dlptest --transport http https://mcp.dlptest.com/`;
+claude mcp add dlptest --transport http https://mcp.dlptest.com/api/mcp/`;
 
 const claudeCodeJsonExample = `// .claude/settings.json (project) or ~/.claude.json (global)
 {
   "mcpServers": {
     "dlptest": {
       "type": "http",
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }`;
@@ -23,7 +23,7 @@ const claudeDesktopConfig = `// claude_desktop_config.json
   "mcpServers": {
     "dlptest": {
       "type": "http",
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }`;
@@ -32,7 +32,7 @@ const cursorConfig = `// .cursor/mcp.json (project) or ~/.cursor/mcp.json (globa
 {
   "mcpServers": {
     "dlptest": {
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }`;
@@ -41,7 +41,7 @@ const windsurfConfig = `// ~/.codeium/windsurf/mcp_config.json
 {
   "mcpServers": {
     "dlptest": {
-      "serverUrl": "https://mcp.dlptest.com/sse"
+      "serverUrl": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }`;
@@ -51,7 +51,7 @@ const vsCodeConfig = `// .vscode/mcp.json (project root)
   "servers": {
     "dlptest": {
       "type": "http",
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }`;
@@ -59,13 +59,13 @@ const vsCodeConfig = `// .vscode/mcp.json (project root)
 const genericConfig = `{
   "mcpServers": {
     "dlptest": {
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }`;
 
 const initExample = `# 1. initialize — protocol handshake
-curl -sS -X POST "https://mcp.dlptest.com/" \\
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
     "jsonrpc": "2.0",
@@ -79,12 +79,12 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
   }'`;
 
 const listExample = `# 2. tools/list — discover available tools
-curl -sS -X POST "https://mcp.dlptest.com/" \\
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'`;
 
 const callExample = `# 3. tools/call — invoke a tool (response-side DLP test)
-curl -sS -X POST "https://mcp.dlptest.com/" \\
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
     "jsonrpc": "2.0",
@@ -97,7 +97,7 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
   }'`;
 
 const echoExample = `# echo_sensitive_data — PII travels in the *request* arguments
-curl -sS -X POST "https://mcp.dlptest.com/" \\
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
     "jsonrpc": "2.0",
@@ -113,7 +113,7 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
   }'`;
 
 const promptContextExample = `# generate_prompt_context — simulate RAG / system-prompt PII
-curl -sS -X POST "https://mcp.dlptest.com/" \\
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
     "jsonrpc": "2.0",
@@ -126,7 +126,7 @@ curl -sS -X POST "https://mcp.dlptest.com/" \\
   }'`;
 
 const probeExample = `# probe_request — verify DLP is on the right network leg
-curl -sS -X POST "https://mcp.dlptest.com/" \\
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"probe_request","arguments":{}}}'`;
 
@@ -146,7 +146,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
 >
   <h1>MCP Server Test</h1>
   <p>
-    <strong><code>https://mcp.dlptest.com/</code></strong> is a public
+    <strong><code>https://mcp.dlptest.com/api/mcp/</code></strong> is a public
     <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
     server that exposes the same synthetic PII, PCI, and PHI generators that power this site —
     but over the MCP wire protocol instead of a web page. Point any MCP-capable agent at it
