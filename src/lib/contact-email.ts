@@ -5,6 +5,7 @@ const GRAPH_SCOPE = "https://graph.microsoft.com/.default";
 export type ContactEmailPayload = {
   name: string;
   email: string;
+  company?: string;
   subject: string;
   message: string;
 };
@@ -63,6 +64,7 @@ export async function sendContactEmail(
   const text = [
     `Name: ${payload.name}`,
     `Email: ${payload.email}`,
+    ...(payload.company ? [`Company: ${payload.company}`] : []),
     "",
     payload.message,
   ].join("\n");
