@@ -12,7 +12,7 @@
 ## MCP Endpoint
 
 ```
-https://mcp.dlptest.com/
+https://mcp.dlptest.com/api/mcp/
 ```
 
 Stateless Streamable HTTP transport (MCP spec 2025-06-18). No authentication required. Cross-origin requests allowed.
@@ -52,7 +52,7 @@ All data-generation tools accept `count` (1–500, default 50) and `format` (`"j
 ### Claude Code (CLI)
 
 ```bash
-claude mcp add dlptest --transport http https://mcp.dlptest.com/
+claude mcp add dlptest --transport http https://mcp.dlptest.com/api/mcp/
 ```
 
 Or add to `.claude/settings.json` (project) or `~/.claude.json` (global):
@@ -62,7 +62,7 @@ Or add to `.claude/settings.json` (project) or `~/.claude.json` (global):
   "mcpServers": {
     "dlptest": {
       "type": "http",
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }
@@ -77,7 +77,7 @@ Add to `claude_desktop_config.json` (`~/Library/Application Support/Claude/` on 
   "mcpServers": {
     "dlptest": {
       "type": "http",
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }
@@ -91,7 +91,7 @@ Add to `.cursor/mcp.json` (project root) or `~/.cursor/mcp.json` (global):
 {
   "mcpServers": {
     "dlptest": {
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }
@@ -105,7 +105,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "dlptest": {
-      "serverUrl": "https://mcp.dlptest.com/sse"
+      "serverUrl": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }
@@ -120,7 +120,7 @@ Add to `.vscode/mcp.json` in your project root:
   "servers": {
     "dlptest": {
       "type": "http",
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }
@@ -132,7 +132,7 @@ Add to `.vscode/mcp.json` in your project root:
 {
   "mcpServers": {
     "dlptest": {
-      "url": "https://mcp.dlptest.com/"
+      "url": "https://mcp.dlptest.com/api/mcp/"
     }
   }
 }
