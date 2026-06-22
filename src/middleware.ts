@@ -100,14 +100,24 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   const hostname = url.hostname;
   const blockIndexing = shouldBlockIndexing(env.ENVIRONMENT, hostname);
 
-  // MCP subdomain: route every request on mcp.dlptest.com (and any
-  // mcp.* preview host) to the single MCP endpoint at /api/mcp. The
-  // subdomain is configured as a Custom Domain in the Cloudflare dashboard
-  // and points at the same Worker; this rewrite lets the canonical URL be
-  // `https://mcp.dlptest.com/` while keeping the implementation as a
-  // standard Astro API route.
+  // MCP subdomain: route requests on mcp.dlptest.com (and any mcp.* preview
+  // host) to the single MCP endpoint at /api/mcp/. The subdomain is configured
+  // as a Custom Domain in the Cloudflare dashboard and points at the same
+  // Worker; this rewrite lets the implementation stay a standard Astro API
+  // route while clients connect to the mcp.* host.
+  //
+  // The `pathname !== "/api/mcp/"` guard is essential: context.rewrite re-runs
+  // the middleware chain against the new path, so rewriting unconditionally
+  // makes a request that *does* reach the Worker at /api/mcp/ rewrite to
+  // itself forever (HTTP 508 Loop Detected). Requests for static-asset paths
+  // (including the bare host root `/`) are served by the Cloudflare Assets
+  // layer before the Worker runs — see the NOTE at the top of this file — so
+  // they never reach here; the canonical subdomain endpoint that works is
+  // https://mcp.dlptest.com/api/mcp/.
   if (hostname === "mcp.dlptest.com" || hostname.startsWith("mcp.")) {
-    return context.rewrite("/api/mcp/");
+    if (url.pathname !== "/api/mcp/") {
+      return context.rewrite("/api/mcp/");
+    }
   }
 
   const response = await next();
