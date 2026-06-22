@@ -20,6 +20,10 @@ export const prerender = true;
         <input id="c-email" name="email" type="email" autocomplete="email" required />
       </div>
       <div class="field">
+        <label for="c-company">Company <span class="optional">(optional)</span></label>
+        <input id="c-company" name="company" type="text" autocomplete="organization" />
+      </div>
+      <div class="field">
         <label for="c-subject">Subject</label>
         <input id="c-subject" name="subject" type="text" required />
       </div>
@@ -132,6 +136,7 @@ export const prerender = true;
     #contact-form { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin: 0; }
     #contact-form .field { margin-bottom: 1rem; }
     #contact-form label { display: block; font-weight: 500; margin-bottom: 0.35rem; }
+    #contact-form .optional { color: var(--text-dim); font-weight: 400; }
     #contact-form .field--checkbox { margin-bottom: 1.25rem; }
     #contact-form .checkbox-label {
       display: flex;

@@ -19,6 +19,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const name = (form.get("name") || "").toString().trim();
   const email = (form.get("email") || "").toString().trim();
+  const company = (form.get("company") || "").toString().trim();
   const subject = (form.get("subject") || "").toString().trim();
   const message = (form.get("message") || "").toString().trim();
   const subscribeUpdates = form.get("subscribe_updates") != null;
@@ -27,7 +28,13 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse({ ok: false, error: "missing_field" }, 400);
   }
 
-  const mail = await sendContactEmail({ name, email, subject, message });
+  const mail = await sendContactEmail({
+    name,
+    email,
+    company: company || undefined,
+    subject,
+    message,
+  });
   if (!mail.ok) {
     const status = mail.reason === "not_configured" ? 503 : 502;
     return jsonResponse(
@@ -37,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (subscribeUpdates) {
-    await addSubscriber({ email, name });
+    await addSubscriber({ email, name, company: company || undefined });
   }
 
   return jsonResponse({ ok: true, message: "received" }, 200);
