@@ -130,6 +130,19 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"probe_request","arguments":{}}}'`;
 
+const listPatternsExample = `# list_dlp_patterns — browse the curated DLP regex library
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 7,
+    "method": "tools/call",
+    "params": {
+      "name": "list_dlp_patterns",
+      "arguments": { "category": "Financial / PCI", "format": "csv" }
+    }
+  }'`;
+
 const localConfig = `// Local instance (npm run dev → http://localhost:4321)
 {
   "mcpServers": {
@@ -294,6 +307,20 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
   </details>
 
   <details class="accordion">
+    <summary>Browse the DLP regex library</summary>
+    <div class="accordion-body">
+      <p>
+        <code>list_dlp_patterns</code> returns a curated library of DLP-relevant regular
+        expressions — SSN, credit card, IBAN, MRN, API keys, network identifiers, and
+        international government IDs — each with a sample string it matches. The same library
+        will power the Regex Test page. Filter by <code>category</code> or a
+        free-text <code>search</code>; choose <code>json</code> or <code>csv</code> output.
+      </p>
+      <pre><code>{listPatternsExample}</code></pre>
+    </div>
+  </details>
+
+  <details class="accordion">
     <summary>Test with a local instance</summary>
     <div class="accordion-body">
       <p>
@@ -379,6 +406,28 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
           <tr>
             <td><code>probe_request</code></td>
             <td>Returns User-Agent, client IP, and timestamp to confirm the interception point.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <details class="accordion">
+    <summary>Regex &amp; DLP pattern library</summary>
+    <div class="accordion-body">
+      <table>
+        <thead>
+          <tr><th>Tool</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>list_dlp_patterns</code></td>
+            <td>
+              Returns the curated DLP regex library (id, name, category, ECMAScript
+              <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that will
+              also back the Regex Test page. Optional <code>category</code> and
+              <code>search</code> filters; <code>json</code> or <code>csv</code> output.
+            </td>
           </tr>
         </tbody>
       </table>
