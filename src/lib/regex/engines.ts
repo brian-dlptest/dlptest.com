@@ -54,6 +54,13 @@ export interface RunOptions {
   maxPatternLength?: number;
 }
 
+export interface ReplaceResult {
+  ok: boolean;
+  error: string | null;
+  engine: RegexEngine;
+  output: string;
+}
+
 /** Generous client-side defaults; the MCP tool passes tighter caps. */
 export const DEFAULT_LIMITS = {
   maxMatches: 10_000,
@@ -264,4 +271,68 @@ function runRe2(
   }
 
   return { ok: true, error: null, engine: "re2", global, matches, truncated };
+}
+
+// ─── Substitution / replace ──────────────────────────────────────────────────
+
+/**
+ * Apply a replacement to text. ECMAScript and RE2 only (PCRE replace is
+ * browser-only and lives in pcre.ts). Replacement syntax follows the engine:
+ * ECMAScript uses $1 / $<name>; RE2 (Java-style) uses $1 / ${name}.
+ */
+export function runReplace(
+  engine: RegexEngine,
+  pattern: string,
+  flags: string,
+  text: string,
+  replacement: string,
+  opts: RunOptions = {},
+): ReplaceResult {
+  const maxInputLength = opts.maxInputLength ?? DEFAULT_LIMITS.maxInputLength;
+  const maxPatternLength = opts.maxPatternLength ?? DEFAULT_LIMITS.maxPatternLength;
+  const global = flags.includes("g");
+
+  if (engine === "pcre") {
+    return { ok: false, error: "PCRE replace is only available in the browser", engine, output: text };
+  }
+  if (pattern.length > maxPatternLength) {
+    return { ok: false, error: `pattern exceeds ${maxPatternLength} characters`, engine, output: text };
+  }
+  if (text.length > maxInputLength) {
+    return { ok: false, error: `input exceeds ${maxInputLength} characters`, engine, output: text };
+  }
+  if (pattern === "") {
+    return { ok: true, error: null, engine, output: text };
+  }
+
+  if (engine === "re2") {
+    let compiled: RE2JS;
+    try {
+      compiled = RE2JS.compile(pattern, re2Flags(flags));
+    } catch (e) {
+      return { ok: false, error: errMessage(e), engine, output: text };
+    }
+    try {
+      const matcher = compiled.matcher(text);
+      const output = global ? matcher.replaceAll(replacement) : matcher.replaceFirst(replacement);
+      return { ok: true, error: null, engine, output };
+    } catch (e) {
+      return { ok: false, error: errMessage(e), engine, output: text };
+    }
+  }
+
+  // ECMAScript
+  let re: RegExp;
+  // Replace honours the 'g' flag for all-vs-first; 'd' is irrelevant here.
+  const f = buildEcmaFlags(flags, global).replace(/d/g, "");
+  try {
+    re = new RegExp(pattern, f);
+  } catch (e) {
+    return { ok: false, error: errMessage(e), engine, output: text };
+  }
+  try {
+    return { ok: true, error: null, engine, output: text.replace(re, replacement) };
+  } catch (e) {
+    return { ok: false, error: errMessage(e), engine, output: text };
+  }
 }

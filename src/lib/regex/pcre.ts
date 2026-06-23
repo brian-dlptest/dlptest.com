@@ -7,7 +7,7 @@
 // so capture-group start/end are reported as null for PCRE.
 
 import { createPCRE2, FLAGS, type PCRE2 } from "pcre2-wasm";
-import type { MatchResult, RegexGroup, RegexMatchInfo } from "./engines";
+import type { MatchResult, RegexGroup, RegexMatchInfo, ReplaceResult } from "./engines";
 
 let instance: PCRE2 | null = null;
 let pending: Promise<PCRE2> | null = null;
@@ -95,6 +95,41 @@ export async function runPcre(
     return { ok: true, error: null, ...base, matches: list.map(toMatch), truncated };
   } catch (e) {
     return { ok: false, error: msg(e), ...base, matches: [], truncated: false };
+  } finally {
+    re.destroy();
+  }
+}
+
+export async function runPcreReplace(
+  pattern: string,
+  flags: string,
+  text: string,
+  replacement: string,
+): Promise<ReplaceResult> {
+  const global = flags.includes("g");
+  const base = { engine: "pcre" as const };
+
+  if (pattern === "") return { ok: true, error: null, ...base, output: text };
+
+  let pcre2: PCRE2;
+  try {
+    pcre2 = await loadPcre();
+  } catch (e) {
+    return { ok: false, error: `failed to load PCRE engine: ${msg(e)}`, ...base, output: text };
+  }
+
+  let re: ReturnType<PCRE2["compile"]>;
+  try {
+    re = pcre2.compile(pattern, pcreFlags(flags));
+  } catch (e) {
+    return { ok: false, error: msg(e), ...base, output: text };
+  }
+
+  try {
+    const output = global ? re.replaceAll(text, replacement) : re.replace(text, replacement);
+    return { ok: true, error: null, ...base, output };
+  } catch (e) {
+    return { ok: false, error: msg(e), ...base, output: text };
   } finally {
     re.destroy();
   }

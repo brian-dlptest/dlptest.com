@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import { DLP_PATTERNS, DLP_CATEGORIES } from "@/lib/regex/dlp-patterns";
 export const prerender = true;
 
 // Flag toggles rendered server-side; behaviour wired up in the bundled script.
@@ -15,15 +16,16 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
 ---
 <BaseLayout
   title="Regex Test"
-  description="A regular-expression workbench for DLP rule authoring. Test patterns against sample text with live match highlighting and capture groups, across the ECMAScript and RE2 engines."
+  description="A regular-expression workbench for DLP rule authoring. Test patterns against sample text with live match highlighting, capture groups, substitution, and a token-by-token explanation, across the ECMAScript, RE2, and PCRE engines. Includes a searchable library of common DLP patterns."
 >
   <h1>Regex Test</h1>
   <p>
     Build and test regular expressions for DLP rules. Type a pattern and some sample text to
-    see matches highlighted live, with capture groups and positions. Switch engines to check how
-    a pattern behaves under <strong>ECMAScript</strong> (JavaScript) versus <strong>RE2</strong>
-    (the linear-time engine used by Go and many DLP products). Everything runs in your browser —
-    nothing is sent anywhere.
+    see matches highlighted live, with capture groups, substitution, and a token-by-token
+    explanation. Switch engines to check how a pattern behaves under <strong>ECMAScript</strong>
+    (JavaScript), <strong>RE2</strong> (the linear-time engine used by Go and many DLP products),
+    or <strong>PCRE</strong>. Browse the built-in library of common DLP patterns below. Everything
+    runs in your browser — nothing is sent anywhere.
   </p>
 
   <CyberhavenAd unit="leaderboard" />
@@ -80,6 +82,12 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       ))}
     </div>
 
+    <!-- Function tabs -->
+    <div class="func-tabs" id="func-tabs" role="tablist" aria-label="Function">
+      <button type="button" class="func-tab" data-tab="match" role="tab" aria-selected="true">Match</button>
+      <button type="button" class="func-tab" data-tab="replace" role="tab" aria-selected="false">Substitution</button>
+    </div>
+
     <!-- Test string with live highlight overlay -->
     <label class="field-label" for="test-input">Test string</label>
     <div class="test-area">
@@ -97,7 +105,35 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
 
     <p id="match-summary" class="match-summary" aria-live="polite"></p>
 
-    <div id="match-results" class="match-results"></div>
+    <!-- Match panel -->
+    <div id="match-panel" class="match-results"></div>
+
+    <!-- Substitution panel -->
+    <div id="replace-panel" hidden>
+      <label class="field-label" for="replace-input">Replacement</label>
+      <input
+        id="replace-input"
+        class="replace-input"
+        type="text"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        autocorrect="off"
+        aria-label="Replacement string"
+        placeholder="replacement — use $1, $2 for groups"
+      />
+      <p class="replace-hint" id="replace-hint"></p>
+      <label class="field-label" for="replace-output">Result</label>
+      <pre id="replace-output" class="replace-output"></pre>
+    </div>
+
+    <!-- Live explanation of the pattern -->
+    <details class="ref explain" id="explain-details">
+      <summary>Explanation</summary>
+      <div class="ref-body">
+        <ul id="explain-list" class="explain-list"></ul>
+      </div>
+    </details>
 
     <details class="ref">
       <summary>Quick reference (ECMAScript)</summary>
@@ -136,7 +172,38 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       </div>
     </details>
   </div>
+
+  <!-- DLP pattern library -->
+  <section class="lib" id="lib" aria-label="DLP pattern library">
+    <h2>DLP pattern library</h2>
+    <p class="lib-intro">
+      {DLP_PATTERNS.length} ready-made patterns for common sensitive-data types. Click any
+      pattern to load it into the tester above.
+    </p>
+    <div class="lib-controls">
+      <input
+        id="lib-search"
+        class="lib-search"
+        type="search"
+        placeholder="Search patterns (e.g. ssn, credit card, iban)…"
+        aria-label="Search patterns"
+      />
+      <select id="lib-category" class="lib-category" aria-label="Filter by category">
+        <option value="">All categories</option>
+        {DLP_CATEGORIES.map((c) => <option value={c}>{c}</option>)}
+      </select>
+    </div>
+    <p id="lib-count" class="lib-count" aria-live="polite"></p>
+    <div id="lib-list" class="lib-list"></div>
+    <div class="lib-pager">
+      <button type="button" id="lib-prev" class="btn-secondary">‹ Prev</button>
+      <span id="lib-page" class="lib-page"></span>
+      <button type="button" id="lib-next" class="btn-secondary">Next ›</button>
+    </div>
+  </section>
 </BaseLayout>
+
+<script type="application/json" id="dlp-patterns-data" set:html={JSON.stringify(DLP_PATTERNS)}></script>
 
 <style>
   .regex-workbench { margin-top: 1.5rem; }
@@ -188,6 +255,17 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     color: var(--text-dim);
     max-width: none;
   }
+
+  .btn-secondary {
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.45rem 0.8rem;
+  }
+  .btn-secondary:hover { background: var(--surface); box-shadow: none; transform: none; }
 
   .regex-input-wrap {
     display: flex;
@@ -312,23 +390,26 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
   .match-summary.is-error { color: var(--danger); }
   .match-summary.has-matches { color: var(--success); }
 
+  /* Match cards, group lists, explanation rows, and library cards are created
+     in JS, so they don't get Astro's scoped attribute — their selectors must be
+     :global() to apply. (Same reason the data generator uses :global(.copy-btn).) */
   .match-results { display: flex; flex-direction: column; gap: 0.5rem; }
-  .match-card {
+  :global(.match-card) {
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--bg-elev);
     padding: 0.6rem 0.8rem;
   }
-  .match-card-head {
+  :global(.match-card-head) {
     display: flex;
     align-items: baseline;
     gap: 0.6rem;
     flex-wrap: wrap;
     font-size: 0.85rem;
   }
-  .match-index { font-weight: 700; color: var(--accent); }
-  .match-pos { color: var(--text-dim); font-size: 0.8rem; }
-  .match-value {
+  :global(.match-index) { font-weight: 700; color: var(--accent); }
+  :global(.match-pos) { color: var(--text-dim); font-size: 0.8rem; }
+  :global(.match-value) {
     font-family: var(--font-mono);
     background: var(--code-bg);
     border: 1px solid var(--border);
@@ -336,7 +417,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     padding: 0.05em 0.4em;
     word-break: break-all;
   }
-  .group-list {
+  :global(.group-list) {
     list-style: none;
     margin: 0.5rem 0 0;
     padding: 0;
@@ -345,10 +426,10 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     gap: 0.25rem;
     font-size: 0.82rem;
   }
-  .group-list li { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: baseline; }
-  .group-key { color: var(--text-dim); font-family: var(--font-mono); white-space: nowrap; }
-  .group-val { font-family: var(--font-mono); word-break: break-all; }
-  .group-val.empty { color: var(--text-dim); font-style: italic; }
+  :global(.group-list li) { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: baseline; }
+  :global(.group-key) { color: var(--text-dim); font-family: var(--font-mono); white-space: nowrap; }
+  :global(.group-val) { font-family: var(--font-mono); word-break: break-all; }
+  :global(.group-val.empty) { color: var(--text-dim); font-style: italic; }
 
   /* Quick reference */
   .ref {
@@ -369,11 +450,134 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
   .ref-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
   .ref-grid table { margin: 0; font-size: 0.85rem; }
   .ref-note { font-size: 0.82rem; color: var(--text-dim); margin: 0.85rem 0 0; }
+
+  /* Function tabs */
+  .func-tabs { display: flex; gap: 0.25rem; margin: 1rem 0 0; border-bottom: 1px solid var(--border); }
+  .func-tab {
+    background: transparent;
+    color: var(--text-dim);
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none;
+    transform: none;
+    margin-bottom: -1px;
+  }
+  .func-tab:hover { color: var(--text); box-shadow: none; transform: none; }
+  .func-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Substitution panel */
+  .replace-input {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    color: var(--text);
+  }
+  .replace-input:focus { outline: none; border-color: var(--accent); box-shadow: var(--shadow-accent); }
+  .replace-hint { font-size: 0.78rem; color: var(--text-dim); margin: 0.35rem 0 0; min-height: 1em; }
+  .replace-output {
+    margin: 0.35rem 0 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 5rem;
+    box-shadow: none;
+  }
+
+  /* Explanation (rows created in JS → :global) */
+  .explain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+  :global(.explain-list li) { display: flex; gap: 0.6rem; align-items: baseline; font-size: 0.85rem; }
+  :global(.explain-tok) {
+    font-family: var(--font-mono);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    color: var(--accent);
+    white-space: pre;
+    flex-shrink: 0;
+  }
+  :global(.explain-desc) { color: var(--text-dim); }
+
+  /* DLP pattern library */
+  .lib { margin-top: 2.5rem; }
+  .lib-intro { color: var(--text-dim); font-size: 0.9rem; max-width: none; }
+  .lib-controls { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0 0.5rem; }
+  .lib-search {
+    flex: 1 1 18rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  .lib-search:focus { outline: none; border-color: var(--accent); box-shadow: var(--shadow-accent); }
+  .lib-category {
+    padding: 0.55rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  .lib-count { font-size: 0.8rem; color: var(--text-dim); margin: 0.25rem 0; }
+  .lib-list { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  /* Library cards are created in JS → :global */
+  :global(.lib-card) {
+    text-align: left;
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    padding: 0.7rem 0.85rem;
+    cursor: pointer;
+    box-shadow: none;
+    transform: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+  }
+  :global(.lib-card:hover) {
+    border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
+    background: var(--surface);
+    box-shadow: none;
+    transform: none;
+  }
+  :global(.lib-card-top) { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
+  :global(.lib-name) { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+  :global(.lib-cat) { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; }
+  :global(.lib-pattern) {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 0.35rem;
+    word-break: break-all;
+  }
+  :global(.lib-example) { display: block; font-size: 0.78rem; color: var(--text-dim); margin-top: 0.25rem; word-break: break-all; }
+  .lib-pager { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
+  .lib-pager .btn-secondary { background: var(--bg-elev); color: var(--text); border: 1px solid var(--border); }
+  .lib-pager .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .lib-page { font-size: 0.85rem; color: var(--text-dim); }
 </style>
 
 <script>
-  import { runMatch, ENGINE_FLAGS, type RegexEngine } from "@/lib/regex/engines";
+  import { runMatch, runReplace, ENGINE_FLAGS, type RegexEngine } from "@/lib/regex/engines";
   import { encodeState, decodeState } from "@/lib/regex/share";
+  import { explainPattern } from "@/lib/regex/explain";
 
   const patternInput = document.getElementById("pattern-input") as HTMLInputElement;
   const testInput = document.getElementById("test-input") as HTMLTextAreaElement;
@@ -382,11 +586,19 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
   const flagsEcho = document.getElementById("flags-echo") as HTMLSpanElement;
   const engineSeg = document.getElementById("engine-seg") as HTMLDivElement;
   const summary = document.getElementById("match-summary") as HTMLParagraphElement;
-  const results = document.getElementById("match-results") as HTMLDivElement;
+  const results = document.getElementById("match-panel") as HTMLDivElement;
   const shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
   const shareStatus = document.getElementById("share-status") as HTMLSpanElement;
 
+  const funcTabs = document.getElementById("func-tabs") as HTMLDivElement;
+  const replacePanel = document.getElementById("replace-panel") as HTMLDivElement;
+  const replaceInput = document.getElementById("replace-input") as HTMLInputElement;
+  const replaceOutput = document.getElementById("replace-output") as HTMLPreElement;
+  const replaceHint = document.getElementById("replace-hint") as HTMLParagraphElement;
+  const explainList = document.getElementById("explain-list") as HTMLUListElement;
+
   let engine: RegexEngine = "ecmascript";
+  let activeTab: "match" | "replace" = "match";
 
   function flagButtons(): HTMLButtonElement[] {
     return Array.from(flagsRow.querySelectorAll<HTMLButtonElement>(".flag-toggle"));
@@ -510,6 +722,44 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     renderResults(result.matches);
   }
 
+  function applyReplace(rep: ReturnType<typeof runReplace>) {
+    replaceOutput.classList.toggle("is-error", !rep.ok);
+    replaceOutput.textContent = rep.ok ? rep.output : `Error: ${rep.error}`;
+  }
+
+  function renderExplanation(pattern: string) {
+    explainList.innerHTML = "";
+    if (!pattern) return;
+    let tokens;
+    try {
+      tokens = explainPattern(pattern);
+    } catch {
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    for (const t of tokens) {
+      const li = document.createElement("li");
+      const tok = document.createElement("span");
+      tok.className = "explain-tok";
+      tok.textContent = t.text;
+      const desc = document.createElement("span");
+      desc.className = "explain-desc";
+      desc.textContent = t.description;
+      li.append(tok, desc);
+      frag.appendChild(li);
+    }
+    explainList.appendChild(frag);
+  }
+
+  const REPLACE_HINTS: Record<RegexEngine, string> = {
+    ecmascript: "Use $1, $2 for groups, $<name> for named groups, $& for the whole match.",
+    re2: "Use $1, $2 for groups, ${name} for named groups.",
+    pcre: "Use $1, $2 (or ${1}) for groups, $0 / $& for the whole match.",
+  };
+  function updateReplaceHint() {
+    replaceHint.textContent = REPLACE_HINTS[engine];
+  }
+
   let pcreReady = false;
   let renderSeq = 0;
 
@@ -519,13 +769,15 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     const flags = currentFlags();
     const text = testInput.value;
     flagsEcho.textContent = flags;
+    renderExplanation(pattern);
 
+    // ── Match (always — drives highlighting and the match panel) ──
+    let result;
     if (engine === "pcre") {
       if (pattern !== "" && !pcreReady) {
         summary.textContent = "Loading PCRE engine…";
         summary.className = "match-summary";
       }
-      let result;
       try {
         // Lazy-load the WASM-backed PCRE engine only when it's actually used.
         const mod = await import("@/lib/regex/pcre");
@@ -539,11 +791,37 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
         return;
       }
       if (seq !== renderSeq) return; // a newer render superseded this one
-      applyResult(result, pattern, text);
-      return;
+    } else {
+      result = runMatch(engine, pattern, flags, text);
     }
+    applyResult(result, pattern, text);
 
-    applyResult(runMatch(engine, pattern, flags, text), pattern, text);
+    // ── Substitution (only when that tab is active) ──
+    if (activeTab === "replace") {
+      const replacement = replaceInput.value;
+      let rep;
+      if (engine === "pcre") {
+        try {
+          const mod = await import("@/lib/regex/pcre");
+          rep = await mod.runPcreReplace(pattern, flags, text, replacement);
+        } catch {
+          return;
+        }
+        if (seq !== renderSeq) return;
+      } else {
+        rep = runReplace(engine, pattern, flags, text, replacement);
+      }
+      applyReplace(rep);
+    }
+  }
+
+  function setTab(tab: "match" | "replace") {
+    activeTab = tab;
+    for (const b of funcTabs.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+      b.setAttribute("aria-selected", b.dataset["tab"] === tab ? "true" : "false");
+    }
+    replacePanel.hidden = tab !== "replace";
+    results.hidden = tab === "replace"; // hide match cards while substituting
   }
 
   function syncBackdropScroll() {
@@ -577,8 +855,18 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       b.setAttribute("aria-pressed", b === btn ? "true" : "false");
     }
     syncEngineFlagAvailability();
-    render();
+    updateReplaceHint();
+    void render();
   });
+
+  funcTabs.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-tab]");
+    if (!btn) return;
+    setTab(btn.dataset["tab"] as "match" | "replace");
+    void render();
+  });
+
+  replaceInput.addEventListener("input", scheduleRender);
 
   shareBtn.addEventListener("click", async () => {
     const hash = encodeState({
@@ -586,6 +874,8 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       flags: currentFlags(),
       engine,
       test: testInput.value,
+      tab: activeTab,
+      replace: replaceInput.value,
     });
     history.replaceState(null, "", `#${hash}`);
     try {
@@ -624,6 +914,96 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     testInput.value =
       "Sample record:\n  SSN: 123-45-6789\n  Backup SSN: 987-65-4321\n  Phone: (555) 123-4567";
   }
+  if (state.replace !== undefined) replaceInput.value = state.replace;
+  syncEngineFlagAvailability();
+  updateReplaceHint();
+  setTab(state.tab === "replace" ? "replace" : "match");
+
+  // ── DLP pattern library ─────────────────────────────────────────────────────
+  interface LibPattern { id: string; name: string; category: string; pattern: string; flags: string; example: string; }
+  const dlpData: LibPattern[] = JSON.parse(
+    document.getElementById("dlp-patterns-data")?.textContent || "[]",
+  );
+  const libSearch = document.getElementById("lib-search") as HTMLInputElement;
+  const libCategory = document.getElementById("lib-category") as HTMLSelectElement;
+  const libCount = document.getElementById("lib-count") as HTMLParagraphElement;
+  const libList = document.getElementById("lib-list") as HTMLDivElement;
+  const libPrev = document.getElementById("lib-prev") as HTMLButtonElement;
+  const libNext = document.getElementById("lib-next") as HTMLButtonElement;
+  const libPage = document.getElementById("lib-page") as HTMLSpanElement;
+  const LIB_PAGE_SIZE = 12;
+  let libPageIdx = 0;
+
+  function filteredLib(): LibPattern[] {
+    const q = libSearch.value.trim().toLowerCase();
+    const cat = libCategory.value;
+    return dlpData.filter(
+      (p) =>
+        (!cat || p.category === cat) &&
+        (!q || `${p.id} ${p.name} ${p.category}`.toLowerCase().includes(q)),
+    );
+  }
+
+  function renderLib() {
+    const items = filteredLib();
+    const pages = Math.max(1, Math.ceil(items.length / LIB_PAGE_SIZE));
+    if (libPageIdx >= pages) libPageIdx = pages - 1;
+    const start = libPageIdx * LIB_PAGE_SIZE;
+    const slice = items.slice(start, start + LIB_PAGE_SIZE);
+
+    libCount.textContent = `${items.length} pattern${items.length === 1 ? "" : "s"}`;
+    const frag = document.createDocumentFragment();
+    for (const p of slice) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "lib-card";
+      card.dataset["pattern"] = p.pattern;
+      card.dataset["flags"] = p.flags;
+
+      const top = document.createElement("div");
+      top.className = "lib-card-top";
+      const name = document.createElement("span");
+      name.className = "lib-name";
+      name.textContent = p.name;
+      const cat = document.createElement("span");
+      cat.className = "lib-cat";
+      cat.textContent = p.category;
+      top.append(name, cat);
+
+      const pat = document.createElement("code");
+      pat.className = "lib-pattern";
+      pat.textContent = `/${p.pattern}/${p.flags}`;
+      const ex = document.createElement("span");
+      ex.className = "lib-example";
+      ex.textContent = `e.g. ${p.example}`;
+
+      card.append(top, pat, ex);
+      frag.appendChild(card);
+    }
+    libList.innerHTML = "";
+    libList.appendChild(frag);
+
+    libPage.textContent = `Page ${libPageIdx + 1} of ${pages}`;
+    libPrev.disabled = libPageIdx <= 0;
+    libNext.disabled = libPageIdx >= pages - 1;
+  }
+
+  libSearch.addEventListener("input", () => { libPageIdx = 0; renderLib(); });
+  libCategory.addEventListener("change", () => { libPageIdx = 0; renderLib(); });
+  libPrev.addEventListener("click", () => { if (libPageIdx > 0) { libPageIdx--; renderLib(); } });
+  libNext.addEventListener("click", () => { libPageIdx++; renderLib(); });
+  libList.addEventListener("click", (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLButtonElement>(".lib-card");
+    if (!card) return;
+    patternInput.value = card.dataset["pattern"] ?? "";
+    setFlags(card.dataset["flags"] ?? "g");
+    syncEngineFlagAvailability();
+    setTab("match");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    patternInput.focus();
+    void render();
+  });
+  renderLib();
 
   void render();
 </script>
