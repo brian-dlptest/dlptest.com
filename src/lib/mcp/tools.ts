@@ -27,6 +27,7 @@ import {
   type DlpCategory,
   type DlpPattern,
 } from "@/lib/regex/dlp-patterns";
+import { runMatch, type RegexEngine } from "@/lib/regex/engines";
 
 export interface ToolDefinition {
   name: string;
@@ -561,6 +562,89 @@ const listDlpPatternsTool: ToolDefinition = {
   },
 };
 
+// regex_test: evaluate a pattern against text. Defaults to the RE2 engine,
+// which is linear-time (ReDoS-safe) — important because this runs server-side on
+// caller-supplied patterns. Input/pattern length are capped for the same reason.
+const REGEX_TEST_MAX_INPUT = 25_000;
+const REGEX_TEST_MAX_PATTERN = 1_000;
+const REGEX_TEST_MAX_MATCHES = 1_000;
+
+const regexTestTool: ToolDefinition = {
+  name: "regex_test",
+  description:
+    "Test a regular expression against a string and return every match with its capture groups and character offsets — the building block for authoring and validating DLP detection rules. Choose the `engine`: 're2' (default; the linear-time RE2/Go engine used by many DLP products — ReDoS-safe) or 'ecmascript' (JavaScript `RegExp`). `flags` is a JS-style string (g, i, m, s; plus u, y for ecmascript). Pair it with list_dlp_patterns to validate library patterns against your own sample data. Matching happens server-side; nothing is stored.",
+  inputSchema: {
+    type: "object",
+    required: ["pattern", "text"],
+    properties: {
+      pattern: {
+        type: "string",
+        maxLength: REGEX_TEST_MAX_PATTERN,
+        description: "The regular expression source (without surrounding slashes).",
+      },
+      text: {
+        type: "string",
+        maxLength: REGEX_TEST_MAX_INPUT,
+        description: `The text to match against (max ${REGEX_TEST_MAX_INPUT} characters).`,
+      },
+      flags: {
+        type: "string",
+        maxLength: 10,
+        default: "g",
+        description:
+          "JS-style flag string: g (find all), i (ignore case), m (multiline), s (dotall); u and y apply to the ecmascript engine only. Default 'g'.",
+      },
+      engine: {
+        type: "string",
+        enum: ["re2", "ecmascript"],
+        default: "re2",
+        description:
+          "Matching engine. 're2' is linear-time and ReDoS-safe (default); 'ecmascript' uses JavaScript RegExp semantics (supports lookbehind, backreferences, sticky/unicode flags).",
+      },
+    },
+    additionalProperties: false,
+  },
+  handler: (args) => {
+    const pattern = typeof args["pattern"] === "string" ? args["pattern"] : "";
+    const text = typeof args["text"] === "string" ? args["text"] : "";
+    const flags = typeof args["flags"] === "string" ? args["flags"] : "g";
+    const engine: RegexEngine = args["engine"] === "ecmascript" ? "ecmascript" : "re2";
+
+    const result = runMatch(engine, pattern, flags, text, {
+      maxInputLength: REGEX_TEST_MAX_INPUT,
+      maxPatternLength: REGEX_TEST_MAX_PATTERN,
+      maxMatches: REGEX_TEST_MAX_MATCHES,
+    });
+
+    return JSON.stringify(
+      {
+        engine: result.engine,
+        pattern,
+        flags,
+        global: result.global,
+        ok: result.ok,
+        error: result.error,
+        match_count: result.matches.length,
+        truncated: result.truncated,
+        matches: result.matches.map((m) => ({
+          value: m.value,
+          start: m.start,
+          end: m.end,
+          groups: m.groups.map((g) => ({
+            index: g.index,
+            name: g.name,
+            value: g.value,
+            start: g.start,
+            end: g.end,
+          })),
+        })),
+      },
+      null,
+      2,
+    );
+  },
+};
+
 // ─── Registry ───────────────────────────────────────────────────────────────
 
 export const TOOLS: ToolDefinition[] = [
@@ -570,6 +654,7 @@ export const TOOLS: ToolDefinition[] = [
   promptContextTool,
   probeTool,
   listDlpPatternsTool,
+  regexTestTool,
 ];
 
 const TOOL_INDEX = new Map(TOOLS.map((t) => [t.name, t]));

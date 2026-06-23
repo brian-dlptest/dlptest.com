@@ -51,6 +51,7 @@ All data-generation tools accept `count` (1–500, default 50) and `format` (`"j
 
 | Tool | Description |
 |------|-------------|
+| `regex_test` | Matches a `pattern` against `text`, returning matches with capture groups and offsets. `engine`: `re2` (default, linear-time/ReDoS-safe) or `ecmascript`; JS-style `flags` |
 | `list_dlp_patterns` | Returns the curated DLP regex library (id, name, category, ECMAScript `pattern`, `flags`, sample `example`). Optional `category` and `search` filters; `json` or `csv` output |
 
 ## Configuration by Client
