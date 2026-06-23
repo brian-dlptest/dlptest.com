@@ -12,7 +12,11 @@
 
 import { RE2JS } from "re2js";
 
-export type RegexEngine = "ecmascript" | "re2";
+// "pcre" matching is browser-only (WASM, lazy-loaded by the page via
+// src/lib/regex/pcre.ts). runMatch() here implements only the two WASM-free
+// engines; it rejects "pcre" so the engine never accidentally runs in the
+// Worker. The page produces the same MatchResult shape for PCRE.
+export type RegexEngine = "ecmascript" | "re2" | "pcre";
 
 export interface RegexGroup {
   /** 1-based capture group index. */
@@ -62,6 +66,8 @@ export const ENGINE_FLAGS: Record<RegexEngine, string[]> = {
   ecmascript: ["g", "i", "m", "s", "u", "y"],
   // RE2 is Unicode-aware by default and has no sticky mode; only these apply.
   re2: ["g", "i", "m", "s"],
+  // PCRE: same common flags; unicode is enabled by the wrapper, no sticky mode.
+  pcre: ["g", "i", "m", "s"],
 };
 
 function fail(engine: RegexEngine, global: boolean, message: string): MatchResult {
@@ -89,6 +95,10 @@ export function runMatch(
   }
   if (text.length > maxInputLength) {
     return fail(engine, global, `input exceeds ${maxInputLength} characters`);
+  }
+  if (engine === "pcre") {
+    // PCRE runs in the browser only (WASM). It should never reach here.
+    return fail(engine, global, "PCRE matching is only available in the browser");
   }
   if (pattern === "") {
     // An empty pattern matches the empty string at every position — noise, not

@@ -43,7 +43,10 @@ const CSP_DIRECTIVES = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com",
+  // 'wasm-unsafe-eval' lets the browser instantiate the WASM-backed PCRE engine
+  // on the /regex/ page (lazy-loaded, base64-inlined — no remote fetch). It only
+  // permits WebAssembly compilation, not JS eval(). Keep in sync with _headers.
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com",
   "font-src 'self' data:",
