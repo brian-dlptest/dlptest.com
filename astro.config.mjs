@@ -6,7 +6,7 @@ import rehypeExternalLinks from "rehype-external-links";
 
 // Astro on Cloudflare Workers. On-demand rendering enabled (output: "server")
 // because we need:
-//  - POST endpoints (/api/http-post, /api/contact) that accept-and-discard
+//  - POST endpoints (/api/https-post, /api/contact) that accept-and-discard
 //  - Middleware-based X-Robots-Tag for staging
 //  - R2-backed file downloads (large DLP test files)
 //
@@ -41,7 +41,7 @@ export default defineConfig({
   trailingSlash: "always",
   security: {
     // Astro 6 enables cross-origin POST protection by default. We deliberately
-    // disable it: /api/http-post is the entire reason this site exists — DLP
+    // disable it: /api/https-post is the entire reason this site exists — DLP
     // tools, scripts, and ad-hoc curl invocations need to POST arbitrary data
     // here and receive a 200. Per-route honeypots / Turnstile / rate-limiting
     // are handled in the individual API handlers.

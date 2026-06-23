@@ -5,26 +5,26 @@ import PostTestForm from "@/components/PostTestForm.astro";
 export const prerender = true;
 
 const curlExamples = `# Probe the endpoint
-curl -sS "https://dlptest.com/api/http-post/"
+curl -sS "https://dlptest.com/api/https-post/"
 
 # Small form-style body
-curl -sS -X POST "https://dlptest.com/api/http-post/" \\
+curl -sS -X POST "https://dlptest.com/api/https-post/" \\
   -d "message=DLP+POST+test"
 
 # JSON body
-curl -sS -X POST "https://dlptest.com/api/http-post/" \\
+curl -sS -X POST "https://dlptest.com/api/https-post/" \\
   -H "Content-Type: application/json" \\
   -d '{"note":"sample payload"}'
 
 # Raw file (single part; good for scripted throughput checks)
-curl -sS -X POST "https://dlptest.com/api/http-post/" \\
+curl -sS -X POST "https://dlptest.com/api/https-post/" \\
   --data-binary @./your-local-file.bin`;
 ---
 <BaseLayout
-  title="HTTP POST Test"
+  title="HTTP(S) POST Test"
   description="Submit text and files with the HTTP POST method to a safe HTTPS endpoint that discards the body. Use it to verify DLP, proxies, and SSL inspection without storing data."
 >
-  <h1>HTTP POST Test</h1>
+  <h1>HTTP(S) POST Test</h1>
   <p class="intro">
     Use the forms below to send a test message or upload a file to dlptest.com using the
     HTTP POST method over TLS (HTTPS). Most browsers and Cloudflare configurations
@@ -44,14 +44,14 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
   </style>
 
   <p class="muted">
-    Bookmark note: the former <code>/https-post/</code> page redirects here with HTTP 301.
+    Bookmark note: the former <code>/http-post/</code> page redirects here with HTTP 301.
   </p>
 
   <CyberhavenAd unit="leaderboard" />
 
   <h2>Test with curl or scripts</h2>
   <p>
-    The accept-and-discard endpoint is <code>/api/http-post/</code>. You can POST any
+    The accept-and-discard endpoint is <code>/api/https-post/</code>. You can POST any
     body (form data, JSON, raw bytes, multipart). Responses are JSON with an
     <code>ok</code> field (<code>true</code> when the body was accepted). GET on the same URL returns a short JSON hint.
     Cross-origin use from automation or in-browser fetch from another origin is allowed
@@ -62,11 +62,11 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
   <p class="muted small">
     Cleartext HTTP (<code>http://</code>) may be redirected to HTTPS by Cloudflare or blocked by
     HSTS in your browser. For a deliberate cleartext POST from the command line, try
-    <code>curl -X POST "http://dlptest.com/api/http-post/" -d "test=1"</code> only if your
+    <code>curl -X POST "http://dlptest.com/api/https-post/" -d "test=1"</code> only if your
     environment allows port 80 without an immediate upgrade.
   </p>
 
-  <h2>What is an HTTP POST?</h2>
+  <h2>What is an HTTP(S) POST?</h2>
   <p>
     HTTP POST is a request method in the HTTP family (the same protocol whether the
     transport is TLS or not). A POST asks a server to accept an entity in the request

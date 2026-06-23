@@ -5,7 +5,7 @@
 # in a single zone-scoped http_ratelimit ruleset:
 #
 #   /api/contact + /api/subscribe   — managed_challenge,  5 req / 60s, 10 min
-#   /api/http-post                  — block,            600 req / 60s,  1 min
+#   /api/https-post (+ http-post)   — block,            600 req / 60s,  1 min
 #
 # Why two rules:
 #   The Cloudflare Pro plan caps http_ratelimit rules at 2 per zone. We
@@ -14,7 +14,7 @@
 #        email via Microsoft Graph / O365; subscribe writes to the Railway
 #        list). Combined into one rule with a soft action so real users with
 #        typos pass through after a managed challenge.
-#     2. http-post — highest-volume DLP test endpoint; without a ceiling
+#     2. https-post — highest-volume DLP test endpoint; without a ceiling
 #        a malicious client can burn bandwidth / Worker invocations.
 #
 #   /api/generate-custom is intentionally NOT rate-limited here because
@@ -108,8 +108,8 @@ resource "cloudflare_ruleset" "api_rate_limits" {
   # budget. Quick cooldown so a single bad-actor burst doesn't punish a
   # shared NAT for long.
   rules {
-    description = "Throttle /api/http-post"
-    expression  = "(http.request.uri.path in {\"/api/http-post\" \"/api/http-post/\"} and http.request.method ne \"OPTIONS\")"
+    description = "Throttle /api/https-post (+ legacy /api/http-post alias)"
+    expression  = "(http.request.uri.path in {\"/api/https-post\" \"/api/https-post/\" \"/api/http-post\" \"/api/http-post/\"} and http.request.method ne \"OPTIONS\")"
     action      = "block"
     ratelimit {
       characteristics     = ["ip.src", "cf.colo.id"]

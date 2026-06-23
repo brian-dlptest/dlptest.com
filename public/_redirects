@@ -7,9 +7,11 @@
 #
 # Format: <from>  <to>  <status>
 
+# ── Renamed page: HTTP POST Test is now the HTTP(S) POST Test at /https-post/ ──
+/http-post/                         /https-post/            301
+/http-post                          /https-post/            301
+
 # ── Legacy WordPress permalinks ──────────────────────────────────────────────
-/https-post/                        /http-post/             301
-/https-post                         /http-post/             301
 /classification/                    /inspect-data/          301
 /classification                     /inspect-data/          301
 /category/news/                     /blog/                  301

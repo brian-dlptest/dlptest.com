@@ -52,7 +52,7 @@ const faqs = [
     q: "How often should I re-test DLP?",
     a: `<p>Re-test on a regular cadence and after any change that could affect detection. A reasonable baseline:</p>
       <ul>
-        <li><strong>Monthly:</strong> quick smoke test of the most critical policies on the most critical channels. A short script that submits sample data via <a href="/http-post/">/http-post/</a> and uploads to <code>ftp://ftp.dlptest.com/24_Hour/</code> covers most of this in minutes.</li>
+        <li><strong>Monthly:</strong> quick smoke test of the most critical policies on the most critical channels. A short script that submits sample data via <a href="/https-post/">/https-post/</a> and uploads to <code>ftp://ftp.dlptest.com/24_Hour/</code> covers most of this in minutes.</li>
         <li><strong>Quarterly:</strong> full regression test of all production policies across all channels in scope. Confirm that previously fixed false positives haven't returned and that detection rates are stable.</li>
         <li><strong>After every DLP product update:</strong> policy engines and detection logic change between releases. A test that passed last quarter can silently start failing after an upgrade.</li>
         <li><strong>After every policy change:</strong> any time someone tunes a regex, adds a dictionary, or modifies an EDM index, re-run that policy's tests before pushing to production.</li>
@@ -74,7 +74,7 @@ const faqs = [
   },
   {
     q: "How to test web DLP (ICAP-based proxies)",
-    a: `<p>Validate that the proxy sends all PUT/POST traffic through the DLP server via ICAP, then ensure the test workstation's browser routes through that proxy. Enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code> (see that page for examples). Run first in monitor mode, then again in blocking mode.</p>
+    a: `<p>Validate that the proxy sends all PUT/POST traffic through the DLP server via ICAP, then ensure the test workstation's browser routes through that proxy. Enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/https-post/">/https-post/</a> or <code>curl</code> to <code>/api/https-post/</code> (see that page for examples). Run first in monitor mode, then again in blocking mode.</p>
       <p>This pattern applies to any ICAP-based DLP integration, including Symantec/Broadcom Web Prevent, Forcepoint, Trellix, and similar on-premises deployments. For cloud-delivered web DLP via SSE or SASE, see the next FAQ.</p>`,
   },
   {
@@ -84,7 +84,7 @@ const faqs = [
       <ol>
         <li>Confirm the test endpoint's traffic is routed through the SSE tenant (via PAC file, agent, or device tunnel).</li>
         <li>Enable a test SSN and CCN policy in the SSE console.</li>
-        <li>Copy sample data from <a href="/sample-data/">/sample-data/</a> and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code>.</li>
+        <li>Copy sample data from <a href="/sample-data/">/sample-data/</a> and submit it via <a href="/https-post/">/https-post/</a> or <code>curl</code> to <code>/api/https-post/</code>.</li>
         <li>Verify the incident appears in the SSE console. Run first in monitor mode, then in blocking mode.</li>
       </ol>
       <p>Because SSE inspects TLS-decrypted traffic in the cloud, the test workstation does not need to be on the corporate network. Off-network testing is a useful additional validation step.</p>`,
@@ -103,7 +103,7 @@ const faqs = [
   },
   {
     q: "How to test a Network Monitor",
-    a: `<p>Confirm the Network Monitor is observing both HTTP and FTP traffic by checking its traffic stats. Enable a test SSN and CCN policy, then submit sample data to <a href="/http-post/">/http-post/</a> and upload a document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Network Monitor is monitor-only, so you can't test block actions, only detection. If incidents don't appear, run Wireshark on the monitor to confirm the right traffic is being seen.</p>
+    a: `<p>Confirm the Network Monitor is observing both HTTP and FTP traffic by checking its traffic stats. Enable a test SSN and CCN policy, then submit sample data to <a href="/https-post/">/https-post/</a> and upload a document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Network Monitor is monitor-only, so you can't test block actions, only detection. If incidents don't appear, run Wireshark on the monitor to confirm the right traffic is being seen.</p>
       <p>Note: passive Network Monitors see less and less traffic as more activity moves to TLS-encrypted protocols and off-network endpoints. Most organizations now get equivalent coverage from an SSE / SASE deployment that inspects decrypted traffic in the cloud.</p>`,
   },
   {
@@ -115,7 +115,7 @@ const faqs = [
         <li>Copy sample data from <a href="/sample-data/">/sample-data/</a>.</li>
         <li>Trigger each channel you want to validate, for example:
           <ul>
-            <li><strong>Web browser:</strong> submit via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code>.</li>
+            <li><strong>Web browser:</strong> submit via <a href="/https-post/">/https-post/</a> or <code>curl</code> to <code>/api/https-post/</code>.</li>
             <li><strong>FTP:</strong> upload a sample-data file to <code>ftp://ftp.dlptest.com/24_Hour/</code>.</li>
             <li><strong>USB:</strong> copy a sample-data file to a USB drive.</li>
             <li><strong>Cloud sync:</strong> save a sample-data file into a OneDrive, Google Drive, or Dropbox folder.</li>
@@ -270,7 +270,7 @@ const faqs = [
         and block.
       </p>
       <p class="hero-actions">
-        <a class="button" href="/http-post/">Try the HTTP POST test</a>
+        <a class="button" href="/https-post/">Try the HTTP(S) POST test</a>
       </p>
     </div>
     <div class="hero-visual" aria-hidden="true">
@@ -279,7 +279,7 @@ const faqs = [
           <span></span><span></span><span></span>
           <span class="terminal-mock-title">dlp-test — curl</span>
         </div>
-        <pre class="terminal-mock-body"><span class="t-prompt">$</span> <span class="t-cmd">curl</span> -X POST https://dlptest.com/api/http-post \
+        <pre class="terminal-mock-body"><span class="t-prompt">$</span> <span class="t-cmd">curl</span> -X POST https://dlptest.com/api/https-post \
     -F <span class="t-str">"ssn=123-45-6789"</span> \
     -F <span class="t-str">"cc=5555-4444-3333-2222"</span>
 
@@ -359,9 +359,9 @@ const faqs = [
         <p><a href="/sample-data/">Browse sample data →</a></p>
       </div>
       <div class="card">
-        <h3>HTTP POST test</h3>
+        <h3>HTTP(S) POST test</h3>
         <p>Submit text and files with the HTTP POST method to a safe HTTPS endpoint that accepts and discards them. Trip your DLP without leaking data.</p>
-        <p><a href="/http-post/">HTTP POST Test →</a></p>
+        <p><a href="/https-post/">HTTP(S) POST Test →</a></p>
       </div>
       <div class="card">
         <h3>FTP Test</h3>

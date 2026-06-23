@@ -127,7 +127,7 @@ Tuning is iterative. Expect to spend most of the pilot in this loop:
 
 A reasonable goal is to exit the pilot with alert volume per policy in a stable range and false positive rate below 25 percent. (It will get lower in production as you continue to tune, but 25 percent is a reasonable bar to move out of pilot.)
 
-You can test specific policies during the pilot using sample data from [/sample-data/](/sample-data/), submitting it via [/http-post/](/http-post/) or uploading it to `ftp://ftp.dlptest.com/24_Hour/`. This is faster than waiting for real traffic to trip a policy.
+You can test specific policies during the pilot using sample data from [/sample-data/](/sample-data/), submitting it via [/https-post/](/https-post/) or uploading it to `ftp://ftp.dlptest.com/24_Hour/`. This is faster than waiting for real traffic to trip a policy.
 
 ## Phase 3: Roll out in rings
 
@@ -248,7 +248,7 @@ Policy reviews are also a good forcing function for keeping the data scope docum
 
 Regularly validate that policies are still firing the way you think they are. The easiest way to do this is to run the same test data through the same channels on a monthly or quarterly cadence and confirm incidents fire as expected.
 
-Use [/sample-data/](/sample-data/) to copy test data and [/http-post/](/http-post/) or `ftp://ftp.dlptest.com/24_Hour/` to exercise web and FTP channels. For other channels (USB, cloud sync, clipboard, AI tools), use the same sample data through those channels on a test endpoint. If a test that used to fire stops firing, something has changed silently. Find out what.
+Use [/sample-data/](/sample-data/) to copy test data and [/https-post/](/https-post/) or `ftp://ftp.dlptest.com/24_Hour/` to exercise web and FTP channels. For other channels (USB, cloud sync, clipboard, AI tools), use the same sample data through those channels on a test endpoint. If a test that used to fire stops firing, something has changed silently. Find out what.
 
 ## Common pitfalls
 
@@ -300,4 +300,4 @@ If you're starting a deployment, work the phases in order. Don't skip the pilot.
 
 If you have a deployment that's stuck in monitor mode after months or years, the path forward is usually the same. Pick one policy that you're confident in, move it to block mode, and use the experience to build momentum for the rest.
 
-If you need to validate that your deployment is actually doing what you think it's doing, [/sample-data/](/sample-data/), [/http-post/](/http-post/), and the public FTP server at `ftp://ftp.dlptest.com/24_Hour/` are designed exactly for this. Use them.
+If you need to validate that your deployment is actually doing what you think it's doing, [/sample-data/](/sample-data/), [/https-post/](/https-post/), and the public FTP server at `ftp://ftp.dlptest.com/24_Hour/` are designed exactly for this. Use them.

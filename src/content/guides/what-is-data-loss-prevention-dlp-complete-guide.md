@@ -38,7 +38,7 @@ Data in Use refers to data being actively accessed, modified, or transferred on 
 
 Protecting Data in Use requires an endpoint agent installed on the user's workstation or laptop. The agent monitors application behavior and enforces policies at the operating system level. Without an agent, you have no visibility into what happens on the device itself.
 
-DLPTest.com provides several tools to test Data in Use scenarios, including [HTTP Post](/http-post/) and [HTTPS Post](/https-post/) tests that simulate web-based data exfiltration.
+DLPTest.com provides several tools to test Data in Use scenarios, including an [HTTP(S) Post](/https-post/) test that simulates web-based data exfiltration.
 
 ### Data in Motion (DIM)
 
@@ -183,7 +183,7 @@ This is where [DLPTest.com](/) becomes essential. Before enabling blocking, use 
 
 Test across multiple channels:
 
-- Web uploads via [HTTP](/http-post/) and [HTTPS](/https-post/) post
+- Web uploads via [HTTP(S)](/https-post/) post
 - File transfers via [FTP](/ftp-test/)
 - Email (if your DLP covers SMTP)
 - Endpoint actions (USB copy, print, clipboard)
