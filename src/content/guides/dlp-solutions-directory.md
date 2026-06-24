@@ -171,7 +171,7 @@ The most useful path through this market is structured proof-of-concept testing 
 
 Define your requirements before engaging vendors. Document your sensitive data types, the channels through which data leaves your organization, your regulatory obligations, and your architectural constraints. This helps you compare like to like rather than letting each vendor steer the conversation toward its strengths.
 
-Run a proof of concept with real data. Deploy each candidate in monitor mode against production traffic. Use sample test data with names, identifiers, and dates of birth to validate detection accuracy across web uploads, encrypted web uploads, email, and file transfers. DLPTest.com provides free test data and endpoints you can use during this phase. See our [test tools](/) for [HTTP](/http-post/), [HTTPS](/https-post/), and [FTP](/ftp-test/) testing.
+Run a proof of concept with real data. Deploy each candidate in monitor mode against production traffic. Use sample test data with names, identifiers, and dates of birth to validate detection accuracy across web uploads, encrypted web uploads, email, and file transfers. DLPTest.com provides free test data and endpoints you can use during this phase. See our [test tools](/) for [HTTP(S)](/http-post/) and [FTP](/ftp-test/) testing.
 
 Measure false positive rates yourself. Vendor-published benchmarks are useful as a starting point but should be validated against your own data. A 1 percent false positive rate across millions of transactions still produces thousands of alerts per day.
 

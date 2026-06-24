@@ -21,10 +21,10 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
   --data-binary @./your-local-file.bin`;
 ---
 <BaseLayout
-  title="HTTP POST Test"
+  title="HTTP(S) POST Test"
   description="Submit text and files with the HTTP POST method to a safe HTTPS endpoint that discards the body. Use it to verify DLP, proxies, and SSL inspection without storing data."
 >
-  <h1>HTTP POST Test</h1>
+  <h1>HTTP(S) POST Test</h1>
   <p class="intro">
     Use the forms below to send a test message or upload a file to dlptest.com using the
     HTTP POST method over TLS (HTTPS). Most browsers and Cloudflare configurations
@@ -66,7 +66,7 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
     environment allows port 80 without an immediate upgrade.
   </p>
 
-  <h2>What is an HTTP POST?</h2>
+  <h2>What is an HTTP(S) POST?</h2>
   <p>
     HTTP POST is a request method in the HTTP family (the same protocol whether the
     transport is TLS or not). A POST asks a server to accept an entity in the request
