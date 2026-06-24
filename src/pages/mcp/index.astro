@@ -161,6 +161,22 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
+const regexGenExample = `# regex_generate_matches — synthesize strings that match a pattern
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 9,
+    "method": "tools/call",
+    "params": {
+      "name": "regex_generate_matches",
+      "arguments": {
+        "pattern": "[A-Z]{2}\\\\d{2}[A-Z0-9]{11,30}",
+        "count": 3
+      }
+    }
+  }'`;
+
 const localConfig = `// Local instance (npm run dev → http://localhost:4321)
 {
   "mcpServers": {
@@ -335,6 +351,12 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
       </p>
       <pre><code>{regexTestExample}</code></pre>
       <p>
+        <code>regex_generate_matches</code> goes the other way — it synthesizes synthetic strings
+        that <em>match</em> a pattern, turning a DLP rule into ready-made test data. Every result is
+        verified to actually match; unsupported patterns return an error rather than a wrong answer.
+      </p>
+      <pre><code>{regexGenExample}</code></pre>
+      <p>
         <code>list_dlp_patterns</code> returns a curated library of DLP-relevant regular
         expressions — SSN, credit card, IBAN, MRN, API keys, network identifiers, and
         international government IDs — each with a sample string it matches. The same library
@@ -451,6 +473,14 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
               Matches a <code>pattern</code> against <code>text</code> and returns matches with
               capture groups and offsets. <code>engine</code>: <code>re2</code> (default,
               linear-time) or <code>ecmascript</code>; JS-style <code>flags</code>.
+            </td>
+          </tr>
+          <tr>
+            <td><code>regex_generate_matches</code></td>
+            <td>
+              Synthesizes synthetic strings that match a <code>pattern</code> (the reverse of
+              <code>regex_test</code>) — turns a DLP rule into test data. Self-verifying; returns an
+              error for unsupported patterns rather than a wrong answer.
             </td>
           </tr>
           <tr>
