@@ -35,10 +35,17 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       <div class="engine-seg" id="engine-seg" role="group" aria-label="Regex engine">
         <button type="button" data-engine="ecmascript" aria-pressed="true">ECMAScript (JS)</button>
         <button type="button" data-engine="re2" aria-pressed="false">RE2 / Go</button>
+        <button type="button" data-engine="pcre" aria-pressed="false">PCRE</button>
       </div>
       <button type="button" id="share-btn" class="btn-secondary" title="Copy a shareable link to this test">Copy link</button>
       <span id="share-status" class="share-status" aria-live="polite"></span>
     </div>
+    <p class="engine-note" id="engine-note">
+      ECMAScript and RE2 run instantly. PCRE loads a small engine on first use.
+      For DLP rules written for <strong>.NET</strong> or <strong>Python</strong>, the
+      <strong>PCRE</strong> engine is the closest match (PCRE supports lookbehind, backreferences,
+      and named groups), though minor syntax differences remain.
+    </p>
 
     <!-- Pattern input with /…/flags delimiters -->
     <div class="regex-input-wrap">
@@ -174,6 +181,13 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
   .engine-seg button:hover { box-shadow: none; transform: none; }
 
   .share-status { font-size: 0.8rem; color: var(--success); min-width: 4rem; }
+
+  .engine-note {
+    margin: 0 0 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    max-width: none;
+  }
 
   .regex-input-wrap {
     display: flex;
@@ -467,14 +481,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     results.appendChild(frag);
   }
 
-  function render() {
-    const pattern = patternInput.value;
-    const flags = currentFlags();
-    const text = testInput.value;
-    flagsEcho.textContent = flags;
-
-    const result = runMatch(engine, pattern, flags, text);
-
+  function applyResult(result: ReturnType<typeof runMatch>, pattern: string, text: string) {
     patternInput.classList.toggle("is-invalid", !result.ok);
 
     if (!result.ok) {
@@ -497,10 +504,46 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       summary.className = "match-summary";
     } else {
       summary.textContent =
-        `${n} match${n === 1 ? "" : "es"}` + (result.truncated ? " (showing first " + n + ")" : "");
+        `${n} match${n === 1 ? "" : "es"}` + (result.truncated ? ` (showing first ${n})` : "");
       summary.className = "match-summary has-matches";
     }
     renderResults(result.matches);
+  }
+
+  let pcreReady = false;
+  let renderSeq = 0;
+
+  async function render() {
+    const seq = ++renderSeq;
+    const pattern = patternInput.value;
+    const flags = currentFlags();
+    const text = testInput.value;
+    flagsEcho.textContent = flags;
+
+    if (engine === "pcre") {
+      if (pattern !== "" && !pcreReady) {
+        summary.textContent = "Loading PCRE engine…";
+        summary.className = "match-summary";
+      }
+      let result;
+      try {
+        // Lazy-load the WASM-backed PCRE engine only when it's actually used.
+        const mod = await import("@/lib/regex/pcre");
+        result = await mod.runPcre(pattern, flags, text);
+        pcreReady = true;
+      } catch {
+        if (seq === renderSeq) {
+          summary.textContent = "Failed to load the PCRE engine.";
+          summary.className = "match-summary is-error";
+        }
+        return;
+      }
+      if (seq !== renderSeq) return; // a newer render superseded this one
+      applyResult(result, pattern, text);
+      return;
+    }
+
+    applyResult(runMatch(engine, pattern, flags, text), pattern, text);
   }
 
   function syncBackdropScroll() {
@@ -512,7 +555,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
   let raf = 0;
   function scheduleRender() {
     cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(render);
+    raf = requestAnimationFrame(() => { void render(); });
   }
 
   patternInput.addEventListener("input", scheduleRender);
@@ -563,7 +606,9 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
   }
 
   const state = decodeState(location.hash);
-  if (state.engine === "re2" || state.engine === "ecmascript") engine = state.engine;
+  if (state.engine === "re2" || state.engine === "ecmascript" || state.engine === "pcre") {
+    engine = state.engine;
+  }
   for (const b of engineSeg.querySelectorAll<HTMLButtonElement>("[data-engine]")) {
     b.setAttribute("aria-pressed", b.dataset["engine"] === engine ? "true" : "false");
   }
@@ -580,5 +625,5 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
       "Sample record:\n  SSN: 123-45-6789\n  Backup SSN: 987-65-4321\n  Phone: (555) 123-4567";
   }
 
-  render();
+  void render();
 </script>
