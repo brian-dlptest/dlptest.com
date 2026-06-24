@@ -25,6 +25,7 @@
     "astro": "^6.3.3",
     "docx": "^9.6.1",
     "pdf-lib": "^1.17.1",
+    "re2js": "^2.8.3",
     "rehype-external-links": "^3.0.0",
     "xlsx": "^0.18.5"
   },

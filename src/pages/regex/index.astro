@@ -1,0 +1,584 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAd from "@/components/CyberhavenAd.astro";
+export const prerender = true;
+
+// Flag toggles rendered server-side; behaviour wired up in the bundled script.
+const FLAGS: { flag: string; label: string; title: string }[] = [
+  { flag: "g", label: "global", title: "Find all matches, not just the first" },
+  { flag: "i", label: "ignore case", title: "Case-insensitive matching" },
+  { flag: "m", label: "multiline", title: "^ and $ match at line breaks" },
+  { flag: "s", label: "dotall", title: ". matches newlines" },
+  { flag: "u", label: "unicode", title: "Unicode mode (ECMAScript only)" },
+  { flag: "y", label: "sticky", title: "Match only from lastIndex (ECMAScript only)" },
+];
+---
+<BaseLayout
+  title="Regex Test"
+  description="A regular-expression workbench for DLP rule authoring. Test patterns against sample text with live match highlighting and capture groups, across the ECMAScript and RE2 engines."
+>
+  <h1>Regex Test</h1>
+  <p>
+    Build and test regular expressions for DLP rules. Type a pattern and some sample text to
+    see matches highlighted live, with capture groups and positions. Switch engines to check how
+    a pattern behaves under <strong>ECMAScript</strong> (JavaScript) versus <strong>RE2</strong>
+    (the linear-time engine used by Go and many DLP products). Everything runs in your browser —
+    nothing is sent anywhere.
+  </p>
+
+  <CyberhavenAd unit="leaderboard" />
+
+  <div class="regex-workbench">
+    <!-- Engine + share toolbar -->
+    <div class="regex-toolbar">
+      <span class="toolbar-label">Engine</span>
+      <div class="engine-seg" id="engine-seg" role="group" aria-label="Regex engine">
+        <button type="button" data-engine="ecmascript" aria-pressed="true">ECMAScript (JS)</button>
+        <button type="button" data-engine="re2" aria-pressed="false">RE2 / Go</button>
+      </div>
+      <button type="button" id="share-btn" class="btn-secondary" title="Copy a shareable link to this test">Copy link</button>
+      <span id="share-status" class="share-status" aria-live="polite"></span>
+    </div>
+
+    <!-- Pattern input with /…/flags delimiters -->
+    <div class="regex-input-wrap">
+      <span class="regex-slash">/</span>
+      <input
+        id="pattern-input"
+        class="pattern-input"
+        type="text"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        autocorrect="off"
+        aria-label="Regular expression pattern"
+        placeholder="enter a regular expression"
+      />
+      <span class="regex-slash">/</span>
+      <span id="flags-echo" class="flags-echo" aria-hidden="true"></span>
+    </div>
+
+    <!-- Flag toggles -->
+    <div class="flags-row" id="flags-row">
+      {FLAGS.map((f) => (
+        <button
+          type="button"
+          class="flag-toggle"
+          data-flag={f.flag}
+          aria-pressed={f.flag === "g" ? "true" : "false"}
+          title={f.title}
+        >
+          <b>{f.flag}</b><span>{f.label}</span>
+        </button>
+      ))}
+    </div>
+
+    <!-- Test string with live highlight overlay -->
+    <label class="field-label" for="test-input">Test string</label>
+    <div class="test-area">
+      <div id="highlight-backdrop" class="highlight-backdrop" aria-hidden="true"></div>
+      <textarea
+        id="test-input"
+        class="test-input"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        autocorrect="off"
+        placeholder="paste or type the text to test against…"
+      ></textarea>
+    </div>
+
+    <p id="match-summary" class="match-summary" aria-live="polite"></p>
+
+    <div id="match-results" class="match-results"></div>
+
+    <details class="ref">
+      <summary>Quick reference (ECMAScript)</summary>
+      <div class="ref-body">
+        <div class="ref-grid">
+          <table>
+            <thead><tr><th>Token</th><th>Matches</th></tr></thead>
+            <tbody>
+              <tr><td><code>.</code></td><td>any character (except newline)</td></tr>
+              <tr><td><code>\d</code> <code>\D</code></td><td>digit / non-digit</td></tr>
+              <tr><td><code>\w</code> <code>\W</code></td><td>word char / non-word char</td></tr>
+              <tr><td><code>\s</code> <code>\S</code></td><td>whitespace / non-whitespace</td></tr>
+              <tr><td><code>\b</code> <code>\B</code></td><td>word boundary / non-boundary</td></tr>
+              <tr><td><code>[abc]</code> <code>[^abc]</code></td><td>character set / negated set</td></tr>
+              <tr><td><code>[a-z]</code></td><td>character range</td></tr>
+            </tbody>
+          </table>
+          <table>
+            <thead><tr><th>Token</th><th>Repeats</th></tr></thead>
+            <tbody>
+              <tr><td><code>*</code> <code>+</code> <code>?</code></td><td>0+, 1+, 0 or 1</td></tr>
+              <tr><td><code>{`{n}`}</code> <code>{`{n,}`}</code> <code>{`{n,m}`}</code></td><td>exactly / at least / range</td></tr>
+              <tr><td><code>*?</code> <code>+?</code></td><td>lazy (non-greedy)</td></tr>
+              <tr><td><code>(…)</code></td><td>capture group</td></tr>
+              <tr><td><code>(?:…)</code></td><td>non-capturing group</td></tr>
+              <tr><td><code>(?&lt;name&gt;…)</code></td><td>named capture group</td></tr>
+              <tr><td><code>a|b</code></td><td>alternation</td></tr>
+              <tr><td><code>^</code> <code>$</code></td><td>start / end (of line with <code>m</code>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="ref-note">
+          RE2 uses the same core syntax but omits backtracking features such as
+          lookbehind and backreferences; it guarantees linear-time matching in return.
+        </p>
+      </div>
+    </details>
+  </div>
+</BaseLayout>
+
+<style>
+  .regex-workbench { margin-top: 1.5rem; }
+
+  .regex-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .toolbar-label,
+  .field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+  }
+  .field-label { display: block; margin: 1rem 0 0.35rem; }
+
+  .engine-seg {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .engine-seg button {
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none;
+    transform: none;
+  }
+  .engine-seg button:last-child { border-right: none; }
+  .engine-seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .engine-seg button:hover { box-shadow: none; transform: none; }
+
+  .share-status { font-size: 0.8rem; color: var(--success); min-width: 4rem; }
+
+  .regex-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    padding: 0.55rem 0.75rem;
+  }
+  .regex-input-wrap:focus-within { border-color: var(--accent); box-shadow: var(--shadow-accent); }
+  .regex-slash {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    user-select: none;
+  }
+  .pattern-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    padding: 0.15rem 0;
+  }
+  .pattern-input:focus { outline: none; border: none; box-shadow: none; }
+  .pattern-input.is-invalid { color: var(--danger); }
+  .flags-echo {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .flags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.65rem 0;
+  }
+  .flag-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--bg-elev);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    box-shadow: none;
+    transform: none;
+  }
+  .flag-toggle b { font-family: var(--font-mono); font-size: 0.85rem; }
+  .flag-toggle:hover { box-shadow: none; transform: none; color: var(--text); }
+  .flag-toggle[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  .flag-toggle:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Highlight overlay: a backdrop div rendered behind a transparent-text
+     textarea. Both share identical box metrics so the <mark> spans line up
+     exactly under the editable text. */
+  .test-area { position: relative; }
+  .highlight-backdrop,
+  .test-input {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+    min-height: 16rem;
+    box-sizing: border-box;
+    tab-size: 2;
+  }
+  .highlight-backdrop {
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    background: var(--code-bg);
+    overflow: auto;
+    pointer-events: none;
+    z-index: 0;
+    border-color: var(--border);
+  }
+  .test-input {
+    position: relative;
+    z-index: 1;
+    color: var(--text);
+    background: transparent;
+    resize: vertical;
+    caret-color: var(--accent);
+  }
+  .test-input:focus { outline: none; border-color: var(--accent); box-shadow: var(--shadow-accent); }
+  .highlight-backdrop :global(mark) {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+    color: transparent;
+    border-radius: 2px;
+  }
+  .highlight-backdrop :global(mark.alt) {
+    background: color-mix(in srgb, var(--success) 28%, transparent);
+  }
+
+  .match-summary {
+    margin: 0.85rem 0 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    min-height: 1.2em;
+  }
+  .match-summary.is-error { color: var(--danger); }
+  .match-summary.has-matches { color: var(--success); }
+
+  .match-results { display: flex; flex-direction: column; gap: 0.5rem; }
+  .match-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    padding: 0.6rem 0.8rem;
+  }
+  .match-card-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+  }
+  .match-index { font-weight: 700; color: var(--accent); }
+  .match-pos { color: var(--text-dim); font-size: 0.8rem; }
+  .match-value {
+    font-family: var(--font-mono);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.05em 0.4em;
+    word-break: break-all;
+  }
+  .group-list {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.82rem;
+  }
+  .group-list li { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: baseline; }
+  .group-key { color: var(--text-dim); font-family: var(--font-mono); white-space: nowrap; }
+  .group-val { font-family: var(--font-mono); word-break: break-all; }
+  .group-val.empty { color: var(--text-dim); font-style: italic; }
+
+  /* Quick reference */
+  .ref {
+    margin-top: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .ref summary {
+    cursor: pointer;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--bg-elev);
+    user-select: none;
+  }
+  .ref-body { padding: 1rem; border-top: 1px solid var(--border); }
+  .ref-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .ref-grid table { margin: 0; font-size: 0.85rem; }
+  .ref-note { font-size: 0.82rem; color: var(--text-dim); margin: 0.85rem 0 0; }
+</style>
+
+<script>
+  import { runMatch, ENGINE_FLAGS, type RegexEngine } from "@/lib/regex/engines";
+  import { encodeState, decodeState } from "@/lib/regex/share";
+
+  const patternInput = document.getElementById("pattern-input") as HTMLInputElement;
+  const testInput = document.getElementById("test-input") as HTMLTextAreaElement;
+  const backdrop = document.getElementById("highlight-backdrop") as HTMLDivElement;
+  const flagsRow = document.getElementById("flags-row") as HTMLDivElement;
+  const flagsEcho = document.getElementById("flags-echo") as HTMLSpanElement;
+  const engineSeg = document.getElementById("engine-seg") as HTMLDivElement;
+  const summary = document.getElementById("match-summary") as HTMLParagraphElement;
+  const results = document.getElementById("match-results") as HTMLDivElement;
+  const shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
+  const shareStatus = document.getElementById("share-status") as HTMLSpanElement;
+
+  let engine: RegexEngine = "ecmascript";
+
+  function flagButtons(): HTMLButtonElement[] {
+    return Array.from(flagsRow.querySelectorAll<HTMLButtonElement>(".flag-toggle"));
+  }
+
+  function currentFlags(): string {
+    return flagButtons()
+      .filter((b) => b.getAttribute("aria-pressed") === "true" && !b.disabled)
+      .map((b) => b.dataset["flag"])
+      .join("");
+  }
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function syncEngineFlagAvailability() {
+    const allowed = new Set(ENGINE_FLAGS[engine]);
+    for (const btn of flagButtons()) {
+      const flag = btn.dataset["flag"]!;
+      const ok = allowed.has(flag);
+      btn.disabled = !ok;
+      if (!ok) btn.setAttribute("aria-pressed", "false");
+    }
+  }
+
+  function buildBackdrop(text: string, matches: { start: number; end: number }[]) {
+    let html = "";
+    let last = 0;
+    matches.forEach((m, i) => {
+      if (m.start < last || m.end <= m.start) return; // skip overlaps / zero-width
+      html += escapeHtml(text.slice(last, m.start));
+      html += `<mark class="${i % 2 === 0 ? "" : "alt"}">${escapeHtml(text.slice(m.start, m.end))}</mark>`;
+      last = m.end;
+    });
+    html += escapeHtml(text.slice(last));
+    // A trailing newline needs an extra line so the backdrop height tracks the textarea.
+    if (text.endsWith("\n")) html += "\n";
+    backdrop.innerHTML = html;
+  }
+
+  function renderResults(matches: ReturnType<typeof runMatch>["matches"]) {
+    if (matches.length === 0) {
+      results.innerHTML = "";
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    matches.forEach((m, i) => {
+      const card = document.createElement("div");
+      card.className = "match-card";
+
+      const head = document.createElement("div");
+      head.className = "match-card-head";
+      head.innerHTML =
+        `<span class="match-index">Match ${i + 1}</span>` +
+        `<span class="match-pos">index ${m.start}–${m.end}</span>`;
+      const val = document.createElement("span");
+      val.className = "match-value";
+      val.textContent = m.value;
+      head.appendChild(val);
+      card.appendChild(head);
+
+      if (m.groups.length > 0) {
+        const ul = document.createElement("ul");
+        ul.className = "group-list";
+        for (const g of m.groups) {
+          const li = document.createElement("li");
+          const key = document.createElement("span");
+          key.className = "group-key";
+          key.textContent = g.name ? `Group ${g.index} (${g.name}):` : `Group ${g.index}:`;
+          li.appendChild(key);
+          const gv = document.createElement("span");
+          if (g.value === null) {
+            gv.className = "group-val empty";
+            gv.textContent = "(no match)";
+          } else {
+            gv.className = "group-val";
+            gv.textContent =
+              g.value + (g.start !== null ? `  ·  ${g.start}–${g.end}` : "");
+          }
+          li.appendChild(gv);
+          ul.appendChild(li);
+        }
+        card.appendChild(ul);
+      }
+      frag.appendChild(card);
+    });
+    results.innerHTML = "";
+    results.appendChild(frag);
+  }
+
+  function render() {
+    const pattern = patternInput.value;
+    const flags = currentFlags();
+    const text = testInput.value;
+    flagsEcho.textContent = flags;
+
+    const result = runMatch(engine, pattern, flags, text);
+
+    patternInput.classList.toggle("is-invalid", !result.ok);
+
+    if (!result.ok) {
+      summary.textContent = `Error: ${result.error}`;
+      summary.className = "match-summary is-error";
+      backdrop.textContent = text;
+      results.innerHTML = "";
+      return;
+    }
+
+    buildBackdrop(text, result.matches);
+    syncBackdropScroll();
+
+    const n = result.matches.length;
+    if (pattern === "") {
+      summary.textContent = "";
+      summary.className = "match-summary";
+    } else if (n === 0) {
+      summary.textContent = "No matches";
+      summary.className = "match-summary";
+    } else {
+      summary.textContent =
+        `${n} match${n === 1 ? "" : "es"}` + (result.truncated ? " (showing first " + n + ")" : "");
+      summary.className = "match-summary has-matches";
+    }
+    renderResults(result.matches);
+  }
+
+  function syncBackdropScroll() {
+    backdrop.scrollTop = testInput.scrollTop;
+    backdrop.scrollLeft = testInput.scrollLeft;
+  }
+
+  // ── Wiring ────────────────────────────────────────────────────────────────
+  let raf = 0;
+  function scheduleRender() {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(render);
+  }
+
+  patternInput.addEventListener("input", scheduleRender);
+  testInput.addEventListener("input", scheduleRender);
+  testInput.addEventListener("scroll", syncBackdropScroll);
+
+  flagsRow.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".flag-toggle");
+    if (!btn || btn.disabled) return;
+    btn.setAttribute("aria-pressed", btn.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    render();
+  });
+
+  engineSeg.addEventListener("click", (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-engine]");
+    if (!btn) return;
+    engine = btn.dataset["engine"] as RegexEngine;
+    for (const b of engineSeg.querySelectorAll<HTMLButtonElement>("[data-engine]")) {
+      b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+    }
+    syncEngineFlagAvailability();
+    render();
+  });
+
+  shareBtn.addEventListener("click", async () => {
+    const hash = encodeState({
+      pattern: patternInput.value,
+      flags: currentFlags(),
+      engine,
+      test: testInput.value,
+    });
+    history.replaceState(null, "", `#${hash}`);
+    try {
+      await navigator.clipboard.writeText(location.href);
+      shareStatus.textContent = "Link copied";
+    } catch {
+      shareStatus.textContent = "Link in address bar";
+    }
+    setTimeout(() => { shareStatus.textContent = ""; }, 2000);
+  });
+
+  // ── Restore from URL hash, else seed a friendly default ─────────────────────
+  function setFlags(flags: string) {
+    const want = new Set(flags.split(""));
+    for (const btn of flagButtons()) {
+      btn.setAttribute("aria-pressed", want.has(btn.dataset["flag"]!) ? "true" : "false");
+    }
+  }
+
+  const state = decodeState(location.hash);
+  if (state.engine === "re2" || state.engine === "ecmascript") engine = state.engine;
+  for (const b of engineSeg.querySelectorAll<HTMLButtonElement>("[data-engine]")) {
+    b.setAttribute("aria-pressed", b.dataset["engine"] === engine ? "true" : "false");
+  }
+  syncEngineFlagAvailability();
+
+  if (state.pattern !== undefined || state.test !== undefined || state.flags !== undefined) {
+    patternInput.value = state.pattern ?? "";
+    testInput.value = state.test ?? "";
+    if (state.flags !== undefined) setFlags(state.flags);
+  } else {
+    // First-visit example: SSN-style detector against sample text.
+    patternInput.value = "\\b\\d{3}-\\d{2}-\\d{4}\\b";
+    testInput.value =
+      "Sample record:\n  SSN: 123-45-6789\n  Backup SSN: 987-65-4321\n  Phone: (555) 123-4567";
+  }
+
+  render();
+</script>

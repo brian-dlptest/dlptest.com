@@ -143,6 +143,24 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
+const regexTestExample = `# regex_test — match a pattern against text (RE2 engine by default)
+curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 8,
+    "method": "tools/call",
+    "params": {
+      "name": "regex_test",
+      "arguments": {
+        "pattern": "\\\\b\\\\d{3}-\\\\d{2}-\\\\d{4}\\\\b",
+        "flags": "g",
+        "text": "SSN: 123-45-6789",
+        "engine": "re2"
+      }
+    }
+  }'`;
+
 const localConfig = `// Local instance (npm run dev → http://localhost:4321)
 {
   "mcpServers": {
@@ -307,13 +325,20 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
   </details>
 
   <details class="accordion">
-    <summary>Browse the DLP regex library</summary>
+    <summary>Test a regex &amp; browse the DLP pattern library</summary>
     <div class="accordion-body">
+      <p>
+        <code>regex_test</code> matches a pattern against text and returns every match with its
+        capture groups and offsets. It mirrors the interactive
+        <a href="/regex/">Regex Test</a> page. Pick the <code>engine</code>: <code>re2</code>
+        (default — linear-time and ReDoS-safe) or <code>ecmascript</code>.
+      </p>
+      <pre><code>{regexTestExample}</code></pre>
       <p>
         <code>list_dlp_patterns</code> returns a curated library of DLP-relevant regular
         expressions — SSN, credit card, IBAN, MRN, API keys, network identifiers, and
         international government IDs — each with a sample string it matches. The same library
-        will power the Regex Test page. Filter by <code>category</code> or a
+        powers the <a href="/regex/">Regex Test</a> page. Filter by <code>category</code> or a
         free-text <code>search</code>; choose <code>json</code> or <code>csv</code> output.
       </p>
       <pre><code>{listPatternsExample}</code></pre>
@@ -421,11 +446,19 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
         </thead>
         <tbody>
           <tr>
+            <td><code>regex_test</code></td>
+            <td>
+              Matches a <code>pattern</code> against <code>text</code> and returns matches with
+              capture groups and offsets. <code>engine</code>: <code>re2</code> (default,
+              linear-time) or <code>ecmascript</code>; JS-style <code>flags</code>.
+            </td>
+          </tr>
+          <tr>
             <td><code>list_dlp_patterns</code></td>
             <td>
               Returns the curated DLP regex library (id, name, category, ECMAScript
-              <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that will
-              also back the Regex Test page. Optional <code>category</code> and
+              <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that also
+              backs the <a href="/regex/">Regex Test</a> page. Optional <code>category</code> and
               <code>search</code> filters; <code>json</code> or <code>csv</code> output.
             </td>
           </tr>
