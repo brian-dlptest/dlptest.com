@@ -47,6 +47,12 @@ All data-generation tools accept `count` (1–500, default 50) and `format` (`"j
 | `generate_prompt_context` | Returns prose paragraphs with inline PII simulating RAG retrieval or system-prompt injection. Scenarios: `medical-record`, `financial-statement`, `hr-file`, `customer-list` |
 | `probe_request` | Returns User-Agent, client IP, and timestamp to confirm the interception point |
 
+### Regex and DLP pattern library
+
+| Tool | Description |
+|------|-------------|
+| `list_dlp_patterns` | Returns the curated DLP regex library (id, name, category, ECMAScript `pattern`, `flags`, sample `example`). Optional `category` and `search` filters; `json` or `csv` output |
+
 ## Configuration by Client
 
 ### Claude Code (CLI)

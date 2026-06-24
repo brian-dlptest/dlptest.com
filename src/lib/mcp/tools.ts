@@ -21,6 +21,12 @@ import {
   type PiiSsnCcnRow,
   type PresetDatasetType,
 } from "@/lib/data-generator";
+import {
+  DLP_CATEGORIES,
+  DLP_PATTERNS,
+  type DlpCategory,
+  type DlpPattern,
+} from "@/lib/regex/dlp-patterns";
 
 export interface ToolDefinition {
   name: string;
@@ -478,6 +484,83 @@ const probeTool: ToolDefinition = {
   },
 };
 
+// ─── Regex / DLP pattern tools ───────────────────────────────────────────────
+
+const VALID_DLP_CATEGORIES = new Set<DlpCategory>(DLP_CATEGORIES);
+
+function csvEscape(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+// list_dlp_patterns: returns the curated DLP regex library that also backs the
+// /regex/ page. Single source of truth = src/lib/regex/dlp-patterns.ts.
+const listDlpPatternsTool: ToolDefinition = {
+  name: "list_dlp_patterns",
+  description:
+    "Return dlptest.com's curated library of DLP-relevant regular expressions — SSN, credit card, IBAN, MRN, API keys/secrets, network identifiers, and international government IDs. Each entry has an `id`, `name`, `category`, an ECMAScript `pattern`, default `flags`, and a sample `example` string the pattern matches. Use it to seed or tune DLP/CASB regex rules, or as known-good inputs for other tools. Filterable by `category` and a free-text `search`. These are pragmatic detectors that favour recall — not formal validators (e.g. credit-card entries check brand prefix + length, not the Luhn digit).",
+  inputSchema: {
+    type: "object",
+    properties: {
+      category: {
+        type: "string",
+        enum: [...DLP_CATEGORIES],
+        description: "Restrict results to a single category.",
+      },
+      search: {
+        type: "string",
+        maxLength: 100,
+        description:
+          "Case-insensitive substring filter applied to each pattern's id, name, and category.",
+      },
+      format: {
+        type: "string",
+        enum: ["json", "csv"],
+        default: "json",
+        description:
+          "Output format. 'json' returns a structured object; 'csv' returns id,name,category,pattern,flags,example rows.",
+      },
+    },
+    additionalProperties: false,
+  },
+  handler: (args) => {
+    const category = typeof args["category"] === "string" ? args["category"] : "";
+    const search =
+      typeof args["search"] === "string" ? args["search"].trim().toLowerCase() : "";
+    const format = args["format"] === "csv" ? "csv" : "json";
+
+    let patterns: DlpPattern[] = DLP_PATTERNS;
+    if (category && VALID_DLP_CATEGORIES.has(category as DlpCategory)) {
+      patterns = patterns.filter((p) => p.category === category);
+    }
+    if (search) {
+      patterns = patterns.filter((p) =>
+        `${p.id} ${p.name} ${p.category}`.toLowerCase().includes(search),
+      );
+    }
+
+    if (format === "csv") {
+      const header = "id,name,category,pattern,flags,example";
+      const rows = patterns.map((p) =>
+        [p.id, p.name, p.category, p.pattern, p.flags, p.example]
+          .map(csvEscape)
+          .join(","),
+      );
+      return [header, ...rows].join("\n");
+    }
+
+    return JSON.stringify(
+      {
+        count: patterns.length,
+        total: DLP_PATTERNS.length,
+        categories: DLP_CATEGORIES,
+        patterns,
+      },
+      null,
+      2,
+    );
+  },
+};
+
 // ─── Registry ───────────────────────────────────────────────────────────────
 
 export const TOOLS: ToolDefinition[] = [
@@ -486,6 +569,7 @@ export const TOOLS: ToolDefinition[] = [
   echoTool,
   promptContextTool,
   probeTool,
+  listDlpPatternsTool,
 ];
 
 const TOOL_INDEX = new Map(TOOLS.map((t) => [t.name, t]));
