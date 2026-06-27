@@ -13,5 +13,8 @@ node_modules/
 dist/
 .astro/
 
+# Temp output of `npm run regex:validate` (compiles the pattern lib to check it)
+.regexcheck/
+
 # Local scratch caches for one-shot import scripts (regenerable from the source URLs)
 scripts/news/cache/

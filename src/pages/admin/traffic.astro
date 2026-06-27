@@ -1,0 +1,237 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { verifyAccess } from "@/lib/access";
+import {
+  fetchTrafficSummary,
+  AnalyticsConfigError,
+  type TrafficSummary,
+} from "@/lib/cf-analytics";
+
+// Traffic dashboard — a single pane to answer "how much traffic are we getting,
+// and is anything hammering us?". Server-rendered and gated by Cloudflare Access
+// (verified again at the origin). Reads Cloudflare's zone HTTP analytics, which
+// is the only source that sees per-IP / per-user-agent breakdowns and edge-only
+// traffic (e.g. a runaway client POSTing / and getting 405) that never reaches
+// the Worker.
+export const prerender = false;
+
+const access = await verifyAccess(Astro.request);
+if (!access.ok) {
+  return new Response(`Forbidden: ${access.reason}`, { status: access.status });
+}
+
+const hoursParam = Number(Astro.url.searchParams.get("hours"));
+const windowHours = [1, 6, 24, 168].includes(hoursParam) ? hoursParam : 24;
+
+let summary: TrafficSummary | null = null;
+let loadError: string | null = null;
+let notConfigured = false;
+try {
+  summary = await fetchTrafficSummary(windowHours);
+} catch (error) {
+  if (error instanceof AnalyticsConfigError) {
+    notConfigured = true;
+    loadError = error.message;
+  } else {
+    console.error("[admin/traffic] failed to load analytics:", error);
+    loadError = error instanceof Error ? error.message : "Could not load analytics.";
+  }
+}
+
+const nf = new Intl.NumberFormat("en-US");
+function fmtBytes(n: number): string {
+  if (!n) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(units.length - 1, Math.floor(Math.log(n) / Math.log(1024)));
+  return `${(n / 1024 ** i).toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+function shorten(s: string, max = 60): string {
+  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+}
+function statusClass(code: number): string {
+  if (code >= 500) return "s5";
+  if (code >= 400) return "s4";
+  if (code >= 300) return "s3";
+  return "s2";
+}
+
+// Share of total carried by the single busiest IP — the headline "is one bot
+// dominating?" number.
+const topShare =
+  summary && summary.totalRequests > 0 && summary.byIP[0]
+    ? Math.round((summary.byIP[0].count / summary.totalRequests) * 100)
+    : 0;
+
+const hourlyMax = summary ? Math.max(1, ...summary.hourly.map((h) => h.count)) : 1;
+
+const windows: { h: number; label: string }[] = [
+  { h: 1, label: "1h" },
+  { h: 6, label: "6h" },
+  { h: 24, label: "24h" },
+  { h: 168, label: "7d" },
+];
+---
+
+<BaseLayout title="Traffic" description="Internal traffic dashboard.">
+  <h1>Traffic</h1>
+  <p class="muted">
+    Cloudflare zone analytics for dlptest.com.
+    {access.email && <span>Signed in as {access.email}.</span>}
+  </p>
+
+  <div class="windows">
+    {windows.map((w) => (
+      <a class={`pill ${w.h === windowHours ? "pill--on" : ""}`} href={`?hours=${w.h}`}>{w.label}</a>
+    ))}
+  </div>
+
+  {notConfigured && (
+    <div class="flash flash--warn">
+      <strong>Analytics not configured.</strong> {loadError}
+    </div>
+  )}
+  {loadError && !notConfigured && (
+    <div class="flash flash--err">Could not load analytics: <code>{loadError}</code></div>
+  )}
+
+  {summary && (
+    <>
+      <div class="cards">
+        <div class="card">
+          <div class="k">Requests</div>
+          <div class="v">{nf.format(summary.totalRequests)}</div>
+          <div class="sub">last {windowHours >= 24 ? `${windowHours / 24}d` : `${windowHours}h`}</div>
+        </div>
+        <div class="card">
+          <div class="k">Bandwidth</div>
+          <div class="v">{fmtBytes(summary.totalBytes)}</div>
+          <div class="sub">edge response bytes</div>
+        </div>
+        <div class={`card ${topShare >= 50 ? "card--alert" : ""}`}>
+          <div class="k">Top IP share</div>
+          <div class="v">{topShare}%</div>
+          <div class="sub">{topShare >= 50 ? "one source dominating" : "well distributed"}</div>
+        </div>
+      </div>
+
+      <section>
+        <h2>Requests per hour</h2>
+        <div class="spark">
+          {summary.hourly.map((h) => (
+            <div
+              class="bar"
+              style={`height:${Math.max(2, Math.round((h.count / hourlyMax) * 100))}%`}
+              title={`${h.dimensions.datetimeHour.slice(5, 16).replace("T", " ")} UTC · ${nf.format(h.count)}`}
+            />
+          ))}
+        </div>
+        <p class="hint">Hover a bar for the hour + count (UTC). A flat line around the clock = automated traffic.</p>
+      </section>
+
+      <div class="grid">
+        <section>
+          <h2>Top IPs</h2>
+          <table>
+            <thead><tr><th>IP</th><th>ASN</th><th>Country</th><th class="num">Requests</th></tr></thead>
+            <tbody>
+              {summary.byIP.map((r) => (
+                <tr>
+                  <td class="mono">{r.dimensions.clientIP}</td>
+                  <td class="mono">{r.dimensions.clientAsn}</td>
+                  <td>{r.dimensions.clientCountryName}</td>
+                  <td class="num">{nf.format(r.count)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>Top paths</h2>
+          <table>
+            <thead><tr><th>Path</th><th class="num">Requests</th></tr></thead>
+            <tbody>
+              {summary.byPath.map((r) => (
+                <tr>
+                  <td class="mono">{shorten(r.dimensions.clientRequestPath)}</td>
+                  <td class="num">{nf.format(r.count)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>Top user-agents</h2>
+          <table>
+            <thead><tr><th>User-agent</th><th class="num">Requests</th></tr></thead>
+            <tbody>
+              {summary.byUserAgent.map((r) => (
+                <tr>
+                  <td class="mono" title={r.dimensions.userAgent}>{shorten(r.dimensions.userAgent, 50)}</td>
+                  <td class="num">{nf.format(r.count)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>Status codes</h2>
+          <table>
+            <thead><tr><th>Code</th><th class="num">Requests</th></tr></thead>
+            <tbody>
+              {summary.byStatus.map((r) => (
+                <tr>
+                  <td><span class={`badge ${statusClass(r.dimensions.edgeResponseStatus)}`}>{r.dimensions.edgeResponseStatus}</span></td>
+                  <td class="num">{nf.format(r.count)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <p class="gen">
+        Window: {summary.start} → {summary.end} (UTC). Counts are Cloudflare adaptive
+        estimates. Generated {new Date().toISOString().slice(0, 16).replace("T", " ")} UTC.
+      </p>
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  .muted { color: var(--text-dim); }
+  .windows { display: flex; gap: 0.4rem; margin: 0.75rem 0 1.25rem; }
+  .pill {
+    border: 1px solid var(--border); border-radius: 999px; padding: 0.2rem 0.8rem;
+    font-size: 0.85rem; color: var(--accent); text-decoration: none;
+  }
+  .pill--on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .flash { padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); margin: 0.75rem 0; font-size: 0.95rem; border: 1px solid var(--border); }
+  .flash--warn { background: color-mix(in srgb, var(--warning) 14%, var(--surface)); border-color: var(--warning); }
+  .flash--err { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); border-color: var(--danger); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0 1.5rem; }
+  .card { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1.1rem; background: var(--surface); }
+  .card--alert { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }
+  .card .k { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .card .v { color: var(--text); font-size: 1.8rem; font-weight: 600; line-height: 1.2; }
+  .card .sub { color: var(--text-dim); font-size: 0.8rem; }
+  .spark { display: flex; align-items: flex-end; gap: 2px; height: 120px; padding: 0.5rem 0; }
+  .spark .bar { flex: 1; min-width: 2px; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.8; }
+  .spark .bar:hover { opacity: 1; background: var(--accent-hover); }
+  .hint, .gen { color: var(--text-dim); font-size: 0.8rem; }
+  .gen { margin-top: 1.5rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+  section h2 { font-size: 1.05rem; margin: 0 0 0.5rem; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text); }
+  th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-dim); font-weight: 600; }
+  th.num, td.num { text-align: right; white-space: nowrap; }
+  .mono { font-family: var(--font-mono); font-size: 0.8rem; }
+  .badge { display: inline-block; min-width: 2.4rem; text-align: center; border-radius: var(--radius-sm); padding: 0.05rem 0.35rem; font-size: 0.8rem; font-weight: 600; }
+  .badge.s2 { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
+  .badge.s3 { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
+  .badge.s4 { background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
+  .badge.s5 { background: color-mix(in srgb, var(--danger) 18%, transparent); color: var(--danger); }
+</style>
