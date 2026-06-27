@@ -39,6 +39,10 @@ declare namespace Cloudflare {
     SUBSCRIBE_API_KEY: string;
     /** Railway subscribe upstream URL (optional override; code has a default). */
     SUBSCRIBE_API_URL: string;
+    /** dlptest.com Cloudflare zone tag — powers /admin/traffic (var; zone IDs aren't secret). */
+    CF_ZONE_ID: string;
+    /** Cloudflare API token with Zone → Analytics → Read, for /admin/traffic (secret). */
+    CF_ANALYTICS_TOKEN: string;
   }
 }
 
