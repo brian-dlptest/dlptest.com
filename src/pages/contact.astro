@@ -1,6 +1,12 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { env } from "cloudflare:workers";
 export const prerender = true;
+
+// Cloudflare Turnstile site key — public, baked into the prerendered page at
+// build time. Falls back to Cloudflare's always-pass test key when unset (local
+// dev). Mirrors src/components/FeedbackModal.astro.
+const siteKey = env.CF_TURNSTILE_SITE_KEY?.trim() || "1x00000000000000000000AA";
 ---
 <BaseLayout title="Contact" description="Get in touch with DLP Test.">
   <h1>Contact</h1>
@@ -53,6 +59,8 @@ export const prerender = true;
           <input type="text" name="website" tabindex="-1" autocomplete="off" />
         </label>
       </div>
+      <!-- Cloudflare Turnstile widget (rendered explicitly via JS) -->
+      <div id="c-turnstile" class="contact-turnstile"></div>
       <button type="submit">Send</button>
       <p class="result" role="status"></p>
     </form>
@@ -157,6 +165,7 @@ export const prerender = true;
     }
     #contact-form .checkbox-title { font-weight: 600; color: var(--text); }
     #contact-form .honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+    #contact-form .contact-turnstile { margin-bottom: 1rem; min-height: 65px; }
     #contact-form .result { margin-top: 0.75rem; min-height: 1.5rem; }
     #contact-form .result.success { color: var(--success); }
     #contact-form .result.error { color: var(--danger); }
@@ -233,41 +242,102 @@ export const prerender = true;
     }
   </style>
 
-  <script>
-    const form = document.getElementById("contact-form") as HTMLFormElement | null;
-    form?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const result = form.querySelector<HTMLElement>(".result");
-      if (result) {
-        result.textContent = "Sending…";
-        result.className = "result";
-      }
-      const fd = new FormData(form);
-      try {
-        const res = await fetch(form.action, { method: "POST", body: fd });
-        if (res.ok) {
-          if (result) {
-            result.textContent = "Thanks — message received.";
-            result.className = "result success";
-          }
-          form.reset();
-        } else {
-          const data = (await res.json().catch(() => ({}))) as {
-            message?: string;
-          };
-          if (result) {
-            result.textContent =
-              data.message ||
-              `Something went wrong (${res.status}). Please try again.`;
-            result.className = "result error";
-          }
+  <script define:vars={{ siteKey }}>
+    let widgetId = null;
+    let turnstileToken = null;
+
+    function initContactForm() {
+      const form = document.getElementById("contact-form");
+      const turnstileContainer = document.getElementById("c-turnstile");
+      if (!form || !turnstileContainer) return;
+      // Guard against binding the submit handler twice on the same DOM instance
+      // (initContactForm runs both directly and on astro:page-load) — a double
+      // bind would POST the contact form twice.
+      if (form.dataset.contactInit === "1") return;
+      form.dataset.contactInit = "1";
+
+      // Reset state on each page-load (Astro view transitions respawn the DOM).
+      widgetId = null;
+      turnstileToken = null;
+      loadTurnstile();
+
+      function loadTurnstile() {
+        if (window.turnstile) {
+          renderWidget();
+          return;
         }
-      } catch (err) {
-        if (result) {
-          result.textContent = `Network error: ${(err as Error).message}`;
-          result.className = "result error";
+        if (document.getElementById("turnstile-script")) return;
+        const script = document.createElement("script");
+        script.id = "turnstile-script";
+        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        script.async = true;
+        script.onload = renderWidget;
+        document.head.appendChild(script);
+      }
+
+      function renderWidget() {
+        if (!window.turnstile || !turnstileContainer) return;
+        if (widgetId !== null) {
+          window.turnstile.reset(widgetId);
+          return;
+        }
+        turnstileContainer.innerHTML = "";
+        widgetId = window.turnstile.render(turnstileContainer, {
+          sitekey: siteKey,
+          callback: (token) => { turnstileToken = token; },
+          "expired-callback": () => { turnstileToken = null; },
+          "error-callback": () => { turnstileToken = null; },
+        });
+      }
+
+      function resetTurnstile() {
+        turnstileToken = null;
+        if (widgetId !== null && window.turnstile) {
+          window.turnstile.reset(widgetId);
         }
       }
-    });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const result = form.querySelector(".result");
+        const setResult = (msg, cls) => {
+          if (result) {
+            result.textContent = msg;
+            result.className = "result" + (cls ? " " + cls : "");
+          }
+        };
+
+        if (!turnstileToken) {
+          setResult("Please complete the security check.", "error");
+          return;
+        }
+
+        setResult("Sending…", "");
+        const fd = new FormData(form);
+        fd.set("turnstileToken", turnstileToken);
+        try {
+          const res = await fetch(form.action, { method: "POST", body: fd });
+          if (res.ok) {
+            setResult("Thanks — message received.", "success");
+            form.reset();
+            resetTurnstile();
+          } else {
+            const data = await res.json().catch(() => ({}));
+            const msg =
+              data.error === "captcha_failed"
+                ? "Security check failed. Please try again."
+                : data.message ||
+                  `Something went wrong (${res.status}). Please try again.`;
+            setResult(msg, "error");
+            resetTurnstile();
+          }
+        } catch (err) {
+          setResult(`Network error: ${err.message}`, "error");
+        }
+      });
+    }
+
+    initContactForm();
+    document.addEventListener("astro:page-load", initContactForm);
   </script>
 </BaseLayout>
