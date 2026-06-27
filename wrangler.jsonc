@@ -23,7 +23,11 @@
     // Cloudflare Turnstile site key for the feedback form. Public by design
     // (rendered into the page); baked into prerendered pages at build time.
     // The matching secret is set via `wrangler secret put CF_TURNSTILE_SECRET_KEY`.
-    "CF_TURNSTILE_SITE_KEY": "0x4AAAAAADgkyesHv85sOwDD"
+    "CF_TURNSTILE_SITE_KEY": "0x4AAAAAADgkyesHv85sOwDD",
+    // dlptest.com Cloudflare zone tag — powers the /admin/traffic dashboard.
+    // Zone IDs aren't secret; the matching API token (Zone → Analytics → Read)
+    // is set via `wrangler secret put CF_ANALYTICS_TOKEN`.
+    "CF_ZONE_ID": "484b917cb842cc9aacdca4269dd20321"
   },
   // R2 bucket holding the legacy DLP test downloads (sample-data.csv,
   // 1-MB-Test.xlsx, 334-MB-Test-CSV.csv, etc). Populated by
@@ -58,7 +62,10 @@
         "CONTACT_FROM_EMAIL": "contact@dlptest.com",
         "CONTACT_TO_EMAIL": "brian@dlptest.com",
         // Same Turnstile widget covers dlptest.com + staging.dlptest.com.
-        "CF_TURNSTILE_SITE_KEY": "0x4AAAAAADgkyesHv85sOwDD"
+        "CF_TURNSTILE_SITE_KEY": "0x4AAAAAADgkyesHv85sOwDD",
+        // staging.dlptest.com lives in the same zone, so the report covers the
+        // whole dlptest.com zone regardless of which env renders it.
+        "CF_ZONE_ID": "484b917cb842cc9aacdca4269dd20321"
       },
       "r2_buckets": [
         { "binding": "DOWNLOADS", "bucket_name": "dlptest-downloads" }
