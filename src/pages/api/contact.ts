@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import { sendContactEmail } from "@/lib/contact-email";
 import { addSubscriber } from "@/lib/subscribe";
 
@@ -22,10 +23,47 @@ export const POST: APIRoute = async ({ request }) => {
   const company = (form.get("company") || "").toString().trim();
   const subject = (form.get("subject") || "").toString().trim();
   const message = (form.get("message") || "").toString().trim();
+  const turnstileToken = (form.get("turnstileToken") || "").toString().trim();
   const subscribeUpdates = form.get("subscribe_updates") != null;
 
   if (!name || !email || !subject || !message) {
     return jsonResponse({ ok: false, error: "missing_field" }, 400);
+  }
+
+  // Verify Cloudflare Turnstile token to block form-spam bots.
+  // Skip verification if the secret key isn't configured (local dev fallback) —
+  // mirrors src/pages/api/feedback.ts.
+  const tsSecret = env.CF_TURNSTILE_SECRET_KEY?.trim();
+  if (tsSecret) {
+    if (!turnstileToken) {
+      return jsonResponse({ ok: false, error: "captcha_failed" }, 403);
+    }
+    const tsRes = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: tsSecret, response: turnstileToken }),
+      },
+    );
+    const tsData = (await tsRes.json()) as {
+      success: boolean;
+      "error-codes"?: string[];
+    };
+    if (!tsData.success) {
+      // Log Cloudflare's error-codes so the cause is diagnosable from
+      // `wrangler tail` — e.g. "invalid-input-secret" (secret doesn't match
+      // the site key) vs "timeout-or-duplicate" (token already used/expired).
+      console.error(
+        "[contact] Turnstile siteverify failed",
+        tsData["error-codes"] ?? [],
+      );
+      return jsonResponse({ ok: false, error: "captcha_failed" }, 403);
+    }
+  } else {
+    console.warn(
+      "[contact] CF_TURNSTILE_SECRET_KEY not configured — skipping Turnstile verification",
+    );
   }
 
   const mail = await sendContactEmail({
