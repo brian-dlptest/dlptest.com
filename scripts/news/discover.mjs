@@ -83,6 +83,31 @@ async function fetchKnownSlugs(siteUrl, secret) {
   }
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Transient capacity errors worth retrying in-run (vs. a persistent block). */
+function isTransientError(error) {
+  return error?.status === 429 || error?.status === 529;
+}
+
+/**
+ * client.messages.create with exponential backoff on transient capacity
+ * errors (429 rate limit, 529 overloaded). Persistent errors — including a
+ * drained credit balance — fail fast and bubble up to main()'s handler.
+ */
+async function createMessage(client, params, { maxRetries = 4 } = {}) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await client.messages.create(params);
+    } catch (error) {
+      if (attempt >= maxRetries || !isTransientError(error)) throw error;
+      const delayMs = 2 ** attempt * 1000;
+      console.warn(`Transient API error (${error.status}); retry ${attempt + 1}/${maxRetries} in ${delayMs}ms…`);
+      await sleep(delayMs);
+    }
+  }
+}
+
 /** Phase 1 — research qualifying stories with web search. */
 async function research(client, { editorial, cutoffIso, excludeSlugs, today }) {
   const prompt = `You are the editor for the Data Security News section of dlptest.com — practitioner notes for DLP/DSPM/insider-risk buyers.
@@ -102,7 +127,7 @@ Prefer 0–2 strong stories over padding with weak fits. If nothing qualifies, s
 For each qualifying story, write a short briefing: the headline, the primary source URL (canonical vendor PR / Calcalist / SecurityWeek — never dlptest.com), the publication date, and 3–5 sentences of practitioner synthesis including the DLP/DSPM angle. Stay factual and flag uncertainty where sources conflict.`;
 
   const tools = [{ type: "web_search_20260209", name: "web_search" }];
-  let response = await client.messages.create({
+  let response = await createMessage(client, {
     model: MODEL,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
@@ -115,7 +140,7 @@ For each qualifying story, write a short briefing: the headline, the primary sou
   const messages = [{ role: "user", content: prompt }];
   while (response.stop_reason === "pause_turn" && guard < 5) {
     messages.push({ role: "assistant", content: response.content });
-    response = await client.messages.create({
+    response = await createMessage(client, {
       model: MODEL,
       max_tokens: 16000,
       thinking: { type: "adaptive" },
@@ -164,7 +189,7 @@ async function extract(client, { report, cutoffIso }) {
     required: ["candidates"],
   };
 
-  const response = await client.messages.create({
+  const response = await createMessage(client, {
     model: MODEL,
     max_tokens: 16000,
     output_config: { format: { type: "json_schema", schema } },
@@ -201,6 +226,32 @@ async function ingest(siteUrl, secret, candidates) {
     throw new Error(`ingest failed ${res.status}: ${JSON.stringify(body)}`);
   }
   return body;
+}
+
+/**
+ * True when an error is a non-actionable operational condition rather than a
+ * code bug — chiefly an exhausted Anthropic credit balance. The daily cron
+ * shouldn't go red (and spam failure emails) every morning until billing is
+ * topped up, so we soft-exit on these.
+ */
+function isSoftApiError(error) {
+  if (!error || typeof error !== "object") return false;
+  const status = error.status;
+  // Drill into the SDK's structured body as well as the flattened message.
+  const message = [
+    error.message,
+    error.error?.error?.message,
+    error.error?.message,
+  ]
+    .filter((s) => typeof s === "string")
+    .join(" ")
+    .toLowerCase();
+  if (/credit balance is too low/.test(message)) return true;
+  if (/billing|insufficient.*(credit|quota)|quota.*exceeded/.test(message)) return true;
+  // Capacity blips (429/529) reach here only after createMessage() has already
+  // exhausted its retries — at that point skip the run rather than fail red.
+  if (status === 429 || status === 529) return true;
+  return false;
 }
 
 async function main() {
@@ -242,4 +293,15 @@ async function main() {
   console.log("Ingest result:", JSON.stringify(result));
 }
 
-await main();
+try {
+  await main();
+} catch (error) {
+  if (isSoftApiError(error)) {
+    const detail = error.error?.error?.message || error.message || String(error);
+    console.warn(`::warning::News discovery skipped — Anthropic API unavailable: ${detail}`);
+    console.warn("Soft-exiting 0 so the scheduled run doesn't fail on a billing/capacity blip.");
+    process.exit(0);
+  }
+  console.error(error);
+  process.exit(1);
+}
