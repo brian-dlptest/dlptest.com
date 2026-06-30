@@ -203,6 +203,31 @@ async function ingest(siteUrl, secret, candidates) {
   return body;
 }
 
+/**
+ * True when an error is a non-actionable operational condition rather than a
+ * code bug — chiefly an exhausted Anthropic credit balance. The daily cron
+ * shouldn't go red (and spam failure emails) every morning until billing is
+ * topped up, so we soft-exit on these.
+ */
+function isSoftApiError(error) {
+  if (!error || typeof error !== "object") return false;
+  const status = error.status;
+  // Drill into the SDK's structured body as well as the flattened message.
+  const message = [
+    error.message,
+    error.error?.error?.message,
+    error.error?.message,
+  ]
+    .filter((s) => typeof s === "string")
+    .join(" ")
+    .toLowerCase();
+  if (/credit balance is too low/.test(message)) return true;
+  if (/billing|insufficient.*(credit|quota)|quota.*exceeded/.test(message)) return true;
+  // Capacity blips: overloaded (529) and rate limits (429) are transient.
+  if (status === 429 || status === 529) return true;
+  return false;
+}
+
 async function main() {
   const apiKey = requireEnv("ANTHROPIC_API_KEY");
   const ingestSecret = requireEnv("NEWS_INGEST_SECRET");
@@ -242,4 +267,15 @@ async function main() {
   console.log("Ingest result:", JSON.stringify(result));
 }
 
-await main();
+try {
+  await main();
+} catch (error) {
+  if (isSoftApiError(error)) {
+    const detail = error.error?.error?.message || error.message || String(error);
+    console.warn(`::warning::News discovery skipped — Anthropic API unavailable: ${detail}`);
+    console.warn("Soft-exiting 0 so the scheduled run doesn't fail on a billing/capacity blip.");
+    process.exit(0);
+  }
+  console.error(error);
+  process.exit(1);
+}
