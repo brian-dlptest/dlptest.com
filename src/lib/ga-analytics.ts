@@ -23,6 +23,13 @@ const DATA_API = "https://analyticsdata.googleapis.com/v1beta";
 
 export class GaConfigError extends Error {}
 
+export interface GaDay {
+  /** Date as YYYYMMDD (GA's `date` dimension format). */
+  date: string;
+  users: number;
+  views: number;
+}
+
 export interface GaSummary {
   days: number;
   startDate: string;
@@ -31,6 +38,8 @@ export interface GaSummary {
   totalUsers: number;
   newUsers: number;
   sessions: number;
+  /** Per-day users + views over the window, oldest first — for trend charts. */
+  daily: GaDay[];
   topPages: { path: string; views: number }[];
   topEvents: { name: string; count: number }[];
 }
@@ -123,12 +132,13 @@ interface BatchResponse {
 }
 
 /**
- * Fetch a GA4 summary over a window matching the dashboard's hour window
- * (rounded to whole days, min 1). Throws {@link GaConfigError} when the
+ * Fetch a GA4 summary over the last `days` (default 90), ending yesterday so a
+ * partial "today" doesn't read as a drop in the trend. Includes a per-day
+ * users/views series for trend charts. Throws {@link GaConfigError} when the
  * service-account secrets aren't configured so the page can render a friendly
  * "not set up" state instead of a 500.
  */
-export async function fetchGaSummary(windowHours = 24): Promise<GaSummary> {
+export async function fetchGaSummary(days = 90): Promise<GaSummary> {
   const propertyId = env.GA4_PROPERTY_ID?.trim();
   const clientEmail = env.GA_SA_CLIENT_EMAIL?.trim();
   const privateKey = env.GA_SA_PRIVATE_KEY?.trim();
@@ -139,15 +149,15 @@ export async function fetchGaSummary(windowHours = 24): Promise<GaSummary> {
     );
   }
 
-  // GA reports in whole days; map the dashboard's hour window onto a day range.
-  const days = Math.max(1, Math.round(windowHours / 24));
+  // GA reports in whole days. End yesterday: today's data is partial and would
+  // show up as a misleading dip at the right edge of the trend.
   const startDate = `${days}daysAgo`;
-  const endDate = "today";
+  const endDate = "yesterday";
   const dateRanges = [{ startDate, endDate }];
 
   const token = await getAccessToken(clientEmail, privateKey);
 
-  // One round-trip: totals + top pages + top events via batchRunReports.
+  // One round-trip: totals + daily series + top pages + top events.
   const body = {
     requests: [
       {
@@ -158,6 +168,13 @@ export async function fetchGaSummary(windowHours = 24): Promise<GaSummary> {
           { name: "newUsers" },
           { name: "sessions" },
         ],
+      },
+      {
+        dateRanges,
+        dimensions: [{ name: "date" }],
+        metrics: [{ name: "totalUsers" }, { name: "screenPageViews" }],
+        orderBys: [{ dimension: { dimensionName: "date" } }],
+        limit: 100,
       },
       {
         dateRanges,
@@ -187,7 +204,7 @@ export async function fetchGaSummary(windowHours = 24): Promise<GaSummary> {
   }
 
   const data = (await res.json()) as BatchResponse;
-  const [totals, pages, events] = data.reports ?? [];
+  const [totals, daily, pages, events] = data.reports ?? [];
 
   const num = (s?: string) => Number(s ?? 0) || 0;
   const t = totals?.rows?.[0]?.metricValues ?? [];
@@ -200,6 +217,11 @@ export async function fetchGaSummary(windowHours = 24): Promise<GaSummary> {
     totalUsers: num(t[1]?.value),
     newUsers: num(t[2]?.value),
     sessions: num(t[3]?.value),
+    daily: (daily?.rows ?? []).map((r) => ({
+      date: r.dimensionValues?.[0]?.value ?? "",
+      users: num(r.metricValues?.[0]?.value),
+      views: num(r.metricValues?.[1]?.value),
+    })),
     topPages: (pages?.rows ?? []).map((r) => ({
       path: r.dimensionValues?.[0]?.value ?? "",
       views: num(r.metricValues?.[0]?.value),

@@ -24,6 +24,19 @@ if (!access.ok) {
 const hoursParam = Number(Astro.url.searchParams.get("hours"));
 const windowHours = [1, 6, 24, 168].includes(hoursParam) ? hoursParam : 24;
 
+// GA has its own window (in days): Cloudflare maxes at 7d, but GA is where we
+// look for longer-term user trends. Defaults to 90d.
+const gaDaysParam = Number(Astro.url.searchParams.get("gadays"));
+const gaDays = [7, 28, 90].includes(gaDaysParam) ? gaDaysParam : 90;
+
+// Build a relative URL that flips one query param but preserves the others, so
+// the Cloudflare and GA window pills don't clobber each other's selection.
+function withParam(key: string, value: string | number): string {
+  const p = new URLSearchParams(Astro.url.search);
+  p.set(key, String(value));
+  return `?${p.toString()}`;
+}
+
 // Scope analytics to the hostname this dashboard is served on. dlptest.com and
 // staging.dlptest.com share one Cloudflare zone, so without this each
 // environment would show the whole zone's traffic (prod + staging combined).
@@ -51,7 +64,7 @@ let ga: GaSummary | null = null;
 let gaError: string | null = null;
 let gaNotConfigured = false;
 try {
-  ga = await fetchGaSummary(windowHours);
+  ga = await fetchGaSummary(gaDays);
 } catch (error) {
   if (error instanceof GaConfigError) {
     gaNotConfigured = true;
@@ -60,6 +73,31 @@ try {
     console.error("[admin/traffic] failed to load GA:", error);
     gaError = error instanceof Error ? error.message : "Could not load GA.";
   }
+}
+
+// Trend signal: average daily users over the most recent N days vs the first N
+// days of the window. Direct answer to "are we losing users?". N scales with the
+// window (a week for 90d) but never exceeds half the series.
+const gaWindows = [
+  { d: 7, label: "7d" },
+  { d: 28, label: "28d" },
+  { d: 90, label: "90d" },
+];
+let usersTrendPct: number | null = null;
+let trendN = 0;
+if (ga && ga.daily.length >= 8) {
+  const d = ga.daily;
+  trendN = Math.min(ga.days >= 60 ? 14 : 7, Math.floor(d.length / 2));
+  const avg = (rows: typeof d) => rows.reduce((s, x) => s + x.users, 0) / rows.length;
+  const baseAvg = avg(d.slice(0, trendN));
+  const recentAvg = avg(d.slice(-trendN));
+  if (baseAvg > 0) usersTrendPct = Math.round(((recentAvg - baseAvg) / baseAvg) * 100);
+}
+const gaUsersMax = ga ? Math.max(1, ...ga.daily.map((x) => x.users)) : 1;
+function fmtGaDate(yyyymmdd: string): string {
+  return yyyymmdd.length === 8
+    ? `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`
+    : yyyymmdd;
 }
 
 const nf = new Intl.NumberFormat("en-US");
@@ -105,7 +143,7 @@ const windows: { h: number; label: string }[] = [
 
   <div class="windows">
     {windows.map((w) => (
-      <a class={`pill ${w.h === windowHours ? "pill--on" : ""}`} href={`?hours=${w.h}`}>{w.label}</a>
+      <a class={`pill ${w.h === windowHours ? "pill--on" : ""}`} href={withParam("hours", w.h)}>{w.label}</a>
     ))}
   </div>
 
@@ -229,8 +267,14 @@ const windows: { h: number; label: string }[] = [
       Different lens than the Cloudflare numbers above: GA counts only visitors who
       ran the analytics tag and consented — bots, automated DLP-test traffic, and
       asset/sub-resource requests are excluded, so these sit well below the edge
-      request counts. Daily data can lag ~24–48h, so today may be partial.
+      request counts. Windows end yesterday (today is partial).
     </p>
+
+    <div class="windows">
+      {gaWindows.map((w) => (
+        <a class={`pill ${w.d === gaDays ? "pill--on" : ""}`} href={withParam("gadays", w.d)}>{w.label}</a>
+      ))}
+    </div>
 
     {gaNotConfigured && (
       <div class="flash flash--warn"><strong>GA not configured.</strong> {gaError}</div>
@@ -257,7 +301,33 @@ const windows: { h: number; label: string }[] = [
             <div class="v">{nf.format(ga.sessions)}</div>
             <div class="sub">last {ga.days}d</div>
           </div>
+          {usersTrendPct !== null && (
+            <div class={`card ${usersTrendPct < -5 ? "card--alert" : ""}`}>
+              <div class="k">Users trend</div>
+              <div class="v">{usersTrendPct > 0 ? "▲" : usersTrendPct < 0 ? "▼" : "■"} {Math.abs(usersTrendPct)}%</div>
+              <div class="sub">last {trendN}d avg vs first {trendN}d</div>
+            </div>
+          )}
         </div>
+
+        {ga.daily.length > 0 && (
+          <section>
+            <h2>Users per day</h2>
+            <div class="spark">
+              {ga.daily.map((d) => (
+                <div
+                  class="bar"
+                  style={`height:${Math.max(2, Math.round((d.users / gaUsersMax) * 100))}%`}
+                  title={`${fmtGaDate(d.date)} · ${nf.format(d.users)} users · ${nf.format(d.views)} views`}
+                />
+              ))}
+            </div>
+            <p class="hint">
+              Daily unique users over the last {ga.days} days (ending yesterday). Hover a
+              bar for the date + counts. A sustained downward slope = losing users.
+            </p>
+          </section>
+        )}
 
         <div class="grid">
           <section>
