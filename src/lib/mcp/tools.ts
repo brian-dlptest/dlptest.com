@@ -27,6 +27,8 @@ import {
   type DlpCategory,
   type DlpPattern,
 } from "@/lib/regex/dlp-patterns";
+import { runMatch, type RegexEngine } from "@/lib/regex/engines";
+import { generateMatchingStrings } from "@/lib/regex/generate-match";
 
 export interface ToolDefinition {
   name: string;
@@ -561,6 +563,149 @@ const listDlpPatternsTool: ToolDefinition = {
   },
 };
 
+// regex_test: evaluate a pattern against text. Defaults to the RE2 engine,
+// which is linear-time (ReDoS-safe) — important because this runs server-side on
+// caller-supplied patterns. Input/pattern length are capped for the same reason.
+const REGEX_TEST_MAX_INPUT = 25_000;
+const REGEX_TEST_MAX_PATTERN = 1_000;
+const REGEX_TEST_MAX_MATCHES = 1_000;
+
+const regexTestTool: ToolDefinition = {
+  name: "regex_test",
+  description:
+    "Test a regular expression against a string and return every match with its capture groups and character offsets — the building block for authoring and validating DLP detection rules. Choose the `engine`: 're2' (default; the linear-time RE2/Go engine used by many DLP products — ReDoS-safe) or 'ecmascript' (JavaScript `RegExp`). `flags` is a JS-style string (g, i, m, s; plus u, y for ecmascript). Pair it with list_dlp_patterns to validate library patterns against your own sample data. Matching happens server-side; nothing is stored.",
+  inputSchema: {
+    type: "object",
+    required: ["pattern", "text"],
+    properties: {
+      pattern: {
+        type: "string",
+        maxLength: REGEX_TEST_MAX_PATTERN,
+        description: "The regular expression source (without surrounding slashes).",
+      },
+      text: {
+        type: "string",
+        maxLength: REGEX_TEST_MAX_INPUT,
+        description: `The text to match against (max ${REGEX_TEST_MAX_INPUT} characters).`,
+      },
+      flags: {
+        type: "string",
+        maxLength: 10,
+        default: "g",
+        description:
+          "JS-style flag string: g (find all), i (ignore case), m (multiline), s (dotall); u and y apply to the ecmascript engine only. Default 'g'.",
+      },
+      engine: {
+        type: "string",
+        enum: ["re2", "ecmascript"],
+        default: "re2",
+        description:
+          "Matching engine. 're2' is linear-time and ReDoS-safe (default); 'ecmascript' uses JavaScript RegExp semantics (supports lookbehind, backreferences, sticky/unicode flags).",
+      },
+    },
+    additionalProperties: false,
+  },
+  handler: (args) => {
+    const pattern = typeof args["pattern"] === "string" ? args["pattern"] : "";
+    const text = typeof args["text"] === "string" ? args["text"] : "";
+    const flags = typeof args["flags"] === "string" ? args["flags"] : "g";
+    const engine: RegexEngine = args["engine"] === "ecmascript" ? "ecmascript" : "re2";
+
+    const result = runMatch(engine, pattern, flags, text, {
+      maxInputLength: REGEX_TEST_MAX_INPUT,
+      maxPatternLength: REGEX_TEST_MAX_PATTERN,
+      maxMatches: REGEX_TEST_MAX_MATCHES,
+    });
+
+    return JSON.stringify(
+      {
+        engine: result.engine,
+        pattern,
+        flags,
+        global: result.global,
+        ok: result.ok,
+        error: result.error,
+        match_count: result.matches.length,
+        truncated: result.truncated,
+        matches: result.matches.map((m) => ({
+          value: m.value,
+          start: m.start,
+          end: m.end,
+          groups: m.groups.map((g) => ({
+            index: g.index,
+            name: g.name,
+            value: g.value,
+            start: g.start,
+            end: g.end,
+          })),
+        })),
+      },
+      null,
+      2,
+    );
+  },
+};
+
+// regex_generate_matches: synthesize strings that MATCH a given pattern. Useful
+// for producing DLP test data from a regex rule. Scoped + self-verifying (see
+// src/lib/regex/generate-match.ts) — it returns an honest error rather than a
+// wrong answer for patterns outside its supported subset.
+const REGEX_GEN_MAX_PATTERN = 1_000;
+const REGEX_GEN_MAX_COUNT = 25;
+
+const regexGenerateMatchesTool: ToolDefinition = {
+  name: "regex_generate_matches",
+  description:
+    "Generate synthetic strings that MATCH a given regular expression — the reverse of regex_test, useful for turning a DLP detection rule into sample test data. Handles a bounded ECMAScript subset (literals, ., \\d \\w \\s and friends, character classes, groups, alternation, and bounded quantifiers); backreferences and look-around are not supported. If the pattern is one of dlptest.com's curated DLP library patterns, its known-good example is used. Every returned string is verified to actually match the pattern — if none can be produced, the tool returns an error rather than a wrong answer. Generated data is synthetic and structurally shaped only; it does not correspond to any real person or account.",
+  inputSchema: {
+    type: "object",
+    required: ["pattern"],
+    properties: {
+      pattern: {
+        type: "string",
+        maxLength: REGEX_GEN_MAX_PATTERN,
+        description: "The regular expression source (without surrounding slashes).",
+      },
+      flags: {
+        type: "string",
+        maxLength: 10,
+        default: "",
+        description: "JS-style flags affecting matching during verification (i, m, s).",
+      },
+      count: {
+        type: "integer",
+        minimum: 1,
+        maximum: REGEX_GEN_MAX_COUNT,
+        default: 3,
+        description: `Number of matching strings to generate (1–${REGEX_GEN_MAX_COUNT}). Default 3.`,
+      },
+    },
+    additionalProperties: false,
+  },
+  handler: (args) => {
+    const pattern = typeof args["pattern"] === "string" ? args["pattern"] : "";
+    const flags = typeof args["flags"] === "string" ? args["flags"] : "";
+    const count = typeof args["count"] === "number" ? args["count"] : 3;
+
+    const result = generateMatchingStrings(pattern, flags, count);
+    if (!result.ok) {
+      throw new Error(result.error ?? "could not generate matches");
+    }
+    return JSON.stringify(
+      {
+        pattern: result.pattern,
+        flags: result.flags,
+        source: result.source,
+        count: result.samples.length,
+        samples: result.samples,
+        ...(result.note ? { note: result.note } : {}),
+      },
+      null,
+      2,
+    );
+  },
+};
+
 // ─── Registry ───────────────────────────────────────────────────────────────
 
 export const TOOLS: ToolDefinition[] = [
@@ -570,6 +715,8 @@ export const TOOLS: ToolDefinition[] = [
   promptContextTool,
   probeTool,
   listDlpPatternsTool,
+  regexTestTool,
+  regexGenerateMatchesTool,
 ];
 
 const TOOL_INDEX = new Map(TOOLS.map((t) => [t.name, t]));
