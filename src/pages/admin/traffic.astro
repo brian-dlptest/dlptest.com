@@ -324,12 +324,18 @@ const windows: { h: number; label: string }[] = [
     color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.1rem 0.5rem;
   }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+  /* Grid/flex items default to min-width:auto, which lets a table's widest
+     unbreakable cell (long IPv6 / path / user-agent) blow past the track and
+     overlap the next column. Pin to 0 so the track governs width and the
+     tables wrap instead of spilling. */
+  .grid > section { min-width: 0; }
   section h2 { font-size: 1.05rem; margin: 0 0 0.5rem; color: var(--text); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text); table-layout: fixed; }
   th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
   th { color: var(--text-dim); font-weight: 600; }
-  th.num, td.num { text-align: right; white-space: nowrap; }
-  .mono { font-family: var(--font-mono); font-size: 0.8rem; }
+  th.num, td.num { text-align: right; white-space: nowrap; width: 5rem; }
+  /* Break long technical strings so fixed-layout cells wrap rather than overflow. */
+  .mono { font-family: var(--font-mono); font-size: 0.8rem; overflow-wrap: anywhere; word-break: break-word; }
   .badge { display: inline-block; min-width: 2.4rem; text-align: center; border-radius: var(--radius-sm); padding: 0.05rem 0.35rem; font-size: 0.8rem; font-weight: 600; }
   .badge.s2 { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
   .badge.s3 { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
