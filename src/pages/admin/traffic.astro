@@ -23,11 +23,16 @@ if (!access.ok) {
 const hoursParam = Number(Astro.url.searchParams.get("hours"));
 const windowHours = [1, 6, 24, 168].includes(hoursParam) ? hoursParam : 24;
 
+// Scope analytics to the hostname this dashboard is served on. dlptest.com and
+// staging.dlptest.com share one Cloudflare zone, so without this each
+// environment would show the whole zone's traffic (prod + staging combined).
+const host = Astro.url.hostname;
+
 let summary: TrafficSummary | null = null;
 let loadError: string | null = null;
 let notConfigured = false;
 try {
-  summary = await fetchTrafficSummary(windowHours);
+  summary = await fetchTrafficSummary(windowHours, host);
 } catch (error) {
   if (error instanceof AnalyticsConfigError) {
     notConfigured = true;
@@ -75,7 +80,7 @@ const windows: { h: number; label: string }[] = [
 <BaseLayout title="Traffic" description="Internal traffic dashboard.">
   <h1>Traffic</h1>
   <p class="muted">
-    Cloudflare zone analytics for dlptest.com.
+    Cloudflare zone analytics for <strong>{host}</strong>.
     {access.email && <span>Signed in as {access.email}.</span>}
   </p>
 
