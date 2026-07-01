@@ -72,10 +72,6 @@ const PERMISSIONS_POLICY = [
 /**
  * Apply baseline security headers to a response. Idempotent — calling this on
  * a response that already has these headers just re-sets the same values.
- *
- * Skips the redirect response in the legacy /https-post/ flow because
- * setting headers on a 301 is harmless but pointless; the browser follows
- * Location: and gets the real headers on the destination.
  */
 function setSecurityHeaders(response: Response): Response {
   response.headers.set(

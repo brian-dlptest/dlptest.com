@@ -8,8 +8,6 @@
 # Format: <from>  <to>  <status>
 
 # ── Legacy WordPress permalinks ──────────────────────────────────────────────
-/https-post/                        /http-post/             301
-/https-post                         /http-post/             301
 /classification/                    /inspect-data/          301
 /classification                     /inspect-data/          301
 /category/news/                     /blog/                  301
