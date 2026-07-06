@@ -52,15 +52,46 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
   </p>
   <p>Examples (use your own hostname for staging or production):</p>
   <pre><code>{curlExamples}</code></pre>
+  <h2>Keeping your browser on http://</h2>
+  <p>
+    This site does not enforce HSTS, so it never instructs a browser to upgrade to HTTPS.
+    However, some browsers upgrade <code>http://</code> on their own — even when you type
+    the scheme explicitly — because the site also answers on HTTPS. What to expect:
+  </p>
+  <ul>
+    <li>
+      <strong>Chrome / Edge:</strong> an explicitly typed <code>http://</code> URL loads
+      in cleartext by default (the address bar shows "Not Secure" — that's your
+      confirmation). Bare domains typed without a scheme may be auto-tried over HTTPS
+      first, so include the <code>http://</code> prefix.
+    </li>
+    <li>
+      <strong>Brave:</strong> upgrades even explicit <code>http://</code> URLs by default
+      (Shields' "Use secure connections"), including in private windows. To test cleartext,
+      click the Brave Shields lion icon on this page and turn off
+      <em>Use secure connections</em> for this site, or change the global default at
+      <code>brave://settings/shields</code>.
+    </li>
+    <li>
+      <strong>Firefox:</strong> private windows use HTTPS-First by default, and it only
+      falls back to HTTP when the HTTPS attempt fails — which it won't here. Use a normal
+      window, or add an exception if HTTPS-Only Mode is enabled at
+      <code>about:preferences#privacy</code>.
+    </li>
+    <li>
+      <strong>Safari:</strong> upgrades automatically when it knows a site supports HTTPS
+      and offers no per-site override — use another browser, curl, or a script for
+      cleartext testing.
+    </li>
+  </ul>
   <p class="muted small">
-    This site does not enforce HSTS, so browsers are allowed to load this page and submit
-    the forms over cleartext <code>http://</code>. If your browser cached an HSTS policy
-    from before mid-2026 (when this site sent one), it will silently upgrade
-    <code>http://</code> to HTTPS until that pin clears — visiting any page here over
-    HTTPS once now clears it automatically (we send <code>max-age=0</code>), or delete it
-    manually in Chrome, Brave, or Edge at <code>chrome://net-internals/#hsts</code> under
-    "Delete domain security policies". Either way, confirm the request was really
-    cleartext on the wire with a packet capture or your inspection tool's own logs.
+    If your browser cached an HSTS policy for this domain from before mid-2026 (when this
+    site sent one), one HTTPS visit now clears it automatically (we send
+    <code>max-age=0</code>), or delete it manually at
+    <code>chrome://net-internals/#hsts</code> under "Delete domain security policies".
+    Whichever browser you use, confirm the request was really cleartext on the wire with a
+    packet capture or your inspection tool's own logs — an address bar reading
+    <code>http://</code> plus "Not Secure" is a good sign, but the wire is the truth.
   </p>
 
   <h2>What is an HTTP POST?</h2>
