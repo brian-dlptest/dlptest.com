@@ -16,6 +16,8 @@
   --success: #4ade80;
   --warning: #fbbf24;
   --code-bg: #0a1020;
+  --row-alt: rgba(17, 26, 46, 0.5);
+  --row-hover: rgba(79, 163, 255, 0.05);
   --max-width: 1280px;
   --content-px: clamp(1rem, 4vw, 2.5rem);
   --radius: 8px;
@@ -55,6 +57,8 @@
   --accent: #1f6feb;
   --accent-hover: #0a58ca;
   --code-bg: #f1f4f9;
+  --row-alt: rgba(0, 40, 100, 0.03);
+  --row-hover: rgba(31, 111, 235, 0.05);
   --shadow-sm: 0 1px 3px rgba(0, 40, 100, 0.08), 0 1px 2px rgba(0, 40, 100, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 40, 100, 0.10), 0 2px 4px rgba(0, 40, 100, 0.07);
   --shadow-lg: 0 8px 24px rgba(0, 40, 100, 0.12), 0 4px 8px rgba(0, 40, 100, 0.08);
@@ -72,6 +76,8 @@
     --accent: #4fa3ff;
     --accent-hover: #7cc0ff;
     --code-bg: #0a1020;
+    --row-alt: rgba(17, 26, 46, 0.5);
+    --row-hover: rgba(79, 163, 255, 0.05);
   }
 }
 
@@ -159,19 +165,15 @@ th {
   letter-spacing: 0.04em;
   color: var(--text-dim);
 }
+/* Zebra striping + hover via theme tokens. The old hardcoded per-theme rules
+   keyed on :root:not([data-theme]) always used the light values there, so a
+   system-dark visitor with no explicit theme choice got light-tinted stripes
+   on the dark background. Tokens resolve per-theme automatically. */
 tbody tr:nth-child(even) {
-  background: rgba(17, 26, 46, 0.5);
+  background: var(--row-alt);
 }
 tbody tr:hover {
-  background: rgba(79, 163, 255, 0.05);
-}
-:root[data-theme="light"] tbody tr:nth-child(even),
-:root:not([data-theme]) tbody tr:nth-child(even) {
-  background: rgba(0, 40, 100, 0.03);
-}
-:root[data-theme="light"] tbody tr:hover,
-:root:not([data-theme]) tbody tr:hover {
-  background: rgba(31, 111, 235, 0.05);
+  background: var(--row-hover);
 }
 
 hr {
@@ -815,6 +817,14 @@ main {
   color: #c9d1d9;
   white-space: pre-wrap;
   word-break: break-word;
+  /* The body is a <pre>, which the base rule paints with var(--code-bg) —
+     near-white in light mode under this hardcoded light-gray terminal text.
+     A terminal reads as dark in both themes, so neutralize the <pre> chrome
+     and let the .terminal-mock dark background show through. */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 .terminal-mock-body .t-prompt { color: #58a6ff; font-weight: 600; }
 .terminal-mock-body .t-cmd { color: #d2a8ff; font-weight: 600; }

@@ -1,0 +1,29 @@
+# DLP Test
+
+> Free, vendor-neutral testing resources for Data Loss Prevention (DLP) software. Synthetic sample data, safe accept-and-discard test endpoints, and tooling for DLP rule authoring. Nothing submitted to the test endpoints is stored, logged, or forwarded; all sample data is fabricated and corresponds to no real person or account.
+
+## Test endpoints
+
+- [HTTP POST Test](https://dlptest.com/http-post/): Submit text or files over plain, unencrypted HTTP to a safe endpoint that discards the body. For network DLP, taps, and passive monitors. API: POST to https://dlptest.com/api/http-post/
+- [HTTPS POST Test](https://dlptest.com/https-post/): The same accept-and-discard endpoint over TLS, for SSL-inspecting proxies, ICAP integrations, and SSE/SASE agents.
+- [FTP & S3 Test](https://dlptest.com/ftp-test/): Public FTP server (ftp.dlptest.com) with published credentials; uploads are deleted automatically after a short retention period.
+- [MCP Server](https://dlptest.com/mcp/): A public Model Context Protocol server (https://mcp.dlptest.com/api/mcp/) that returns synthetic PII/PCI/PHI, for testing whether DLP or CASB tooling can inspect agentic tool traffic.
+
+## Test data
+
+- [Sample Data Library](https://dlptest.com/sample-data/): Curated fake PII/PCI datasets (names + SSNs, credit cards + ZIPs, DOBs + emails) that pass the structural checks DLP engines use (Luhn, SSN area-group-serial). Downloadable as CSV, XLSX, PDF, and DOCX.
+- [Data Generator](https://dlptest.com/generate/): Build custom synthetic datasets from PII, PCI, HIPAA, and international field types, with seedable reproducibility. API: POST to https://dlptest.com/api/generate-custom/
+- [Regex Test](https://dlptest.com/regex/): A regex workbench for DLP rule authoring — ECMAScript, RE2, and PCRE engines, live match highlighting, and a searchable library of common DLP detection patterns.
+
+## Guides
+
+- [What is Data Loss Prevention (DLP)? Complete Guide](https://dlptest.com/what-is-data-loss-prevention-dlp/)
+- [How to Deploy Endpoint DLP: A Practitioner's Guide](https://dlptest.com/endpoint-dlp-deployment-guide/)
+- [DLP Solutions Directory](https://dlptest.com/dlp-solutions-directory/)
+- [Blog & data-security news](https://dlptest.com/blog/)
+
+## Optional
+
+- [Contact](https://dlptest.com/contact/)
+- [Security / vulnerability disclosure policy](https://dlptest.com/security-policy/)
+- [RSS feed](https://dlptest.com/feed.xml)
