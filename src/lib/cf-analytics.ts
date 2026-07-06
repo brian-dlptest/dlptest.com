@@ -18,6 +18,7 @@ export type Row<T> = { count: number; dimensions: T };
 
 export interface TrafficSummary {
   windowHours: number;
+  host: string;
   start: string;
   end: string;
   totalRequests: number;
@@ -34,35 +35,40 @@ export class AnalyticsConfigError extends Error {}
 
 // One round-trip: alias several httpRequestsAdaptiveGroups selections under the
 // same zone so the page costs a single subrequest instead of six.
+//
+// dlptest.com and staging.dlptest.com share a single Cloudflare zone, so a
+// zoneTag-only query returns the whole zone's traffic (prod + staging combined).
+// We scope every selection to $host (clientRequestHTTPHost) so each environment's
+// dashboard only reflects its own hostname.
 const QUERY = `
-query($zone: String!, $start: Time!, $end: Time!) {
+query($zone: String!, $start: Time!, $end: Time!, $host: String!) {
   viewer {
     zones(filter: { zoneTag: $zone }) {
-      total: httpRequestsAdaptiveGroups(limit: 1, filter: { datetime_geq: $start, datetime_leq: $end }) {
+      total: httpRequestsAdaptiveGroups(limit: 1, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }) {
         count
         sum { edgeResponseBytes }
       }
-      byPath: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end }, orderBy: [count_DESC]) {
+      byPath: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }, orderBy: [count_DESC]) {
         count
         dimensions { clientRequestPath }
       }
-      byIP: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end }, orderBy: [count_DESC]) {
+      byIP: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }, orderBy: [count_DESC]) {
         count
         dimensions { clientIP clientAsn clientCountryName }
       }
-      byUserAgent: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end }, orderBy: [count_DESC]) {
+      byUserAgent: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }, orderBy: [count_DESC]) {
         count
         dimensions { userAgent }
       }
-      byStatus: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end }, orderBy: [count_DESC]) {
+      byStatus: httpRequestsAdaptiveGroups(limit: 15, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }, orderBy: [count_DESC]) {
         count
         dimensions { edgeResponseStatus }
       }
-      byCountry: httpRequestsAdaptiveGroups(limit: 10, filter: { datetime_geq: $start, datetime_leq: $end }, orderBy: [count_DESC]) {
+      byCountry: httpRequestsAdaptiveGroups(limit: 10, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }, orderBy: [count_DESC]) {
         count
         dimensions { clientCountryName }
       }
-      hourly: httpRequestsAdaptiveGroups(limit: 168, filter: { datetime_geq: $start, datetime_leq: $end }, orderBy: [datetimeHour_ASC]) {
+      hourly: httpRequestsAdaptiveGroups(limit: 168, filter: { datetime_geq: $start, datetime_leq: $end, clientRequestHTTPHost: $host }, orderBy: [datetimeHour_ASC]) {
         count
         dimensions { datetimeHour }
       }
@@ -81,11 +87,13 @@ interface ZoneResult {
 }
 
 /**
- * Fetch a traffic summary for the zone over the last `windowHours`.
+ * Fetch a traffic summary for `host` within the zone over the last `windowHours`.
+ * `host` scopes results to a single hostname (e.g. "dlptest.com" vs
+ * "staging.dlptest.com") since both share one Cloudflare zone.
  * Throws {@link AnalyticsConfigError} when the token/zone aren't configured so
  * the page can render a friendly "not set up" state instead of a 500.
  */
-export async function fetchTrafficSummary(windowHours = 24): Promise<TrafficSummary> {
+export async function fetchTrafficSummary(windowHours = 24, host: string): Promise<TrafficSummary> {
   const zone = env.CF_ZONE_ID?.trim();
   const token = env.CF_ANALYTICS_TOKEN?.trim();
   if (!zone || !token) {
@@ -107,7 +115,7 @@ export async function fetchTrafficSummary(windowHours = 24): Promise<TrafficSumm
     },
     body: JSON.stringify({
       query: QUERY,
-      variables: { zone, start: iso(start), end: iso(end) },
+      variables: { zone, start: iso(start), end: iso(end), host },
     }),
   });
 
@@ -131,6 +139,7 @@ export async function fetchTrafficSummary(windowHours = 24): Promise<TrafficSumm
 
   return {
     windowHours,
+    host,
     start: iso(start),
     end: iso(end),
     totalRequests: z.total[0]?.count ?? 0,

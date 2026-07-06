@@ -43,6 +43,12 @@ declare namespace Cloudflare {
     CF_ZONE_ID: string;
     /** Cloudflare API token with Zone → Analytics → Read, for /admin/traffic (secret). */
     CF_ANALYTICS_TOKEN: string;
+    /** GA4 numeric property ID — powers the GA panel on /admin/traffic (secret). */
+    GA4_PROPERTY_ID: string;
+    /** Google service-account client email for the GA Data API (secret). */
+    GA_SA_CLIENT_EMAIL: string;
+    /** Google service-account private key (PKCS8 PEM) for the GA Data API (secret). */
+    GA_SA_PRIVATE_KEY: string;
   }
 }
 

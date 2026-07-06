@@ -1,0 +1,68 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { verifyAccess } from "@/lib/access";
+
+// Admin landing page — the single entry point to the internal tools. Like the
+// other /admin/* pages it's server-rendered and gated by Cloudflare Access
+// (verified again here at the origin). Add a tool by appending to `tools`.
+export const prerender = false;
+
+const access = await verifyAccess(Astro.request);
+if (!access.ok) {
+  return new Response(`Forbidden: ${access.reason}`, { status: access.status });
+}
+
+const tools: { href: string; title: string; desc: string }[] = [
+  {
+    href: "/admin/traffic/",
+    title: "Traffic",
+    desc: "Cloudflare zone analytics — requests, bandwidth, top IPs/paths/UAs, and is anything hammering us.",
+  },
+  {
+    href: "/admin/news/",
+    title: "News Review Queue",
+    desc: "Triage discovered news candidates — preview, publish to the live site, or delete.",
+  },
+];
+---
+
+<BaseLayout title="Admin" description="Internal admin tools.">
+  <h1>Admin</h1>
+  <p class="muted">
+    Internal tools for dlptest.com.
+    {access.email && <span>Signed in as {access.email}.</span>}
+  </p>
+
+  <div class="tools">
+    {tools.map((t) => (
+      <a class="tool" href={t.href}>
+        <span class="t">{t.title}</span>
+        <span class="d">{t.desc}</span>
+      </a>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .muted { color: var(--text-dim); }
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .tool {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    background: var(--surface);
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .tool:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .tool .t { color: var(--accent); font-size: 1.1rem; font-weight: 600; }
+  .tool .d { color: var(--text-dim); font-size: 0.9rem; line-height: 1.4; }
+</style>

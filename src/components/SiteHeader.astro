@@ -1,8 +1,16 @@
 ---
-export interface HeaderNavItem {
+export interface HeaderNavLink {
   href: string;
   label: string;
   active: boolean;
+}
+
+export interface HeaderNavItem {
+  /** Absent when the item is a dropdown (children present instead). */
+  href?: string;
+  label: string;
+  active: boolean;
+  children?: HeaderNavLink[];
 }
 
 interface Props {
@@ -51,11 +59,37 @@ const { nav } = Astro.props;
     </div>
 
     <nav id="primary-navigation" class="site-nav" aria-label="Primary">
-      {nav.map((item) => (
-        <a href={item.href} aria-current={item.active ? "page" : undefined}>
-          {item.label}
-        </a>
-      ))}
+      {nav.map((item) =>
+        item.children ? (
+          <div class="nav-dropdown" data-nav-dropdown>
+            <button
+              type="button"
+              class="nav-dropdown-trigger"
+              aria-expanded="false"
+              aria-haspopup="true"
+              data-active={item.active ? "true" : undefined}
+            >
+              {item.label}
+              <svg class="nav-dropdown-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M6 9l6 6 6-6"></path>
+              </svg>
+            </button>
+            <ul class="nav-dropdown-menu">
+              {item.children.map((child) => (
+                <li>
+                  <a href={child.href} aria-current={child.active ? "page" : undefined}>
+                    {child.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <a href={item.href} aria-current={item.active ? "page" : undefined}>
+            {item.label}
+          </a>
+        ),
+      )}
     </nav>
   </div>
 </header>
@@ -84,8 +118,38 @@ const { nav } = Astro.props;
       link.addEventListener("click", close);
     });
 
+    const dropdowns = Array.from(
+      nav.querySelectorAll<HTMLElement>("[data-nav-dropdown]"),
+    );
+
+    const closeDropdowns = () => {
+      dropdowns.forEach((dd) => {
+        dd.classList.remove("nav-dropdown--open");
+        dd.querySelector("button")?.setAttribute("aria-expanded", "false");
+      });
+    };
+
+    dropdowns.forEach((dd) => {
+      const trigger = dd.querySelector<HTMLButtonElement>("button");
+      trigger?.addEventListener("click", () => {
+        const open = !dd.classList.contains("nav-dropdown--open");
+        closeDropdowns();
+        dd.classList.toggle("nav-dropdown--open", open);
+        trigger.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!dropdowns.some((dd) => dd.contains(event.target as Node))) {
+        closeDropdowns();
+      }
+    });
+
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") close();
+      if (event.key === "Escape") {
+        close();
+        closeDropdowns();
+      }
     });
   }
 

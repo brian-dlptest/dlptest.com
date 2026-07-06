@@ -74,7 +74,7 @@ const faqs = [
   },
   {
     q: "How to test web DLP (ICAP-based proxies)",
-    a: `<p>Validate that the proxy sends all PUT/POST traffic through the DLP server via ICAP, then ensure the test workstation's browser routes through that proxy. Enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/http-post/">/http-post/</a> or <code>curl</code> to <code>/api/http-post/</code> (see that page for examples). Run first in monitor mode, then again in blocking mode.</p>
+    a: `<p>Validate that the proxy sends all PUT/POST traffic through the DLP server via ICAP, then ensure the test workstation's browser routes through that proxy. Enable a test SSN and CCN policy, copy sample data from <a href="/sample-data/">/sample-data/</a>, and submit it via <a href="/https-post/">/https-post/</a> (if the proxy performs SSL inspection) or <a href="/http-post/">/http-post/</a> (for plain-HTTP traffic it doesn't need to decrypt) — see those pages for <code>curl</code> examples against <code>/api/http-post/</code>. Run first in monitor mode, then again in blocking mode.</p>
       <p>This pattern applies to any ICAP-based DLP integration, including Symantec/Broadcom Web Prevent, Forcepoint, Trellix, and similar on-premises deployments. For cloud-delivered web DLP via SSE or SASE, see the next FAQ.</p>`,
   },
   {
@@ -103,7 +103,7 @@ const faqs = [
   },
   {
     q: "How to test a Network Monitor",
-    a: `<p>Confirm the Network Monitor is observing both HTTP and FTP traffic by checking its traffic stats. Enable a test SSN and CCN policy, then submit sample data to <a href="/http-post/">/http-post/</a> and upload a document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Network Monitor is monitor-only, so you can't test block actions, only detection. If incidents don't appear, run Wireshark on the monitor to confirm the right traffic is being seen.</p>
+    a: `<p>Confirm the Network Monitor is observing both HTTP and FTP traffic by checking its traffic stats. Enable a test SSN and CCN policy, then submit sample data to <a href="/http-post/">/http-post/</a> — plain HTTP, since most passive Network Monitors can't decrypt TLS — and upload a document to <code>ftp://ftp.dlptest.com/24_Hour/</code>. Network Monitor is monitor-only, so you can't test block actions, only detection. If incidents don't appear, run Wireshark on the monitor to confirm the right traffic is being seen.</p>
       <p>Note: passive Network Monitors see less and less traffic as more activity moves to TLS-encrypted protocols and off-network endpoints. Most organizations now get equivalent coverage from an SSE / SASE deployment that inspects decrypted traffic in the cloud.</p>`,
   },
   {
@@ -258,19 +258,20 @@ const faqs = [
   },
 ];
 ---
-<BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP POST test endpoint over HTTPS, and a public FTP server to verify your DLP is blocking what it should.">
+<BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP POST test endpoints over both plain HTTP and HTTPS, and a public FTP server to verify your DLP is blocking what it should.">
   <section class="hero">
     <div class="hero-content">
       <h1>Test Your DLP. Prove It Actually Blocks.</h1>
       <p>
         DLPTest.com is a free testing resource for Data Loss Prevention software.
         If your DLP is configured correctly, the endpoints here will demonstrate
-        it. We provide sample data, an HTTP POST test endpoint over HTTPS, and a public FTP
-        server. They are designed to be safe targets that your DLP can detect
-        and block.
+        it. We provide sample data, HTTP POST test endpoints over both plain HTTP and
+        HTTPS, and a public FTP server. They are designed to be safe targets that your
+        DLP can detect and block.
       </p>
       <p class="hero-actions">
-        <a class="button" href="/http-post/">Try the HTTP(S) POST test</a>
+        <a class="button" href="/https-post/">Try the default HTTPS POST</a>
+        <a class="button button-outline" href="/http-post/">Try the cleartext HTTP POST</a>
       </p>
     </div>
     <div class="hero-visual" aria-hidden="true">
@@ -360,8 +361,8 @@ const faqs = [
       </div>
       <div class="card">
         <h3>HTTP(S) POST test</h3>
-        <p>Submit text and files with the HTTP POST method to a safe HTTPS endpoint that accepts and discards them. Trip your DLP without leaking data.</p>
-        <p><a href="/http-post/">HTTP(S) POST Test →</a></p>
+        <p>Submit text and files with the HTTP POST method, over plain HTTP or TLS, to a safe endpoint that accepts and discards them. Trip your DLP without leaking data.</p>
+        <p><a href="/http-post/">HTTP POST Test →</a>{" · "}<a href="/https-post/">HTTPS POST Test →</a></p>
       </div>
       <div class="card">
         <h3>FTP Test</h3>

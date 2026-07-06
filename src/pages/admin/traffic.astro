@@ -6,6 +6,7 @@ import {
   AnalyticsConfigError,
   type TrafficSummary,
 } from "@/lib/cf-analytics";
+import { fetchGaSummary, GaConfigError, type GaSummary } from "@/lib/ga-analytics";
 
 // Traffic dashboard — a single pane to answer "how much traffic are we getting,
 // and is anything hammering us?". Server-rendered and gated by Cloudflare Access
@@ -23,11 +24,29 @@ if (!access.ok) {
 const hoursParam = Number(Astro.url.searchParams.get("hours"));
 const windowHours = [1, 6, 24, 168].includes(hoursParam) ? hoursParam : 24;
 
+// GA has its own window (in days): Cloudflare maxes at 7d, but GA is where we
+// look for longer-term user trends. Defaults to 90d.
+const gaDaysParam = Number(Astro.url.searchParams.get("gadays"));
+const gaDays = [7, 28, 90].includes(gaDaysParam) ? gaDaysParam : 90;
+
+// Build a relative URL that flips one query param but preserves the others, so
+// the Cloudflare and GA window pills don't clobber each other's selection.
+function withParam(key: string, value: string | number): string {
+  const p = new URLSearchParams(Astro.url.search);
+  p.set(key, String(value));
+  return `?${p.toString()}`;
+}
+
+// Scope analytics to the hostname this dashboard is served on. dlptest.com and
+// staging.dlptest.com share one Cloudflare zone, so without this each
+// environment would show the whole zone's traffic (prod + staging combined).
+const host = Astro.url.hostname;
+
 let summary: TrafficSummary | null = null;
 let loadError: string | null = null;
 let notConfigured = false;
 try {
-  summary = await fetchTrafficSummary(windowHours);
+  summary = await fetchTrafficSummary(windowHours, host);
 } catch (error) {
   if (error instanceof AnalyticsConfigError) {
     notConfigured = true;
@@ -36,6 +55,49 @@ try {
     console.error("[admin/traffic] failed to load analytics:", error);
     loadError = error instanceof Error ? error.message : "Could not load analytics.";
   }
+}
+
+// Google Analytics, shown next to the Cloudflare numbers for an apples-to-apples
+// read. GA failures are isolated from the Cloudflare panel — one source being
+// down or unconfigured must not blank the other.
+let ga: GaSummary | null = null;
+let gaError: string | null = null;
+let gaNotConfigured = false;
+try {
+  ga = await fetchGaSummary(gaDays);
+} catch (error) {
+  if (error instanceof GaConfigError) {
+    gaNotConfigured = true;
+    gaError = error.message;
+  } else {
+    console.error("[admin/traffic] failed to load GA:", error);
+    gaError = error instanceof Error ? error.message : "Could not load GA.";
+  }
+}
+
+// Trend signal: average daily users over the most recent N days vs the first N
+// days of the window. Direct answer to "are we losing users?". N scales with the
+// window (a week for 90d) but never exceeds half the series.
+const gaWindows = [
+  { d: 7, label: "7d" },
+  { d: 28, label: "28d" },
+  { d: 90, label: "90d" },
+];
+let usersTrendPct: number | null = null;
+let trendN = 0;
+if (ga && ga.daily.length >= 8) {
+  const d = ga.daily;
+  trendN = Math.min(ga.days >= 60 ? 14 : 7, Math.floor(d.length / 2));
+  const avg = (rows: typeof d) => rows.reduce((s, x) => s + x.users, 0) / rows.length;
+  const baseAvg = avg(d.slice(0, trendN));
+  const recentAvg = avg(d.slice(-trendN));
+  if (baseAvg > 0) usersTrendPct = Math.round(((recentAvg - baseAvg) / baseAvg) * 100);
+}
+const gaUsersMax = ga ? Math.max(1, ...ga.daily.map((x) => x.users)) : 1;
+function fmtGaDate(yyyymmdd: string): string {
+  return yyyymmdd.length === 8
+    ? `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`
+    : yyyymmdd;
 }
 
 const nf = new Intl.NumberFormat("en-US");
@@ -75,13 +137,13 @@ const windows: { h: number; label: string }[] = [
 <BaseLayout title="Traffic" description="Internal traffic dashboard.">
   <h1>Traffic</h1>
   <p class="muted">
-    Cloudflare zone analytics for dlptest.com.
+    Cloudflare zone analytics for <strong>{host}</strong>.
     {access.email && <span>Signed in as {access.email}.</span>}
   </p>
 
   <div class="windows">
     {windows.map((w) => (
-      <a class={`pill ${w.h === windowHours ? "pill--on" : ""}`} href={`?hours=${w.h}`}>{w.label}</a>
+      <a class={`pill ${w.h === windowHours ? "pill--on" : ""}`} href={withParam("hours", w.h)}>{w.label}</a>
     ))}
   </div>
 
@@ -198,6 +260,109 @@ const windows: { h: number; label: string }[] = [
       </p>
     </>
   )}
+
+  <section class="ga">
+    <h2>Google Analytics <span class="tag">consented human visitors</span></h2>
+    <p class="hint">
+      Different lens than the Cloudflare numbers above: GA counts only visitors who
+      ran the analytics tag and consented — bots, automated DLP-test traffic, and
+      asset/sub-resource requests are excluded, so these sit well below the edge
+      request counts. Windows end yesterday (today is partial).
+    </p>
+
+    <div class="windows">
+      {gaWindows.map((w) => (
+        <a class={`pill ${w.d === gaDays ? "pill--on" : ""}`} href={withParam("gadays", w.d)}>{w.label}</a>
+      ))}
+    </div>
+
+    {gaNotConfigured && (
+      <div class="flash flash--warn"><strong>GA not configured.</strong> {gaError}</div>
+    )}
+    {gaError && !gaNotConfigured && (
+      <div class="flash flash--err">Could not load GA: <code>{gaError}</code></div>
+    )}
+
+    {ga && (
+      <>
+        <div class="cards">
+          <div class="card">
+            <div class="k">Page views</div>
+            <div class="v">{nf.format(ga.pageViews)}</div>
+            <div class="sub">last {ga.days}d</div>
+          </div>
+          <div class="card">
+            <div class="k">Users</div>
+            <div class="v">{nf.format(ga.totalUsers)}</div>
+            <div class="sub">{nf.format(ga.newUsers)} new</div>
+          </div>
+          <div class="card">
+            <div class="k">Sessions</div>
+            <div class="v">{nf.format(ga.sessions)}</div>
+            <div class="sub">last {ga.days}d</div>
+          </div>
+          {usersTrendPct !== null && (
+            <div class={`card ${usersTrendPct < -5 ? "card--alert" : ""}`}>
+              <div class="k">Users trend</div>
+              <div class="v">{usersTrendPct > 0 ? "▲" : usersTrendPct < 0 ? "▼" : "■"} {Math.abs(usersTrendPct)}%</div>
+              <div class="sub">last {trendN}d avg vs first {trendN}d</div>
+            </div>
+          )}
+        </div>
+
+        {ga.daily.length > 0 && (
+          <section>
+            <h2>Users per day</h2>
+            <div class="spark">
+              {ga.daily.map((d) => (
+                <div
+                  class="bar"
+                  style={`height:${Math.max(2, Math.round((d.users / gaUsersMax) * 100))}%`}
+                  title={`${fmtGaDate(d.date)} · ${nf.format(d.users)} users · ${nf.format(d.views)} views`}
+                />
+              ))}
+            </div>
+            <p class="hint">
+              Daily unique users over the last {ga.days} days (ending yesterday). Hover a
+              bar for the date + counts. A sustained downward slope = losing users.
+            </p>
+          </section>
+        )}
+
+        <div class="grid">
+          <section>
+            <h2>Top pages (GA)</h2>
+            <table>
+              <thead><tr><th>Path</th><th class="num">Views</th></tr></thead>
+              <tbody>
+                {ga.topPages.map((r) => (
+                  <tr>
+                    <td class="mono">{shorten(r.path)}</td>
+                    <td class="num">{nf.format(r.views)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          <section>
+            <h2>Top events (GA)</h2>
+            <table>
+              <thead><tr><th>Event</th><th class="num">Count</th></tr></thead>
+              <tbody>
+                {ga.topEvents.map((r) => (
+                  <tr>
+                    <td class="mono">{r.name}</td>
+                    <td class="num">{nf.format(r.count)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </>
+    )}
+  </section>
 </BaseLayout>
 
 <style>
@@ -222,13 +387,25 @@ const windows: { h: number; label: string }[] = [
   .spark .bar:hover { opacity: 1; background: var(--accent-hover); }
   .hint, .gen { color: var(--text-dim); font-size: 0.8rem; }
   .gen { margin-top: 1.5rem; }
+  .ga { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+  .ga > h2 { font-size: 1.2rem; margin: 0 0 0.25rem; color: var(--text); display: flex; align-items: center; gap: 0.6rem; }
+  .ga .tag {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.1rem 0.5rem;
+  }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+  /* Grid/flex items default to min-width:auto, which lets a table's widest
+     unbreakable cell (long IPv6 / path / user-agent) blow past the track and
+     overlap the next column. Pin to 0 so the track governs width and the
+     tables wrap instead of spilling. */
+  .grid > section { min-width: 0; }
   section h2 { font-size: 1.05rem; margin: 0 0 0.5rem; color: var(--text); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text); table-layout: fixed; }
   th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
   th { color: var(--text-dim); font-weight: 600; }
-  th.num, td.num { text-align: right; white-space: nowrap; }
-  .mono { font-family: var(--font-mono); font-size: 0.8rem; }
+  th.num, td.num { text-align: right; white-space: nowrap; width: 5rem; }
+  /* Break long technical strings so fixed-layout cells wrap rather than overflow. */
+  .mono { font-family: var(--font-mono); font-size: 0.8rem; overflow-wrap: anywhere; word-break: break-word; }
   .badge { display: inline-block; min-width: 2.4rem; text-align: center; border-radius: var(--radius-sm); padding: 0.05rem 0.35rem; font-size: 0.8rem; font-weight: 600; }
   .badge.s2 { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
   .badge.s3 { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }

@@ -43,15 +43,20 @@ const CSP_DIRECTIVES = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://challenges.cloudflare.com",
+  // 'wasm-unsafe-eval' lets the browser instantiate the WASM-backed PCRE engine
+  // on the /regex/ page (lazy-loaded, base64-inlined — no remote fetch). It only
+  // permits WebAssembly compilation, not JS eval(). Keep in sync with _headers.
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com",
   "font-src 'self' data:",
   "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
   "frame-src https://www.googletagmanager.com https://challenges.cloudflare.com",
+  // NO upgrade-insecure-requests: /http-post/ exists to send genuinely
+  // cleartext POSTs, and that directive would make browsers silently upgrade
+  // the form submission to HTTPS even when the page was loaded over http://.
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
 ].join("; ");
 
 const PERMISSIONS_POLICY = [
@@ -69,16 +74,15 @@ const PERMISSIONS_POLICY = [
 /**
  * Apply baseline security headers to a response. Idempotent — calling this on
  * a response that already has these headers just re-sets the same values.
- *
- * Skips the redirect response in the legacy /https-post/ flow because
- * setting headers on a 301 is harmless but pointless; the browser follows
- * Location: and gets the real headers on the destination.
  */
 function setSecurityHeaders(response: Response): Response {
-  response.headers.set(
-    "Strict-Transport-Security",
-    "max-age=31536000; includeSubDomains",
-  );
+  // HSTS is deliberately max-age=0 (DO NOT restore a positive max-age).
+  // HSTS pins are host-wide — a browser that caches one refuses cleartext
+  // http:// for the entire domain, which breaks /http-post/, a core feature
+  // of this site. max-age=0 (rather than omitting the header) actively
+  // clears the pin from browsers that cached the old one-year policy on
+  // their next HTTPS visit. Cloudflare's zone-level HSTS must stay off too.
+  response.headers.set("Strict-Transport-Security", "max-age=0");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Frame-Options", "DENY");
