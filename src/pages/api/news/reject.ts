@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 
 import { verifyAccess } from "@/lib/access";
-import { readId, redirectOrJson } from "@/lib/news-admin-http";
+import { isCrossSite, readId, redirectOrJson } from "@/lib/news-admin-http";
 import { getCandidate, markReviewed } from "@/lib/news-candidates";
 
 export const prerender = false;
@@ -10,6 +10,10 @@ export const prerender = false;
 // recorded and discovery never resurfaces it. Access-gated like publish — though
 // it doesn't touch the live site, it acts on the queue.
 export const POST: APIRoute = async ({ request }) => {
+  if (isCrossSite(request)) {
+    return redirectOrJson(request, "/admin/news/?error=cross_site", 403, "cross_site");
+  }
+
   const access = await verifyAccess(request);
   if (!access.ok) {
     return redirectOrJson(request, `/admin/news/?error=${access.reason}`, access.status, access.reason);

@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 
 import { verifyAccess } from "@/lib/access";
-import { readId, redirectOrJson } from "@/lib/news-admin-http";
+import { isCrossSite, readId, redirectOrJson } from "@/lib/news-admin-http";
 import { getCandidate, markReviewed } from "@/lib/news-candidates";
 import { publishCandidate } from "@/lib/news-publish";
 
@@ -11,6 +11,10 @@ export const prerender = false;
 // flip the row to `published`. Gated by Cloudflare Access JWT verification — this
 // writes to the live site, so it must be you, logged in through Access.
 export const POST: APIRoute = async ({ request }) => {
+  if (isCrossSite(request)) {
+    return redirectOrJson(request, "/admin/news/?error=cross_site", 403, "cross_site");
+  }
+
   const access = await verifyAccess(request);
   if (!access.ok) {
     return redirectOrJson(request, `/admin/news/?error=${access.reason}`, access.status, access.reason);
