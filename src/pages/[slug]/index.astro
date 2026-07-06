@@ -36,9 +36,34 @@ function fmt(d: Date) {
     day: "numeric",
   });
 }
+
+// Article structured data. Guides carry an optional updatedDate; news posts
+// only have pubDate. The publisher/@id resolves against the Organization
+// emitted by BaseLayout on the homepage.
+const pageUrl = `https://dlptest.com/${entry.data.slug}/`;
+const updated = type === "guide" ? entry.data.updatedDate : undefined;
+const articleJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: entry.data.title,
+  datePublished: entry.data.pubDate.toISOString(),
+  dateModified: (updated ?? entry.data.pubDate).toISOString(),
+  mainEntityOfPage: pageUrl,
+  url: pageUrl,
+  author: { "@type": "Organization", name: "DLP Test", url: "https://dlptest.com/" },
+  publisher: { "@id": "https://dlptest.com/#organization" },
+  ...(type === "news" && entry.data.heroImage ? { image: entry.data.heroImage } : {}),
+});
 ---
 {type === "guide" ? (
-  <BaseLayout title={entry.data.title} description={entry.data.description}>
+  <BaseLayout
+    title={entry.data.title}
+    description={entry.data.description}
+    ogType="article"
+    publishedTime={entry.data.pubDate}
+    modifiedTime={entry.data.updatedDate}
+  >
+    <script type="application/ld+json" set:html={articleJsonLd} />
     <article class="guide-post">
       <p class="news-back">
         <a href="/blog/">← All posts</a>
@@ -62,7 +87,13 @@ function fmt(d: Date) {
     </article>
   </BaseLayout>
 ) : (
-  <BaseLayout title={entry.data.title} description={entry.data.excerpt || undefined}>
+  <BaseLayout
+    title={entry.data.title}
+    description={entry.data.excerpt || undefined}
+    ogType="article"
+    publishedTime={entry.data.pubDate}
+  >
+    <script type="application/ld+json" set:html={articleJsonLd} />
     <article class="news-post">
       <p class="news-back">
         <a href="/blog/">← All posts</a>
