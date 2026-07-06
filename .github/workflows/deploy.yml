@@ -16,6 +16,13 @@ on:
 # Serialize deploys per branch so a fast follow-up push can't race ahead of
 # the previous build and overwrite newer code with older code. Different
 # branches deploy to different Workers, so they may run concurrently.
+#
+# Serialization alone is not enough: a push-triggered checkout defaults to the
+# triggering commit's SHA, so if two commits land close together the OLDER
+# commit's deploy can finish last and clobber the newer one (this happened when
+# PRs #182 and #183 merged 14s apart — the #182 build redeployed a pre-#183
+# hero). The deploy jobs pin `ref` to the branch HEAD so every deploy builds
+# the latest code regardless of which run finishes last.
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
@@ -59,6 +66,9 @@ jobs:
       url: https://dlptest-com-staging.hileman8.workers.dev
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Build the branch HEAD, not this push's commit — see concurrency note.
+          ref: ${{ github.ref }}
       - uses: actions/setup-node@v6
         with:
           node-version: 22
@@ -89,6 +99,9 @@ jobs:
       url: https://dlptest-com-prod.hileman8.workers.dev
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Build the branch HEAD, not this push's commit — see concurrency note.
+          ref: ${{ github.ref }}
       - uses: actions/setup-node@v6
         with:
           node-version: 22
