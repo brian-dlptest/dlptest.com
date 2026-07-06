@@ -3,6 +3,33 @@ import { defineConfig } from "astro/config";
 import cloudflare from "@astrojs/cloudflare";
 import sitemap from "@astrojs/sitemap";
 import rehypeExternalLinks from "rehype-external-links";
+import { readFileSync, readdirSync } from "node:fs";
+
+/**
+ * Map content permalinks (/<slug>/) to their last-modified date so the sitemap
+ * can carry <lastmod> — it speeds recrawl of updated posts. Reads frontmatter
+ * directly because astro:content isn't available in the config file; only the
+ * `slug`/`pubDate`/`updatedDate` keys are needed, so a line-match is enough.
+ */
+function contentLastmods() {
+  /** @type {Map<string, Date>} */
+  const map = new Map();
+  for (const dir of ["./src/content/news", "./src/content/guides"]) {
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith(".md")) continue;
+      const fm = readFileSync(`${dir}/${file}`, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+      if (!fm) continue;
+      const get = (/** @type {string} */ key) =>
+        fm[1].match(new RegExp(`^${key}:\\s*["']?([^"'\\r\\n]+)["']?\\s*$`, "m"))?.[1];
+      const slug = get("slug");
+      const date = new Date(get("updatedDate") ?? get("pubDate") ?? "");
+      if (slug && !Number.isNaN(date.getTime())) map.set(`/${slug}/`, date);
+    }
+  }
+  return map;
+}
+
+const lastmods = contentLastmods();
 
 // Astro on Cloudflare Workers. On-demand rendering enabled (output: "server")
 // because we need:
@@ -25,6 +52,11 @@ export default defineConfig({
         !page.includes("/inspect-data") &&
         !page.includes("/privacy-policy") &&
         !page.includes("/terms-and-conditions"),
+      serialize: (item) => {
+        const lastmod = lastmods.get(new URL(item.url).pathname);
+        if (lastmod) item.lastmod = lastmod.toISOString();
+        return item;
+      },
     }),
   ],
   markdown: {
