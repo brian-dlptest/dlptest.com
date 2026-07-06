@@ -53,12 +53,14 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
   <p>Examples (use your own hostname for staging or production):</p>
   <pre><code>{curlExamples}</code></pre>
   <p class="muted small">
-    If your browser has visited <code>https://dlptest.com</code> before, it may have cached
-    an HSTS policy for this domain and will silently upgrade any <code>http://</code> request
-    here to HTTPS before it leaves your machine — that's a browser-side setting, not
-    something this page controls. For a guaranteed cleartext request, use curl, a script, or
-    a browser profile that has never visited the HTTPS site, and confirm on the wire with a
-    packet capture or your inspection tool's own logs.
+    This site does not enforce HSTS, so browsers are allowed to load this page and submit
+    the forms over cleartext <code>http://</code>. If your browser cached an HSTS policy
+    from before mid-2026 (when this site sent one), it will silently upgrade
+    <code>http://</code> to HTTPS until that pin clears — visiting any page here over
+    HTTPS once now clears it automatically (we send <code>max-age=0</code>), or delete it
+    manually in Chrome, Brave, or Edge at <code>chrome://net-internals/#hsts</code> under
+    "Delete domain security policies". Either way, confirm the request was really
+    cleartext on the wire with a packet capture or your inspection tool's own logs.
   </p>
 
   <h2>What is an HTTP POST?</h2>
