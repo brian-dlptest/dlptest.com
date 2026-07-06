@@ -1,6 +1,35 @@
 // Tiny request/response helpers shared by the /api/news/publish and /reject
 // endpoints, which accept both no-JS HTML form posts and JSON callers.
 
+/**
+ * Reject cross-site browser requests (CSRF guard). Astro's built-in origin
+ * check is disabled site-wide (`security.checkOrigin: false` in
+ * astro.config.mjs) because /api/http-post must accept arbitrary cross-origin
+ * POSTs — that's the product. But the news mutation endpoints authenticate via
+ * the CF_Authorization cookie, so a cross-site form post from a malicious page
+ * would otherwise ride an admin's logged-in session.
+ *
+ * Browsers send `Sec-Fetch-Site` and/or `Origin` on cross-origin POSTs; a
+ * same-origin form post (the /admin/news/ review UI) sends same-origin values,
+ * and non-browser clients (curl with the JWT header) send neither — both pass.
+ */
+export function isCrossSite(request: Request): boolean {
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none") {
+    return true;
+  }
+  const origin = request.headers.get("origin");
+  if (origin) {
+    const host = request.headers.get("host");
+    try {
+      if (new URL(origin).host !== host) return true;
+    } catch {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Accept either a form post (id field) or JSON ({id}). Returns a positive int or null. */
 export async function readId(request: Request): Promise<number | null> {
   const contentType = request.headers.get("content-type") ?? "";

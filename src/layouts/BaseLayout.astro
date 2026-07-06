@@ -14,9 +14,32 @@ interface Props {
   description?: string;
   /** When true, force noindex even outside staging (e.g. a thank-you page). */
   noindex?: boolean;
+  /** Open Graph type — pages default to "website"; blog posts pass "article". */
+  ogType?: "website" | "article";
+  /** Article dates, emitted as article:* meta when ogType is "article". */
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  /** Path to the social-preview image (1200×630). Defaults to the site-wide card. */
+  ogImage?: string;
 }
 
-const { title, description = "DLP Test — a resource for testing Data Loss Prevention software.", noindex = false } = Astro.props;
+const {
+  title,
+  description = "DLP Test — a resource for testing Data Loss Prevention software.",
+  noindex = false,
+  ogType = "website",
+  publishedTime,
+  modifiedTime,
+  ogImage = "/og-default.png",
+} = Astro.props;
+
+// Titles that already lead with the brand (e.g. the homepage's
+// "DLP Test — Test Your Data Loss Prevention") skip the suffix so the
+// rendered <title> doesn't double up as "DLP Test — … — DLP Test".
+const fullTitle =
+  title === "DLP Test" || title.startsWith("DLP Test — ")
+    ? title
+    : `${title} — DLP Test`;
 
 // `env.ENVIRONMENT` is set per-Worker via wrangler.jsonc (`production` vs
 // `staging`). Pages prerendered at build time bake in this value, so a
@@ -26,7 +49,34 @@ const shouldNoindex = noindex || isStaging;
 /** GTM/GA4 only on production so staging traffic does not pollute reports. */
 const analyticsEnabled = env.ENVIRONMENT === "production";
 const canonical = new URL(Astro.url.pathname, "https://dlptest.com").toString();
+const ogImageUrl = new URL(ogImage, "https://dlptest.com").toString();
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
+
+// Site-level structured data, emitted on the homepage only — search engines
+// pick up Organization/WebSite from any page, and once is enough.
+const siteJsonLd =
+  currentPath === "/"
+    ? JSON.stringify([
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "@id": "https://dlptest.com/#organization",
+          name: "DLP Test",
+          url: "https://dlptest.com/",
+          logo: "https://dlptest.com/dlp-test-logo.png",
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "@id": "https://dlptest.com/#website",
+          name: "DLP Test",
+          url: "https://dlptest.com/",
+          description:
+            "Free testing resources for Data Loss Prevention (DLP) software — sample data, HTTP POST test endpoints, a public FTP server, a regex workbench, and an MCP server.",
+          publisher: { "@id": "https://dlptest.com/#organization" },
+        },
+      ])
+    : null;
 
 // Top level keeps the most-visited pages front and center (per GA4 the two
 // POST test pages dominate traffic); everything else lives under the
@@ -101,7 +151,7 @@ const headerNav: HeaderNavItem[] = nav.map((item) =>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — DLP Test</title>
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {shouldNoindex ? (
       <>
@@ -111,6 +161,27 @@ const headerNav: HeaderNavItem[] = nav.map((item) =>
     ) : (
       <link rel="canonical" href={canonical} />
     )}
+    <meta property="og:site_name" content="DLP Test" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    {ogType === "article" && publishedTime && (
+      <meta property="article:published_time" content={publishedTime.toISOString()} />
+    )}
+    {ogType === "article" && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime.toISOString()} />
+    )}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+    {siteJsonLd && <script type="application/ld+json" set:html={siteJsonLd} />}
     <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="/apple-touch-icon.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
