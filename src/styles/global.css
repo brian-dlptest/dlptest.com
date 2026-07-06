@@ -367,6 +367,70 @@ textarea { min-height: 6rem; resize: vertical; }
   text-decoration: none;
 }
 
+/* ── Nav dropdown ("Extra Tools") ──
+   Mobile (inside the hamburger menu): an accordion row that expands in place.
+   Desktop (≥768px block below): a floating panel under the trigger. */
+.nav-dropdown {
+  position: relative;
+}
+/* Trigger resets the global button styling (same reason as .nav-menu-toggle). */
+.nav-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.7rem 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid var(--border);
+  box-shadow: none;
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 400;
+  letter-spacing: normal;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+.nav-dropdown-trigger:hover {
+  background: none;
+  box-shadow: none;
+  transform: none;
+  color: var(--text);
+}
+.nav-dropdown-trigger:active {
+  transform: none;
+}
+.nav-dropdown-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+.nav-dropdown-trigger[data-active] {
+  color: var(--text);
+}
+.nav-dropdown-caret {
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+.nav-dropdown--open .nav-dropdown-caret {
+  transform: rotate(180deg);
+}
+.nav-dropdown-menu {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-dropdown--open .nav-dropdown-menu {
+  display: block;
+}
+.nav-dropdown-menu a {
+  display: block;
+  padding-left: 1rem;
+}
+
 @media (min-width: 768px) {
   .nav-menu-toggle {
     display: none;
@@ -406,6 +470,66 @@ textarea { min-height: 6rem; resize: vertical; }
 
   .site-nav a[aria-current="page"]::after {
     transform: scaleX(1);
+  }
+
+  .nav-dropdown-trigger {
+    width: auto;
+    padding: 0.2rem 0;
+    border-bottom: none;
+  }
+
+  /* Underline indicator, matching .site-nav a::after */
+  .nav-dropdown-trigger::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform var(--transition-fast);
+  }
+
+  .nav-dropdown-trigger:hover::after {
+    transform: scaleX(0.6);
+  }
+
+  .nav-dropdown-trigger[data-active]::after {
+    transform: scaleX(1);
+  }
+
+  .nav-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.65rem);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 11.5rem;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 0.4rem;
+    z-index: 110;
+  }
+
+  .nav-dropdown-menu a {
+    padding: 0.5rem 0.75rem;
+    border-radius: calc(var(--radius) - 2px);
+    white-space: nowrap;
+  }
+
+  .nav-dropdown-menu a::after {
+    display: none;
+  }
+
+  .nav-dropdown-menu a:hover {
+    background: var(--bg);
+  }
+
+  .nav-dropdown-menu a[aria-current="page"] {
+    color: var(--accent);
   }
 }
 
