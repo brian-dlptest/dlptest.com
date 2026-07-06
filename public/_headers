@@ -8,11 +8,18 @@
 # Keep the Content-Security-Policy below in sync with CSP_DIRECTIVES in
 # src/middleware.ts. The Turnstile origin (challenges.cloudflare.com) must stay
 # in script-src and frame-src or the feedback modal's CAPTCHA breaks.
+#
+# HSTS is deliberately max-age=0 and the CSP deliberately omits
+# upgrade-insecure-requests (DO NOT restore either). HSTS pins are host-wide;
+# a browser that caches one refuses cleartext http:// for the whole domain,
+# which breaks /http-post/ — a core feature of this site. max-age=0 actively
+# clears old cached pins on the browser's next HTTPS visit. Cloudflare's
+# zone-level HSTS and "Always Use HTTPS" must stay off as well.
 
 /*
-  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Strict-Transport-Security: max-age=0
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' data:; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; frame-src https://www.googletagmanager.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' data:; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; frame-src https://www.googletagmanager.com https://challenges.cloudflare.com; object-src 'none'; frame-ancestors 'none'
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), interest-cohort=(), magnetometer=(), microphone=(), payment=(), usb=()
