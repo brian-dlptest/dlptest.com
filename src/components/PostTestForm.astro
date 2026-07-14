@@ -280,6 +280,34 @@ const maxBytes = 100 * 1024 * 1024;
     return `${file.name}:${file.size}:${file.lastModified}`;
   }
 
+  type PostVerdict = "accepted" | "blocked" | "error";
+
+  // The /api/http-post/ endpoint always answers accepted requests with a JSON
+  // body of { ok: true }. An inline DLP proxy that blocks the upload typically
+  // injects its own block page instead — a 2xx response (often 200) carrying an
+  // HTML body — so the request never reaches our server. Relying on res.ok
+  // alone would report those blocks as successful uploads, which is exactly the
+  // false positive we want to avoid: a blocked upload must read as blocked.
+  // Confirm the JSON contract before declaring success.
+  async function classifyResponse(res: Response): Promise<PostVerdict> {
+    const contentType = res.headers.get("content-type") || "";
+    if (res.ok && contentType.includes("application/json")) {
+      try {
+        const data = (await res.json()) as { ok?: unknown };
+        if (data?.ok === true) return "accepted";
+      } catch {
+        /* body was not the JSON we expected — treat as intercepted below */
+      }
+      return "blocked";
+    }
+    // A 2xx response that isn't our JSON contract means something answered on
+    // our behalf (a proxy block page); a non-2xx is a genuine transport error.
+    return res.ok ? "blocked" : "error";
+  }
+
+  const BLOCKED_MESSAGE =
+    "The upload did not reach dlptest.com. If a DLP control is inline, it blocked the request — check your DLP console for the incident. That's the expected result for a working policy.";
+
   function initFileForm(form: HTMLFormElement) {
     const maxBytes = Number(form.dataset.maxBytes) || 100 * 1024 * 1024;
     const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
@@ -401,7 +429,8 @@ const maxBytes = 100 * 1024 * 1024;
 
       try {
         const res = await fetch(form.action, { method: "POST", body: fd });
-        if (res.ok) {
+        const verdict = await classifyResponse(res);
+        if (verdict === "accepted") {
           if (result) {
             result.textContent =
               "Received. Nothing was stored. Check your DLP console for an incident.";
@@ -411,7 +440,10 @@ const maxBytes = 100 * 1024 * 1024;
           syncUi();
           form.reset();
         } else if (result) {
-          result.textContent = `Submission failed: ${res.status} ${res.statusText}`;
+          result.textContent =
+            verdict === "blocked"
+              ? BLOCKED_MESSAGE
+              : `Submission failed: ${res.status} ${res.statusText}`.trim();
           result.className = "result error";
         }
       } catch (err) {
@@ -456,7 +488,8 @@ const maxBytes = 100 * 1024 * 1024;
 
       try {
         const res = await fetch(form.action, { method: "POST", body: fd });
-        if (res.ok) {
+        const verdict = await classifyResponse(res);
+        if (verdict === "accepted") {
           if (result) {
             result.textContent =
               "Received. Nothing was stored. Check your DLP console for an incident.";
@@ -464,7 +497,10 @@ const maxBytes = 100 * 1024 * 1024;
           }
           form.reset();
         } else if (result) {
-          result.textContent = `Submission failed: ${res.status} ${res.statusText}`;
+          result.textContent =
+            verdict === "blocked"
+              ? BLOCKED_MESSAGE
+              : `Submission failed: ${res.status} ${res.statusText}`.trim();
           result.className = "result error";
         }
       } catch (err) {
