@@ -46,6 +46,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Audit dependencies (fail on high/critical)
+        run: npx --yes audit-ci@^7 --config ./audit-ci.jsonc
       - name: Typecheck
         run: npm run check
       - name: Build (production target)
