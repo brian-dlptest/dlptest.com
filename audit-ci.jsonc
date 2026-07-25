@@ -1,0 +1,18 @@
+{
+  // Config for audit-ci, run as a PR gate in .github/workflows/deploy.yml.
+  //
+  // Fail the build on any HIGH or CRITICAL advisory. Moderate/low findings are
+  // surfaced by Dependabot as update PRs but do not block a merge.
+  "high": true,
+
+  // Accepted, non-blocking advisories. Each entry needs a reason.
+  "allowlist": [
+    // xlsx (SheetJS): prototype pollution + ReDoS, both in the spreadsheet
+    // READ path. The fixed version ships only from SheetJS's own CDN, not npm,
+    // so there is no npm upgrade to take. This site only GENERATES spreadsheets
+    // (never parses untrusted input), so neither advisory is reachable here.
+    // Revisit if xlsx ever gets used to parse uploaded/untrusted files.
+    "GHSA-4r6h-8v6p-xvw6",
+    "GHSA-5pgg-2g8v-p4x9"
+  ]
+}

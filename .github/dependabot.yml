@@ -1,0 +1,36 @@
+# Dependabot keeps dependencies patched automatically.
+#
+# It opens PRs against `staging` (the integration branch — see CLAUDE.md),
+# which then run through the existing typecheck + build gate in deploy.yml.
+# Security updates are opened as soon as an advisory lands; version updates
+# are batched weekly to keep PR noise down.
+version: 2
+updates:
+  # npm dependencies
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    target-branch: staging
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    # Group low-risk updates into a single PR so review stays manageable.
+    # Majors are left ungrouped so each breaking bump is reviewed on its own.
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions used in workflows (checkout, setup-node, etc.)
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    target-branch: staging
+    labels:
+      - dependencies
+      - github-actions
