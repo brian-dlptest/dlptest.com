@@ -4,8 +4,9 @@
     {
       "name": "dlptest-dev",
       "runtimeExecutable": "/bin/zsh",
-      "runtimeArgs": ["-c", "PATH=/opt/homebrew/opt/node@22/bin:$PATH npm run dev"],
-      "port": 4321
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/opt/node@22/bin:$PATH npm run dev -- --port ${PORT:-4321}"],
+      "port": 4321,
+      "autoPort": true
     }
   ]
 }
