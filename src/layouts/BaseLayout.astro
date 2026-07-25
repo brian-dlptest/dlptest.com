@@ -125,9 +125,15 @@ const TOP_LEVEL_PATHS = new Set<string>([
 function isActive(href: string) {
   const normHref = href.replace(/\/+$/, "") || "/";
   if (normHref === currentPath) return true;
+  // Section pages (e.g. /sample-data/namessnccn) highlight their parent nav
+  // item. Guard against the home item ("/"), which would otherwise match all.
+  if (normHref !== "/" && currentPath.startsWith(normHref + "/")) return true;
+  // Blog posts (news + guides) live at the root as single-segment legacy
+  // WordPress permalinks (/<slug>/). Anything with one path segment that isn't
+  // a known top-level route is treated as a blog post so Blog stays highlighted.
   if (
     normHref === "/blog" &&
-    currentPath.startsWith("/") &&
+    !currentPath.slice(1).includes("/") &&
     !TOP_LEVEL_PATHS.has(currentPath)
   ) {
     return true;
