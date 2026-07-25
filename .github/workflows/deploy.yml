@@ -38,7 +38,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@v6
@@ -67,7 +67,7 @@ jobs:
       name: staging
       url: https://dlptest-com-staging.hileman8.workers.dev
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Build the branch HEAD, not this push's commit — see concurrency note.
           ref: ${{ github.ref }}
@@ -100,7 +100,7 @@ jobs:
       name: production
       url: https://dlptest-com-prod.hileman8.workers.dev
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # Build the branch HEAD, not this push's commit — see concurrency note.
           ref: ${{ github.ref }}
