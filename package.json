@@ -11,7 +11,7 @@
     "preview": "wrangler dev --config dist/server/wrangler.json",
     "sync": "astro sync",
     "check": "astro sync && tsc --noEmit",
-    "regex:validate": "tsc src/lib/regex/dlp-patterns.ts --outDir .regexcheck --module es2022 --target es2022 --moduleResolution bundler --skipLibCheck && node -e \"import('./.regexcheck/dlp-patterns.js').then(m=>{const f=m.validateDlpPatterns();if(f.length){console.error('INVALID PATTERNS:\\n'+f.map(x=>'  '+x.id+': '+x.reason).join('\\n'));process.exit(1)}console.log('OK — '+m.DLP_PATTERNS.length+' patterns valid')}).catch(e=>{console.error(e);process.exit(1)})\"",
+    "regex:validate": "tsc src/lib/regex/dlp-patterns.ts --ignoreConfig --outDir .regexcheck --module es2022 --target es2022 --moduleResolution bundler --skipLibCheck && node -e \"import('./.regexcheck/dlp-patterns.js').then(m=>{const f=m.validateDlpPatterns();if(f.length){console.error('INVALID PATTERNS:\\n'+f.map(x=>'  '+x.id+': '+x.reason).join('\\n'));process.exit(1)}console.log('OK — '+m.DLP_PATTERNS.length+' patterns valid')}).catch(e=>{console.error(e);process.exit(1)})\"",
     "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
     "deploy:staging": "npm run build:staging && wrangler deploy --config dist/server/wrangler.json",
     "news:test-key": "node scripts/news/test-cursor-api-key.mjs",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260724.1",
     "aws4fetch": "^1.0.20",
-    "typescript": "^5.8.3",
+    "typescript": "^7.0.2",
     "wrangler": "^4.114.0"
   }
 }
