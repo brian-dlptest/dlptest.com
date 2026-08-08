@@ -23,6 +23,9 @@
  *   NEWS_INGEST_SECRET   — required; Bearer secret for the ingest endpoint
  *   NEWS_SITE_URL        — optional; default https://dlptest.com
  *   NEWS_DIR             — optional; default src/content/news
+ *   NEWS_MODEL           — optional; default claude-sonnet-5. Anthropic pins model
+ *                          IDs per generation (no floating "latest" alias), so bump
+ *                          this deliberately after checking migration notes.
  */
 
 import { readFileSync, readdirSync } from "node:fs";
@@ -31,7 +34,10 @@ import { fileURLToPath } from "node:url";
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODEL = "claude-opus-4-8";
+// Pin an exact model ID here (or override per-run via NEWS_MODEL) — Anthropic
+// doesn't offer a floating "latest" alias, since generation upgrades can carry
+// breaking API/behavior changes. Bump this deliberately after checking release notes.
+const MODEL = process.env.NEWS_MODEL?.trim() || "claude-sonnet-5";
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..");
 
@@ -91,14 +97,51 @@ function isTransientError(error) {
 }
 
 /**
- * client.messages.create with exponential backoff on transient capacity
+ * Streaming message request with exponential backoff on transient capacity
  * errors (429 rate limit, 529 overloaded). Persistent errors — including a
  * drained credit balance — fail fast and bubble up to main()'s handler.
+ *
+ * Streaming (rather than messages.create) is load-bearing, not a style choice:
+ * the research call runs a server-side web_search loop that can think and
+ * search for many minutes with no bytes on the wire. A non-streaming request
+ * sits idle through all of it and trips the SDK's HTTP timeout — which is what
+ * killed run 31264538594 after 15m, and the SDK's own retries then re-billed
+ * the same work twice more for nothing. Streaming keeps the connection active
+ * so long calls complete instead of timing out.
  */
+/** Token usage accumulated across every call in a run, for cost comparison. */
+const usageTotals = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+
+/**
+ * Print per-run token totals. Called on both the success and failure paths —
+ * a run that dies partway still consumed tokens, and that is exactly the case
+ * worth seeing. Note process.exit() skips `finally`, so this is called
+ * explicitly rather than relied on there.
+ */
+function logUsage() {
+  const { calls, input, output, cacheRead, cacheWrite } = usageTotals;
+  if (calls === 0) return;
+  console.log(
+    `Usage (${MODEL}): ${calls} calls, ${input} in / ${output} out, ` +
+      `cache ${cacheRead} read / ${cacheWrite} write`,
+  );
+}
+
+function recordUsage(message) {
+  const u = message?.usage;
+  if (!u) return message;
+  usageTotals.calls += 1;
+  usageTotals.input += u.input_tokens ?? 0;
+  usageTotals.output += u.output_tokens ?? 0;
+  usageTotals.cacheRead += u.cache_read_input_tokens ?? 0;
+  usageTotals.cacheWrite += u.cache_creation_input_tokens ?? 0;
+  return message;
+}
+
 async function createMessage(client, params, { maxRetries = 4 } = {}) {
   for (let attempt = 0; ; attempt += 1) {
     try {
-      return await client.messages.create(params);
+      return recordUsage(await client.messages.stream(params).finalMessage());
     } catch (error) {
       if (attempt >= maxRetries || !isTransientError(error)) throw error;
       const delayMs = 2 ** attempt * 1000;
@@ -126,12 +169,22 @@ Prefer 0–2 strong stories over padding with weak fits. If nothing qualifies, s
 
 For each qualifying story, write a short briefing: the headline, the primary source URL (canonical vendor PR / Calcalist / SecurityWeek — never dlptest.com), the publication date, and 3–5 sentences of practitioner synthesis including the DLP/DSPM angle. Stay factual and flag uncertainty where sources conflict.`;
 
-  const tools = [{ type: "web_search_20260209", name: "web_search" }];
-  let response = await createMessage(client, {
+  // max_uses bounds how long a single call can run. Without it the server-side
+  // search loop is unbounded, and a more search-eager model can stretch one
+  // request past any client timeout. 12 is ample for finding 0–2 stories.
+  const tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 12 }];
+  const request = {
     model: MODEL,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
+    // Default effort is "high". This task is editorial judgement plus a short
+    // synthesis, not hard reasoning, so "medium" trades little quality for
+    // meaningfully fewer tokens and less tool-looping.
+    output_config: { effort: "medium" },
     tools,
+  };
+  let response = await createMessage(client, {
+    ...request,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -140,13 +193,7 @@ For each qualifying story, write a short briefing: the headline, the primary sou
   const messages = [{ role: "user", content: prompt }];
   while (response.stop_reason === "pause_turn" && guard < 5) {
     messages.push({ role: "assistant", content: response.content });
-    response = await createMessage(client, {
-      model: MODEL,
-      max_tokens: 16000,
-      thinking: { type: "adaptive" },
-      tools,
-      messages,
-    });
+    response = await createMessage(client, { ...request, messages });
     guard += 1;
   }
 
@@ -273,8 +320,14 @@ async function main() {
   console.log(`Today:         ${today}`);
   console.log(`Exclude slugs: ${excludeSlugs.length}`);
   console.log(`Site:          ${siteUrl}`);
+  console.log(`Model:         ${MODEL}`);
 
-  const client = new Anthropic({ apiKey });
+  // timeout: generous ceiling for a long streaming research call.
+  // maxRetries: the SDK retries connection errors by default (2 = 3 attempts).
+  // A timed-out request usually still completes and bills server-side, so each
+  // retry pays for work we then discard — 1 keeps a blip recoverable without
+  // paying for the same research three times.
+  const client = new Anthropic({ apiKey, timeout: 15 * 60 * 1000, maxRetries: 1 });
 
   console.log("Researching with web search...");
   const report = await research(client, { editorial, cutoffIso, excludeSlugs, today });
@@ -295,7 +348,9 @@ async function main() {
 
 try {
   await main();
+  logUsage();
 } catch (error) {
+  logUsage();
   if (isSoftApiError(error)) {
     const detail = error.error?.error?.message || error.message || String(error);
     console.warn(`::warning::News discovery skipped — Anthropic API unavailable: ${detail}`);
