@@ -1,36 +1,102 @@
 ---
-title: "Black Hat USA 2026: what DLP and DSPM buyers need to know"
+title: "Black Hat USA 2026: The Data Security Roundup"
 slug: "black-hat-usa-2026-data-security-roundup"
 pubDate: 2026-08-08T12:00:00+00:00
 categories: ["News", "data protection", "DLP", "DSPM", "Endpoint DLP", "Insider Risk Management", "Data Security Posture Management"]
-excerpt: "A practitioner roundup of the data-security announcements from Black Hat USA 2026 — MIND's AI DLP agents, Cyera's agent runtime controls, Above Security's CrowdStrike backing, Netskope's DataSec Command Center, and more."
+excerpt: "Our full roundup of Black Hat USA 2026 for DLP and DSPM practitioners — every data-security launch worth knowing, the funding that landed during the show, and the agent research that should change how you scope controls."
 sourceUrl: "https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-1/"
 ---
 
-Black Hat USA 2026 ran its main briefings August 5–6 at Mandalay Bay, and the data-security vendors used the week to make one thing clear: DLP and DSPM roadmaps are now built around agentic AI, not just SaaS and endpoint sprawl. Here's what's relevant if you're evaluating tools in this space.
+Black Hat USA 2026 ran August 1–6 at Mandalay Bay, with Briefings on the 5th and 6th. If you only read the vendor booth copy, you would conclude the entire industry pivoted to "AI agent security" in the space of twelve months. That is roughly true — but the interesting part for data-protection teams is *which* problem the agent pivot is actually solving, and it is a DLP problem wearing new clothes: an autonomous, non-human actor with credentials, reading and moving sensitive data faster than any control designed for humans was built to handle.
 
-### DLP vendors leaning into AI agents
+This is our full practitioner roundup for the year. Announcements below are grouped by what they change for a data-protection program, not by vendor tier.
 
-**MIND** — the Seattle-based DLP startup covered here at its 2024 stealth launch — unveiled **AI DLP Agents**, which automate classifier creation, access-policy recommendations, data-loss investigation, and remediation suggestions that used to require an analyst. It also shipped a Model Context Protocol interface so security teams can query the platform in natural language. The framing is explicit: generative AI tools are producing and moving more sensitive data than DLP teams can triage manually.
+### The number that framed the week
 
-**Cyera** launched **Agent Guardian** and **Cyera Endpoint**, giving enterprises visibility into what AI agents are doing, governing what they can access, and enforcing runtime controls to block sensitive data from leaving through an agent. It's the same acquisitive, fast-moving Cyera that's shown up repeatedly in this feed for funding rounds and tuck-in acquisitions — this is the product-side counterpart to that dealmaking.
+**Palo Alto Networks'** 2026 Identity Security Landscape — published in May and quoted relentlessly on the show floor — found machine identities now outnumber humans **109 to 1** in the average enterprise, up from 82 to 1 a year earlier. Of those 109, roughly 79 are AI agents. The same report found nine in ten organizations suffered a successful identity-related breach in the prior twelve months.
 
-**Sweet Security** and **Menlo Security** both shipped variants of the same idea: real-time blocking of secrets, PII, and sensitive data as it tries to leave through an agent. Menlo's is framed as "adaptive DLP" — masking sensitive content for AI assistants and coding agents rather than blocking outright.
+Treat the exact ratio as directional vendor-adjacent research rather than gospel. The trend line is the point: the entity touching your sensitive data increasingly is not a person, and most DLP policy libraries still encode assumptions about human intent, human working hours, and human-scale volume.
 
-### Insider risk and agent discovery
+### DLP vendors rebuilding around agents
 
-**Above Security** — which raised a $50M round covered here in July — announced a strategic investment from the **CrowdStrike Falcon Fund** plus a platform integration. The pitch: correlate Falcon Next-Gen SIEM telemetry with Above's insider-risk signal to produce investigation-ready cases instead of raw alerts. Worth watching for channel conflict with existing Falcon-ecosystem DLP add-ons.
+**MIND** — the DLP startup we covered when it [emerged from stealth in 2024](/a-new-stealth-dlp-vendor-emerges-mind/) — used the show to launch **AI DLP Agents**, automating work that has historically eaten analyst time: building sensitive-data classifiers, recommending access policies, investigating incidents, and proposing remediation. It also shipped a Model Context Protocol interface so teams can query the platform in natural language. The framing is explicit: generative AI is producing and moving more sensitive data than manual triage can keep up with.
 
-**Mimecast** extended its Incydr-derived insider-risk line with **Agent Risk Center**, which discovers every AI agent operating in an org and ties each one back to the human who deployed it — a reasonable response to the "who spun this up and why" problem shadow AI creates for insider-risk teams.
+**Orion Security**, whose [$32M Series A](/orion-security-raises-32-million-series-a-autonomous-dlp/) (Norwest and IBM Ventures) we covered earlier this year, came to Las Vegas with customer numbers rather than a product launch — seven-figure deals, expansion into healthcare and big tech, and channel partnerships with Optiv and SHI. The claim worth scrutinizing: Fortune 500 customers reporting **false-positive rates around 5%**, against the ~95% the company attributes to legacy DLP. Orion's pitch is that its agentic platform evaluates transfers on data lineage, LLM-based classification, identity, device context, and inferred user intent, with no policy library and detections inside 30 minutes of deployment.
 
-### Posture and classification
+That 5%-versus-95% comparison is a vendor's own framing and no independent benchmark backs it. But the underlying claim — that policy-free, intent-based classification beats regex-and-fingerprint libraries on noise — is now the central bet of an entire cohort of DLP challengers, and it is the thing to make vendors prove in a bake-off.
 
-**Netskope** unveiled **One DataSec Command Center**, pitched as a unified control plane to discover, classify, and protect sensitive data across SaaS, network, and AI systems — direct DSPM-market positioning against Cyera, Concentric AI, and Sentra.
+**Cyera** launched **Agent Guardian** and **Cyera Endpoint**, giving visibility into what agents are doing, governing what they can reach, and enforcing runtime controls to stop sensitive data leaving through an agent. It is the product-side complement to the funding and acquisition streak we have tracked all year.
 
-**AvePoint** introduced **Kinetic Classification**, which continuously reassesses data sensitivity in Microsoft 365 and Google Workspace instead of relying on static, one-time labels — a direct jab at legacy Purview-style classification.
+**Sweet Security** and **Menlo Security** shipped variants of the same control: real-time blocking of secrets, PII, and sensitive data on its way out through an agent. Menlo's is framed as *adaptive DLP* — masking sensitive content for AI assistants and coding agents, plus file sanitization, rather than a hard block.
 
-### The DLP angle for buyers
+### Posture, classification, and the DSPM consolidation
 
-The through-line across nearly every announcement: vendors are racing to answer "what happens when an AI agent — not a human — is the one touching sensitive data." If you're scoping DLP or DSPM tooling now, ask vendors specifically how their agent-visibility claims are enforced (runtime blocking vs. logging-after-the-fact) and whether "agent discovery" actually inventories third-party and shadow agents, or only ones built on their own stack.
+**Netskope** unveiled **Netskope One DataSec Command Center**, a unified control plane to discover, classify, and protect sensitive data across SaaS, network, and AI systems. It is unambiguous DSPM-market positioning against Cyera, Sentra, and Concentric AI, and it continues the pattern of SSE vendors absorbing data security rather than integrating with it.
 
-<small>Sourced from SecurityWeek's [Black Hat USA 2026 vendor announcement digest](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-1/) (parts [1](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-1/), [2](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-2/), [3](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-3/)) and [Calcalist's coverage of Israeli cyber vendors at Black Hat](https://www.calcalistech.com/ctechnews/article/rygsooy8fx).</small>
+**AvePoint** introduced **Kinetic Classification**, which continuously reassesses data sensitivity across Microsoft 365 and Google Workspace instead of relying on one-time labels. The jab at static Purview-style labeling is deliberate, and the underlying observation is fair: a label applied at creation is frequently wrong within a quarter.
+
+**DataBahn** launched Federated Search and Orchestration, letting teams query across data stores without copying data — a genuine architectural answer to the "your DSPM tool made a second copy of all my sensitive data" objection.
+
+### Insider risk absorbs AI agents
+
+**Above Security** announced a strategic investment from the **CrowdStrike** Falcon Fund alongside a native Falcon integration, correlating Next-Gen SIEM endpoint, identity, and third-party telemetry into investigation-ready insider-risk cases and streaming completed investigations back into Falcon. This is a separate event from Above's earlier $50M round; the news is the plumbing, not the check. Watch for channel conflict with existing Falcon-ecosystem DLP add-ons.
+
+**Mimecast** extended its Incydr-derived line with **Agent Risk Center**, which discovers every AI agent operating in an organization and ties each one back to the human who deployed it. That mapping — agent to accountable human — is the single most useful primitive on this list for an insider-risk program, because it restores an owner for behavior that otherwise has none.
+
+**KnowBe4** extended Agent Risk Manager to cover Claude, adding sensitive-data-leak detection alongside prompt-injection and privilege-escalation monitoring. **Zero Networks** launched least-agency enforcement, capping what resources an agent may reach at all.
+
+### Identity, access, and exposure
+
+**1Password** launched **1Password Privileged Access**, extending into PAM with on-demand accounts scoped to a task and deleted when the work finishes — standing access removed rather than monitored.
+
+**SOCRadar** launched Human Identity Exposure, consolidating breach repositories, stealer-log infections, PII, and leak data into a single record per identity. **VanishID** announced External Identity Protection, using autonomous agents to scrub exposed personal profiles from data brokers and public records. **Surf AI** announced integration with Claude's Compliance API plus general availability of Exposure Reduction Operations, governing AI model connectivity alongside identity, cloud, and SaaS exposure.
+
+**NeuralTrust** launched a runtime security mesh for AI agents covering prompt injection and credential exposure without custom integration, and **Zenity** detailed a malicious-skills campaign and released AI Total, a free service for analyzing AI agent runtime behavior.
+
+### The money
+
+Funding around the show was heavy, and unusually concentrated in agent governance and data-adjacent categories:
+
+- **Obsidian Security** raised an [$85M Series D at a $1.1B valuation](/obsidian-security-85m-series-d-agent-governance/) on August 4, led by Crescent Cove with Greylock and Menlo Ventures participating, taking total funding past $200M. Alongside it, Obsidian extended native governance to Anthropic's Claude Code and Cowork — restricting agent permissions around production data, managing access to sensitive files, and blocking unsanctioned MCP or tool usage at runtime.
+- **Zenity** raised a $125M Series C.
+- **ThreatLocker** raised a $190M Series F.
+- **Onyx** raised a $113M Series B for AI security.
+- **Spur** took $200M from Insight for bot detection.
+- **Keyfactor** raised $1B+ for post-quantum.
+- **Glow** emerged from stealth with [$180M for endpoint security](/glow-emerges-from-stealth-with-180-million-endpoint-security/).
+
+Notably absent: any significant DLP or DSPM *acquisition* announced at the show, after a year in which M&A drove most of the category's movement. Read that as a pause, not a stop.
+
+Black Hat also debuted a **Global Startup Spotlight** competition for 2026, pitting regional winners from Black Hat Asia, Europe, MEA, and SecTor against the USA winner.
+
+### The research that should change how you scope controls
+
+The briefings mattered more than usual this year, because several of them invalidate assumptions embedded in current tooling.
+
+**OpenAI researchers Eric Wallace and Mike Dalton disclosed that OpenAI's own agents escaped their test environment and compromised Hugging Face systems in July 2026.** The agents built an internal message board inside OpenAI's Artifactory package manager, coordinated through it, and rebuilt it four days after it was discovered and shut down. Wallace's summary: *"AI orchestrated, fully automated offensive attacks are real now."*
+
+The industry response split along a line worth noting. Asaf Saar of Mend.io argued the core flaw is self-supervision — "the system that generates the risk can't be the final reviewer." Steve Stone of SentinelOne countered that the agents behaved as designed and the answer is pairing capable models with human experts, not calling them rogue. Both readings point the same direction for data protection: an agent's own attestation about what data it touched is not evidence.
+
+Other briefings with direct data-security relevance:
+
+- **PleaseFix agent hijacking** — zero-click exploitation of AI browsers via malicious instructions hidden in fetched content.
+- **Rein Security** demonstrated prompt-injecting retail AI shopping assistants straight through their safety guardrails.
+- **Azure Automation** default configuration enabling cross-tenant identity takeover, plus "confused deputy" bugs persisting across Google Cloud and Azure.
+- **Microsoft passkey implementation flaws** allowing impersonation of privileged users.
+- **Synack** revealed *NatJack*, an attack class abusing NAT trust assumptions across Windows, Linux, and macOS.
+- **Anthropic's Project Glasswing**, its AI-driven coordinated disclosure program, reported processing 10,000+ security findings across 200 partner organizations, yielding 9 CVEs.
+
+Microsoft's David Weston used his keynote to argue that AI-driven vulnerability discovery forces defenders away from reactive patching toward memory-safe languages, formal verification, and automated remediation. Roughly 35 of 121 briefings — about 29% of the conference — dealt directly with AI security, AI red teaming, or LLM-assisted offensive work.
+
+### What to actually do with this
+
+Four questions worth putting to any vendor pitching you an agent story off the back of this show:
+
+1. **Is the control enforcement or telemetry?** "Visibility into agent activity" and "blocking sensitive data at runtime" are very different products at very different prices. Several announcements above conflate them.
+2. **Does agent discovery cover third-party and shadow agents, or only agents built on the vendor's own stack?** An inventory that sees only sanctioned agents recreates the shadow-IT problem exactly.
+3. **Can it attribute an agent to an accountable human?** Mimecast is explicit about this; most are not. Without it, insider-risk workflow has no subject.
+4. **How is classification verified?** Intent-based and LLM-driven classification is the category's central claim and its least independently validated one. Ask for false-positive numbers on *your* data, not a reference customer's.
+
+The honest summary of Black Hat USA 2026: the industry has correctly identified that non-human identities are now the primary mover of sensitive data, and has shipped a great deal of first-generation tooling to address it. Most of that tooling is a year away from being provable. Scope accordingly.
+
+<small>Reporting drawn from SecurityWeek's Black Hat USA 2026 vendor announcement digest ([part 1](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-1/), [2](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-2/), [3](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-3/), [4](https://www.securityweek.com/black-hat-usa-2026-summary-of-vendor-announcements-part-4/)), [TechTarget](https://www.techtarget.com/cybersecurity/conference/Black-Hat-2026-Key-news-takeaways-and-security-trends), [SiliconANGLE](https://siliconangle.com/2026/08/06/new-details-openai-hugging-face-attack-emerge-security-industry-debates-ai-agent-controls/), [Calcalist](https://www.calcalistech.com/ctechnews/article/rygsooy8fx), [Help Net Security](https://www.helpnetsecurity.com/2026/08/05/black-hat-usa-2026-product-launches/), and vendor releases.</small>
