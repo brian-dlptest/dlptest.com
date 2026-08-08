@@ -12,6 +12,9 @@ name: News discovery (Claude → review queue)
 #                         Worker; authorizes POSTs to the ingest endpoint.
 # Optional:
 #   NEWS_SITE_URL var   — defaults to https://dlptest.com
+#   NEWS_MODEL var      — defaults to claude-sonnet-5 (see discover.mjs). Bump
+#                         this var (not the code) when moving to a newer Claude
+#                         generation, after checking Anthropic's migration notes.
 #
 # Security note: this workflow runs on `schedule` / `workflow_dispatch` only —
 # NEVER add a `pull_request` trigger, or fork PRs could run it with these
@@ -46,4 +49,5 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NEWS_INGEST_SECRET: ${{ secrets.NEWS_INGEST_SECRET }}
           NEWS_SITE_URL: ${{ vars.NEWS_SITE_URL || 'https://dlptest.com' }}
+          NEWS_MODEL: ${{ vars.NEWS_MODEL }}
         run: node scripts/news/discover.mjs
