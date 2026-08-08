@@ -23,6 +23,9 @@
  *   NEWS_INGEST_SECRET   — required; Bearer secret for the ingest endpoint
  *   NEWS_SITE_URL        — optional; default https://dlptest.com
  *   NEWS_DIR             — optional; default src/content/news
+ *   NEWS_MODEL           — optional; default claude-sonnet-5. Anthropic pins model
+ *                          IDs per generation (no floating "latest" alias), so bump
+ *                          this deliberately after checking migration notes.
  */
 
 import { readFileSync, readdirSync } from "node:fs";
@@ -31,7 +34,10 @@ import { fileURLToPath } from "node:url";
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODEL = "claude-opus-4-8";
+// Pin an exact model ID here (or override per-run via NEWS_MODEL) — Anthropic
+// doesn't offer a floating "latest" alias, since generation upgrades can carry
+// breaking API/behavior changes. Bump this deliberately after checking release notes.
+const MODEL = process.env.NEWS_MODEL?.trim() || "claude-sonnet-5";
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..");
 
