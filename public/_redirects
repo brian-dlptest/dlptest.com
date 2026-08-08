@@ -55,3 +55,16 @@
 /sample-dobemail.xls             /sample-data/  301
 /sample-dobemail.xlsx            /sample-data/  301
 /sample-dobemail.pdf             /sample-data/  301
+
+# ── Black Hat USA 2026 consolidation ─────────────────────────────────────────
+# These three stories were published as standalone posts during Black Hat week,
+# then folded into the annual /black-hat-usa-2026-data-security-roundup/ piece.
+# The standalone posts were removed, so 301 the (already indexed) permalinks at
+# the roundup rather than letting them 404 and drop their link equity.
+# If this becomes a yearly pattern, add a block per show.
+/above-security-crowdstrike-falcon-fund-investment-falcon-integration/  /black-hat-usa-2026-data-security-roundup/  301
+/above-security-crowdstrike-falcon-fund-investment-falcon-integration   /black-hat-usa-2026-data-security-roundup/  301
+/cyera-launches-agent-guardian-to-secure-the-autonomous-workforce/      /black-hat-usa-2026-data-security-roundup/  301
+/cyera-launches-agent-guardian-to-secure-the-autonomous-workforce       /black-hat-usa-2026-data-security-roundup/  301
+/netskope-launches-netskope-one-datasec-command-center/                 /black-hat-usa-2026-data-security-roundup/  301
+/netskope-launches-netskope-one-datasec-command-center                  /black-hat-usa-2026-data-security-roundup/  301
