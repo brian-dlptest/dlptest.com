@@ -48,9 +48,15 @@ const CSP_DIRECTIVES = [
   // permits WebAssembly compilation, not JS eval(). Keep in sync with _headers.
   "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://www.googletagmanager.com https://www.google-analytics.com",
+  "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://stats.g.doubleclick.net",
   "font-src 'self' data:",
-  "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+  // GA4 does not post to a single host. gtag sends /g/collect to whichever of
+  // these the container picks, and a CSP wildcard never matches the apex it is
+  // built from — `*.analytics.google.com` covers region1.* but NOT
+  // analytics.google.com itself, so the apex must be listed separately.
+  // Dropping any of these silently blackholes ALL measurement (page_view and
+  // every custom event share this one transport, distinguished only by `en=`).
+  "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.google.com",
   "frame-src https://www.googletagmanager.com https://challenges.cloudflare.com",
   // NO upgrade-insecure-requests: /http-post/ exists to send genuinely
   // cleartext POSTs, and that directive would make browsers silently upgrade
