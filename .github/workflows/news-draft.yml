@@ -15,6 +15,9 @@ name: News discovery (Claude → review queue)
 #   NEWS_MODEL var      — defaults to claude-sonnet-5 (see discover.mjs). Bump
 #                         this var (not the code) when moving to a newer Claude
 #                         generation, after checking Anthropic's migration notes.
+#   NEWS_EFFORT var     — defaults to high. low|medium|high|xhigh|max. Lower
+#                         effort makes the model scope research more tightly;
+#                         raise it if runs start coming back empty.
 #
 # Security note: this workflow runs on `schedule` / `workflow_dispatch` only —
 # NEVER add a `pull_request` trigger, or fork PRs could run it with these
@@ -50,4 +53,5 @@ jobs:
           NEWS_INGEST_SECRET: ${{ secrets.NEWS_INGEST_SECRET }}
           NEWS_SITE_URL: ${{ vars.NEWS_SITE_URL || 'https://dlptest.com' }}
           NEWS_MODEL: ${{ vars.NEWS_MODEL }}
+          NEWS_EFFORT: ${{ vars.NEWS_EFFORT }}
         run: node scripts/news/discover.mjs
