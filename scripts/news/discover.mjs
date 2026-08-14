@@ -27,6 +27,8 @@
  *                          IDs per generation (no floating "latest" alias), so bump
  *                          this deliberately after checking migration notes.
  *   NEWS_EFFORT          — optional; default high. low|medium|high|xhigh|max.
+ *   NEWS_LOOKBACK_DAYS   — optional; default 21. Minimum span the search window
+ *                          always covers, so an outage gap can't be skipped.
  */
 
 import { readFileSync, readdirSync } from "node:fs";
@@ -42,6 +44,13 @@ const MODEL = process.env.NEWS_MODEL?.trim() || "claude-sonnet-5";
 // Research effort. Same pattern as NEWS_MODEL: tune via the Actions variable
 // rather than a code change, so a quiet stretch can be probed without a PR.
 const EFFORT = process.env.NEWS_EFFORT?.trim() || "high";
+// How far back the search window always reaches, regardless of what has been
+// published since. See computeCutoff() — this is the outage-recovery guarantee.
+// Must exceed the longest plausible discovery outage; the 2026 one ran ~13 days.
+const LOOKBACK_DAYS = (() => {
+  const raw = Number(process.env.NEWS_LOOKBACK_DAYS);
+  return Number.isFinite(raw) && raw > 0 ? raw : 21;
+})();
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..");
 
@@ -54,7 +63,29 @@ function requireEnv(name) {
   return value;
 }
 
-/** Newest pubDate across all existing posts → ISO cutoff. */
+/**
+ * Discovery cutoff: the EARLIER of the newest pubDate and a fixed lookback
+ * floor, so the search window can never skip past a gap.
+ *
+ * Using max(pubDate) alone was a silent data-loss bug. It is not "since the
+ * last successful run" — it is "since the newest thing we happen to have
+ * published". So when discovery is down (the 2026-07-26..08-07 credit
+ * outage), any story announced inside that window becomes permanently
+ * unreachable the moment a NEWER article publishes and drags the cutoff past
+ * it. Hush Security's 07-28 Series A was lost exactly this way, and
+ * hand-publishing the Black Hat roundup (pubDate 08-08) is what slammed the
+ * window shut. Publishing was actively destroying our own recovery path.
+ *
+ * The floor makes recovery automatic: every run re-examines at least the last
+ * NEWS_LOOKBACK_DAYS days regardless of what has been published since.
+ * Re-examining is cheap and safe because correctness never depended on the
+ * cutoff — duplicates are prevented by the slug exclusion list (repo filenames
+ * + every slug in D1, any status). The cutoff is a search-efficiency hint, so
+ * widening it costs some tokens and risks nothing.
+ *
+ * Caveat this does NOT solve: an outage longer than the lookback window still
+ * loses stories. Raise NEWS_LOOKBACK_DAYS if the pipeline is ever down longer.
+ */
 function computeCutoff(newsDir) {
   const files = readdirSync(newsDir).filter((f) => f.endsWith(".md"));
   let max = 0;
@@ -65,7 +96,16 @@ function computeCutoff(newsDir) {
     const ts = Date.parse(match[1].trim().replace(/^["']|["']$/g, ""));
     if (!Number.isNaN(ts) && ts > max) max = ts;
   }
-  return max > 0 ? new Date(max) : new Date(Date.now() - 14 * 864e5);
+
+  const lookbackFloor = Date.now() - LOOKBACK_DAYS * 864e5;
+  // Earlier of the two. When the newest post is recent, the floor wins and we
+  // look back further; when the site has been quiet longer than the window,
+  // max(pubDate) wins and we keep the wider span rather than narrowing it.
+  const cutoffMs = max > 0 ? Math.min(max, lookbackFloor) : lookbackFloor;
+  return {
+    cutoff: new Date(cutoffMs),
+    basis: max > 0 && max < lookbackFloor ? "newest pubDate" : `${LOOKBACK_DAYS}d lookback floor`,
+  };
 }
 
 /** Slugs from existing repo filenames. */
@@ -315,7 +355,7 @@ async function main() {
   const newsDir = join(REPO_ROOT, process.env.NEWS_DIR?.trim() || "src/content/news");
 
   const editorial = readFileSync(join(SCRIPT_DIR, "EDITORIAL.md"), "utf8");
-  const cutoff = computeCutoff(newsDir);
+  const { cutoff, basis: cutoffBasis } = computeCutoff(newsDir);
   const cutoffIso = cutoff.toISOString();
   const today = new Date().toISOString().slice(0, 10);
 
@@ -323,7 +363,7 @@ async function main() {
     new Set([...repoSlugs(newsDir), ...(await fetchKnownSlugs(siteUrl, ingestSecret))]),
   );
 
-  console.log(`Cutoff:        ${cutoffIso}`);
+  console.log(`Cutoff:        ${cutoffIso}  (${cutoffBasis})`);
   console.log(`Today:         ${today}`);
   console.log(`Exclude slugs: ${excludeSlugs.length}`);
   console.log(`Site:          ${siteUrl}`);

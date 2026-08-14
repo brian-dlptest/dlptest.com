@@ -18,6 +18,10 @@ name: News discovery (Claude → review queue)
 #   NEWS_EFFORT var     — defaults to high. low|medium|high|xhigh|max. Lower
 #                         effort makes the model scope research more tightly;
 #                         raise it if runs start coming back empty.
+#   NEWS_LOOKBACK_DAYS  — defaults to 21. Minimum span the discovery window
+#                         always covers. This is the outage-recovery guarantee:
+#                         raise it if the pipeline is ever down longer than
+#                         21 days, or stories inside the gap are lost for good.
 #
 # Security note: this workflow runs on `schedule` / `workflow_dispatch` only —
 # NEVER add a `pull_request` trigger, or fork PRs could run it with these
@@ -54,4 +58,5 @@ jobs:
           NEWS_SITE_URL: ${{ vars.NEWS_SITE_URL || 'https://dlptest.com' }}
           NEWS_MODEL: ${{ vars.NEWS_MODEL }}
           NEWS_EFFORT: ${{ vars.NEWS_EFFORT }}
+          NEWS_LOOKBACK_DAYS: ${{ vars.NEWS_LOOKBACK_DAYS }}
         run: node scripts/news/discover.mjs
