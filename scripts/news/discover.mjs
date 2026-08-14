@@ -26,6 +26,7 @@
  *   NEWS_MODEL           — optional; default claude-sonnet-5. Anthropic pins model
  *                          IDs per generation (no floating "latest" alias), so bump
  *                          this deliberately after checking migration notes.
+ *   NEWS_EFFORT          — optional; default high. low|medium|high|xhigh|max.
  */
 
 import { readFileSync, readdirSync } from "node:fs";
@@ -38,6 +39,9 @@ import Anthropic from "@anthropic-ai/sdk";
 // doesn't offer a floating "latest" alias, since generation upgrades can carry
 // breaking API/behavior changes. Bump this deliberately after checking release notes.
 const MODEL = process.env.NEWS_MODEL?.trim() || "claude-sonnet-5";
+// Research effort. Same pattern as NEWS_MODEL: tune via the Actions variable
+// rather than a code change, so a quiet stretch can be probed without a PR.
+const EFFORT = process.env.NEWS_EFFORT?.trim() || "high";
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..");
 
@@ -177,10 +181,13 @@ For each qualifying story, write a short briefing: the headline, the primary sou
     model: MODEL,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
-    // Default effort is "high". This task is editorial judgement plus a short
-    // synthesis, not hard reasoning, so "medium" trades little quality for
-    // meaningfully fewer tokens and less tool-looping.
-    output_config: { effort: "medium" },
+    // Was "medium" from 2026-08-08. Reverted to "high" (the API default) after
+    // six consecutive zero-candidate runs: Sonnet 5 scopes work more tightly at
+    // lower effort, and research output shrank from ~3.7k chars on the run that
+    // found a story to ~1.6-2.4k on the empty ones. That is correlation, not
+    // proof — RESEARCH_REPORT logging below is what will actually settle it.
+    // Override per-run with the NEWS_EFFORT variable without a code change.
+    output_config: { effort: EFFORT },
     tools,
   };
   let response = await createMessage(client, {
@@ -321,6 +328,7 @@ async function main() {
   console.log(`Exclude slugs: ${excludeSlugs.length}`);
   console.log(`Site:          ${siteUrl}`);
   console.log(`Model:         ${MODEL}`);
+  console.log(`Effort:        ${EFFORT}`);
 
   // timeout: generous ceiling for a long streaming research call.
   // maxRetries: the SDK retries connection errors by default (2 = 3 attempts).
@@ -339,6 +347,14 @@ async function main() {
 
   if (candidates.length === 0) {
     console.log("Nothing met the bar — no candidates queued.");
+    // Dump the research verbatim on empty runs. Without this a zero-candidate
+    // day is indistinguishable from a genuinely quiet news week: six such runs
+    // (2026-08-09..14) burned 120k-508k input tokens each and left no way to
+    // tell whether the model found qualifying stories and rejected them, or
+    // found nothing at all. The report is a few KB — cheap next to the run.
+    console.log("----- RESEARCH REPORT (why nothing qualified) -----");
+    console.log(report || "(empty report — the research call returned no text)");
+    console.log("----- END RESEARCH REPORT -----");
     return;
   }
 
