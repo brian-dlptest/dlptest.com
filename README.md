@@ -54,30 +54,50 @@ GitHub Actions handles all deploys. See
 - Push to `main` → deploys `dlptest-com-prod`
 - Pull requests → run typecheck + build as a status check, no deploy
 
-### Automated news drafts (Cursor Cloud Agent)
+### Automated news discovery (Claude → review queue)
 
-[`.github/workflows/news-draft.yml`](.github/workflows/news-draft.yml) runs **weekly**
-(Mondays 15:00 UTC, editable cron) and can be triggered manually via **Actions → News discovery**.
+[`.github/workflows/news-draft.yml`](.github/workflows/news-draft.yml) runs **daily**
+(15:00 UTC, editable cron) and can be triggered manually via **Actions → News discovery**.
 
-It executes [`scripts/news/run-cloud-draft.mjs`](scripts/news/run-cloud-draft.mjs), which calls the
-[`@cursor/sdk`](https://cursor.com/docs/api/sdk/typescript) **`Agent.prompt`** API with **`cloud.autoCreatePR: true`**.
-The Cursor-hosted agent clones **`staging`** (override with env `NEWS_BASE_REF`), scans **`src/content/news/*.md`** for the newest **`pubDate`**, searches for credible stories **after that cutoff**, drafts new Markdown files that match **`src/content.config.ts`**, runs **`npm run check`** and **`npm run build`**, commits, and opens a PR.
+It executes [`scripts/news/discover.mjs`](scripts/news/discover.mjs):
 
-You get alerted the same way as any other PR (GitHub email / mobile). Review and merge into **`staging`** like any content change.
+1. **Cutoff** — the earlier of the newest `pubDate` in `src/content/news/*.md` and a
+   21-day lookback floor. The floor matters: without it, an outage gap becomes
+   permanently invisible as soon as any newer article publishes.
+2. **Research** — Claude + `web_search` finds qualifying stories after the cutoff,
+   following [`scripts/news/EDITORIAL.md`](scripts/news/EDITORIAL.md). Streamed, because
+   the server-side search loop can run for minutes and a non-streaming request trips
+   the SDK's HTTP timeout.
+3. **Extract** — a second, tool-free call turns the briefing into structured candidates.
+4. **Ingest** — candidates POST to `/api/news/candidates` and land in a D1-backed queue
+   as `pending`. The endpoint sends one digest email when new stories arrive.
 
-Setup (one-time):
+**Nothing is published automatically.** Review at **`/admin/news`** (behind Cloudflare
+Access): *Publish* commits the rendered Markdown to both `main` and `staging`; *Delete*
+marks it `rejected`. Published and rejected slugs are both retained so discovery never
+resurfaces the same story.
 
-1. Connect this GitHub repo to **Cursor Cloud Agents** ([dashboard](https://cursor.com/dashboard/cloud-agents)).
-2. Add repo secret **`CURSOR_API_KEY`** — user API key or team **service account** key from the same dashboard.
+Required repo **secrets**:
 
-Local manual run (same behavior — opens a cloud PR, does **not** use your working tree):
+- **`ANTHROPIC_API_KEY`** — Claude API key ([console](https://console.anthropic.com)).
+- **`NEWS_INGEST_SECRET`** — must match the wrangler secret of the same name on the Worker.
 
-```bash
-export CURSOR_API_KEY="cursor_..."
-export NEWS_REPO_URL="https://github.com/<owner>/<repo>"   # optional in Actions; uses GITHUB_REPOSITORY there
-export NEWS_BASE_REF=staging                               # optional
-npm run news:cloud-draft
-```
+Optional repo **variables** (tune without a code change):
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `NEWS_SITE_URL` | `https://dlptest.com` | Ingest target |
+| `NEWS_MODEL` | `claude-sonnet-5` | Model ID. Anthropic has no floating "latest" alias — bump deliberately after checking migration notes |
+| `NEWS_EFFORT` | `high` | `low`–`max`. Lower effort scopes research more tightly; raise if runs come back empty |
+| `NEWS_LOOKBACK_DAYS` | `21` | Minimum span the search window always covers. Raise if the pipeline is ever down longer |
+
+**Reading a run:** healthy runs take ~3–7 minutes and log a `Usage (...)` line. A run that
+finds nothing dumps the full research report so an empty day can be told apart from a quiet
+news week. Billing/quota exhaustion **fails the run red** on purpose — it never self-heals,
+and a silent green run once hid a drained balance for ~13 days. Transient 429/529 capacity
+errors still skip quietly.
+
+Run the pipeline's unit tests with `npm run news:test` (also chained onto `npm run check`).
 
 The deploy workflow uses two repo-level configurations:
 
