@@ -322,30 +322,46 @@ async function ingest(siteUrl, secret, candidates) {
   return body;
 }
 
-/**
- * True when an error is a non-actionable operational condition rather than a
- * code bug — chiefly an exhausted Anthropic credit balance. The daily cron
- * shouldn't go red (and spam failure emails) every morning until billing is
- * topped up, so we soft-exit on these.
- */
-function isSoftApiError(error) {
-  if (!error || typeof error !== "object") return false;
-  const status = error.status;
-  // Drill into the SDK's structured body as well as the flattened message.
-  const message = [
-    error.message,
-    error.error?.error?.message,
-    error.error?.message,
-  ]
+/** Flatten an SDK error's message, including its structured body. */
+function errorMessage(error) {
+  return [error?.message, error?.error?.error?.message, error?.error?.message]
     .filter((s) => typeof s === "string")
     .join(" ")
     .toLowerCase();
+}
+
+/**
+ * Billing / quota exhaustion. THIS MUST FAIL THE RUN.
+ *
+ * These errors never self-heal — a drained credit balance stays drained until
+ * a human tops it up. This used to soft-exit 0 alongside capacity blips, on
+ * the reasoning that a red cron "spams failure emails". The actual cost of
+ * that reasoning: the 2026-07-26 balance ran out and the workflow reported
+ * SUCCESS every morning for ~13 days while producing nothing. Nobody noticed
+ * until the missing articles were spotted by hand. A silent green run is far
+ * more expensive than a noisy red one, because red is the only signal that
+ * reaches anyone.
+ */
+function isBillingError(error) {
+  if (!error || typeof error !== "object") return false;
+  const message = errorMessage(error);
   if (/credit balance is too low/.test(message)) return true;
   if (/billing|insufficient.*(credit|quota)|quota.*exceeded/.test(message)) return true;
-  // Capacity blips (429/529) reach here only after createMessage() has already
-  // exhausted its retries — at that point skip the run rather than fail red.
-  if (status === 429 || status === 529) return true;
   return false;
+}
+
+/**
+ * Transient capacity pressure (429 rate limit / 529 overloaded) — genuinely
+ * self-healing, and only reached here after createMessage() already burned
+ * four exponential-backoff retries. Still worth skipping rather than failing:
+ * tomorrow's run will very likely succeed.
+ *
+ * Deliberately NOT extended to connection timeouts. Those used to indicate a
+ * real bug (a non-streaming request hitting the SDK's HTTP timeout, then
+ * being re-billed twice by SDK retries) and should stay loud.
+ */
+function isTransientCapacityError(error) {
+  return error?.status === 429 || error?.status === 529;
 }
 
 async function main() {
@@ -407,12 +423,25 @@ try {
   logUsage();
 } catch (error) {
   logUsage();
-  if (isSoftApiError(error)) {
-    const detail = error.error?.error?.message || error.message || String(error);
-    console.warn(`::warning::News discovery skipped — Anthropic API unavailable: ${detail}`);
-    console.warn("Soft-exiting 0 so the scheduled run doesn't fail on a billing/capacity blip.");
+  const detail = error?.error?.error?.message || error?.message || String(error);
+
+  // Billing/quota: fail RED. This never fixes itself, and a green run that
+  // produced nothing is indistinguishable from a quiet news week — which is
+  // exactly how the 2026-07-26 outage stayed invisible for ~13 days.
+  if (isBillingError(error)) {
+    console.error(`::error::News discovery FAILED — Anthropic billing/quota exhausted: ${detail}`);
+    console.error("This does NOT self-heal. Top up at console.anthropic.com → Plans & Billing.");
+    console.error("Failing red on purpose: a silent green run hid this for ~13 days in July 2026.");
+    process.exit(1);
+  }
+
+  // Capacity: genuinely transient and already retried in-run. Skip quietly.
+  if (isTransientCapacityError(error)) {
+    console.warn(`::warning::News discovery skipped — Anthropic API at capacity: ${detail}`);
+    console.warn("Soft-exiting 0; this is self-healing. Investigate if it repeats for several days.");
     process.exit(0);
   }
+
   console.error(error);
   process.exit(1);
 }
