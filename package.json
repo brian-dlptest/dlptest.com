@@ -11,7 +11,7 @@
     "preview": "wrangler dev --config dist/server/wrangler.json",
     "sync": "astro sync",
     "check": "astro sync && tsc --noEmit && npm run news:test",
-    "news:test": "node scripts/news/cutoff.test.mjs",
+    "news:test": "node scripts/news/cutoff.test.mjs && node scripts/news/errors.test.mjs",
     "regex:validate": "tsc src/lib/regex/dlp-patterns.ts --ignoreConfig --outDir .regexcheck --module es2022 --target es2022 --moduleResolution bundler --skipLibCheck && node -e \"import('./.regexcheck/dlp-patterns.js').then(m=>{const f=m.validateDlpPatterns();if(f.length){console.error('INVALID PATTERNS:\\n'+f.map(x=>'  '+x.id+': '+x.reason).join('\\n'));process.exit(1)}console.log('OK — '+m.DLP_PATTERNS.length+' patterns valid')}).catch(e=>{console.error(e);process.exit(1)})\"",
     "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
     "deploy:staging": "npm run build:staging && wrangler deploy --config dist/server/wrangler.json",
