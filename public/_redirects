@@ -12,6 +12,8 @@
 /classification                     /inspect-data/          301
 /category/news/                     /blog/                  301
 /category/news                      /blog/                  301
+/data-security-news/                /blog/                  301
+/data-security-news                 /blog/                  301
 /feed/                              /feed.xml               301
 /feed                               /feed.xml               301
 /comments/feed/                     /feed.xml               301
