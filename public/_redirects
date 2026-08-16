@@ -23,6 +23,14 @@
 /wpautoterms/terms-and-conditions/  /terms-and-conditions/  301
 /wpautoterms/terms-and-conditions   /terms-and-conditions/  301
 
+# ── Sitemap ──────────────────────────────────────────────────────────────────
+# Astro's sitemap integration emits /sitemap-index.xml, but /sitemap.xml is the
+# conventional path: WordPress served it, Search Console had it submitted since
+# 2017, and crawlers/SEO tools probe it by default. It 404'd from the cutover
+# until 2026-08-15. Google follows redirects for sitemaps, so a 301 is enough —
+# robots.txt still advertises /sitemap-index.xml directly.
+/sitemap.xml                        /sitemap-index.xml      301
+
 # ── Legacy root download permalinks ──────────────────────────────────────────
 # Old WordPress served sample files at the site root (e.g. /sample-data.csv,
 # /334-MB-Test-CSV.csv). The new site generates sample data client-side and
