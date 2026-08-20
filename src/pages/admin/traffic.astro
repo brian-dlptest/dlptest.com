@@ -94,6 +94,10 @@ if (ga && ga.daily.length >= 8) {
   if (baseAvg > 0) usersTrendPct = Math.round(((recentAvg - baseAvg) / baseAvg) * 100);
 }
 const gaUsersMax = ga ? Math.max(1, ...ga.daily.map((x) => x.users)) : 1;
+// Print the numbers on the chart when few enough bars fit. The 7d window always
+// qualifies; wider windows fall back to the dense hover-only sparkline. A young
+// property also lands here, since GA only returns days that actually have data.
+const showDayLabels = ga ? ga.daily.length > 0 && ga.daily.length <= 14 : false;
 function fmtGaDate(yyyymmdd: string): string {
   return yyyymmdd.length === 8
     ? `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`
@@ -313,18 +317,29 @@ const windows: { h: number; label: string }[] = [
         {ga.daily.length > 0 && (
           <section>
             <h2>Users per day</h2>
-            <div class="spark">
-              {ga.daily.map((d) => (
-                <div
-                  class="bar"
-                  style={`height:${Math.max(2, Math.round((d.users / gaUsersMax) * 100))}%`}
-                  title={`${fmtGaDate(d.date)} · ${nf.format(d.users)} users · ${nf.format(d.views)} views`}
-                />
-              ))}
+            <div class:list={["spark", { "spark--labeled": showDayLabels }]}>
+              {ga.daily.map((d) => {
+                const h = Math.max(2, Math.round((d.users / gaUsersMax) * 100));
+                const tip = `${fmtGaDate(d.date)} · ${nf.format(d.users)} users · ${nf.format(d.views)} views`;
+                return showDayLabels ? (
+                  <div class="col" title={tip}>
+                    <div class="col__track">
+                      <div class="bar" style={`height:${h}%`} />
+                      <span class="col__val" style={`bottom:calc(${h}% + 0.25rem)`}>{nf.format(d.users)}</span>
+                    </div>
+                    <span class="col__day">{fmtGaDate(d.date).slice(5)}</span>
+                  </div>
+                ) : (
+                  <div class="bar" style={`height:${h}%`} title={tip} />
+                );
+              })}
             </div>
             <p class="hint">
-              Daily unique users over the last {ga.days} days (ending yesterday). Hover a
-              bar for the date + counts. A sustained downward slope = losing users.
+              Daily unique users over the last {ga.days} days (ending yesterday).
+              {showDayLabels
+                ? " Each bar is labelled with its user count; hover for views too."
+                : " Hover a bar for the date + counts."}
+              {" "}A sustained downward slope = losing users.
             </p>
           </section>
         )}
@@ -385,6 +400,21 @@ const windows: { h: number; label: string }[] = [
   .spark { display: flex; align-items: flex-end; gap: 2px; height: 120px; padding: 0.5rem 0; }
   .spark .bar { flex: 1; min-width: 2px; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.8; }
   .spark .bar:hover { opacity: 1; background: var(--accent-hover); }
+  /* Labelled variant: used when few enough bars fit (see showDayLabels). The
+     track gets an explicit height so the bars' percentage heights resolve
+     against a definite parent rather than a flex-sized one. */
+  .spark--labeled { height: auto; gap: 4px; padding-top: 1.25rem; }
+  .spark--labeled .col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  /* Track is positioned so each bar's value label can be pinned directly above
+     its own bar (bottom: calc(height% + gap)) rather than floating in a
+     detached row at the top of the chart. */
+  .spark--labeled .col__track { position: relative; height: 110px; width: 100%; }
+  .spark--labeled .col__track .bar { position: absolute; left: 0; right: 0; bottom: 0; }
+  .spark--labeled .col__val {
+    position: absolute; left: 0; right: 0; text-align: center;
+    font-size: 0.75rem; font-weight: 600; color: var(--text); line-height: 1;
+  }
+  .spark--labeled .col__day { font-size: 0.7rem; color: var(--text-dim); line-height: 1; white-space: nowrap; }
   .hint, .gen { color: var(--text-dim); font-size: 0.8rem; }
   .gen { margin-top: 1.5rem; }
   .ga { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
