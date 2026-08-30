@@ -27,6 +27,10 @@
  *                          IDs per generation (no floating "latest" alias), so bump
  *                          this deliberately after checking migration notes.
  *   NEWS_EFFORT          — optional; default high. low|medium|high|xhigh|max.
+ *   NEWS_SEARCH_MAX_USES — optional; default 20. Web searches allowed per research
+ *                          call. Too low and the model spends its budget finding
+ *                          leads and runs dry before it can corroborate them, so
+ *                          verifiable stories get dropped. See SEARCH_MAX_USES.
  *   NEWS_LOOKBACK_DAYS   — optional; default 21. Minimum span the search window
  *                          always covers, so an outage gap can't be skipped.
  */
@@ -50,6 +54,16 @@ const EFFORT = process.env.NEWS_EFFORT?.trim() || "high";
 const LOOKBACK_DAYS = (() => {
   const raw = Number(process.env.NEWS_LOOKBACK_DAYS);
   return Number.isFinite(raw) && raw > 0 ? raw : 21;
+})();
+// Web searches allowed inside one research call. This is a real editorial
+// constraint, not just a safety bound: the bar requires corroborating a lead
+// against a canonical source (vendor PR / SecurityWeek / Help Net Security)
+// before it can be published, and verification costs searches too. Set too
+// low, the model spends everything on discovery and has to drop stories it
+// actually found — which is what happened between 2026-08-08 and 08-29.
+const SEARCH_MAX_USES = (() => {
+  const raw = Number(process.env.NEWS_SEARCH_MAX_USES);
+  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 20;
 })();
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..");
@@ -154,7 +168,7 @@ function isTransientError(error) {
  * so long calls complete instead of timing out.
  */
 /** Token usage accumulated across every call in a run, for cost comparison. */
-const usageTotals = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+const usageTotals = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, searches: 0 };
 
 /**
  * Print per-run token totals. Called on both the success and failure paths —
@@ -163,12 +177,23 @@ const usageTotals = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0
  * explicitly rather than relied on there.
  */
 function logUsage() {
-  const { calls, input, output, cacheRead, cacheWrite } = usageTotals;
+  const { calls, input, output, cacheRead, cacheWrite, searches } = usageTotals;
   if (calls === 0) return;
   console.log(
     `Usage (${MODEL}): ${calls} calls, ${input} in / ${output} out, ` +
-      `cache ${cacheRead} read / ${cacheWrite} write`,
+      `cache ${cacheRead} read / ${cacheWrite} write, ` +
+      `${searches}/${SEARCH_MAX_USES} searches`,
   );
+  // Exhausting the budget is the failure mode that produced 21 straight empty
+  // runs while every one of them reported success. Say so loudly rather than
+  // leaving it to be reverse-engineered from the research report's prose.
+  if (searches >= SEARCH_MAX_USES) {
+    console.warn(
+      `::warning::Web search budget exhausted (${searches}/${SEARCH_MAX_USES}). ` +
+        `The model may have dropped stories it could not corroborate in budget. ` +
+        `Raise the NEWS_SEARCH_MAX_USES repository variable if this repeats.`,
+    );
+  }
 }
 
 function recordUsage(message) {
@@ -179,6 +204,7 @@ function recordUsage(message) {
   usageTotals.output += u.output_tokens ?? 0;
   usageTotals.cacheRead += u.cache_read_input_tokens ?? 0;
   usageTotals.cacheWrite += u.cache_creation_input_tokens ?? 0;
+  usageTotals.searches += u.server_tool_use?.web_search_requests ?? 0;
   return message;
 }
 
@@ -215,8 +241,10 @@ For each qualifying story, write a short briefing: the headline, the primary sou
 
   // max_uses bounds how long a single call can run. Without it the server-side
   // search loop is unbounded, and a more search-eager model can stretch one
-  // request past any client timeout. 12 is ample for finding 0–2 stories.
-  const tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 12 }];
+  // request past any client timeout. Streaming (see above) is what actually
+  // prevents that timeout now, so this is a backstop — size it for the work,
+  // not as tightly as possible, and tune via NEWS_SEARCH_MAX_USES.
+  const tools = [{ type: "web_search_20260209", name: "web_search", max_uses: SEARCH_MAX_USES }];
   const request = {
     model: MODEL,
     max_tokens: 16000,
@@ -385,6 +413,7 @@ async function main() {
   console.log(`Site:          ${siteUrl}`);
   console.log(`Model:         ${MODEL}`);
   console.log(`Effort:        ${EFFORT}`);
+  console.log(`Search budget: ${SEARCH_MAX_USES}`);
 
   // timeout: generous ceiling for a long streaming research call.
   // maxRetries: the SDK retries connection errors by default (2 = 3 attempts).
