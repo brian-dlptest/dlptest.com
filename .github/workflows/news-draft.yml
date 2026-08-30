@@ -35,8 +35,17 @@ name: News discovery (Claude → review queue)
 
 on:
   schedule:
-    # Daily 15:00 UTC (~10am Eastern). Adjust cron as needed.
-    - cron: "0 15 * * *"
+    # Fridays 15:00 UTC (~10am Eastern). Weekly rather than daily on cost:
+    # a run averages ~$1-1.60 (Sonnet 5 tokens + $10/1000 web searches), so
+    # daily was ~$30-48/month against a beat that produces a story every week
+    # or two.
+    #
+    # Weekly is lossless, not a trade: NEWS_LOOKBACK_DAYS (default 21) floors
+    # the discovery window, so each run still searches at least the last 21
+    # days regardless of cadence. The only cost is latency — a story can wait
+    # up to 7 days to be queued. Run workflow_dispatch when something breaks
+    # mid-week and you don't want to wait.
+    - cron: "0 15 * * 5"
   workflow_dispatch:
 
 concurrency:
