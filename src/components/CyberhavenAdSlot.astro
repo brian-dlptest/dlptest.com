@@ -1,13 +1,15 @@
 ---
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
-import { CYBERHAVEN_PAGE_ADS, type CyberhavenAdPage } from "@/lib/cyberhaven-ad";
+import { ADS_ENABLED, CYBERHAVEN_PAGE_ADS, type CyberhavenAdPage, type CyberhavenAdUnit } from "@/lib/cyberhaven-ad";
 
 interface Props {
   page: CyberhavenAdPage;
 }
 
 const { page } = Astro.props;
-const units = CYBERHAVEN_PAGE_ADS[page];
+// With ads off there are no units, so the sidebar grid is skipped and only the
+// page content renders — no empty second column.
+const units: readonly CyberhavenAdUnit[] = ADS_ENABLED ? CYBERHAVEN_PAGE_ADS[page] : [];
 const hasSidebar = units.includes("skyscraper");
 const inlineUnits = units.filter((u) => u !== "skyscraper");
 ---

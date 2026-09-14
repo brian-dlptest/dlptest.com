@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import { ADS_ENABLED } from "@/lib/cyberhaven-ad";
 export const prerender = true;
 
 // The FTP test server lives on a separate host (ftp.dlptest.com) outside of
@@ -17,7 +18,7 @@ const s3Region = "us-west-2";
 const s3Endpoint = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com`;
 ---
 <BaseLayout title="FTP & S3 Test" description="Public FTP and S3 endpoints for testing DLP. Upload files without authentication; they are automatically deleted after a short retention period.">
-  <div class="ftp-layout">
+  <div class:list={["ftp-layout", { "ftp-layout--with-ad": ADS_ENABLED }]}>
     <div class="ftp-content">
       <h1>FTP &amp; S3 Test</h1>
 
@@ -125,7 +126,9 @@ s3.upload_file("testfile.txt", "{s3Bucket}", "testfile.txt")</code></pre>
   }
 
   @media (min-width: 900px) {
-    .ftp-layout {
+    /* Only reserve the sidebar column when an ad fills it; an empty auto track
+       still costs the column gap. */
+    .ftp-layout--with-ad {
       grid-template-columns: minmax(0, 1fr) auto;
     }
   }
