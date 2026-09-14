@@ -51,10 +51,12 @@ const libraryJson = libraryCategories.map((c) => ({
   files: c.files.map((f) => ({ displayName: f.displayName, url: f.url, filename: f.filename })),
 }));
 
-// Serialize as JSON data islands rather than via `define:vars`. A `<script>` with
+// Serialize as JSON data islands rather than via `define:vars`. A script tag with
 // `define:vars` is emitted inline and is NOT bundled by Vite, which would leave the
 // bare-specifier dynamic imports (xlsx / pdf-lib / docx) unresolved in the browser.
-// Escape `<` so a stray "</script>" in the data can't break out of the tag.
+// Escape `<` so a stray closing script tag in the data can't break out of the tag.
+// (Don't write literal script-tag markup in these comments: Vite's dependency
+// scanner extracts script blocks by pattern and will try to parse the comment.)
 const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003c");
 ---
 <BaseLayout
