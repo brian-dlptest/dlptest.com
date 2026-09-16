@@ -32,6 +32,10 @@ export const DOWNLOAD_KEYS: ReadonlySet<string> = new Set([
   "sample-dobemail.xls",
   "sample-dobemail.xlsx",
   "sample-dobemail.pdf",
+
+  // Test plans and guides. Not legacy — these are served only at
+  // /downloads/?file=<key>, never at a root path.
+  "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx",
 ]);
 
 const CONTENT_TYPE_BY_EXT: Record<string, string> = {
