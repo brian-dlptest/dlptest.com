@@ -19,7 +19,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
-from openpyxl.formatting.rule import CellIsRule
+from openpyxl.formatting.rule import CellIsRule, FormulaRule
 from openpyxl.comments import Comment
 from openpyxl.chart import BarChart, Reference
 
@@ -32,7 +32,7 @@ OUT = os.path.join(HERE, "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx")
 
 # Shown on the Read Me sheet. Keep in step with TEST_PLAN_VERSION in src/data/test-plan.ts,
 # which cache-busts the download URL.
-VERSION = 5
+VERSION = 6
 
 FONT = "Arial"
 NAVY = "0B1220"
@@ -61,6 +61,10 @@ CTR   = Alignment(vertical="center", horizontal="center", wrap_text=True)
 HDRA  = Alignment(vertical="center", horizontal="left", wrap_text=True)
 
 RESULT_OPTS  = '"Pass,Partial,Fail,N/A"'
+
+# Table stakes coverage below this means a product cannot cover the basics. It replaced an
+# older "any Fail is disqualifying" rule, which disqualified the market leaders it was scored on.
+TS_FLOOR = 0.70
 
 GOOD = ("D6EFD8", "10651B")
 WARN = ("FDF0CE", "8A5A00")
@@ -170,7 +174,7 @@ for label, text in [
     ("3. Enforcement", "Why some classifications cannot be enforced inline. Each row says what Pass means for that detection method - usually that the product blocks in the moment rather than alerting once the data has gone."),
     ("4. Investigations", "What happens after an alert. Evidence, lineage, pivoting, insider-risk context, case workflow, privacy controls, and response."),
     ("5. Usability", "What it costs to run. AI-assisted classification, policy authoring and triage, rollout and change control, agent footprint and user-visible latency, and the end-user experience that decides whether people route around the agent."),
-    ("Scoring Summary", "Rolls up every Result column. Formulas, not typed values - it updates as you fill the sheets in."),
+    ("Scoring Summary", "Rolls up every Result column - by sheet, by operating system and by maturity tier - and lists every table stakes row that failed. Formulas, not typed values: it updates as you fill the sheets in."),
 ]:
     rm(r, label, text); r += 1
 
@@ -180,7 +184,7 @@ r += 1
 for label, text in [
     ("Result", "Pass = works as described.  Partial = works with caveats, record them in Notes.  Fail = does not work, or requires an unacceptable workaround.  N/A = not applicable to your environment (excluded from scoring)."),
     ("Support (Policy sheet)", "Yes / Partial / No / N/A for each operating system and each enforcement action. Leave blank for anything you did not test - blank and No mean different things."),
-    ("Maturity tier", "Table stakes = expect every serious product to do this.  Advanced = mature products do this.  Differentiator = few products do this well, and it is usually why one product costs more than another."),
+    ("Maturity tier", f"Table stakes = the basics. Table stakes coverage below {TS_FLOOR:.0%} means the product cannot cover the basics, whatever its differentiator score. Individual Fails here belong in your findings rather than averaged into a percentage - the Scoring Summary lists them by row.  Advanced = where mature products separate from adequate ones.  Differentiator = few products pass many of these; a low score is information, not a verdict."),
     ("Blank", "Not yet tested. Blanks are excluded from the coverage percentage on the Scoring Summary."),
 ]:
     rm(r, label, text); r += 1
@@ -438,6 +442,32 @@ ws.freeze_panes = "D2"
 ws.auto_filter.ref = f"A1:H{last}"
 USE_LAST = last
 
+# ══════════════════════════════════════════════════════ Table stakes Fail helpers
+# One hidden column per data sheet: the row's ID when it is a table stakes row scored Fail,
+# otherwise blank. The Scoring Summary TEXTJOINs these into a per-sheet list. A plain range
+# argument means no array formula, so it works in merged cells and needs no Ctrl-Shift-Enter.
+TS_HELPERS = {}
+
+def add_ts_fail_helper(ws, helper_col, id_col, tier_col, res_col, first, last, hdr_rows):
+    L = get_column_letter
+    for hr in hdr_rows:
+        c = ws.cell(row=hr, column=helper_col)
+        c.font, c.fill, c.alignment, c.border = H_FONT, H_FILL, HDRA, BOX
+    ws.cell(row=hdr_rows[-1], column=helper_col, value="Table stakes Fail (auto)")
+    for r_ in range(first, last + 1):
+        ws.cell(row=r_, column=helper_col,
+                value=f'=IF(AND({L(tier_col)}{r_}="Table stakes",{L(res_col)}{r_}="Fail"),{L(id_col)}{r_},"")')
+    ws.column_dimensions[L(helper_col)].width = 18
+    ws.column_dimensions[L(helper_col)].hidden = True
+    TS_HELPERS[ws.title] = (L(helper_col), first, last)
+
+#                                sheet                  helper  id  tier  result  first  last         header rows
+add_ts_fail_helper(wb["1. Classification"], 11, 1, 8, 9, 2, CLASS_LAST, [1])
+add_ts_fail_helper(wb["2. Policy"],         10, 1, 8, 7, 3, POLICY_LAST, [1, 2])   # Block
+add_ts_fail_helper(wb["3. Enforcement"],     7, 1, 5, 4, 3, XP_LAST, [2])
+add_ts_fail_helper(wb["4. Investigations"],  9, 1, 6, 7, 2, INV_LAST, [1])
+add_ts_fail_helper(wb["5. Usability"],       9, 1, 6, 7, 2, USE_LAST, [1])
+
 # ══════════════════════════════════════════════════════ Scoring Summary
 ws = wb.create_sheet("Scoring Summary")
 ws.sheet_view.showGridLines = False
@@ -539,7 +569,7 @@ for tier in ("Table stakes", "Advanced", "Differentiator"):
          + sum(1 for x in USABILITY if x[5] == tier))
     TIER_TOTALS[tier] = n
 MEANING = {
- "Table stakes": "A Fail here is disqualifying. Expect every serious product to pass all of these.",
+ "Table stakes": f"Table stakes coverage below {TS_FLOOR:.0%} means the product cannot cover the basics, whatever its differentiator score. Individual Fails here belong in your findings rather than averaged into a percentage - they are listed by row below.",
  "Advanced": "Where mature products separate from adequate ones.",
  "Differentiator": "Few products pass many of these. A low score is information, not a verdict.",
 }
@@ -548,14 +578,61 @@ for tier in ("Table stakes", "Advanced", "Differentiator"):
         f'COUNTIFS({sh}!{tr},"{tier}",{sh}!{rr},"{v}")' for sh, tr, rr in TIER_SRC)
         for v in RES]
     score_row(r, tier, counts, TIER_TOTALS[tier], MEANING[tier])
+    if tier == "Table stakes":
+        TS_TIER_ROW = r
     ws.cell(row=r, column=2).fill = TIER_FILL[tier]
     ws.row_dimensions[r].height = est_height([(MEANING[tier], 50)])
     r += 1
 ws.cell(row=tier_hdr, column=9, value="Why it matters")
 ws.cell(row=tier_hdr, column=9).font = H_FONT
 
+# coverage under the floor turns red; "-" (nothing scored yet) is left alone
+ws.conditional_formatting.add(
+    f"H{TS_TIER_ROW}",
+    FormulaRule(formula=[f"AND(ISNUMBER($H${TS_TIER_ROW}),$H${TS_TIER_ROW}<{TS_FLOOR})"],
+                fill=PatternFill("solid", bgColor=BAD[0]),
+                font=Font(name=FONT, size=10, bold=True, color=BAD[1])))
+
+# ---- section 4: which table stakes rows failed -----------------------------
 r += 1
-ws.cell(row=r, column=2, value="Coverage = (Pass + 0.5 x Partial) / (Pass + Partial + Fail). N/A and untested rows are excluded. The tier rollup scores the Policy sheet on its Block column, the strictest of the three.").font = MUTED
+ws.cell(row=r, column=2, value="Table stakes failures - by row").font = SUB
+r += 1
+for c, h in enumerate(["Sheet", "Table stakes rows", "Fails", "Failed row IDs"], start=2):
+    ws.cell(row=r, column=c, value=h)
+style_header(ws, r, 9, height=30)
+ws.cell(row=r, column=1).fill = PatternFill()
+ws.cell(row=r, column=1).border = Border()
+ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=9)
+r += 1
+FAIL_SRC = [
+    ("1. Classification", "1. Classification", CLS[0], CLS[2], CLS[1], CLASSIFICATION, 7),
+    ("2. Policy",         "2. Policy (Block)", POL[0], POL[2], f"$G$3:$G${POLICY_LAST}", POLICY, 5),
+    ("3. Enforcement",    "3. Enforcement",    ENF[0], ENF[2], ENF[1], XPOLICY, 3),
+    ("4. Investigations", "4. Investigations", INV[0], INV[2], INV[1], INVESTIGATIONS, 5),
+    ("5. Usability",      "5. Usability",      USE[0], USE[2], USE[1], USABILITY, 5),
+]
+FAIL_LIST_ROWS = {}
+for sheet_name, label, sh, tier_rng, res_rng, rows_, tier_idx in FAIL_SRC:
+    hcol, hfirst, hlast = TS_HELPERS[sheet_name]
+    worst_case = ", ".join(x[0] for x in rows_ if x[tier_idx] == "Table stakes")
+    ws.cell(row=r, column=2, value=label)
+    ws.cell(row=r, column=3, value=f'=COUNTIF({sh}!{tier_rng},"Table stakes")')
+    ws.cell(row=r, column=4, value=f'=COUNTIFS({sh}!{tier_rng},"Table stakes",{sh}!{res_rng},"Fail")')
+    ws.cell(row=r, column=5,
+            value=f'=IF(D{r}=0,"None recorded",_xlfn.TEXTJOIN(", ",TRUE,{sh}!${hcol}${hfirst}:${hcol}${hlast}))')
+    ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=9)
+    for c in range(2, 10):
+        cell = ws.cell(row=r, column=c)
+        cell.font = BB_FONT if c == 2 else B_FONT
+        cell.border = BOX
+        cell.alignment = CTR if c in (3, 4) else TOP
+    # size for the case where every table stakes row on the sheet fails, so nothing clips
+    ws.row_dimensions[r].height = max(18, est_height([(worst_case, 96)]))
+    FAIL_LIST_ROWS[sheet_name] = r
+    r += 1
+
+r += 1
+ws.cell(row=r, column=2, value=f"Coverage = (Pass + 0.5 x Partial) / (Pass + Partial + Fail). N/A and untested rows are excluded. Table stakes coverage below {TS_FLOOR:.0%} is highlighted. The tier rollup and the failures list both score the Policy sheet on its Block column, the stricter of its two result columns.").font = MUTED
 ws.merge_cells(start_row=r, start_column=2, end_row=r, end_column=9)
 NOTE_ROW = r
 

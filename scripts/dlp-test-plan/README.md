@@ -61,7 +61,13 @@ There is no LibreOffice on the machines this was written on, so the usual
 - every count formula is simulated in Python against seeded values
 - one scoring vocabulary workbook-wide (`Pass / Partial / Fail / N/A`)
 - no dangling `C-`/`P-`/`E-`/`I-`/`U-` reference in any cell or comment
-- the workbook's IDs match the content modules exactly
+- the workbook's IDs match the content modules exactly, and every ID is well formed
+- the table stakes failures list is correct end to end: each sheet's hidden helper column points
+  only at its own row, the `TEXTJOIN` carries its `_xlfn.` prefix, and after seeding Fails the
+  listed IDs equal both the per-sheet count and the tier rollup's Table stakes Fail total
+- table stakes coverage below the 70% floor is highlighted
+- **the page advertises what the workbook is**: `VERSION` in `build.py`, `TEST_PLAN_VERSION` and
+  every row count in `src/data/test-plan.ts`, and the Read Me's version line all agree
 
 A clean run prints `ALL CHECKS PASSED`. Treat anything else as a broken build.
 
@@ -94,7 +100,7 @@ npx wrangler r2 object put \
 The key is already allow-listed in `src/lib/downloads.ts`; a request for a key not in that Set
 returns 404.
 
-**After every upload, bump `TEST_PLAN_VERSION` in `src/data/test-plan.ts`.** The downloads route
+**After every upload, bump `VERSION` in `build.py` and `TEST_PLAN_VERSION` in `src/data/test-plan.ts` together** — `verify.py` fails if they disagree. The downloads route
 sends `cache-control: immutable, max-age=31536000`, so a browser that already has the file will
 not re-request it for a year. The page links with `&v=<version>`; without the bump, readers
 silently keep the old workbook. Cloudflare's edge does pick up a new object on its own — it is
