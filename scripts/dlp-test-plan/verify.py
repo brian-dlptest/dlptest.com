@@ -207,6 +207,20 @@ print(f"  {len(ids)} live IDs; {len(dangling)} dangling reference(s)")
 for ref, locs in sorted(dangling.items()):
     fail.append(f"dangling reference {ref} at {', '.join(locs[:4])}")
 
+# ---- 5b. every ID is well formed ------------------------------------------
+print("\nID FORMAT")
+CANON = re.compile(r"^(?:C-[ABCD]|P-[GMCBPN]|E-|I-|U-)\d{2}(?:\.(?:Windows|macOS|Linux))?$")
+bad = []
+for sheet, first in DATA_SHEETS.items():
+    ws = wb[sheet]
+    for r_ in range(first, extents[sheet][1] + 1):
+        v = ws.cell(row=r_, column=1).value
+        if not isinstance(v, str) or not CANON.match(v):
+            bad.append(f"{sheet}!A{r_}={v!r}")
+print(f"  {sum(extents[s][2] for s in DATA_SHEETS)} IDs checked; {len(bad)} malformed")
+for b in bad:
+    fail.append(f"malformed ID {b} - did renumber.py run, and does the placeholder match?")
+
 # ---- 6. source <-> workbook ID parity --------------------------------------
 print("\nSOURCE <-> WORKBOOK ID PARITY")
 import content_class, content_policy, content_xp, content_use

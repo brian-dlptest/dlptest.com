@@ -50,17 +50,17 @@ CLASSIFICATION = [
  "(a) matches at 65 only. (c) and (d) match at 85. Low confidence returns the fewest false negatives and the most false positives; high confidence the reverse. The standard technique is to pair high confidence with low instance counts (5-10) and low confidence with high counts (20+) - confirm you can set confidence and count INDEPENDENTLY on one rule, because pairing them is the whole technique.",
  "Confidence scoring", "Table stakes"),
 
-("C-A08", UC_A, "Combined conditions and custom logic",
- "Boolean rule composition - '(1 AND 2) OR (3 AND 4) OR 5' - rather than one classifier per rule.",
- "Build a rule that fires on (SSN AND 'confidential') OR (credit card AND 'cardholder') and test each branch independently.",
- "Each branch fires on its own. The incident names which branch matched.",
- "Rule logic", "Advanced"),
-
-("C-A09", UC_A, "Exact Data Match (EDM)",
+("C-A08", UC_A, "Exact Data Match (EDM)",
  "Matching your actual customer records, not anything SSN-shaped. The highest-precision technique available.",
  "Upload a hashed index of 10,000 real (or realistic) records. Send a file with 50 records that ARE in the index and 50 that are not.",
  "Only the indexed 50 match. Measure index refresh time and the max supported index size.",
  "EDM", "Differentiator"),
+
+("C-A09", UC_A, "AI Classification of a business-specific document type",
+ "Whether you can build a classifier for a document type only your organisation has, described in plain language rather than expressed as a pattern. This is becoming the primary classification method, and the authoring loop is what decides whether it is usable in practice.",
+ "Pick a document type no out-of-box classifier will know - your MSA template, your incident post-mortems, your pricing approvals. Describe it in natural language, add a structural constraint if the tool supports one (an extension or path that must also match), and add an exclusion for templates and test files. Run it against ten real examples and ten near-misses: documents from the same team that are NOT that type. Time the whole loop, from request to a label you would deploy.",
+ "At least nine of the ten real examples labelled and no more than one near-miss, with the loop taking minutes rather than a support ticket. Confirm you can test against sample files BEFORE the label goes live - a classifier you can only evaluate in production is not tunable. If the tool supports sub-labels, confirm a child only matches when the parent does too.",
+ "AI Classification", "Advanced"),
 
 ("C-A10", UC_A, "OCR on images",
  "Screenshot exfiltration - the single most common way PII leaves without tripping a text classifier.",
@@ -75,31 +75,25 @@ CLASSIFICATION = [
  "Container inspection", "Table stakes"),
 
 # ---------------------------------------------------------------- UC_B
-("C-B01", UC_B, "Source code detection by language",
- "Recognising code as code - not by file extension, and not by a keyword list that fires on any technical document.",
- "Paste unfenced Python, Go, Rust, Terraform, and SQL into a monitored channel. Also send a README and an architecture doc as negative controls.",
- "Code matches; prose about code does not. Note which languages are covered out of the box.",
- "Trainable classifier / AI", "Advanced"),
-
-("C-B02", UC_B, "Secrets and credentials in code",
+("C-B01", UC_B, "Secrets and credentials in code",
  "API keys, tokens, private keys, connection strings.",
  "Use the credential patterns in the dlptest.com/regex/ library (AWS keys, GitHub tokens, private key headers, JWTs, connection strings) to build a test file.",
  "Each secret type is detected. Ideally the tool distinguishes a live-looking secret from an obvious placeholder.",
  "Pattern match", "Table stakes"),
 
-("C-B03", UC_B, "Origin-based sensitivity (data lineage)",
+("C-B02", UC_B, "Origin-based sensitivity (data lineage)",
  "THE differentiating test for this use case. The same token is low risk from a public repo and high risk from an internal one.",
  "Clone a file from an internal Git repo and a near-identical file from a public GitHub repo. Move both to the same destination.",
  "The internal-origin file is classified higher, or is the only one blocked. If both are treated identically, the tool has no lineage.",
  "Data lineage", "Differentiator"),
 
-("C-B04", UC_B, "Lineage survival through obfuscation",
+("C-B03", UC_B, "Lineage survival through obfuscation",
  "Whether origin-based classification survives the things people actually do to files.",
  "Take a file from the internal repo, then: rename it, change its extension, zip it, copy its contents into a new blank file, and paste a section into a chat app. Attempt egress after each step.",
  "Classification persists through rename, re-container, and copy/paste. Note the first step where the trace is lost.",
  "Data lineage", "Differentiator"),
 
-("C-B05", UC_B, "Project codenames and trade-secret terms",
+("C-B04", UC_B, "Project codenames and trade-secret terms",
  "Business-specific vocabulary that no out-of-box classifier knows.",
  "Build a dictionary of 20 internal project names and test how long it takes to create, deploy, and tune it. Include one term with an everyday meaning (e.g. 'Mercury') to test false positives.",
  "Dictionary deploys in minutes, supports weighting, and the ambiguous term can be disambiguated by context rather than removed.",
@@ -110,13 +104,13 @@ CLASSIFICATION = [
  "Recognising finance documents by structure and language, not just by folder.",
  "Send a draft earnings release, a board deck, a cap table, and a three-statement model. Include a routine expense report as a negative control.",
  "Sensitive finance material is detected; routine finance files are not. If everything in Finance matches, precision is unusable.",
- "Trainable classifier / AI", "Advanced"),
+ "AI Classification", "Advanced"),
 
 ("C-C02", UC_C, "Time-boxed sensitivity: pre- vs post-publication",
  "The core MNPI problem, from two directions. A draft 10-Q is material nonpublic information before filing and ordinary public data after, so sensitivity has to change with the calendar - and the tool has to be able to tell a forecast from a published result in the first place.",
  "Two parts. (1) Apply a policy with an effective date window, then move the same file inside the window and again after it closes. (2) Send a file of projected FY27 revenue and a file of already-published FY25 results, formatted alike and with similar numbers.",
  "(1) Enforcement changes with the date without the policy being rewritten - most tools cannot do this, so record the workaround. (2) The forward-looking file is treated as more sensitive; a keyword-only tool will treat the two identically.",
- "Policy scheduling / Trainable classifier", "Differentiator"),
+ "Policy scheduling / AI Classification", "Differentiator"),
 
 ("C-C03", UC_C, "Insider-list / need-to-know scoping",
  "Restricting deal material to the deal team, including people who legitimately have file access.",

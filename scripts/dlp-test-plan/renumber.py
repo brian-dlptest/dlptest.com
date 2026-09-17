@@ -61,9 +61,13 @@ def main():
         sys.exit(1)
 
     changed = {k: v for k, v in m.items() if k != v}
+    # Substitute on the map's own keys rather than on ID_RE, so a placeholder that does
+    # not match the canonical shape (a new row seeded as C-XX00) still gets rewritten.
+    # Longest first, so C-A1 never eats the front of C-A10.
+    key_re = re.compile("|".join(re.escape(k) for k in sorted(m, key=len, reverse=True)))
     for f in FILES:
         p = pathlib.Path(HERE) / f
-        p.write_text(ID_RE.sub(lambda mo: m.get(mo.group(0), mo.group(0)), p.read_text()))
+        p.write_text(key_re.sub(lambda mo: m[mo.group(0)], p.read_text()))
     # Renumbered IDs are the same length, so a rewritten module keeps its byte size.
     # With an mtime that can land in the same second, Python's __pycache__ validity
     # check passes and the next process compiles from a STALE .pyc. Drop the cache.
