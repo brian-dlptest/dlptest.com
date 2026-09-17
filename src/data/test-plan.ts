@@ -10,13 +10,13 @@ export const TEST_PLAN_KEY = "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx";
 // Bumped whenever a new build is uploaded over the same R2 key. The downloads
 // route sends `cache-control: immutable, max-age=31536000`, so without a
 // changing query string browsers keep serving the copy they already have.
-export const TEST_PLAN_VERSION = 3;
+export const TEST_PLAN_VERSION = 4;
 
 export const TEST_PLAN_HREF =
   `/downloads/?file=${TEST_PLAN_KEY}&v=${TEST_PLAN_VERSION}`;
 
 export const TEST_PLAN_UPDATED = "2026-09-17";
-export const TEST_PLAN_ROWS = 179;
+export const TEST_PLAN_ROWS = 167;
 
 export type TestPlanSheet = {
   name: string;
@@ -28,7 +28,7 @@ export type TestPlanSheet = {
 export const TEST_PLAN_SHEETS: readonly TestPlanSheet[] = [
   {
     name: "1. Classification",
-    rows: 23,
+    rows: 21,
     question: "Can the tool find the data?",
     detail:
       "Four use cases: regulatory PII, PHI and card data; intellectual property and source code; financial reporting and material nonpublic information; and bulk exports out of business applications. Covers match counting, confidence levels, exact data match, OCR and nested archives.",
@@ -42,21 +42,21 @@ export const TEST_PLAN_SHEETS: readonly TestPlanSheet[] = [
   },
   {
     name: "3. Enforcement",
-    rows: 9,
+    rows: 6,
     question: "What can it enforce in real time?",
     detail:
       "Why some classifications can block inline and others can only alert afterwards. This is the sheet that explains how a team can block card numbers going to a GenAI tool and still be unable to block AI-classified data going to the same place.",
   },
   {
     name: "4. Investigations",
-    rows: 30,
+    rows: 27,
     question: "What happens after an alert?",
     detail:
       "Evidence and context, timeline and lineage, pivoting from a user or a file or a destination, insider-risk behaviour, case workflow, privacy controls and response actions.",
   },
   {
     name: "5. Usability",
-    rows: 29,
+    rows: 25,
     question: "What does it cost to run?",
     detail:
       "AI-assisted classification, policy authoring and triage, rollout and change control, agent footprint and user-visible latency, and the end-user experience that decides whether people route around the agent.",

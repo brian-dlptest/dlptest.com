@@ -30,6 +30,10 @@ from content_use import USABILITY
 
 OUT = os.path.join(HERE, "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx")
 
+# Shown on the Read Me sheet. Keep in step with TEST_PLAN_VERSION in src/data/test-plan.ts,
+# which cache-busts the download URL.
+VERSION = 4
+
 FONT = "Arial"
 NAVY = "0B1220"
 BLUE = "1F6FEB"
@@ -145,16 +149,16 @@ ws["B3"].font = Font(name=FONT, size=11, color=GREY)
 ws.merge_cells("B3:C3")
 ws.row_dimensions[3].height = 18
 
-ws["B4"] = f"dlptest.com  ·  version 1.0  ·  {datetime.date.today().isoformat()}"
+ws["B4"] = f"dlptest.com  ·  version {VERSION}  ·  {datetime.date.today().isoformat()}"
 ws["B4"].font = MUTED
 ws.merge_cells("B4:C4")
 
 r = 6
 ws.cell(row=r, column=2, value="HOW TO USE THIS WORKBOOK").font = SUB
 r += 1
-rm(r, "Fill in the white cells", "Every sheet has a Result (or support) column and a Notes column. Everything else is the plan. Use one copy of the workbook per product you are evaluating, or per environment you are validating."); r += 1
+rm(r, "Fill in the white cells", "Every sheet has a Result column and a Notes column - Pass / Partial / Fail / N/A, from a dropdown. Everything else is the plan. Use one copy of the workbook per product you are evaluating, or per environment you are validating."); r += 1
 rm(r, "Work the sheets in order", "Classification first: if the tool cannot find the data, no policy on the Policy sheet can act on it. Then Policy, then Enforcement, then Investigations, then Usability."); r += 1
-rm(r, "Test the negative cases", "Several rows carry a deliberate negative control - the Luhn-invalid numbers in C-A02, the architecture doc in C-B01, the routine expense report in C-C01, the 20-record file in C-D01. A tool that matches everything is not a passing tool, and precision only shows up if you test for it."); r += 1
+rm(r, "Test the negative cases", "Several rows carry a deliberate negative control - Luhn-invalid card numbers that must not match, a routine expense report alongside the board material, a 20-record file alongside the bulk export. A tool that matches everything is not a passing tool, and precision only shows up if you test for it."); r += 1
 rm(r, "Record the gaps, do not hide them", "The retyping row on the Policy sheet exists so the residual risk is written down rather than assumed away - nothing catches a person reading data off the screen and typing it somewhere else. The same goes for every cell you mark Fail: that is a finding, not a blank."); r += 1
 
 r += 1
@@ -162,10 +166,10 @@ ws.cell(row=r, column=2, value="SHEETS").font = SUB
 r += 1
 for label, text in [
     ("1. Classification", f"Can the tool find the data? {len(CLASSIFICATION)} tests across four use cases: regulatory PII/PHI/PCI, intellectual property and source code, financial reporting and MNPI, and bulk exports from business applications."),
-    ("2. Policy", f"Can the tool act on it? {len(POLICY)} egress channels scored for Monitor / Warn / Block on Windows, macOS, and Linux, with the classification depth each channel can realistically enforce."),
-    ("3. Enforcement", "Why some classifications cannot be enforced inline. Where each detection method runs, its latency, and whether it can block in real time or only alert afterwards."),
+    ("2. Policy", f"Can the tool act on it? {len(POLICY)} rows - one per egress channel per operating system, scored for Monitor / Warn together and for Block separately, because seeing a channel is the easy half."),
+    ("3. Enforcement", "Why some classifications cannot be enforced inline. Each row says what Pass means for that detection method - usually that the product blocks in the moment rather than alerting once the data has gone."),
     ("4. Investigations", "What happens after an alert. Evidence, lineage, pivoting, insider-risk context, case workflow, privacy controls, and response."),
-    ("5. Usability", "What it costs to run. AI-assisted classification, policy creation, tuning and triage, rollout and change control, agent footprint, and the outcome metrics that predict whether the programme survives."),
+    ("5. Usability", "What it costs to run. AI-assisted classification, policy authoring and triage, rollout and change control, agent footprint and user-visible latency, and the end-user experience that decides whether people route around the agent."),
     ("Scoring Summary", "Rolls up every Result column. Formulas, not typed values - it updates as you fill the sheets in."),
 ]:
     rm(r, label, text); r += 1
@@ -191,19 +195,19 @@ r += 1
 GLOSSARY = [
  (None, "Detection and classification"),
  ("Classifier", "Any named detector the tool matches content against - a regular expression, a keyword dictionary, a checksum-validated identifier, or a trained model. Every vendor has its own word for this. Where this workbook means the regular-expression kind specifically, it says pattern."),
- ("EDM", "Exact data match - matching against a hashed index of your own records, so only real customers match rather than anything SSN-shaped. See C-A09."),
+ ("EDM", "Exact data match - matching against a hashed index of your own records, so only real customers match rather than anything SSN-shaped. See C-A08."),
  ("Confidence level", "How much supporting evidence sits near an identifier. Usually exposed as three named levels, sometimes with numbers attached (65 / 75 / 85 is one common scheme). It is NOT a percentage of the pattern matched. See C-A07."),
  ("Proximity", "The character distance between a primary element and its supporting keyword - the mechanism underneath confidence. See C-A07."),
  ("Weighted dictionary", "A keyword list where phrases carry different weights toward a match threshold, so strong evidence counts for more than weak - the second way platforms express the idea in C-A07."),
- ("Data lineage", "Recording where data came from and following it through copies, renames and pastes, so sensitivity is inferred from ORIGIN rather than content. See C-B03 and E-07."),
+ ("Data lineage", "Recording where data came from and following it through copies, renames and pastes, so sensitivity is inferred from ORIGIN rather than content. See C-B02 and E-04."),
  ("Trainable classifier", "A detector trained on example documents rather than written as a pattern."),
- ("OCR", "Optical character recognition - reading text out of images, so screenshots can be classified. See C-A10."),
+ ("OCR", "Optical character recognition - reading text out of images, so screenshots can be classified. See C-A09."),
  (None, "Investigation and risk"),
  ("UEBA", "User and entity behaviour analytics - baselining normal activity per user and flagging deviation from it."),
  ("UAM", "User activity monitoring - recording what users do independently of any policy match. See I-14."),
  ("IRM", "Insider risk management - risk arising from people inside the organisation, whether malicious, negligent, or compromised."),
- ("SIEM / SOAR", "Log aggregation and response-automation platforms. See I-24."),
- ("MCP", "Model Context Protocol - an open standard that lets AI clients call external tools. Some DLP platforms expose one as a natural-language admin interface. See U-12."),
+ ("SIEM / SOAR", "Log aggregation and response-automation platforms. See I-21."),
+ ("MCP", "Model Context Protocol - an open standard that lets AI clients call external tools. Some DLP platforms expose one as a natural-language admin interface. See U-10."),
  (None, "Identifiers used in the test data"),
  ("PII / PHI / PCI", "Personally identifiable information / protected health information / payment card data."),
  ("MNPI", "Material nonpublic information - company information not yet public that would move the share price. Use case C on the Classification sheet."),
@@ -240,7 +244,7 @@ for label, text in [
     ("dlptest.com/generate/", "Generates synthetic datasets on demand, including Luhn-valid card numbers, NPI and DEA numbers, UK NI and NHS numbers, Canadian SIN, EU VAT and IBAN, passport and driver's licence numbers."),
     ("dlptest.com/http-post/ and /https-post/", "Live POST endpoints for testing cleartext and TLS web upload detection."),
     ("dlptest.com/ftp-test/", "Public FTP and S3 test targets for file-transfer channel tests."),
-    ("dlptest.com/regex/", "A library of 103 DLP-relevant regex patterns with worked examples - useful for building the credential and secret test files in C-B02."),
+    ("dlptest.com/regex/", "A library of 103 DLP-relevant regex patterns with worked examples - useful for building the credential and secret test files in C-B01."),
     ("Important", "All data on dlptest.com is synthetic. Never use real customer, employee, or patient data to test a DLP tool."),
 ]:
     rm(r, label, text); r += 1
