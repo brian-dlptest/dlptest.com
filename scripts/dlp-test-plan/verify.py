@@ -32,7 +32,9 @@ for k, v in extents.items():
     print(f"  {k:<22} {v}")
 
 # ---- 1. formulas: safe functions, resolvable refs, correct extents ----------
-ALLOWED = {"COUNTIF", "COUNTIFS", "SUM", "IFERROR"}
+ALLOWED = {"COUNTIF", "COUNTIFS", "SUM", "IFERROR", "IF", "AND", "TEXTJOIN"}
+# Written bare, TEXTJOIN evaluates to #NAME? - Excel stores post-2007 functions prefixed.
+BARE_TEXTJOIN = re.compile(r"(?<!_xlfn\.)TEXTJOIN\(")
 FUNC_RE = re.compile(r"([A-Z_][A-Z0-9_.]*)\s*\(")
 REF_RE = re.compile(r"(?:'([^']+)'|([A-Za-z0-9_.]+))!\$?([A-Z]+)\$?(\d+):\$?([A-Z]+)\$?(\d+)")
 summary = wb["Scoring Summary"]
@@ -62,6 +64,8 @@ for coord, f in formulas:
     for fn in FUNC_RE.findall(f):
         if fn not in ALLOWED:
             fail.append(f"{coord}: unsupported function {fn}")
+    if BARE_TEXTJOIN.search(f):
+        fail.append(f"{coord}: TEXTJOIN without the _xlfn. prefix will show #NAME?")
     for m in REF_RE.finditer(f):
         sheet = m.group(1) or m.group(2)
         c1, r1, c2, r2 = m.group(3), int(m.group(4)), m.group(5), int(m.group(6))
@@ -168,6 +172,94 @@ for coord, f in formulas:
     if got < 0: fail.append(f"{coord}: negative count")
 print(f"  evaluated {checks} count formulas against seeded data without error")
 
+
+# ---- 3b. table stakes failures list: helpers -> TEXTJOIN -> reconciliation ---
+print("\nTABLE STAKES FAILURES LIST")
+#            sheet                 helper  tier  result     (Policy: Block)
+HELPER = {"1. Classification": ("K", "H", "I"), "2. Policy": ("J", "H", "G"),
+          "3. Enforcement": ("G", "E", "D"), "4. Investigations": ("I", "F", "G"),
+          "5. Usability": ("I", "F", "G")}
+HELPER_RE = re.compile(r'^=IF\(AND\(([A-Z]+)(\d+)="Table stakes",([A-Z]+)(\d+)="Fail"\),A(\d+),""\)$')
+LIST_RE = re.compile(r'^=IF\(D(\d+)=0,"None recorded",_xlfn\.TEXTJOIN\(", ",TRUE,'
+                     r"'([^']+)'!\$([A-Z]+)\$(\d+):\$([A-Z]+)\$(\d+)\)\)$")
+
+# every data row carries its own helper, pointing only at its own row
+for sheet, (hcol, tcol, rcol) in HELPER.items():
+    ws = wb[sheet]; first, last, _ = extents[sheet]
+    if not ws.column_dimensions[hcol].hidden:
+        fail.append(f"{sheet}: helper column {hcol} is not hidden")
+    bad = []
+    for r in range(first, last + 1):
+        m = HELPER_RE.match(str(ws[f"{hcol}{r}"].value))
+        if not m or (m.group(1), m.group(3)) != (tcol, rcol) or {m.group(2), m.group(4), m.group(5)} != {str(r)}:
+            bad.append(r)
+    print(f"  helper  {sheet:<20} {hcol}  tier={tcol} result={rcol}  {extents[sheet][2]} rows  "
+          f"{'OK' if not bad else 'BAD ' + str(bad[:4])}")
+    if bad:
+        fail.append(f"{sheet}!{hcol}: helper formula wrong or not self-referencing at rows {bad[:4]}")
+
+# find the list rows and the tier rollup's Table stakes row on the Summary
+list_rows = {}
+for row in summary.iter_rows(min_col=5, max_col=5):
+    c = row[0]
+    m = LIST_RE.match(str(c.value)) if isinstance(c.value, str) else None
+    if m:
+        list_rows[m.group(2)] = (c.row, m)
+ts_tier_row = next(r for r in range(1, summary.max_row + 1)
+                   if summary.cell(row=r, column=2).value == "Table stakes")
+if set(list_rows) != set(HELPER):
+    fail.append(f"failures list covers {sorted(list_rows)}, expected all five sheets")
+
+# seed deliberate table stakes Fails on top of the generic seed, then simulate
+for sheet, (hcol, tcol, rcol) in HELPER.items():
+    ws = wb[sheet]; first, last, _ = extents[sheet]
+    ts = [r for r in range(first, last + 1) if ws[f"{tcol}{r}"].value == "Table stakes"]
+    for r in ts[:2]:
+        ws[f"{rcol}{r}"] = "Fail"
+    for r in ts[2:3]:
+        ws[f"{rcol}{r}"] = "Pass"
+
+listed_total = 0
+for sheet, (hcol, tcol, rcol) in HELPER.items():
+    ws = wb[sheet]; first, last, _ = extents[sheet]
+    row, m = list_rows[sheet]
+    d_row, ref_sheet = int(m.group(1)), m.group(2)
+    c1, r1, c2, r2 = m.group(3), int(m.group(4)), m.group(5), int(m.group(6))
+    if d_row != row:
+        fail.append(f"Summary!E{row}: list reads D{d_row}, not its own row's count")
+    if (ref_sheet, c1, c2, r1, r2) != (sheet, hcol, hcol, first, last):
+        fail.append(f"Summary!E{row}: TEXTJOIN range {ref_sheet}!{c1}{r1}:{c2}{r2} is not the helper column")
+    # what Excel would compute
+    helper_vals = [ws[f"A{r}"].value if (ws[f"{tcol}{r}"].value == "Table stakes"
+                   and ws[f"{rcol}{r}"].value == "Fail") else "" for r in range(first, last + 1)]
+    joined = ", ".join(v for v in helper_vals if v)
+    expected = [ws[f"A{r}"].value for r in range(first, last + 1)
+                if ws[f"{tcol}{r}"].value == "Table stakes" and ws[f"{rcol}{r}"].value == "Fail"]
+    d_count = evaluate(summary[f"D{row}"].value)
+    shown = "None recorded" if d_count == 0 else joined
+    ok = joined == ", ".join(expected) and len(expected) == d_count
+    listed_total += len(expected)
+    print(f"  list    {sheet:<20} Fails={d_count:<2} shows: {shown[:60]}{'...' if len(shown) > 60 else ''}  {'OK' if ok else 'MISMATCH'}")
+    if not ok:
+        fail.append(f"{sheet}: list {joined!r} / count {d_count} disagree with expected {expected}")
+
+tier_fail = evaluate(summary[f"E{ts_tier_row}"].value)
+recon = tier_fail == listed_total
+print(f"  reconcile: tier rollup Table stakes Fail = {tier_fail}, IDs listed = {listed_total}  "
+      f"{'OK' if recon else 'MISMATCH'}")
+if not recon:
+    fail.append(f"tier rollup says {tier_fail} table stakes Fails but the list shows {listed_total}")
+
+# the floor is enforced visually, and the footnote no longer claims three columns
+floor_rules = [rule for rng in summary.conditional_formatting for rule in rng.rules
+               if str(rng.sqref) == f"H{ts_tier_row}" and rule.formula and "<0.7" in rule.formula[0]]
+print(f"  floor highlight on H{ts_tier_row} (<70%): {'OK' if floor_rules else 'MISSING'}")
+if not floor_rules:
+    fail.append(f"no <70% conditional format on the Table stakes coverage cell H{ts_tier_row}")
+note = " ".join(str(summary.cell(row=r, column=2).value or "") for r in range(1, summary.max_row + 1))
+if "of the three" in note:
+    fail.append("Scoring Summary footnote still says 'of the three' - Policy has two result columns")
+
 # ---- 4. dropdowns and conditional formatting -------------------------------
 print("\nVALIDATION / CONDITIONAL FORMATTING")
 VOCAB = set()
@@ -246,6 +338,30 @@ for ch in charts:
     if ch.grouping != "stacked": fail.append("chart is not stacked")
     if len(ch.series) != 5: fail.append(f"chart has {len(ch.series)} series, expected 5")
 if not charts: fail.append("no chart on Scoring Summary")
+
+
+# ---- 8. the page advertises what the workbook actually is ------------------
+print("\nPAGE PARITY  (src/data/test-plan.ts)")
+here = os.path.dirname(os.path.abspath(__file__))
+ts_src = open(os.path.join(here, "..", "..", "src", "data", "test-plan.ts")).read()
+build_src = open(os.path.join(here, "build.py")).read()
+page_ver = int(re.search(r"TEST_PLAN_VERSION = (\d+);", ts_src).group(1))
+build_ver = int(re.search(r"^VERSION = (\d+)$", build_src, re.M).group(1))
+readme_ver = str(wb["Read Me"]["B4"].value)
+print(f"  version  page={page_ver}  build.py={build_ver}  Read Me={readme_ver!r}")
+if not (page_ver == build_ver and f"version {build_ver}" in readme_ver):
+    fail.append(f"version drift: page {page_ver}, build.py {build_ver}, Read Me {readme_ver!r}")
+page_rows = {n: int(c) for n, c in re.findall(r'name: "([^"]+)",\s*rows: (\d+),', ts_src)}
+page_total = int(re.search(r"TEST_PLAN_ROWS = (\d+);", ts_src).group(1))
+for sheet, want in SRC.items():
+    got = page_rows.get(sheet)
+    print(f"  {sheet:<20} page={got}  workbook={len(want)}  {'OK' if got == len(want) else 'MISMATCH'}")
+    if got != len(want):
+        fail.append(f"page says {sheet} has {got} rows, workbook has {len(want)}")
+wb_total = sum(len(v) for v in SRC.values())
+print(f"  total                page={page_total}  workbook={wb_total}  {'OK' if page_total == wb_total else 'MISMATCH'}")
+if page_total != wb_total:
+    fail.append(f"page says {page_total} test cases, workbook has {wb_total}")
 
 print("\n" + ("FAILURES:\n  " + "\n  ".join(fail) if fail else "ALL CHECKS PASSED"))
 sys.exit(1 if fail else 0)

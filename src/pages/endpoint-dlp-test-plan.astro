@@ -6,6 +6,7 @@ import {
   TEST_PLAN_ROWS,
   TEST_PLAN_SHEETS,
   TEST_PLAN_UPDATED,
+  TEST_PLAN_VERSION,
 } from "@/data/test-plan";
 export const prerender = true;
 
@@ -38,7 +39,7 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
 
     <p class="download-row">
       <a class="button" href={TEST_PLAN_HREF} download>Download the test plan (.xlsx)</a>
-      <span class="muted">Last updated {updated}</span>
+      <span class="muted">Version {TEST_PLAN_VERSION} · Last updated {updated}</span>
     </p>
 
     <h2>What is in it</h2>
@@ -60,7 +61,8 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
       A <strong>Read Me</strong> sheet explains how to fill the workbook in and
       includes a glossary, and a <strong>Scoring Summary</strong> rolls
       everything up with formulas — by sheet, by operating system, and by
-      maturity tier — so the totals update as you work.
+      maturity tier — and lists every table stakes row that failed, so the
+      totals update as you work.
     </p>
 
     <h2>How the scoring works</h2>
@@ -88,7 +90,7 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
 
     <table class="legend-table">
       <tbody>
-        <tr><th>Table stakes</th><td>Expect every serious product to do this. A failure here is disqualifying.</td></tr>
+        <tr><th>Table stakes</th><td>The basics. Coverage below 70% means a product cannot cover them, whatever its differentiator score. Individual failures belong in your findings rather than averaged into a percentage.</td></tr>
         <tr><th>Advanced</th><td>Where mature products separate from adequate ones.</td></tr>
         <tr><th>Differentiator</th><td>Few products do this well. A low score is information, not a verdict.</td></tr>
       </tbody>
