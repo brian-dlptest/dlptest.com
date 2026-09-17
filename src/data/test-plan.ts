@@ -10,13 +10,13 @@ export const TEST_PLAN_KEY = "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx";
 // Bumped whenever a new build is uploaded over the same R2 key. The downloads
 // route sends `cache-control: immutable, max-age=31536000`, so without a
 // changing query string browsers keep serving the copy they already have.
-export const TEST_PLAN_VERSION = 4;
+export const TEST_PLAN_VERSION = 5;
 
 export const TEST_PLAN_HREF =
   `/downloads/?file=${TEST_PLAN_KEY}&v=${TEST_PLAN_VERSION}`;
 
 export const TEST_PLAN_UPDATED = "2026-09-17";
-export const TEST_PLAN_ROWS = 167;
+export const TEST_PLAN_ROWS = 168;
 
 export type TestPlanSheet = {
   name: string;
@@ -28,7 +28,7 @@ export type TestPlanSheet = {
 export const TEST_PLAN_SHEETS: readonly TestPlanSheet[] = [
   {
     name: "1. Classification",
-    rows: 21,
+    rows: 22,
     question: "Can the tool find the data?",
     detail:
       "Four use cases: regulatory PII, PHI and card data; intellectual property and source code; financial reporting and material nonpublic information; and bulk exports out of business applications. Covers match counting, confidence levels, exact data match, OCR and nested archives.",

@@ -56,13 +56,19 @@ CLASSIFICATION = [
  "Only the indexed 50 match. Measure index refresh time and the max supported index size.",
  "EDM", "Differentiator"),
 
-("C-A09", UC_A, "OCR on images",
+("C-A09", UC_A, "AI Classification of a business-specific document type",
+ "Whether you can build a classifier for a document type only your organisation has, described in plain language rather than expressed as a pattern. This is becoming the primary classification method, and the authoring loop is what decides whether it is usable in practice.",
+ "Pick a document type no out-of-box classifier will know - your MSA template, your incident post-mortems, your pricing approvals. Describe it in natural language, add a structural constraint if the tool supports one (an extension or path that must also match), and add an exclusion for templates and test files. Run it against ten real examples and ten near-misses: documents from the same team that are NOT that type. Time the whole loop, from request to a label you would deploy.",
+ "At least nine of the ten real examples labelled and no more than one near-miss, with the loop taking minutes rather than a support ticket. Confirm you can test against sample files BEFORE the label goes live - a classifier you can only evaluate in production is not tunable. If the tool supports sub-labels, confirm a child only matches when the parent does too.",
+ "AI Classification", "Advanced"),
+
+("C-A10", UC_A, "OCR on images",
  "Screenshot exfiltration - the single most common way PII leaves without tripping a text classifier.",
  "Screenshot a table of SSNs and save as .png. Also test a photo-quality .jpg and a rotated image.",
  "OCR extracts the identifiers and the normal pattern rules apply. Note the file-size and resolution limits.",
  "OCR + pattern", "Advanced"),
 
-("C-A10", UC_A, "Archives and nested files",
+("C-A11", UC_A, "Archives and nested files",
  "Depth of container inspection.",
  "Send a .zip containing a .docx with SSNs. Then a .zip inside a .zip. Then a password-protected .zip. Then a 7z and a .tar.gz.",
  "Nested content is inspected to at least 2-3 levels. Encrypted archives are detected as encrypted and handled by policy (block or flag), not silently passed.",

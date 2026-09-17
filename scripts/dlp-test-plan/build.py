@@ -32,7 +32,7 @@ OUT = os.path.join(HERE, "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx")
 
 # Shown on the Read Me sheet. Keep in step with TEST_PLAN_VERSION in src/data/test-plan.ts,
 # which cache-busts the download URL.
-VERSION = 4
+VERSION = 5
 
 FONT = "Arial"
 NAVY = "0B1220"
@@ -202,7 +202,7 @@ GLOSSARY = [
  ("Data lineage", "Recording where data came from and following it through copies, renames and pastes, so sensitivity is inferred from ORIGIN rather than content. See C-B02 and E-04."),
  ("AI Classification", "An LLM labelling what a file IS - a contract, source code, a billing record - from a natural-language description rather than a pattern. Usually combined with structural constraints (an extension or path that must also match) and exclusion rules, and tested against sample files before deployment. The term DSPM vendors use, now arriving at the endpoint. See E-02."),
  ("Trainable classifier", "The older supervised form of the same idea - a detector trained on example documents rather than described in a prompt. Being displaced by AI Classification."),
- ("OCR", "Optical character recognition - reading text out of images, so screenshots can be classified. See C-A09."),
+ ("OCR", "Optical character recognition - reading text out of images, so screenshots can be classified. See C-A10."),
  (None, "Investigation and risk"),
  ("UEBA", "User and entity behaviour analytics - baselining normal activity per user and flagging deviation from it."),
  ("UAM", "User activity monitoring - recording what users do independently of any policy match. See I-14."),
