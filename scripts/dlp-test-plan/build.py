@@ -155,7 +155,7 @@ r += 1
 rm(r, "Fill in the white cells", "Every sheet has a Result (or support) column and a Notes column. Everything else is the plan. Use one copy of the workbook per product you are evaluating, or per environment you are validating."); r += 1
 rm(r, "Work the sheets in order", "Classification first: if the tool cannot find the data, no policy on the Policy sheet can act on it. Then Policy, then Enforcement, then Investigations, then Usability."); r += 1
 rm(r, "Test the negative cases", "Several rows carry a deliberate negative control - the Luhn-invalid numbers in C-A02, the architecture doc in C-B01, the routine expense report in C-C01, the 20-record file in C-D01. A tool that matches everything is not a passing tool, and precision only shows up if you test for it."); r += 1
-rm(r, "Record the gaps, do not hide them", "Rows such as P-P10 (retyping data by hand) exist so the residual risk is written down rather than assumed away. The same goes for every cell you mark Fail - that is a finding, not a blank."); r += 1
+rm(r, "Record the gaps, do not hide them", "The retyping row on the Policy sheet exists so the residual risk is written down rather than assumed away - nothing catches a person reading data off the screen and typing it somewhere else. The same goes for every cell you mark Fail: that is a finding, not a blank."); r += 1
 
 r += 1
 ws.cell(row=r, column=2, value="SHEETS").font = SUB
@@ -284,7 +284,7 @@ CLASS_LAST = last
 
 # ══════════════════════════════════════════════════════ 2. Policy
 ws = wb.create_sheet("2. Policy")
-W = [17, 22, 38, 11, 78, 10, 10, 10, 15, 26]
+W = [17, 22, 40, 11, 82, 14, 11, 15, 26]
 set_widths(ws, W)
 
 ws.merge_cells("A1:A2"); ws["A1"] = "ID"
@@ -292,15 +292,15 @@ ws.merge_cells("B1:B2"); ws["B1"] = "Channel Category"
 ws.merge_cells("C1:C2"); ws["C1"] = "Channel / Vector"
 ws.merge_cells("D1:D2"); ws["D1"] = "OS"
 ws.merge_cells("E1:E2"); ws["E1"] = "What to Test"
-ws.merge_cells("F1:H1"); ws["F1"] = "Result"
-ws.merge_cells("I1:I2"); ws["I1"] = "Maturity Tier"
-ws.merge_cells("J1:J2"); ws["J1"] = "Notes"
-for col, val in zip("FGH", ["Monitor", "Warn", "Block"]):
-    ws[f"{col}2"] = val
+ws.merge_cells("F1:G1"); ws["F1"] = "Result"
+ws.merge_cells("H1:H2"); ws["H1"] = "Maturity Tier"
+ws.merge_cells("I1:I2"); ws["I1"] = "Notes"
+ws["F2"] = "Monitor / Warn"
+ws["G2"] = "Block"
 
-style_header(ws, 1, 10, height=26)
-style_header(ws, 2, 10, height=30)
-for col in "FGH":
+style_header(ws, 1, 9, height=26)
+style_header(ws, 2, 9, height=30)
+for col in "FG":
     for r_ in (1, 2):
         ws[f"{col}{r_}"].fill = PatternFill("solid", fgColor=BLUE)
         ws[f"{col}{r_}"].alignment = CTR
@@ -311,9 +311,9 @@ OS_FILL = {"Windows": PatternFill("solid", fgColor="E7F1FF"),
            "Linux":   PatternFill("solid", fgColor="FFF0E6")}
 
 for i, (pid, cat, chan, os_name, test, tier) in enumerate(POLICY, start=3):
-    for c, v in ((1, pid), (2, cat), (3, chan), (4, os_name), (5, test), (9, tier)):
+    for c, v in ((1, pid), (2, cat), (3, chan), (4, os_name), (5, test), (8, tier)):
         ws.cell(row=i, column=c, value=v)
-    for c in range(1, 11):
+    for c in range(1, 10):
         cell = ws.cell(row=i, column=c)
         cell.font = B_FONT
         cell.alignment = TOP
@@ -322,16 +322,16 @@ for i, (pid, cat, chan, os_name, test, tier) in enumerate(POLICY, start=3):
     ws.cell(row=i, column=3).font = BB_FONT
     ws.cell(row=i, column=4).fill = OS_FILL[os_name]
     ws.cell(row=i, column=4).alignment = CTR
-    for c in (6, 7, 8, 9):
+    for c in (6, 7, 8):
         ws.cell(row=i, column=c).alignment = CTR
-    ws.cell(row=i, column=9).fill = TIER_FILL.get(tier, PatternFill())
+    ws.cell(row=i, column=8).fill = TIER_FILL.get(tier, PatternFill())
     ws.row_dimensions[i].height = est_height([(test, W[4]), (chan, W[2])])
 
 last = len(POLICY) + 2
-add_dv(ws, RESULT_OPTS, f"F3:H{last}")
-add_cf(ws, f"F3:H{last}", RESULT_CF)
+add_dv(ws, RESULT_OPTS, f"F3:G{last}")
+add_cf(ws, f"F3:G{last}", RESULT_CF)
 ws.freeze_panes = "F3"
-ws.auto_filter.ref = f"A2:J{last}"
+ws.auto_filter.ref = f"A2:I{last}"
 POLICY_LAST = last
 
 # ══════════════════════════════════════════════════════ 3. Enforcement
@@ -474,7 +474,7 @@ def score_row(row, label, counts, total, meaning, bold_label=True):
 
 # ---- ranges on the source sheets -------------------------------------------
 CLS = ("'1. Classification'", f"$I$2:$I${CLASS_LAST}", f"$H$2:$H${CLASS_LAST}", CLASS_LAST - 1)
-POL = ("'2. Policy'", f"$F$3:$H${POLICY_LAST}", f"$I$3:$I${POLICY_LAST}", (POLICY_LAST - 2) * 3)
+POL = ("'2. Policy'", f"$F$3:$G${POLICY_LAST}", f"$H$3:$H${POLICY_LAST}", (POLICY_LAST - 2) * 2)
 ENF = ("'3. Enforcement'", f"$D$3:$D${XP_LAST}", f"$E$3:$E${XP_LAST}", XP_LAST - 2)
 INV = ("'4. Investigations'", f"$G$2:$G${INV_LAST}", f"$F$2:$F${INV_LAST}", INV_LAST - 1)
 USE = ("'5. Usability'", f"$G$2:$G${USE_LAST}", f"$F$2:$F${USE_LAST}", USE_LAST - 1)
@@ -484,7 +484,7 @@ section_header(5, "Section", "What the score means")
 CHART_FIRST = 6
 for i, (label, (sheet, rng, _tier, total), meaning) in enumerate([
     ("1. Classification", CLS, "Can the tool find your data? A low score here caps every other sheet."),
-    ("2. Policy",         POL, f"{POLICY_LAST - 2} channel x OS rows, scored for Monitor, Warn and Block - {(POLICY_LAST - 2) * 3} cells."),
+    ("2. Policy",         POL, f"{POLICY_LAST - 2} channel x OS rows, scored for Monitor / Warn and for Block - {(POLICY_LAST - 2) * 2} cells."),
     ("3. Enforcement",    ENF, "What the tool can enforce in real time, as opposed to detect after the fact."),
     ("4. Investigations", INV, "What it costs you per incident, in analyst hours."),
     ("5. Usability",      USE, "Whether the programme is still running in a year."),
@@ -506,7 +506,7 @@ for os_name in ("Windows", "macOS", "Linux"):
     OS_ROWCOUNT[os_name] = sum(1 for x in POLICY if x[3] == os_name)
 for os_name in ("Windows", "macOS", "Linux"):
     n = OS_ROWCOUNT[os_name]
-    for action, col in (("Monitor", "F"), ("Warn", "G"), ("Block", "H")):
+    for action, col in (("Monitor / Warn", "F"), ("Block", "G")):
         counts = [f'=COUNTIFS(\'2. Policy\'!$D$3:$D${POLICY_LAST},"{os_name}",'
                   f'\'2. Policy\'!${col}$3:${col}${POLICY_LAST},"{v}")' for v in RES]
         score_row(r, f"{os_name} - {action}", counts, n, None)
@@ -525,7 +525,7 @@ r += 1
 section_header(r, "Maturity tier", "Why it matters")
 tier_hdr = r
 r += 1
-TIER_SRC = [(CLS[0], CLS[2], CLS[1]), (POL[0], POL[2], f"$H$3:$H${POLICY_LAST}"),
+TIER_SRC = [(CLS[0], CLS[2], CLS[1]), (POL[0], POL[2], f"$G$3:$G${POLICY_LAST}"),
             (ENF[0], ENF[2], ENF[1]), (INV[0], INV[2], INV[1]), (USE[0], USE[2], USE[1])]
 TIER_TOTALS = {}
 for tier in ("Table stakes", "Advanced", "Differentiator"):

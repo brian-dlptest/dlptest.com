@@ -10,13 +10,13 @@ export const TEST_PLAN_KEY = "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx";
 // Bumped whenever a new build is uploaded over the same R2 key. The downloads
 // route sends `cache-control: immutable, max-age=31536000`, so without a
 // changing query string browsers keep serving the copy they already have.
-export const TEST_PLAN_VERSION = 2;
+export const TEST_PLAN_VERSION = 3;
 
 export const TEST_PLAN_HREF =
   `/downloads/?file=${TEST_PLAN_KEY}&v=${TEST_PLAN_VERSION}`;
 
-export const TEST_PLAN_UPDATED = "2026-09-16";
-export const TEST_PLAN_ROWS = 212;
+export const TEST_PLAN_UPDATED = "2026-09-17";
+export const TEST_PLAN_ROWS = 179;
 
 export type TestPlanSheet = {
   name: string;
@@ -35,10 +35,10 @@ export const TEST_PLAN_SHEETS: readonly TestPlanSheet[] = [
   },
   {
     name: "2. Policy",
-    rows: 121,
+    rows: 88,
     question: "Can it act on what it found?",
     detail:
-      "43 egress channels — GenAI tools, webmail, cloud storage, browsers, USB, printing, AirDrop, RDP and more — scored for Monitor, Warn and Block. One row per channel per operating system, because a channel that is table stakes on Windows is often advanced on macOS and rare on Linux.",
+      "31 egress channels — GenAI tools, webmail, cloud storage, browsers, USB, printing, AirDrop, RDP and more — scored for Monitor / Warn and separately for Block, because seeing a channel is the easy half. One row per channel per operating system, since a channel that is table stakes on Windows is often advanced on macOS and rare on Linux.",
   },
   {
     name: "3. Enforcement",
