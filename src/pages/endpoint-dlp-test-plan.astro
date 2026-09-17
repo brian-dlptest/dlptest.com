@@ -1,0 +1,188 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
+import {
+  TEST_PLAN_HREF,
+  TEST_PLAN_ROWS,
+  TEST_PLAN_SHEETS,
+  TEST_PLAN_UPDATED,
+} from "@/data/test-plan";
+export const prerender = true;
+
+const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+});
+---
+<BaseLayout
+  title="Endpoint DLP Test Plan"
+  description={`A free, vendor-neutral endpoint DLP test plan: ${TEST_PLAN_ROWS} test cases across classification, policy, enforcement, investigations and usability, as a scored Excel workbook.`}
+>
+  <CyberhavenAdSlot page="sample-data-tab">
+    <h1>Endpoint DLP Test Plan</h1>
+
+    <p>
+      A vendor-neutral plan for evaluating or validating an endpoint DLP
+      deployment — {TEST_PLAN_ROWS} test cases across five sheets, as an Excel
+      workbook you fill in as you go. Use one copy per product you are
+      evaluating, or per environment you are validating.
+    </p>
+
+    <p>
+      It names no DLP product. Every row is written as a capability to test
+      rather than a feature to look for, so it applies equally to any endpoint
+      DLP tool.
+    </p>
+
+    <p class="download-row">
+      <a class="button" href={TEST_PLAN_HREF} download>Download the test plan (.xlsx)</a>
+      <span class="muted">Last updated {updated}</span>
+    </p>
+
+    <h2>What is in it</h2>
+
+    <div class="sheet-list">
+      {TEST_PLAN_SHEETS.map((sheet) => (
+        <section class="sheet">
+          <h3>
+            {sheet.name}
+            <span class="sheet-rows">{sheet.rows} rows</span>
+          </h3>
+          <p class="sheet-question">{sheet.question}</p>
+          <p>{sheet.detail}</p>
+        </section>
+      ))}
+    </div>
+
+    <p>
+      A <strong>Read Me</strong> sheet explains how to fill the workbook in and
+      includes a glossary, and a <strong>Scoring Summary</strong> rolls
+      everything up with formulas — by sheet, by operating system, and by
+      maturity tier — so the totals update as you work.
+    </p>
+
+    <h2>How the scoring works</h2>
+
+    <p>
+      Every result cell uses the same four values, picked from a dropdown.
+      Leave a cell blank if you have not tested it yet — blank and
+      <em>Fail</em> mean different things, and blanks are excluded from the
+      coverage percentage.
+    </p>
+
+    <table class="legend-table">
+      <tbody>
+        <tr><th>Pass</th><td>Works as described.</td></tr>
+        <tr><th>Partial</th><td>Works with caveats — record them in the Notes column.</td></tr>
+        <tr><th>Fail</th><td>Does not work, or needs a workaround you would not accept.</td></tr>
+        <tr><th>N/A</th><td>Not applicable to your environment. Excluded from scoring.</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      Every row also carries a <strong>maturity tier</strong>, because not all
+      failures are equal:
+    </p>
+
+    <table class="legend-table">
+      <tbody>
+        <tr><th>Table stakes</th><td>Expect every serious product to do this. A failure here is disqualifying.</td></tr>
+        <tr><th>Advanced</th><td>Where mature products separate from adequate ones.</td></tr>
+        <tr><th>Differentiator</th><td>Few products do this well. A low score is information, not a verdict.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Test data</h2>
+
+    <p>
+      The plan refers to these pages for the files and endpoints it asks you to
+      use. Everything here is synthetic — never use real customer, employee or
+      patient data to test a DLP tool.
+    </p>
+
+    <ul>
+      <li><a href="/sample-data/">Sample Data</a> — ready-made tables of synthetic PII.</li>
+      <li><a href="/generate/">Data Generator</a> — build a dataset to order, including Luhn-valid card numbers and international identifiers.</li>
+      <li><a href="/http-post/">HTTP Post</a> and <a href="/https-post/">HTTPS Post</a> — live endpoints for web upload tests.</li>
+      <li><a href="/ftp-test/">FTP &amp; S3 Test</a> — public file-transfer targets.</li>
+      <li><a href="/regex/">Regex Test</a> — a library of DLP patterns, useful for building the credential and secret test files.</li>
+    </ul>
+
+    <h2>Feedback</h2>
+
+    <p>
+      This plan is a work in progress and suggestions are welcome — a channel we
+      have missed, a test that does not survive contact with a real product, or
+      a tier you would score differently. Get in touch through the
+      <a href="/contact/">contact page</a>.
+    </p>
+  </CyberhavenAdSlot>
+</BaseLayout>
+
+<style>
+  .download-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 1.75rem 0 2.25rem;
+  }
+
+  .sheet-list {
+    display: grid;
+    gap: 1.1rem;
+    margin: 1.25rem 0 2rem;
+  }
+
+  .sheet {
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+  }
+
+  .sheet h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+  }
+
+  .sheet-rows {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .sheet-question {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+
+  .sheet p:last-child {
+    margin-bottom: 0;
+  }
+
+  .legend-table {
+    width: auto;
+    max-width: 100%;
+    margin: 1rem 0 2rem;
+    font-size: 0.92rem;
+  }
+
+  .legend-table th,
+  .legend-table td {
+    padding: 0.4rem 0.65rem;
+  }
+
+  .legend-table th {
+    width: 1%;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+</style>
