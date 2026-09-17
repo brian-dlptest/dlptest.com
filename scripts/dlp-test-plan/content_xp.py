@@ -7,8 +7,8 @@ XPOLICY = [
  "Attempt egress of 50 records that are in the index and 50 that are not. Ask whether the endpoint holds a local copy of the hash index or calls home for every check. Pass = only the indexed 50 are caught, and the check is fast enough to block rather than alert.",
  "Differentiator"),
 
-("E-02", "Trainable classifier / small ML model",
- "Test a trainable-classifier rule and ask explicitly where the model executes - cloud-scored ML and on-device ML get described in the same language. Pass = it blocks in the moment rather than alerting after the fact.",
+("E-02", "AI Classification (LLM document-type labels)",
+ "The modern form of content classification: an LLM labels what a file IS - a contract, source code, a billing record - from a natural-language description rather than from a pattern. Define a label in plain language, add a structural constraint if the tool supports one (an extension or path that must also match), add an exclusion for test data, then upload sample files and confirm the label lands before you deploy it. Then ask where the model executes and whether the action can be held pending its verdict - cloud-scored and on-device classification get described in the same language. Pass = it labels by document type accurately AND blocks in the moment. A tool that labels well but only alerts after the fact is Partial.",
  "Advanced"),
 
 ("E-03", "AI classification with a cached verdict",

@@ -98,13 +98,13 @@ CLASSIFICATION = [
  "Recognising finance documents by structure and language, not just by folder.",
  "Send a draft earnings release, a board deck, a cap table, and a three-statement model. Include a routine expense report as a negative control.",
  "Sensitive finance material is detected; routine finance files are not. If everything in Finance matches, precision is unusable.",
- "Trainable classifier / AI", "Advanced"),
+ "AI Classification", "Advanced"),
 
 ("C-C02", UC_C, "Time-boxed sensitivity: pre- vs post-publication",
  "The core MNPI problem, from two directions. A draft 10-Q is material nonpublic information before filing and ordinary public data after, so sensitivity has to change with the calendar - and the tool has to be able to tell a forecast from a published result in the first place.",
  "Two parts. (1) Apply a policy with an effective date window, then move the same file inside the window and again after it closes. (2) Send a file of projected FY27 revenue and a file of already-published FY25 results, formatted alike and with similar numbers.",
  "(1) Enforcement changes with the date without the policy being rewritten - most tools cannot do this, so record the workaround. (2) The forward-looking file is treated as more sensitive; a keyword-only tool will treat the two identically.",
- "Policy scheduling / Trainable classifier", "Differentiator"),
+ "Policy scheduling / AI Classification", "Differentiator"),
 
 ("C-C03", UC_C, "Insider-list / need-to-know scoping",
  "Restricting deal material to the deal team, including people who legitimately have file access.",
