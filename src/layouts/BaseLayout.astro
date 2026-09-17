@@ -95,6 +95,7 @@ const nav: Array<NavLink | { label: string; children: NavLink[] }> = [
       { href: "/ftp-test/", label: "FTP & S3 Test" },
       { href: "/mcp/", label: "MCP Server" },
       { href: "/regex/", label: "Regex Test" },
+      { href: "/endpoint-dlp-test-plan/", label: "Test Plan" },
     ],
   },
   // Classification Test (/inspect-data/) is hidden from nav until the real UI
@@ -120,6 +121,7 @@ const TOP_LEVEL_PATHS = new Set<string>([
   "/generate",
   "/regex",
   "/mcp",
+  "/endpoint-dlp-test-plan",
 ]);
 
 function isActive(href: string) {
