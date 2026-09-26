@@ -27,7 +27,7 @@
  *                          IDs per generation (no floating "latest" alias), so bump
  *                          this deliberately after checking migration notes.
  *   NEWS_EFFORT          — optional; default high. low|medium|high|xhigh|max.
- *   NEWS_SEARCH_MAX_USES — optional; default 20. Web searches allowed per research
+ *   NEWS_SEARCH_MAX_USES — optional; default 40. Web searches allowed per research
  *                          call. Too low and the model spends its budget finding
  *                          leads and runs dry before it can corroborate them, so
  *                          verifiable stories get dropped. See SEARCH_MAX_USES.
@@ -61,9 +61,12 @@ const LOOKBACK_DAYS = (() => {
 // before it can be published, and verification costs searches too. Set too
 // low, the model spends everything on discovery and has to drop stories it
 // actually found — which is what happened between 2026-08-08 and 08-29.
+// Raised 20 → 40 once the job went weekly over a 21-day window: the 2026-09-18
+// and 09-25 runs both exhausted a budget of 30, and the 09-25 run stopped at
+// Cyera without surfacing Island's $400M Series F from the day before.
 const SEARCH_MAX_USES = (() => {
   const raw = Number(process.env.NEWS_SEARCH_MAX_USES);
-  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 20;
+  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 40;
 })();
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..");
@@ -235,9 +238,11 @@ Task: using web search, find credible industry stories published AFTER ${cutoffI
 Do NOT include any story whose slug would collide with these already-covered slugs (kebab-case the headline to compare):
 ${excludeSlugs.length ? excludeSlugs.map((s) => `- ${s}`).join("\n") : "(none)"}
 
-Prefer 0–2 strong stories over padding with weak fits. If nothing qualifies, say so explicitly.
+This job runs weekly over a multi-week window, so there are often several qualifying stories. Report every story that clears the bar — do not stop after the first strong one — but never pad with weak fits. If nothing qualifies, say so explicitly.
 
-For each qualifying story, write a short briefing: the headline, the primary source URL (canonical vendor PR / Calcalist / SecurityWeek — never dlptest.com), the publication date, and 3–5 sentences of practitioner synthesis including the DLP/DSPM angle. Stay factual and flag uncertainty where sources conflict.`;
+For each qualifying story, write a short briefing: the headline, the primary source URL (canonical vendor PR / Calcalist / SecurityWeek — never dlptest.com), the publication date, and 3–5 sentences of practitioner synthesis including the DLP/DSPM angle. Stay factual and flag uncertainty where sources conflict.
+
+End with a section headed "Considered but skipped" listing, one line each, every other lead you looked at and why it was dropped (out of scope, before the cutoff, already covered, could not corroborate, ran out of searches). Write "(none)" if there were none.`;
 
   // max_uses bounds how long a single call can run. Without it the server-side
   // search loop is unbounded, and a more search-eager model can stretch one
@@ -318,7 +323,7 @@ async function extract(client, { report, cutoffIso }) {
     messages: [
       {
         role: "user",
-        content: `Cutoff (exclusive): ${cutoffIso}. Convert the research briefing below into structured candidate posts. Always include "News" in categories plus relevant lowercase topical tags (DLP, DSPM, Endpoint DLP, Insider Risk Management, data protection). The body should read like an informed practitioner note, not a press-release paste. If the briefing concludes nothing qualified, return an empty candidates array.\n\n----- RESEARCH -----\n${report}`,
+        content: `Cutoff (exclusive): ${cutoffIso}. Convert the research briefing below into structured candidate posts. Always include "News" in categories plus relevant lowercase topical tags (DLP, DSPM, Endpoint DLP, Insider Risk Management, data protection). The body should read like an informed practitioner note, not a press-release paste. Ignore the "Considered but skipped" section — those are not candidates. If the briefing concludes nothing qualified, return an empty candidates array.\n\n----- RESEARCH -----\n${report}`,
       },
     ],
   });
@@ -430,16 +435,18 @@ async function main() {
   const candidates = await extract(client, { report, cutoffIso });
   console.log(`Candidates drafted: ${candidates.length}`);
 
+  // Dump the research verbatim on every run. Empty runs need it to tell a quiet
+  // week from rejected leads (six such runs, 2026-08-09..14, left no trace).
+  // Non-empty runs need it too: the 2026-09-25 run queued Cyera and silently
+  // missed Island's Series F, and with the report discarded there was no way
+  // to see whether Island was judged out of scope or never found. The report
+  // is a few KB — cheap next to the run.
+  console.log("----- RESEARCH REPORT -----");
+  console.log(report || "(empty report — the research call returned no text)");
+  console.log("----- END RESEARCH REPORT -----");
+
   if (candidates.length === 0) {
     console.log("Nothing met the bar — no candidates queued.");
-    // Dump the research verbatim on empty runs. Without this a zero-candidate
-    // day is indistinguishable from a genuinely quiet news week: six such runs
-    // (2026-08-09..14) burned 120k-508k input tokens each and left no way to
-    // tell whether the model found qualifying stories and rejected them, or
-    // found nothing at all. The report is a few KB — cheap next to the run.
-    console.log("----- RESEARCH REPORT (why nothing qualified) -----");
-    console.log(report || "(empty report — the research call returned no text)");
-    console.log("----- END RESEARCH REPORT -----");
     return;
   }
 
