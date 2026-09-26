@@ -4,7 +4,7 @@ Posts in `src/content/news/` are **practitioner notes for DLP/DSPM buyers**, not
 
 ## Publish these (priority)
 
-- **Funding** and **valuations** for DLP, DSPM, insider risk, CASB/SSE data security, DDR, AI data security vendors
+- **Funding** and **valuations** for DLP, DSPM, insider risk, CASB/SSE data security, DDR, AI data security, and **enterprise browser / browser security** vendors (e.g. Island, LayerX) — browser-level controls are a DLP channel
 - **Acquisitions** and **M&A** in the same space (e.g. Cyera/Trail, Proofpoint/Normalyze)
 - **Product launches** that change DLP, endpoint DLP, email/web DLP, or GenAI data controls
 - **Stealth / launch** of vendors clearly in data loss prevention or data security platforms
