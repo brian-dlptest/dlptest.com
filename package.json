@@ -34,6 +34,6 @@
     "@cloudflare/workers-types": "^5.20260918.1",
     "aws4fetch": "^1.0.20",
     "typescript": "^7.0.2",
-    "wrangler": "^4.134.0"
+    "wrangler": "^4.144.0"
   }
 }
