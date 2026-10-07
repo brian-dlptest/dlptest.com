@@ -18,12 +18,12 @@
     "r2:create": "wrangler r2 bucket create dlptest-downloads"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.126.0",
-    "@astrojs/cloudflare": "^14.3.2",
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@astrojs/cloudflare": "^14.3.3",
     "@astrojs/markdown-remark": "^7.2.4",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.3",
-    "docx": "^9.7.1",
+    "astro": "^7.3.5",
+    "docx": "^9.8.1",
     "pcre2-wasm": "^10.48.0",
     "pdf-lib": "^1.17.1",
     "re2js": "^2.8.6",
@@ -31,9 +31,12 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260918.1",
+    "@cloudflare/workers-types": "^5.20261002.1",
     "aws4fetch": "^1.0.20",
     "typescript": "^7.0.2",
-    "wrangler": "^4.134.0"
+    "wrangler": "^4.146.0"
+  },
+  "overrides": {
+    "sharp": "^0.35.5"
   }
 }
