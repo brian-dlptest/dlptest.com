@@ -59,11 +59,18 @@ export function buildExcelLikeXlsx(
       compression: true,
     }) as ArrayBuffer,
   );
-  return patchAppProps(written);
+  try {
+    return patchAppProps(written);
+  } catch (error) {
+    // The patch is cosmetic, so it must never fail the export.
+    console.warn("[xlsx-export] app.xml patch failed; serving the unpatched workbook:", error);
+    return written;
+  }
 }
 
 // Rewrite docProps/app.xml to report Excel as the authoring application.
-// Falls back to the unpatched workbook if the part can't be found.
+// Returns the workbook unchanged if the part can't be found; the caller also
+// falls back to it if re-reading or re-writing the zip throws.
 function patchAppProps(xlsx: Uint8Array): Uint8Array {
   const zip = XLSX.CFB.read(xlsx, { type: "array" });
   const idx = (zip.FullPaths as string[]).findIndex((p) => p.endsWith("docProps/app.xml"));
