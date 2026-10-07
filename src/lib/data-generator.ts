@@ -811,6 +811,81 @@ function generateAPIKey(rng: ScopedRandom): string {
   return Array.from({ length: 32 }, () => rng.int(0, 15).toString(16)).join("");
 }
 
+// ─── Credential / secret generators ──────────────────────────────────────────
+// Each format matches its pattern in src/lib/regex/dlp-patterns.ts, so the
+// site's own regex library flags every generated value. Charsets that allow
+// "/", "+" or "-" still start and end on a letter or digit, so the patterns'
+// \b anchors match when a value sits between commas or spaces.
+
+const ALNUM_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+function randomChars(rng: ScopedRandom, chars: string, length: number): string {
+  return Array.from({ length }, () => chars[rng.int(0, chars.length - 1)]).join("");
+}
+
+function randomToken(rng: ScopedRandom, chars: string, length: number): string {
+  return randomChars(rng, ALNUM_CHARS, 1) + randomChars(rng, chars, length - 2) + randomChars(rng, ALNUM_CHARS, 1);
+}
+
+function generateAWSSecretKey(rng: ScopedRandom): string {
+  return randomToken(rng, ALNUM_CHARS + "/+", 40);
+}
+
+function generateGitHubToken(rng: ScopedRandom): string {
+  return "ghp_" + randomChars(rng, ALNUM_CHARS, 36);
+}
+
+function generateSlackBotToken(rng: ScopedRandom): string {
+  return `xoxb-${randomChars(rng, "0123456789", 12)}-${randomChars(rng, "0123456789", 13)}-${randomChars(rng, ALNUM_CHARS, 24)}`;
+}
+
+function generateStripeSecretKey(rng: ScopedRandom): string {
+  return "sk_live_" + randomChars(rng, ALNUM_CHARS, 24);
+}
+
+function generateGoogleAPIKey(rng: ScopedRandom): string {
+  return "AIza" + randomToken(rng, ALNUM_CHARS + "_-", 35);
+}
+
+function generateOpenAIKey(rng: ScopedRandom): string {
+  return "sk-" + randomChars(rng, ALNUM_CHARS, 48);
+}
+
+function generateUsername(rng: ScopedRandom): string {
+  const first = rng.pick(FIRST_NAMES).toLowerCase().replace(/[^a-z0-9]/g, "");
+  const last = rng.pick(LAST_NAMES).toLowerCase().replace(/[^a-z0-9]/g, "");
+  switch (rng.int(0, 4)) {
+    case 0:  return `${first[0]}${last}`;
+    case 1:  return `${first}.${last}`;
+    case 2:  return `${first}_${last}`;
+    case 3:  return `${first}${last[0]}${rng.int(1, 99)}`;
+    default: return `${last}${first[0]}`;
+  }
+}
+
+const PASSWORD_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const PASSWORD_LOWER = "abcdefghijklmnopqrstuvwxyz";
+const PASSWORD_DIGITS = "0123456789";
+// No quotes, commas or backslashes (CSV-safe), and no = + - (formula triggers).
+const PASSWORD_SYMBOLS = "!#$%&*?@^";
+
+// 12–16 characters with at least one of each class. Always starts with a
+// lowercase letter, so sanitizeForSpreadsheet() never has to escape it.
+function generatePassword(rng: ScopedRandom): string {
+  const all = PASSWORD_UPPER + PASSWORD_LOWER + PASSWORD_DIGITS + PASSWORD_SYMBOLS;
+  const rest = [
+    randomChars(rng, PASSWORD_UPPER, 1),
+    randomChars(rng, PASSWORD_DIGITS, 1),
+    randomChars(rng, PASSWORD_SYMBOLS, 1),
+    ...randomChars(rng, all, rng.int(12, 16) - 4),
+  ];
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = rng.int(0, i);
+    [rest[i], rest[j]] = [rest[j]!, rest[i]!];
+  }
+  return randomChars(rng, PASSWORD_LOWER, 1) + rest.join("");
+}
+
 // ─── Multi-language PII generators ───────────────────────────────────────────
 
 function generateFranceINSEE(rng: ScopedRandom, delim = " "): string {
@@ -855,6 +930,8 @@ function generateJapanMyNumber(rng: ScopedRandom): string {
 export type FieldTypeKey =
   | "row-number" | "first-name" | "last-name" | "full-name" | "gender" | "email" | "ip-v4"
   | "ip-v6" | "mac-address" | "crypto-wallet" | "aws-access-key" | "api-key"
+  | "aws-secret-key" | "github-token" | "slack-token" | "stripe-secret-key" | "google-api-key"
+  | "openai-api-key" | "username" | "password"
   | "ssn" | "credit-card" | "credit-card-type" | "bank-name"
   | "dob" | "phone" | "zip" | "card-expiry"
   | "mrn" | "icd10" | "cpt" | "routing-number" | "account-number" | "npi" | "dea-number"
@@ -884,8 +961,16 @@ export const FIELD_TYPE_DEFS: Record<FieldTypeKey, FieldTypeDef> = {
   "ip-v6":           { label: "IPv6 Address",            group: "Network / Tech", generate: (rng)  => generateIPv6(rng) },
   "mac-address":     { label: "MAC Address",             group: "Network / Tech", generate: (rng)  => generateMACAddress(rng) },
   "crypto-wallet":   { label: "Bitcoin Wallet",          group: "Network / Tech", generate: (rng)  => generateBitcoinWallet(rng) },
-  "aws-access-key":  { label: "AWS Access Key ID",       group: "Network / Tech", generate: (rng)  => generateAWSAccessKey(rng) },
-  "api-key":         { label: "API Key / Secret",        group: "Network / Tech", generate: (rng)  => generateAPIKey(rng) },
+  "username":          { label: "Username",                     group: "Credentials / Secrets", generate: (rng) => generateUsername(rng) },
+  "password":          { label: "Password",                     group: "Credentials / Secrets", generate: (rng) => generatePassword(rng) },
+  "aws-access-key":    { label: "AWS Access Key ID",            group: "Credentials / Secrets", generate: (rng) => generateAWSAccessKey(rng) },
+  "aws-secret-key":    { label: "AWS Secret Access Key",        group: "Credentials / Secrets", generate: (rng) => generateAWSSecretKey(rng) },
+  "github-token":      { label: "GitHub Personal Access Token", group: "Credentials / Secrets", generate: (rng) => generateGitHubToken(rng) },
+  "slack-token":       { label: "Slack Bot Token",              group: "Credentials / Secrets", generate: (rng) => generateSlackBotToken(rng) },
+  "stripe-secret-key": { label: "Stripe Secret Key",            group: "Credentials / Secrets", generate: (rng) => generateStripeSecretKey(rng) },
+  "google-api-key":    { label: "Google API Key",               group: "Credentials / Secrets", generate: (rng) => generateGoogleAPIKey(rng) },
+  "openai-api-key":    { label: "OpenAI-style API Key",         group: "Credentials / Secrets", generate: (rng) => generateOpenAIKey(rng) },
+  "api-key":           { label: "API Key / Secret",             group: "Credentials / Secrets", generate: (rng) => generateAPIKey(rng) },
   "ssn":             { label: "SSN",                group: "US PII / PCI", generate: (rng)        => generateSSN(rng) },
   "credit-card":     { label: "Credit Card Number", group: "US PII / PCI", generate: (rng, _, opts) => {
     const brands = opts?.cardBrands;
