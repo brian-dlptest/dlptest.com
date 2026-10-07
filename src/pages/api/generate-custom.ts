@@ -2,11 +2,10 @@ import type { APIRoute } from "astro";
 import {
   generateCustom,
   rowsToCsv,
-  sanitizeForSpreadsheet,
   FIELD_TYPE_DEFS,
 } from "@/lib/data-generator";
 import type { CustomField, FieldTypeKey, CardTypeName } from "@/lib/data-generator";
-import * as XLSX from "xlsx";
+import { buildExcelLikeXlsx } from "@/lib/xlsx-export";
 import {
   Document, Packer, Paragraph, Table, TableRow, TableCell,
   WidthType, TextRun, BorderStyle,
@@ -107,23 +106,10 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (format === "xlsx") {
-    // Sanitize header and cell values to prevent CSV/XLSX formula injection
-    // when the user names a field starting with `=`, `+`, `-`, `@`, etc.
-    // See sanitizeForSpreadsheet() for the OWASP reference.
-    const safeColumns = result.columns.map((c) => sanitizeForSpreadsheet(c));
-    const safeRows = result.rows.map((row) => {
-      const out: Record<string, string> = {};
-      result.columns.forEach((col, i) => {
-        out[safeColumns[i]!] = sanitizeForSpreadsheet(
-          String((row as unknown as Record<string, string>)[col] ?? ""),
-        );
-      });
-      return out;
-    });
-    const ws = XLSX.utils.json_to_sheet(safeRows, { header: safeColumns });
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Data");
-    const arr = XLSX.write(wb, { type: "array", bookType: "xlsx" }) as Uint8Array;
+    const arr = buildExcelLikeXlsx(
+      result.columns,
+      result.rows as unknown as Record<string, unknown>[],
+    );
     return new Response(arr as unknown as BodyInit, {
       status: 200,
       headers: {
