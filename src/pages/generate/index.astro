@@ -10,7 +10,7 @@ for (const [key, def] of Object.entries(FIELD_TYPE_DEFS) as [FieldTypeKey, { lab
   if (!groups[def.group]) groups[def.group] = [];
   groups[def.group].push({ key, label: def.label });
 }
-const GROUP_ORDER = ["Basic", "Network / Tech", "US PII / PCI", "US Specialized", "International"];
+const GROUP_ORDER = ["Basic", "Network / Tech", "Credentials / Secrets", "US PII / PCI", "US Specialized", "International"];
 
 const defaultFields: { name: string; type: FieldTypeKey }[] = [
   { name: "id",         type: "row-number" },
@@ -56,6 +56,10 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         <option value="canada-sin">Canada — Name + SIN + Province</option>
         <option value="passport">International — Name + Passport Number</option>
         <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+      </optgroup>
+      <optgroup label="Credentials / Secrets">
+        <option value="api-keys">API Keys — AWS, GitHub, Slack, Stripe, Google, OpenAI</option>
+        <option value="credentials">Credentials — Name + Username + Email + Password</option>
       </optgroup>
     </select>
   </div>
@@ -509,6 +513,14 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "crypto-wallet":   "bitcoin_wallet",
     "aws-access-key":  "aws_access_key_id",
     "api-key":         "api_key",
+    "aws-secret-key":    "aws_secret_access_key",
+    "github-token":      "github_token",
+    "slack-token":       "slack_bot_token",
+    "stripe-secret-key": "stripe_secret_key",
+    "google-api-key":    "google_api_key",
+    "openai-api-key":    "openai_api_key",
+    "username":          "username",
+    "password":          "password",
     "ssn":              "ssn",
     "credit-card":      "credit_card_number",
     "credit-card-type": "card_type",
@@ -632,6 +644,22 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       { type: "eu-vat",   name: "eu_vat_number" },
       { type: "iban",     name: "iban" },
       { type: "country",  name: "country" },
+    ],
+    "api-keys": [
+      { type: "full-name",         name: "owner" },
+      { type: "aws-access-key",    name: "aws_access_key_id" },
+      { type: "aws-secret-key",    name: "aws_secret_access_key" },
+      { type: "github-token",      name: "github_token" },
+      { type: "slack-token",       name: "slack_bot_token" },
+      { type: "stripe-secret-key", name: "stripe_secret_key" },
+      { type: "google-api-key",    name: "google_api_key" },
+      { type: "openai-api-key",    name: "openai_api_key" },
+    ],
+    "credentials": [
+      { type: "full-name", name: "full_name" },
+      { type: "username",  name: "username" },
+      { type: "email",     name: "email" },
+      { type: "password",  name: "password" },
     ],
   };
 
