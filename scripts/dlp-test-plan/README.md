@@ -35,6 +35,7 @@ The order is not optional. `renumber.py` rewrites the content modules in place; 
 | `content_policy.py` | Sheet 2 — Policy (one row per channel **per OS**) |
 | `content_xp.py` | Sheet 3 — Enforcement, and Sheet 4 — Investigations |
 | `content_use.py` | Sheet 5 — Usability |
+| `content_changelog.py` | Change Log sheet — one entry per change, newest version first. **Not** run through `renumber.py`: an entry keeps the row IDs it had in its version |
 | `build.py` | Layout, styling, dropdowns, conditional formatting, scoring formulas, chart |
 | `renumber.py` | Sequential IDs + cross-reference rewriting |
 | `verify.py` | Static checks (see below) |
@@ -45,8 +46,16 @@ IDs are sequential within their section and are **regenerated on every run** —
 `P-G01.Windows`, `E-01…`, `I-01…`, `U-01…`. Policy rows carry a `.<OS>` suffix; several rows
 share one base, and the base advances only once.
 
-Because IDs shift whenever a row is added or removed, prose that references another row
-(`See C-A07`) is rewritten automatically. **`renumber.py` refuses to run if a reference points at
+Because IDs shift whenever a row is added or removed, prose in the content modules that
+references another row (`Image uploads are tested separately at P-G07`) is rewritten
+automatically. **Add new rows with a placeholder ID** (`U-NEWA`, `P-GNEW`) and let
+`renumber.py` assign the number — never pick the final ID yourself, or references to the
+rows it displaces are never rewritten.
+
+**`build.py` never contains a literal row ID.** The Read Me glossary points at rows through
+`ref("name fragment", "P")`, resolved by name at build time, so a pointer cannot drift onto
+another row after a renumber, and a pointer to a cut row fails the build. `verify.py` rejects
+any literal ID in `build.py`. (v6 shipped three wrong glossary pointers this way.) **`renumber.py` refuses to run if a reference points at
 a row that no longer exists**, and names it. Fix the reference, then re-run.
 
 ## Verification

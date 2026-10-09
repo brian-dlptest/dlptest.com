@@ -176,7 +176,7 @@ print(f"  evaluated {checks} count formulas against seeded data without error")
 # ---- 3b. table stakes failures list: helpers -> TEXTJOIN -> reconciliation ---
 print("\nTABLE STAKES FAILURES LIST")
 #            sheet                 helper  tier  result     (Policy: Block)
-HELPER = {"1. Classification": ("K", "H", "I"), "2. Policy": ("J", "H", "G"),
+HELPER = {"1. Classification": ("K", "H", "I"), "2. Policy": ("K", "H", "G"),
           "3. Enforcement": ("G", "E", "D"), "4. Investigations": ("I", "F", "G"),
           "5. Usability": ("I", "F", "G")}
 HELPER_RE = re.compile(r'^=IF\(AND\(([A-Z]+)(\d+)="Table stakes",([A-Z]+)(\d+)="Fail"\),A(\d+),""\)$')
@@ -262,17 +262,26 @@ if "of the three" in note:
 
 # ---- 4. dropdowns and conditional formatting -------------------------------
 print("\nVALIDATION / CONDITIONAL FORMATTING")
-VOCAB = set()
+SCORING = '"Pass,Partial,Fail,N/A"'
+TIMING = '"Inline,After the fact,Not blocked"'      # Policy only, recorded but never scored
+timing_dvs = []
 for ws in wb.worksheets:
     for dv in ws.data_validations.dataValidation:
-        VOCAB.add(dv.formula1)
         print(f"  DV  {ws.title:<22} {str(dv.sqref):<14} {dv.formula1}")
+        if dv.formula1 == TIMING:
+            timing_dvs.append((ws.title, str(dv.sqref)))
+        elif dv.formula1 != SCORING:
+            fail.append(f"{ws.title}!{dv.sqref}: unexpected dropdown {dv.formula1}")
     for rng in ws.conditional_formatting:
         print(f"  CF  {ws.title:<22} {rng.sqref}  ({len(rng.rules)} rules)")
-if len(VOCAB) != 1:
-    fail.append(f"scoring vocabulary is not standardised: {VOCAB}")
-else:
-    print(f"  one vocabulary everywhere: {VOCAB.pop()}")
+pol_last = extents["2. Policy"][1]
+if timing_dvs != [("2. Policy", f"J3:J{pol_last}")]:
+    fail.append(f"Block timing dropdown should cover exactly 2. Policy!J3:J{pol_last}; found {timing_dvs}")
+print(f"  scoring vocabulary on every result column: {SCORING}")
+print(f"  Block timing on 2. Policy!J3:J{pol_last} only: {timing_dvs == [('2. Policy', f'J3:J{pol_last}')]}")
+scored_timing = [c for c, f in formulas if "'2. Policy'!$J$" in f]
+if scored_timing:
+    fail.append(f"Block timing is meant to be unscored, but Summary formulas read it: {scored_timing}")
 
 # ---- 5. reference integrity -------------------------------------------------
 print("\nREFERENCE INTEGRITY")
@@ -286,6 +295,8 @@ for ws in wb.worksheets:
             if ID_RE.fullmatch(base): ids.add(base)
 dangling = {}
 for ws in wb.worksheets:
+    if ws.title == "Change Log":
+        continue                      # historical IDs, checked separately below
     for row in ws.iter_rows():
         for cell in row:
             for t in [cell.value] + ([cell.comment.text] if cell.comment else []):
@@ -298,6 +309,36 @@ for ws in wb.worksheets:
 print(f"  {len(ids)} live IDs; {len(dangling)} dangling reference(s)")
 for ref, locs in sorted(dangling.items()):
     fail.append(f"dangling reference {ref} at {', '.join(locs[:4])}")
+
+# Change Log: entries for THIS version must name live rows; older entries keep the IDs
+# they had at the time and are not checked.
+_here = os.path.dirname(os.path.abspath(__file__))
+_build_src = open(os.path.join(_here, "build.py")).read()
+cur_ver = int(re.search(r"^VERSION = (\d+)$", _build_src, re.M).group(1))
+cl = wb["Change Log"]
+cur_entries, cl_bad = 0, []
+for r_ in range(3, cl.max_row + 1):
+    if cl.cell(row=r_, column=1).value != cur_ver:
+        continue
+    cur_entries += 1
+    for c_ in (3, 4, 5):
+        for ref in ID_RE.findall(str(cl.cell(row=r_, column=c_).value or "")):
+            if ref not in ids:
+                cl_bad.append(f"Change Log!{cl.cell(row=r_, column=c_).coordinate} {ref}")
+print(f"  Change Log: {cur_entries} entries for v{cur_ver}; {len(cl_bad)} naming a row that does not exist")
+if cur_entries == 0:
+    fail.append(f"Change Log has no entries for the current version v{cur_ver}")
+for b in cl_bad:
+    fail.append(f"{b}: current-version change log entry names a row that does not exist")
+
+# build.py must point at rows through ref(), never a literal ID - a literal one survives a
+# renumber by landing on whatever row now has that number, which is how v6 shipped three
+# wrong glossary pointers past every check here.
+literal = [f"build.py:{i}" for i, l in enumerate(_build_src.split("\n"), 1)
+           if not l.lstrip().startswith("#") and ID_RE.search(l)]
+print(f"  literal row IDs in build.py: {literal or 'none - all pointers go through ref()'}")
+for loc in literal:
+    fail.append(f"{loc}: literal row ID - use ref() so the pointer cannot drift")
 
 # ---- 5b. every ID is well formed ------------------------------------------
 print("\nID FORMAT")

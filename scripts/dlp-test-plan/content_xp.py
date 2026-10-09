@@ -21,7 +21,7 @@ XPOLICY = [
 
 ("E-05", "Behavioural / intent (UEBA)",
  "Perform a 100x export and confirm the anomaly surfaces. This is investigation and risk scoring rather than prevention, so Pass = it surfaces promptly and is not sold to you as a blocking control.",
- "Differentiator"),
+ "Advanced"),
 
 ("E-06", "Agentic / autonomous AI decisioning",
  "Ask for a demonstration of a real-time block that an AI agent decided, rather than one a static rule decided. Pass = the agent itself makes the call in the moment; writing a rule that later blocks is a different thing, and should be scored Partial.",
@@ -39,6 +39,7 @@ A3 = "Insider Risk & Behaviour"
 A4 = "Workflow & Case Management"
 A5 = "Privacy & Governance"
 A6 = "Response"
+A7 = "AI Agent Activity"
 
 INVESTIGATIONS = [
 # -------------------------------------------------------- Evidence & Context
@@ -118,7 +119,7 @@ INVESTIGATIONS = [
 ("I-15", A3, "Behavioural baseline and deviation",
  "'Unusual for this person' is a better signal than 'over a global threshold' - and 'unusual for this role' is better still. Ten thousand rows is routine for a data analyst and alarming for a recruiter.",
  "Establish two weeks of normal activity, then perform a 100x export and confirm it is scored as a deviation. Then confirm the tool also compares the user against their department or role, not only against themselves.",
- "Differentiator"),
+ "Advanced"),
 
 ("I-16", A3, "Sequence and scenario detection",
  "The flight-risk pattern: job-site visit, mass download, cloud upload, USB copy, within days.",
@@ -128,7 +129,7 @@ INVESTIGATIONS = [
 ("I-17", A3, "HR and identity context",
  "A resignation date turns routine activity into a priority case.",
  "Import a departing-employee list or HRIS feed and confirm those users are automatically elevated.",
- "Differentiator"),
+ "Advanced"),
 
 # -------------------------------------------------------- Workflow & Case Management
 ("I-18", A4, "Alert grouping and deduplication",
@@ -181,6 +182,27 @@ INVESTIGATIONS = [
 ("I-27", A6, "Remote forensics without touching the device",
  "Remote and BYOD fleets make physical collection impractical.",
  "Collect evidence from a device that is off-network at the time of collection.",
+ "Differentiator"),
+
+# -------------------------------------------------------- AI Agent Activity
+("I-28", A7, "AI agent and tool inventory",
+ "You cannot govern agents you do not know are running. Local model runtimes and MCP servers are the ones most often missed.",
+ "Over a two-week pilot, ask for every AI agent, coding assistant, local model runtime, plugin and MCP server the tool found running on endpoints, with versions and devices. Compare it with what you know is installed.",
+ "Advanced"),
+
+("I-29", A7, "Structured capture of agent sessions",
+ "An agent can take dozens of actions per prompt. Knowing an AI app was open is not the same as knowing what it did.",
+ "Run an AI coding agent through a short task that reads files, runs shell commands and edits a file. Confirm the prompt, the agent's responses, each tool call and command, and each file change are recorded as structured events tied to one session, not only as process activity.",
+ "Advanced"),
+
+("I-30", A7, "Agent, person and account attribution",
+ "An investigation needs to know whether a person or an agent acted, and which identity the agent used.",
+ "In one agent session, confirm each action is attributed to the agent or the person. Then sign the agent in with a personal account and with an API key, and confirm the tool reports which AI account was used and flags personal or unmanaged identities. Better still: a shared or generic OS login is resolved to the person behind it.",
+ "Differentiator"),
+
+("I-31", A7, "Agent tool chain: MCP servers and sub-agents",
+ "Agents reach other systems through MCP servers and hand work to sub-agents, which is often where data actually leaves.",
+ "Have an agent call an MCP server that reads from an internal system. Confirm each call is recorded with its input and output. Better still: a task delegated to a sub-agent is attributed back to the parent session.",
  "Differentiator"),
 
 ]

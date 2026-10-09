@@ -54,7 +54,7 @@ CLASSIFICATION = [
  "Matching your actual customer records, not anything SSN-shaped. The highest-precision technique available.",
  "Upload a hashed index of 10,000 real (or realistic) records. Send a file with 50 records that ARE in the index and 50 that are not.",
  "Only the indexed 50 match. Measure index refresh time and the max supported index size.",
- "EDM", "Differentiator"),
+ "EDM", "Advanced"),
 
 ("C-A09", UC_A, "AI Classification of a business-specific document type",
  "Whether you can build a classifier for a document type only your organisation has, described in plain language rather than expressed as a pattern. This is becoming the primary classification method, and the authoring loop is what decides whether it is usable in practice.",
@@ -116,7 +116,7 @@ CLASSIFICATION = [
  "Restricting deal material to the deal team, including people who legitimately have file access.",
  "Grant two users file access, put only one on the insider list, and have both attempt egress.",
  "Only the insider-list member is permitted. Policy scope is independent of file permissions.",
- "Policy scoping + identity", "Differentiator"),
+ "Policy scoping + identity", "Advanced"),
 
 # ---------------------------------------------------------------- UC_D
 ("C-D01", UC_D, "Bulk CRM export detection",
