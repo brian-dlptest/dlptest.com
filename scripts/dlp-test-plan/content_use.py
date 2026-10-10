@@ -18,7 +18,7 @@ USABILITY = [
 
 ("U-02", B0, "Classification explained in plain language",
  "An unexplainable verdict cannot be defended to a business owner.",
- "Open an AI classification and confirm it states why - which passages, which signals, which origin.",
+ "Open an AI classification and confirm it states why: which passages, which signals, which origin.",
  "Advanced"),
 
 # -------------------------------------------------------- AI Policy & Tuning
@@ -28,13 +28,13 @@ USABILITY = [
  "Differentiator"),
 
 ("U-04", B1, "Policy recommendations from observed behaviour",
- "The tool has the telemetry; it should propose the policy.",
- "After two weeks of monitoring, ask for recommended policies and judge how many you would actually deploy.",
+ "The tool already sees the activity, so it should propose policies from it.",
+ "After two weeks of monitoring, ask for recommended policies and judge how many you would deploy.",
  "Advanced"),
 
 ("U-05", B1, "Simulation before enforcement",
  "The question every stakeholder asks: how many people will this block?",
- "Take a monitor-mode policy and ask how many blocks it WOULD have produced last month, by team. Previewing what an intervention will look like is not simulation. Pass requires a count of would-be blocks calculated from real historical activity.",
+ "Take a monitor-mode policy and ask how many blocks it would have produced last month, by team. Previewing what an intervention will look like is not simulation. Pass requires a count of would-be blocks calculated from real historical activity.",
  "Advanced"),
 
 ("U-06", B1, "Justification as a control, not a log entry",
@@ -54,7 +54,7 @@ USABILITY = [
  "Advanced"),
 
 ("U-09", B2, "Automated remediation with human-in-the-loop escalation",
- "Automation you can actually authorise, because it knows when to stop.",
+ "Automated responses that hand the case to a person when it falls outside set limits.",
  "Confirm you can set which actions run automatically and which require approval, and test both paths.",
  "Advanced"),
 
@@ -70,7 +70,7 @@ USABILITY = [
 
 ("U-12", B2, "Mean time to triage an incident",
  "Cost per incident, measured directly.",
- "Time ten real incidents end to end, from alert to a decision you would stand behind. Run them across two analysts of different experience levels - if the platform is doing the work, the gap between them should be small.",
+ "Time ten real incidents end to end, from alert to a decision you would stand behind. Run them across two analysts of different experience levels. If the platform is doing the work, the gap between them should be small.",
  "Table stakes"),
 
 # -------------------------------------------------------- Rollout & Change Control
@@ -91,7 +91,7 @@ USABILITY = [
 
 # -------------------------------------------------------- Admin Experience
 ("U-16", B4, "Policies required to cover the use cases on this plan",
- "The most honest usability metric there is. Count them.",
+ "Count the policies needed to cover this plan's use cases. Fewer policies means less to tune and maintain.",
  "Implement use cases A-D and count the resulting policies, rules, and classifiers.",
  "Table stakes"),
 
@@ -107,17 +107,17 @@ USABILITY = [
 
 # -------------------------------------------------------- End-User Experience
 ("U-19", B5, "Policy tip clarity",
- "A block the user does not understand becomes a helpdesk ticket and a workaround. Redirecting beats blocking - naming the sanctioned alternative prevents the next attempt too.",
+ "A block the user does not understand becomes a helpdesk ticket and a workaround.",
  "Trigger a block and read the message as an ordinary employee would. Does it say what to do instead, and can it name the approved destination explicitly?",
  "Table stakes"),
 
 ("U-20", B5, "Business justification capture on warn",
- "Keeps people working while producing the best signal in the system - the justification a user types is often the most useful artefact in the case.",
+ "Keeps people working, and records why the user went ahead.",
  "Trigger a warn, submit a justification, and confirm the action proceeds, the text is searchable, and it is attached to the resulting incident.",
  "Table stakes"),
 
 ("U-21", B5, "False-positive reporting from the endpoint",
- "The user who hit the block is your best tuning signal.",
+ "The user who hit the block knows whether it was wrong.",
  "Report a false positive from the block dialog and confirm it reaches an admin queue.",
  "Advanced"),
 
@@ -137,8 +137,8 @@ USABILITY = [
  "Advanced"),
 
 ("U-25", B5, "Modify the action rather than stop it",
- "Many risky actions can continue safely once the sensitive part is removed. Stopping work entirely is the most expensive outcome.",
- "Paste text containing sensitive identifiers into an unsanctioned destination and confirm the identifiers can be redacted while the rest of the paste completes. Better still: during a screen share to an external participant, sensitive content on screen can be obscured.",
+ "Many risky actions can continue safely once the sensitive part is removed.",
+ "Paste text containing sensitive identifiers into an unsanctioned destination and confirm the identifiers can be redacted while the rest of the paste completes. Not required for Pass. Record in Notes whether sensitive content on screen can be obscured during a screen share to an external participant.",
  "Differentiator"),
 
 ("U-26", B5, "Intervention fatigue",
@@ -154,11 +154,11 @@ USABILITY = [
 
 ("U-28", B6, "User-visible latency on common actions",
  "Any perceptible delay on paste or save will be noticed and escalated.",
- "Time paste, file save, and USB copy with the agent on and off. Lag becomes perceptible well before anyone complains about it, so set your own threshold first - anything over about a second on paste is a finding.",
+ "Time paste, file save, and USB copy with the agent on and off. Lag becomes perceptible well before anyone complains about it, so set your own threshold first. Anything over about a second on paste is a finding.",
  "Table stakes"),
 
 ("U-29", B6, "Deployment method coverage",
- "The agent has to reach the fleet you actually have.",
+ "The agent has to reach the fleet you have.",
  "Confirm support for Intune, Jamf, SCCM, GPO, and non-persistent VDI.",
  "Table stakes"),
 

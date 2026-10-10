@@ -2,8 +2,8 @@
 //
 // The workbook itself lives in R2 and is served through /downloads/?file=<key>;
 // the key must also be listed in DOWNLOAD_KEYS (src/lib/downloads.ts) or the
-// route 404s. Row counts below are copied from the workbook — update them here
-// when a new build is uploaded.
+// route 404s. Row counts below are copied from the workbook. Update them here
+// when a new build is uploaded; verify.py fails if they disagree.
 
 export const TEST_PLAN_KEY = "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx";
 
@@ -16,7 +16,7 @@ export const TEST_PLAN_HREF =
   `/downloads/?file=${TEST_PLAN_KEY}&v=${TEST_PLAN_VERSION}`;
 
 export const TEST_PLAN_UPDATED = "2026-10-09";
-export const TEST_PLAN_ROWS = 181;
+export const TEST_PLAN_ROWS = 174;
 
 export type TestPlanSheet = {
   name: string;
@@ -28,7 +28,7 @@ export type TestPlanSheet = {
 export const TEST_PLAN_SHEETS: readonly TestPlanSheet[] = [
   {
     name: "1. Classification",
-    rows: 22,
+    rows: 21,
     question: "Can the tool find the data?",
     detail:
       "Four use cases: regulatory PII, PHI and card data; intellectual property and source code; financial reporting and material nonpublic information; and bulk exports out of business applications. Covers match counting, confidence levels, exact data match, OCR and nested archives.",
@@ -38,24 +38,17 @@ export const TEST_PLAN_SHEETS: readonly TestPlanSheet[] = [
     rows: 91,
     question: "Can it act on what it found?",
     detail:
-      "32 egress channels — GenAI tools, webmail, cloud storage, browsers, USB, printing, AirDrop, RDP and more — scored for Monitor / Warn and separately for Block, because seeing a channel is the easy half. One row per channel per operating system, since a channel that is table stakes on Windows is often advanced on macOS and rare on Linux. A Block timing column records whether each block landed before the data left.",
+      "32 egress channels (GenAI tools, webmail, cloud storage, browsers, USB, printing, AirDrop, RDP and more), scored for Monitor / Warn and separately for Block, because seeing a channel is the easy half. One row per channel per operating system, since a channel that is table stakes on Windows is often advanced on macOS and rare on Linux. A Block timing column records whether each block landed before the data left.",
   },
   {
-    name: "3. Enforcement",
-    rows: 6,
-    question: "What can it enforce in real time?",
-    detail:
-      "Why some classifications can block inline and others can only alert afterwards. This is the sheet that explains how a team can block card numbers going to a GenAI tool and still be unable to block AI-classified data going to the same place.",
-  },
-  {
-    name: "4. Investigations",
+    name: "3. Investigations",
     rows: 31,
     question: "What happens after an alert?",
     detail:
-      "Evidence and context, timeline and lineage, pivoting from a user or a file or a destination, insider-risk behaviour, case workflow, privacy controls, response actions, and AI agent activity — which agents run on an endpoint, what they did, and which identity they acted under.",
+      "Evidence and context, timeline and lineage, pivoting from a user or a file or a destination, insider-risk behaviour, case workflow, privacy controls, response actions, and AI agent activity: which agents run on an endpoint, what they did, and which identity they acted under.",
   },
   {
-    name: "5. Usability",
+    name: "4. Usability",
     rows: 31,
     question: "What does it cost to run?",
     detail:

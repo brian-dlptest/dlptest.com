@@ -12,8 +12,7 @@ P = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 wb = load_workbook(P)
 fail = []
 
-DATA_SHEETS = {"1. Classification": 2, "2. Policy": 3, "3. Enforcement": 3,
-               "4. Investigations": 2, "5. Usability": 2}
+DATA_SHEETS = {"1. Classification": 2, "2. Policy": 3, "3. Investigations": 2, "4. Usability": 2}
 
 print("SHEETS")
 for ws in wb.worksheets:
@@ -130,9 +129,8 @@ for coord, f in formulas:
 print("\nCOUNT SIMULATION")
 SEED = {"1. Classification": {9: ["Pass"]*8 + ["Partial"]*3 + ["Fail"]*2 + ["N/A"]*1},
         "2. Policy": {6: ["Pass"]*30 + ["Fail"]*10, 7: ["Partial"]*15, 8: ["Pass"]*20 + ["N/A"]*5},
-        "3. Enforcement": {4: ["Pass"]*3 + ["Fail"]*2},
-        "4. Investigations": {7: ["Pass"]*9 + ["Partial"]*4},
-        "5. Usability": {7: ["Pass"]*7 + ["Fail"]*3 + ["N/A"]*2}}
+        "3. Investigations": {7: ["Pass"]*9 + ["Partial"]*4},
+        "4. Usability": {7: ["Pass"]*7 + ["Fail"]*3 + ["N/A"]*2}}
 for sheet, cols in SEED.items():
     ws = wb[sheet]; first = extents[sheet][0]
     for ci, vals in cols.items():
@@ -177,21 +175,29 @@ print(f"  evaluated {checks} count formulas against seeded data without error")
 print("\nTABLE STAKES FAILURES LIST")
 #            sheet                 helper  tier  result     (Policy: Block)
 HELPER = {"1. Classification": ("K", "H", "I"), "2. Policy": ("K", "H", "G"),
-          "3. Enforcement": ("G", "E", "D"), "4. Investigations": ("I", "F", "G"),
-          "5. Usability": ("I", "F", "G")}
-HELPER_RE = re.compile(r'^=IF\(AND\(([A-Z]+)(\d+)="Table stakes",([A-Z]+)(\d+)="Fail"\),A(\d+),""\)$')
-LIST_RE = re.compile(r'^=IF\(D(\d+)=0,"None recorded",_xlfn\.TEXTJOIN\(", ",TRUE,'
-                     r"'([^']+)'!\$([A-Z]+)\$(\d+):\$([A-Z]+)\$(\d+)\)\)$")
+          "3. Investigations": ("I", "F", "G"), "4. Usability": ("I", "F", "G")}
+HIT = r'AND\(([A-Z]+)(\d+)="Table stakes",([A-Z]+)(\d+)="Fail"\)'
+HELPER_FIRST = re.compile(r'^=IF\(' + HIT + r',A(\d+),""\)$')
+HELPER_NEXT = re.compile(r'^=IF\(' + HIT + r',IF\(([A-Z]+)(\d+)="",A(\d+),([A-Z]+)(\d+)&", "&A(\d+)\),([A-Z]+)(\d+)\)$')
+LIST_RE = re.compile(r'^=IF\(D(\d+)=0,"None recorded",' r"'([^']+)'!\$([A-Z]+)\$(\d+)\)$")
 
-# every data row carries its own helper, pointing only at its own row
+# every helper cell reads only its own row, and (after the first) the helper cell above it
 for sheet, (hcol, tcol, rcol) in HELPER.items():
     ws = wb[sheet]; first, last, _ = extents[sheet]
     if not ws.column_dimensions[hcol].hidden:
         fail.append(f"{sheet}: helper column {hcol} is not hidden")
     bad = []
     for r in range(first, last + 1):
-        m = HELPER_RE.match(str(ws[f"{hcol}{r}"].value))
-        if not m or (m.group(1), m.group(3)) != (tcol, rcol) or {m.group(2), m.group(4), m.group(5)} != {str(r)}:
+        f_ = str(ws[f"{hcol}{r}"].value)
+        if r == first:
+            m = HELPER_FIRST.match(f_)
+            ok_ = bool(m) and (m.group(1), m.group(3)) == (tcol, rcol) and {m.group(2), m.group(4), m.group(5)} == {str(r)}
+        else:
+            m = HELPER_NEXT.match(f_)
+            ok_ = (bool(m) and (m.group(1), m.group(3)) == (tcol, rcol)
+                   and {m.group(2), m.group(4), m.group(7), m.group(10)} == {str(r)}
+                   and {(m.group(5), m.group(6)), (m.group(8), m.group(9)), (m.group(11), m.group(12))} == {(hcol, str(r - 1))})
+        if not ok_:
             bad.append(r)
     print(f"  helper  {sheet:<20} {hcol}  tier={tcol} result={rcol}  {extents[sheet][2]} rows  "
           f"{'OK' if not bad else 'BAD ' + str(bad[:4])}")
@@ -208,7 +214,7 @@ for row in summary.iter_rows(min_col=5, max_col=5):
 ts_tier_row = next(r for r in range(1, summary.max_row + 1)
                    if summary.cell(row=r, column=2).value == "Table stakes")
 if set(list_rows) != set(HELPER):
-    fail.append(f"failures list covers {sorted(list_rows)}, expected all five sheets")
+    fail.append(f"failures list covers {sorted(list_rows)}, expected all {len(HELPER)} sheets")
 
 # seed deliberate table stakes Fails on top of the generic seed, then simulate
 for sheet, (hcol, tcol, rcol) in HELPER.items():
@@ -224,15 +230,16 @@ for sheet, (hcol, tcol, rcol) in HELPER.items():
     ws = wb[sheet]; first, last, _ = extents[sheet]
     row, m = list_rows[sheet]
     d_row, ref_sheet = int(m.group(1)), m.group(2)
-    c1, r1, c2, r2 = m.group(3), int(m.group(4)), m.group(5), int(m.group(6))
+    c1, r1 = m.group(3), int(m.group(4))
     if d_row != row:
         fail.append(f"Summary!E{row}: list reads D{d_row}, not its own row's count")
-    if (ref_sheet, c1, c2, r1, r2) != (sheet, hcol, hcol, first, last):
-        fail.append(f"Summary!E{row}: TEXTJOIN range {ref_sheet}!{c1}{r1}:{c2}{r2} is not the helper column")
-    # what Excel would compute
-    helper_vals = [ws[f"A{r}"].value if (ws[f"{tcol}{r}"].value == "Table stakes"
-                   and ws[f"{rcol}{r}"].value == "Fail") else "" for r in range(first, last + 1)]
-    joined = ", ".join(v for v in helper_vals if v)
+    if (ref_sheet, c1, r1) != (sheet, hcol, last):
+        fail.append(f"Summary!E{row}: reads {ref_sheet}!{c1}{r1}, not the last helper cell {sheet}!{hcol}{last}")
+    # what any spreadsheet computes: the running list down the helper column
+    joined = ""
+    for r in range(first, last + 1):
+        if ws[f"{tcol}{r}"].value == "Table stakes" and ws[f"{rcol}{r}"].value == "Fail":
+            joined = ws[f"A{r}"].value if joined == "" else joined + ", " + ws[f"A{r}"].value
     expected = [ws[f"A{r}"].value for r in range(first, last + 1)
                 if ws[f"{tcol}{r}"].value == "Table stakes" and ws[f"{rcol}{r}"].value == "Fail"]
     d_count = evaluate(summary[f"D{row}"].value)
@@ -342,7 +349,7 @@ for loc in literal:
 
 # ---- 5b. every ID is well formed ------------------------------------------
 print("\nID FORMAT")
-CANON = re.compile(r"^(?:C-[ABCD]|P-[GMCBPN]|E-|I-|U-)\d{2}(?:\.(?:Windows|macOS|Linux))?$")
+CANON = re.compile(r"^(?:C-[ABCD]|P-[GMCBPN]|I-|U-)\d{2}(?:\.(?:Windows|macOS|Linux))?$")
 bad = []
 for sheet, first in DATA_SHEETS.items():
     ws = wb[sheet]
@@ -359,9 +366,8 @@ print("\nSOURCE <-> WORKBOOK ID PARITY")
 import content_class, content_policy, content_xp, content_use
 SRC = {"1. Classification": [r[0] for r in content_class.CLASSIFICATION],
        "2. Policy":         [r[0] for r in content_policy.POLICY],
-       "3. Enforcement":    [r[0] for r in content_xp.XPOLICY],
-       "4. Investigations": [r[0] for r in content_xp.INVESTIGATIONS],
-       "5. Usability":      [r[0] for r in content_use.USABILITY]}
+       "3. Investigations": [r[0] for r in content_xp.INVESTIGATIONS],
+       "4. Usability":      [r[0] for r in content_use.USABILITY]}
 for sheet, want in SRC.items():
     ws, first = wb[sheet], extents[sheet][0]
     got = [ws.cell(row=r, column=1).value for r in range(first, first + len(want))]
@@ -403,6 +409,74 @@ wb_total = sum(len(v) for v in SRC.values())
 print(f"  total                page={page_total}  workbook={wb_total}  {'OK' if page_total == wb_total else 'MISMATCH'}")
 if page_total != wb_total:
     fail.append(f"page says {page_total} test cases, workbook has {wb_total}")
+
+
+# ---- 9. no template leakage, no em dashes ----------------------------------
+print("\nRENDERED TEXT")
+here_ = os.path.dirname(os.path.abspath(__file__))
+page_src = open(os.path.join(here_, "..", "..", "src", "pages", "endpoint-dlp-test-plan.astro")).read()
+leaks, emdash = [], []
+for ws_ in wb.worksheets:
+    for row in ws_.iter_rows():
+        for c in row:
+            v = c.value
+            if not isinstance(v, str) or v.startswith("="):
+                continue
+            # an f-string that was never an f-string prints its {ref(...)} literally
+            if "{" in v or "}" in v:
+                leaks.append(f"{ws_.title}!{c.coordinate}: {v[max(0, v.find('{') - 20):v.find('{') + 40]!r}")
+            if "—" in v:
+                emdash.append(f"{ws_.title}!{c.coordinate}")
+for name, src_ in (("src/data/test-plan.ts", ts_src), ("endpoint-dlp-test-plan.astro", page_src)):
+    if "ref(" in src_:
+        leaks.append(f"{name}: contains ref(")
+    if "—" in src_:
+        emdash.append(name)
+print(f"  template text in cells or page data: {leaks or 'none'}")
+print(f"  em dashes in workbook or page data: {emdash or 'none'}")
+for l in leaks:  fail.append(f"unrendered template text - {l}")
+for e in emdash: fail.append(f"em dash in {e}")
+
+# ---- 10. the page's channel count matches the Policy sheet ------------------
+chan_page = int(re.search(r'"(\d+) egress channels', ts_src).group(1))
+chan_wb = len({r[0].split(".")[0] for r in content_policy.POLICY})
+print(f"  Policy channels: page={chan_page} workbook={chan_wb}  {'OK' if chan_page == chan_wb else 'MISMATCH'}")
+if chan_page != chan_wb:
+    fail.append(f"page says {chan_page} egress channels, Policy sheet has {chan_wb}")
+
+# ---- 11. ID map reconciles with the previous version ------------------------
+print("\nID MAP")
+import content_changelog
+prev_ver, prev_rows = content_changelog.IDMAP_FROM
+full_ids = {wb[sh].cell(row=r_, column=1).value for sh, (f_, l_, _) in extents.items()
+            for r_ in range(f_, l_ + 1)}
+cl_ = wb["Change Log"]
+hdr = next((r_ for r_ in range(1, cl_.max_row + 1) if cl_.cell(row=r_, column=1).value == f"v{prev_ver} ID"), None)
+if hdr is None:
+    fail.append("Change Log has no ID map header")
+else:
+    olds, news, bad_map = [], [], []
+    r_ = hdr + 1
+    while cl_.cell(row=r_, column=1).value:
+        o, n_ = cl_.cell(row=r_, column=1).value, cl_.cell(row=r_, column=2).value
+        olds.append(o); news.append(n_)
+        if n_ != "Removed" and n_ not in full_ids:
+            bad_map.append(f"row {r_}: v{cur_ver} ID {n_} does not exist")
+        if o != "New" and not re.fullmatch(r"(?:C-[ABCD]|P-[GMCBPN]|E-|I-|U-)\d{2}(?:\.(?:Windows|macOS|Linux))?", o):
+            bad_map.append(f"row {r_}: v{prev_ver} ID {o!r} is malformed")
+        r_ += 1
+    real_old = [o for o in olds if o != "New"]; real_new = [n_ for n_ in news if n_ != "Removed"]
+    if len(set(real_old)) != len(real_old): bad_map.append("a previous ID appears twice")
+    if len(set(real_new)) != len(real_new): bad_map.append("a current ID appears twice")
+    removed, added = news.count("Removed"), olds.count("New")
+    total_now = sum(e[2] for e in extents.values())
+    ok_sum = prev_rows - removed + added == total_now
+    print(f"  {len(olds)} rows: removed {removed}, new {added}, shifted {len(olds) - removed - added}")
+    print(f"  reconcile: v{prev_ver} {prev_rows} - {removed} + {added} = {prev_rows - removed + added}, "
+          f"v{cur_ver} has {total_now}  {'OK' if ok_sum else 'MISMATCH'}")
+    if not ok_sum:
+        bad_map.append(f"v{prev_ver} {prev_rows} - {removed} removed + {added} new != {total_now} rows now")
+    for b in bad_map: fail.append(f"ID map: {b}")
 
 print("\n" + ("FAILURES:\n  " + "\n  ".join(fail) if fail else "ALL CHECKS PASSED"))
 sys.exit(1 if fail else 0)
