@@ -16,7 +16,10 @@
  *      following scripts/news/EDITORIAL.md.
  *   4. Extract: a second, tool-free Claude call turns the research into
  *      structured candidate posts (JSON schema — no citations, no conflict).
- *   5. POST the candidates to the ingest endpoint (Bearer NEWS_INGEST_SECRET).
+ *   5. Polish: one tool-free editing call per candidate, using the vendored
+ *      no-ai-slop skill (scripts/news/no-ai-slop/) plus scripts/news/VOICE.md.
+ *      An edit that fails checkPolish() is discarded and the draft kept.
+ *   6. POST the candidates to the ingest endpoint (Bearer NEWS_INGEST_SECRET).
  *
  * Env:
  *   ANTHROPIC_API_KEY    — required
@@ -339,6 +342,113 @@ async function extract(client, { report, cutoffIso }) {
   }
 }
 
+/**
+ * Phase 3 — line-edit each candidate with the no-ai-slop skill.
+ *
+ * The drafts are fluent but formulaic: across the 38 posts the pipeline wrote
+ * before this pass existed, 31 used em dashes (135 in all), 26 leaned on a
+ * "rather than" contrast, and 28 ended on a "what this means for DLP buyers"
+ * kicker. The skill targets exactly those patterns; VOICE.md supplies the
+ * audience, Brian's voice and the house rules the skill can't know.
+ *
+ * Unattended, so it fails safe: any error, refusal, truncation or failed
+ * checkPolish() keeps the unedited draft. A story is never lost to the edit.
+ */
+async function polish(client, candidates, { skill, skillEval, voice }) {
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      excerpt: { type: "string", description: "plain text, 200-280 chars" },
+      body: { type: "string", description: "Markdown body, no frontmatter" },
+      changes: { type: "string", description: "the skill's short What changed section" },
+    },
+    required: ["title", "excerpt", "body", "changes"],
+  };
+
+  // Identical across every candidate in a run, so it is cached after the first
+  // call (one breakpoint at the end of system covers all three blocks).
+  const system = [
+    {
+      type: "text",
+      text:
+        "You are the line editor for dlptest.com's Data Security News. Edit each draft with the " +
+        "no-ai-slop skill below (its Edit job), then check the result against its eval and fix " +
+        "any failures before returning. VOICE.md follows the skill and overrides it where they " +
+        "disagree. This runs unattended: never ask questions, and return the edited title, " +
+        "excerpt and body plus the skill's short What changed section as `changes`.",
+    },
+    {
+      type: "text",
+      text: `----- no-ai-slop: SKILL.md -----\n${skill}\n----- no-ai-slop: eval.md -----\n${skillEval}`,
+    },
+    {
+      type: "text",
+      text: `----- VOICE.md -----\n${voice}`,
+      cache_control: { type: "ephemeral" },
+    },
+  ];
+
+  const out = [];
+  for (const candidate of candidates) {
+    const draft = { title: candidate.title, excerpt: candidate.excerpt, body: candidate.body };
+    try {
+      const response = await createMessage(client, {
+        model: MODEL,
+        max_tokens: 16000,
+        system,
+        output_config: { format: { type: "json_schema", schema } },
+        messages: [{ role: "user", content: `Edit this draft:\n\n${JSON.stringify(draft, null, 2)}` }],
+      });
+      if (response.stop_reason !== "end_turn") {
+        throw new Error(`stop_reason ${response.stop_reason}`);
+      }
+      const edited = JSON.parse(response.content.find((b) => b.type === "text")?.text ?? "{}");
+      const verdict = checkPolish(draft, edited);
+      if (!verdict.ok) throw new Error(verdict.reason);
+      console.log(`Polished ${candidate.slug}:\n${edited.changes.trim()}\n`);
+      out.push({ ...candidate, title: edited.title, excerpt: edited.excerpt, body: edited.body });
+    } catch (error) {
+      console.warn(`::warning::Kept the unedited draft for ${candidate.slug}: ${error.message}`);
+      out.push(candidate);
+    }
+  }
+  return out;
+}
+
+/**
+ * Guard for the editing pass: reject an edit that changed facts rather than
+ * prose. The skill already forbids adding claims, but a reviewer skimming the
+ * queue would not notice a wrong number, so the rules that matter are enforced
+ * here too. Pure — exercised by polish.test.mjs.
+ */
+function checkPolish(draft, edited) {
+  for (const field of ["title", "excerpt", "body"]) {
+    if (typeof edited?.[field] !== "string" || !edited[field].trim()) {
+      return { ok: false, reason: `edit returned no ${field}` };
+    }
+  }
+
+  // Over-compression strips substance; the skill asks for the minimum edit.
+  if (edited.body.length < draft.body.length * 0.4) {
+    return { ok: false, reason: `body shrank from ${draft.body.length} to ${edited.body.length} chars` };
+  }
+
+  const urls = (s) => s.match(/https?:\/\/[^\s)\]>"]+/g) ?? [];
+  const lost = urls(draft.body).filter((u) => !edited.body.includes(u));
+  if (lost.length) return { ok: false, reason: `dropped link ${lost[0]}` };
+
+  // Every number in the edit must already be in the draft: "$25 million" may
+  // become "$25M", but a figure that wasn't there is an invented fact.
+  const numbers = (s) => new Set((s.match(/\d+(?:[.,]\d+)*/g) ?? []).map((n) => n.replace(/,/g, "")));
+  const known = numbers(`${draft.title} ${draft.excerpt} ${draft.body}`);
+  const added = [...numbers(`${edited.title} ${edited.excerpt} ${edited.body}`)].filter((n) => !known.has(n));
+  if (added.length) return { ok: false, reason: `introduced number ${added[0]}` };
+
+  return { ok: true };
+}
+
 async function ingest(siteUrl, secret, candidates) {
   const res = await fetch(new URL("/api/news/candidates/", siteUrl), {
     method: "POST",
@@ -404,6 +514,11 @@ async function main() {
   const newsDir = join(REPO_ROOT, process.env.NEWS_DIR?.trim() || "src/content/news");
 
   const editorial = readFileSync(join(SCRIPT_DIR, "EDITORIAL.md"), "utf8");
+  const style = {
+    skill: readFileSync(join(SCRIPT_DIR, "no-ai-slop", "SKILL.md"), "utf8"),
+    skillEval: readFileSync(join(SCRIPT_DIR, "no-ai-slop", "eval.md"), "utf8"),
+    voice: readFileSync(join(SCRIPT_DIR, "VOICE.md"), "utf8"),
+  };
   const { cutoff, basis: cutoffBasis } = computeCutoff(newsDir);
   const cutoffIso = cutoff.toISOString();
   const today = new Date().toISOString().slice(0, 10);
@@ -450,7 +565,10 @@ async function main() {
     return;
   }
 
-  const result = await ingest(siteUrl, ingestSecret, candidates);
+  console.log("Editing drafts (no-ai-slop + VOICE.md)...");
+  const polished = await polish(client, candidates, style);
+
+  const result = await ingest(siteUrl, ingestSecret, polished);
   console.log("Ingest result:", JSON.stringify(result));
 }
 

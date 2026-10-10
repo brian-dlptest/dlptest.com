@@ -7,6 +7,7 @@ one digest email and triage everything at `/admin/news/` with **Publish**
 
 ```
 GitHub Actions cron ──▶ scripts/news/discover.mjs (Claude + web_search)
+                          │  research → draft → edit (no-ai-slop + VOICE.md)
                           │  POST /api/news/candidates/  (Bearer secret)
                           ▼
 Cloudflare Worker ── D1 `news_candidates` ── digest email (Graph)
@@ -14,6 +15,23 @@ Cloudflare Worker ── D1 `news_candidates` ── digest email (Graph)
             /admin/news/ (Cloudflare Access) ── Publish → git commit → deploy
                                               └ Delete  → mark rejected
 ```
+
+## How posts are written
+
+Three files shape a post, each with one job:
+
+- `EDITORIAL.md` decides **which stories qualify**. The research call reads it.
+- `no-ai-slop/` is a vendored copy of
+  [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop), the editing
+  skill that strips AI writing patterns. Don't edit it; see its README to update.
+- `VOICE.md` sets **how posts read**: the audience, Brian's voice, and house
+  rules such as vendor-neutrality. It overrides the skill, and it's the file to
+  edit when a post doesn't sound right.
+
+Every drafted candidate gets one editing pass before it is queued. If the edit
+changes a number, drops a link or guts the body, `checkPolish()` throws it away
+and the original draft is queued instead, with a warning in the Actions log.
+The log also prints the skill's "What changed" notes for each post.
 
 ## One-time setup
 
