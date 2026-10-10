@@ -18,7 +18,7 @@ USABILITY = [
 
 ("U-02", B0, "Classification explained in plain language",
  "An unexplainable verdict cannot be defended to a business owner.",
- "Open an AI classification and confirm it states why - which passages, which signals, which origin.",
+ "Open an AI classification and confirm it states why: which passages, which signals, which origin.",
  "Advanced"),
 
 # -------------------------------------------------------- AI Policy & Tuning
@@ -28,33 +28,33 @@ USABILITY = [
  "Differentiator"),
 
 ("U-04", B1, "Policy recommendations from observed behaviour",
- "The tool has the telemetry; it should propose the policy.",
- "After two weeks of monitoring, ask for recommended policies and judge how many you would actually deploy.",
- "Differentiator"),
+ "The tool already sees the activity, so it should propose policies from it.",
+ "After two weeks of monitoring, ask for recommended policies and judge how many you would deploy.",
+ "Advanced"),
 
 ("U-05", B1, "Simulation before enforcement",
  "The question every stakeholder asks: how many people will this block?",
- "Take a monitor-mode policy and ask how many blocks it WOULD have produced last month, by team.",
+ "Take a monitor-mode policy and ask how many blocks it would have produced last month, by team. Previewing what an intervention will look like is not simulation. Pass requires a count of would-be blocks calculated from real historical activity.",
  "Advanced"),
 
-("U-06", B1, "AI review of user override justifications",
- "Justifications are usually collected and never read. This makes them a control.",
- "Submit a weak justification ('needed it') and a strong one, and confirm they are scored differently in real time.",
- "Differentiator"),
+("U-06", B1, "Justification as a control, not a log entry",
+ "Justifications are usually collected and never read. The sentence a user writes when asked why is often the most useful artefact in a case, and it is worth nothing if nothing acts on it.",
+ "First confirm the user can enter free text rather than only choosing from a list. Then submit a weak justification ('needed it') and a considered one, and establish what the tool does with the difference. Any of these counts: scored or classified in real time, routed to a review queue, escalated to an analyst, or ranked for the operator. Ask whether the text is searchable and whether repeated weak justifications from one person show up as a pattern. A picklist with no free-text option is a Fail.",
+ "Advanced"),
 
 # -------------------------------------------------------- AI Operations
 ("U-07", B2, "AI incident investigator",
  "Triage is the largest recurring cost in running DLP.",
  "Hand the agent a real incident and compare its findings and recommended action against your own analysis.",
- "Differentiator"),
+ "Advanced"),
 
 ("U-08", B2, "Intent inference, not just activity detection",
  "Separates a careless employee from a departing one taking the customer list.",
  "Run the same file movement as (a) a routine workflow and (b) part of an exfiltration sequence, and confirm they are scored differently.",
- "Differentiator"),
+ "Advanced"),
 
 ("U-09", B2, "Automated remediation with human-in-the-loop escalation",
- "Automation you can actually authorise, because it knows when to stop.",
+ "Automated responses that hand the case to a person when it falls outside set limits.",
  "Confirm you can set which actions run automatically and which require approval, and test both paths.",
  "Advanced"),
 
@@ -70,7 +70,7 @@ USABILITY = [
 
 ("U-12", B2, "Mean time to triage an incident",
  "Cost per incident, measured directly.",
- "Time ten real incidents end to end, from alert to a decision you would stand behind. Run them across two analysts of different experience levels - if the platform is doing the work, the gap between them should be small.",
+ "Time ten real incidents end to end, from alert to a decision you would stand behind. Run them across two analysts of different experience levels. If the platform is doing the work, the gap between them should be small.",
  "Table stakes"),
 
 # -------------------------------------------------------- Rollout & Change Control
@@ -91,53 +91,83 @@ USABILITY = [
 
 # -------------------------------------------------------- Admin Experience
 ("U-16", B4, "Policies required to cover the use cases on this plan",
- "The most honest usability metric there is. Count them.",
+ "Count the policies needed to cover this plan's use cases. Fewer policies means less to tune and maintain.",
  "Implement use cases A-D and count the resulting policies, rules, and classifiers.",
  "Table stakes"),
 
 ("U-17", B4, "Role-based administration and separation of duties",
- "Policy authors, approvers and investigators should be different people, and a block-mode change deserves a second pair of eyes.",
- "Create an author who cannot approve and confirm the block holds. Then confirm a policy change can be made to require approval before it reaches endpoints.",
+ "Policy authors, approvers and investigators should be different people.",
+ "Create a role that can author policies but cannot change enforcement settings or view evidence, and a role that can investigate but cannot change policy. Confirm both restrictions hold.",
  "Table stakes"),
 
+("U-18", B4, "Approval workflow for enforcement changes",
+ "A block-mode change is a production change and deserves a second pair of eyes.",
+ "Change a rule from monitor to block and confirm the change can be made to require a second administrator's approval before it reaches endpoints.",
+ "Advanced"),
+
 # -------------------------------------------------------- End-User Experience
-("U-18", B5, "Policy tip clarity",
- "A block the user does not understand becomes a helpdesk ticket and a workaround. Redirecting beats blocking - naming the sanctioned alternative prevents the next attempt too.",
+("U-19", B5, "Policy tip clarity",
+ "A block the user does not understand becomes a helpdesk ticket and a workaround.",
  "Trigger a block and read the message as an ordinary employee would. Does it say what to do instead, and can it name the approved destination explicitly?",
  "Table stakes"),
 
-("U-19", B5, "Business justification capture on warn",
- "Keeps people working while producing the best signal in the system - the justification a user types is often the most useful artefact in the case.",
+("U-20", B5, "Business justification capture on warn",
+ "Keeps people working, and records why the user went ahead.",
  "Trigger a warn, submit a justification, and confirm the action proceeds, the text is searchable, and it is attached to the resulting incident.",
  "Table stakes"),
 
-("U-20", B5, "False-positive reporting from the endpoint",
- "The user who hit the block is your best tuning signal.",
+("U-21", B5, "False-positive reporting from the endpoint",
+ "The user who hit the block knows whether it was wrong.",
  "Report a false positive from the block dialog and confirm it reaches an admin queue.",
  "Advanced"),
 
+("U-22", B5, "Working redirect to the sanctioned alternative",
+ "Naming the approved destination helps. Getting the user there in one step is what stops the next attempt.",
+ "Trigger a block or warn that offers an approved alternative. Follow it and confirm the user can finish the original task through the sanctioned path without raising a ticket.",
+ "Advanced"),
+
+("U-23", B5, "Request approval before proceeding",
+ "Some actions should be neither blocked outright nor allowed on a justification alone.",
+ "Trigger an action that requires approval. Confirm the user can request it from the prompt and see what they are waiting on, and that both approval and denial reach the user and the record. Test what happens when nobody responds.",
+ "Advanced"),
+
+("U-24", B5, "Time-bound exceptions",
+ "Permanent exceptions pile up until the policy means nothing.",
+ "After a justified or approved override, confirm access can be granted for a set period or a single action, and that the prompt returns when it expires.",
+ "Advanced"),
+
+("U-25", B5, "Modify the action rather than stop it",
+ "Many risky actions can continue safely once the sensitive part is removed.",
+ "Paste text containing sensitive identifiers into an unsanctioned destination and confirm the identifiers can be redacted while the rest of the paste completes. Not required for Pass. Record in Notes whether sensitive content on screen can be obscured during a screen share to an external participant.",
+ "Differentiator"),
+
+("U-26", B5, "Intervention fatigue",
+ "A prompt shown thirty times a day gets clicked through unread, and that teaches users to ignore the agent.",
+ "Trigger the same rule thirty times in one day as the same user. Confirm the tool suppresses, escalates or adapts rather than showing an identical prompt every time, and that an administrator can see and tune the frequency.",
+ "Advanced"),
+
 # -------------------------------------------------------- Agent & Platform
-("U-21", B6, "Agent resource footprint",
+("U-27", B6, "Agent resource footprint",
  "The fastest route to an agent being uninstalled is a slow laptop.",
  "Measure idle and peak CPU, RAM, and battery over a normal working day. Set a threshold before you test.",
  "Table stakes"),
 
-("U-22", B6, "User-visible latency on common actions",
+("U-28", B6, "User-visible latency on common actions",
  "Any perceptible delay on paste or save will be noticed and escalated.",
- "Time paste, file save, and USB copy with the agent on and off. Lag becomes perceptible well before anyone complains about it, so set your own threshold first - anything over about a second on paste is a finding.",
+ "Time paste, file save, and USB copy with the agent on and off. Lag becomes perceptible well before anyone complains about it, so set your own threshold first. Anything over about a second on paste is a finding.",
  "Table stakes"),
 
-("U-23", B6, "Deployment method coverage",
- "The agent has to reach the fleet you actually have.",
+("U-29", B6, "Deployment method coverage",
+ "The agent has to reach the fleet you have.",
  "Confirm support for Intune, Jamf, SCCM, GPO, and non-persistent VDI.",
  "Table stakes"),
 
-("U-24", B6, "Tamper resistance and self-healing",
+("U-30", B6, "Tamper resistance and self-healing",
  "A technical user who can stop the service has no DLP.",
  "Attempt to stop the service, kill the process, and uninstall as a local administrator.",
  "Table stakes"),
 
-("U-25", B6, "Offline enforcement and event queueing",
+("U-31", B6, "Offline enforcement and event queueing",
  "Laptops spend real time off the network.",
  "Go offline for 24 hours, trigger events, reconnect, and confirm nothing is lost.",
  "Table stakes"),

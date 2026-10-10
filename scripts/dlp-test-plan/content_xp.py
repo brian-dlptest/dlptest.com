@@ -1,35 +1,4 @@
-# Sheet 3 - Enforcement
-# (id, method, what_to_test, tier)
-# The Result column is left blank for the tester.
-
-XPOLICY = [
-("E-01", "Exact Data Match (EDM)",
- "Attempt egress of 50 records that are in the index and 50 that are not. Ask whether the endpoint holds a local copy of the hash index or calls home for every check. Pass = only the indexed 50 are caught, and the check is fast enough to block rather than alert.",
- "Differentiator"),
-
-("E-02", "AI Classification (LLM document-type labels)",
- "The modern form of content classification: an LLM labels what a file IS - a contract, source code, a billing record - from a natural-language description rather than from a pattern. Define a label in plain language, add a structural constraint if the tool supports one (an extension or path that must also match), add an exclusion for test data, then upload sample files and confirm the label lands before you deploy it. Then ask where the model executes and whether the action can be held pending its verdict - cloud-scored and on-device classification get described in the same language. Pass = it labels by document type accurately AND blocks in the moment. A tool that labels well but only alerts after the fact is Partial.",
- "Advanced"),
-
-("E-03", "AI classification with a cached verdict",
- "Score a file once, then attempt egress of the same content again. Uncached, a cloud verdict usually lands after the data has already gone - so ask for the p95 classification latency and whether the action can be held pending the verdict. Caching is the practical answer: AI decides once, the endpoint caches, enforcement is local from then on. Ask how long verdicts are cached and what invalidates them. Pass = the second attempt is blocked locally, without a round trip.",
- "Differentiator"),
-
-("E-04", "Data lineage / origin",
- "Download a file from an internal repo, rename it, zip it, then attempt egress. The agent records the origin as it happens, so enforcement is a local lookup rather than a call out - which is why lineage can block in real time where AI classification usually cannot. Pass = the zip is blocked on origin alone.",
- "Differentiator"),
-
-("E-05", "Behavioural / intent (UEBA)",
- "Perform a 100x export and confirm the anomaly surfaces. This is investigation and risk scoring rather than prevention, so Pass = it surfaces promptly and is not sold to you as a blocking control.",
- "Differentiator"),
-
-("E-06", "Agentic / autonomous AI decisioning",
- "Ask for a demonstration of a real-time block that an AI agent decided, rather than one a static rule decided. Pass = the agent itself makes the call in the moment; writing a rule that later blocks is a different thing, and should be scored Partial.",
- "Differentiator"),
-
-]
-
-# Sheet 4 - Investigations
+# Sheet 3 - Investigations
 # (id, area, capability, why_it_matters, how_to_test, tier)
 
 A0 = "Evidence & Context"
@@ -39,16 +8,17 @@ A3 = "Insider Risk & Behaviour"
 A4 = "Workflow & Case Management"
 A5 = "Privacy & Governance"
 A6 = "Response"
+A7 = "AI Agent Activity"
 
 INVESTIGATIONS = [
 # -------------------------------------------------------- Evidence & Context
 ("I-01", A0, "The matched content is visible in the incident",
- "Without seeing what actually matched, every triage decision is a guess.",
+ "Without seeing what matched, every triage decision is a guess.",
  "Open an incident and confirm you can see the matched strings in context, with configurable masking.",
  "Table stakes"),
 
 ("I-02", A0, "Forensic file capture",
- "The file itself, as it was at the moment of the incident - not a filename and a hash.",
+ "The file itself, as it was at the moment of the incident, not a filename and a hash.",
  "Trigger an incident and confirm you can retrieve and open the captured copy.",
  "Advanced"),
 
@@ -63,13 +33,13 @@ INVESTIGATIONS = [
  "Table stakes"),
 
 ("I-05", A0, "Destination detail, not just a category",
- "Knowing that data went to 'cloud storage' is not actionable. Capturing the account it went to - and that it is a personal account rather than your corporate tenant - is.",
+ "Capture the account the data went to, and whether it is a personal account or your corporate tenant.",
  "Upload to a personal Dropbox and check whether the incident names the account, not just the domain.",
  "Advanced"),
 
 # -------------------------------------------------------- Timeline & Lineage
 ("I-06", A1, "Auto-assembled incident timeline",
- "The investigation should open with the story already told, not with a query box.",
+ "The investigation opens with the sequence of events already assembled.",
  "Open an incident cold and time how long until you can state what happened. Target: under two minutes with no manual log correlation.",
  "Differentiator"),
 
@@ -89,18 +59,18 @@ INVESTIGATIONS = [
  "Differentiator"),
 
 ("I-10", A1, "Events before the policy existed",
- "Most investigations start after the fact. Retroactive visibility decides whether you can answer at all.",
- "Enable always-on activity auditing. Create a NEW policy today and ask what that user did last month.",
+ "When an investigation starts after the fact, retroactive visibility decides whether you can answer at all.",
+ "Enable always-on activity auditing. Create a new policy today and ask what that user did last month.",
  "Advanced"),
 
 # -------------------------------------------------------- Search & Pivot
 ("I-11", A2, "Pivot from any point in an incident",
- "The core investigative move: from one alert, follow the person, the file, or the destination - whichever the question needs.",
+ "The core investigative move: from one alert, follow the person, the file, or the destination, whichever the question needs.",
  "From one alert, pivot three ways: to all activity for that user over 90 days including activity that never triggered a policy; to every user, device and destination a single file reached; and from a personal cloud account seen in the incident to everything else that reached it.",
  "Advanced"),
 
 ("I-12", A2, "Free-text and structured search across all telemetry",
- "Investigations are questions you did not anticipate.",
+ "Investigations start from questions no rule anticipated, so analysts need to search the raw telemetry directly.",
  "Search for a filename fragment, a USB serial, and a destination domain across 90 days. Time each query.",
  "Table stakes"),
 
@@ -111,14 +81,14 @@ INVESTIGATIONS = [
 
 # -------------------------------------------------------- Insider Risk & Behaviour
 ("I-14", A3, "All user activity, not just DLP alerts",
- "This is what separates modern DLP from a policy engine. An investigation needs the context around the alert.",
+ "An investigation needs the context around the alert.",
  "Confirm you can see application usage, file activity, web activity, and USB activity for a user with no policy match attached.",
  "Differentiator"),
 
 ("I-15", A3, "Behavioural baseline and deviation",
- "'Unusual for this person' is a better signal than 'over a global threshold' - and 'unusual for this role' is better still. Ten thousand rows is routine for a data analyst and alarming for a recruiter.",
+ "'Unusual for this person' is a better signal than 'over a global threshold', and 'unusual for this role' is better still. Ten thousand rows is routine for a data analyst and alarming for a recruiter.",
  "Establish two weeks of normal activity, then perform a 100x export and confirm it is scored as a deviation. Then confirm the tool also compares the user against their department or role, not only against themselves.",
- "Differentiator"),
+ "Advanced"),
 
 ("I-16", A3, "Sequence and scenario detection",
  "The flight-risk pattern: job-site visit, mass download, cloud upload, USB copy, within days.",
@@ -128,7 +98,7 @@ INVESTIGATIONS = [
 ("I-17", A3, "HR and identity context",
  "A resignation date turns routine activity into a priority case.",
  "Import a departing-employee list or HRIS feed and confirm those users are automatically elevated.",
- "Differentiator"),
+ "Advanced"),
 
 # -------------------------------------------------------- Workflow & Case Management
 ("I-18", A4, "Alert grouping and deduplication",
@@ -137,7 +107,7 @@ INVESTIGATIONS = [
  "Advanced"),
 
 ("I-19", A4, "Case management with assignment and annotation",
- "Investigations span days and people.",
+ "An investigation spans days and several people, so cases need owners, notes and history.",
  "Create a case, assign it, add notes and evidence, reassign it, and close it. Confirm the full history is preserved.",
  "Advanced"),
 
@@ -148,12 +118,12 @@ INVESTIGATIONS = [
 
 ("I-21", A4, "SIEM / SOAR integration",
  "Investigations that stay inside the DLP console do not scale.",
- "Forward incidents to your SIEM and confirm full fidelity - including the evidence link - not just a summary line.",
+ "Forward incidents to your SIEM and confirm full fidelity (including the evidence link), not just a summary line.",
  "Table stakes"),
 
 ("I-22", A4, "Auto-close of known-good activity",
  "The only durable way to cut alert volume.",
- "Identify a repeating benign pattern and confirm you can suppress it by pattern rather than by disabling the rule. Better still: confirm the platform spots the pattern itself, proposes the suppression, and applies it once you approve.",
+ "Identify a repeating benign pattern and confirm you can suppress it by pattern rather than by disabling the rule. Not required for Pass. Record in Notes whether the platform spots the pattern itself, proposes the suppression, and applies it once you approve.",
  "Advanced"),
 
 # -------------------------------------------------------- Privacy & Governance
@@ -168,7 +138,7 @@ INVESTIGATIONS = [
  "Table stakes"),
 
 ("I-25", A5, "Audit log of the investigators",
- "Someone has to watch the watchers.",
+ "Investigator searches and file views are logged, so access to monitoring data can itself be reviewed.",
  "Run a search as an analyst, then confirm that search is itself logged and reviewable by an administrator.",
  "Advanced"),
 
@@ -181,6 +151,27 @@ INVESTIGATIONS = [
 ("I-27", A6, "Remote forensics without touching the device",
  "Remote and BYOD fleets make physical collection impractical.",
  "Collect evidence from a device that is off-network at the time of collection.",
+ "Differentiator"),
+
+# -------------------------------------------------------- AI Agent Activity
+("I-28", A7, "AI agent and tool inventory",
+ "You cannot govern agents you do not know are running. Include local model runtimes and MCP servers.",
+ "Over a two-week pilot, ask for every AI agent, coding assistant, local model runtime, plugin and MCP server the tool found running on endpoints, with versions and devices. Compare it with what you know is installed.",
+ "Advanced"),
+
+("I-29", A7, "Structured capture of agent sessions",
+ "An agent can take dozens of actions per prompt. Record what the agent did, not only that it ran.",
+ "Run an AI coding agent through a short task that reads files, runs shell commands and edits a file. Confirm the prompt, the agent's responses, each tool call and command, and each file change are recorded as structured events tied to one session, not only as process activity.",
+ "Advanced"),
+
+("I-30", A7, "Agent, person and account attribution",
+ "An investigation needs to know whether a person or an agent acted, and which identity the agent used.",
+ "In one agent session, confirm each action is attributed to the agent or the person. Then sign the agent in with a personal account and with an API key, and confirm the tool reports which AI account was used and flags personal or unmanaged identities. Not required for Pass. Record in Notes whether a shared or generic OS login is resolved to the person behind it.",
+ "Differentiator"),
+
+("I-31", A7, "Agent tool chain: MCP servers and sub-agents",
+ "Agents reach other systems through MCP servers and hand work to sub-agents, which is often where data leaves.",
+ "Have an agent call an MCP server that reads from an internal system. Confirm each call is recorded with its input and output. Not required for Pass. Record in Notes whether a task delegated to a sub-agent is attributed back to the parent session.",
  "Differentiator"),
 
 ]
