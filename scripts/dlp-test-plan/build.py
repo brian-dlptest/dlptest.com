@@ -25,14 +25,32 @@ from openpyxl.chart import BarChart, Reference
 
 from content_class import CLASSIFICATION
 from content_policy import POLICY
-from content_xp import XPOLICY, INVESTIGATIONS
+from content_xp import INVESTIGATIONS
 from content_use import USABILITY
+from content_changelog import CHANGELOG, IDMAP, IDMAP_FROM
 
 OUT = os.path.join(HERE, "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx")
 
+
+def ref(fragment, sheet):
+    """The current ID of the one row on `sheet` (C, P, I or U) whose name contains
+    `fragment`. Prose in this file points at rows through ref(), never a literal ID: a
+    literal ID silently lands on a different row once the sheet is renumbered, which
+    is exactly how three glossary pointers went wrong in v6. Zero matches or several
+    fail the build instead of passing quietly."""
+    rows = {"C": [(r[0], r[2]) for r in CLASSIFICATION],
+            "P": [(r[0].split(".")[0], r[2]) for r in POLICY],
+            "I": [(r[0], r[2]) for r in INVESTIGATIONS],
+            "U": [(r[0], r[2]) for r in USABILITY]}[sheet]
+    hits = sorted({rid for rid, name in rows if fragment in name})
+    if len(hits) != 1:
+        raise SystemExit(f"ref({fragment!r}, {sheet!r}) matched {hits or 'no row'} - "
+                         f"name exactly one row")
+    return hits[0]
+
 # Shown on the Read Me sheet. Keep in step with TEST_PLAN_VERSION in src/data/test-plan.ts,
 # which cache-busts the download URL.
-VERSION = 6
+VERSION = 7
 
 FONT = "Arial"
 NAVY = "0B1220"
@@ -61,6 +79,8 @@ CTR   = Alignment(vertical="center", horizontal="center", wrap_text=True)
 HDRA  = Alignment(vertical="center", horizontal="left", wrap_text=True)
 
 RESULT_OPTS  = '"Pass,Partial,Fail,N/A"'
+# Policy only, and not scored: did the block land before the data left?
+BLOCK_TIMING_OPTS = '"Inline,After the fact,Not blocked"'
 
 # Table stakes coverage below this means a product cannot cover the basics. It replaced an
 # older "any Fail is disqualifying" rule, which disqualified the market leaders it was scored on.
@@ -120,6 +140,7 @@ def add_cf(ws, cell_range, mapping):
 
 
 RESULT_CF  = {"Pass": GOOD, "Partial": WARN, "Fail": BAD, "N/A": NEUT}
+BLOCK_TIMING_CF = {"Inline": GOOD, "After the fact": WARN, "Not blocked": BAD}
 
 TIER_FILL = {
     "Table stakes":   PatternFill("solid", fgColor="E7F1FF"),
@@ -160,21 +181,25 @@ ws.merge_cells("B4:C4")
 r = 6
 ws.cell(row=r, column=2, value="HOW TO USE THIS WORKBOOK").font = SUB
 r += 1
-rm(r, "Fill in the white cells", "Every sheet has a Result column and a Notes column - Pass / Partial / Fail / N/A, from a dropdown. Everything else is the plan. Use one copy of the workbook per product you are evaluating, or per environment you are validating."); r += 1
-rm(r, "Work the sheets in order", "Classification first: if the tool cannot find the data, no policy on the Policy sheet can act on it. Then Policy, then Enforcement, then Investigations, then Usability."); r += 1
-rm(r, "Test the negative cases", "Several rows carry a deliberate negative control - Luhn-invalid card numbers that must not match, a routine expense report alongside the board material, a 20-record file alongside the bulk export. A tool that matches everything is not a passing tool, and precision only shows up if you test for it."); r += 1
-rm(r, "Record the gaps, do not hide them", "The retyping row on the Policy sheet exists so the residual risk is written down rather than assumed away - nothing catches a person reading data off the screen and typing it somewhere else. The same goes for every cell you mark Fail: that is a finding, not a blank."); r += 1
+rm(r, "Fill in the white cells", "Every sheet has a Result column (Pass / Partial / Fail / N/A, from a dropdown) and a Notes column. The Policy sheet also has a Block timing column (Inline, After the fact or Not blocked), which is recorded but not scored. Everything else is the plan. Use one copy of the workbook per product you are evaluating, or per environment you are validating."); r += 1
+rm(r, "Check Linux first", "If Linux endpoints are in scope, score the Linux rows before anything else. A product with no Linux agent fails every Linux row, and that alone may decide the evaluation."); r += 1
+rm(r, "Short on time", "Run the Table stakes rows first. They decide whether a product is viable. Advanced and Differentiator rows decide between viable products."); r += 1
+rm(r, "Endpoint controls only", "Score what the product under test does for activity on the endpoint. A control that comes only from a separate product, such as an email gateway, a network proxy or cloud app scanning, does not count toward a Pass. Record it in Notes."); r += 1
+rm(r, "Work the sheets in order", "Classification first: if the tool cannot find the data, no policy on the Policy sheet can act on it. Then Policy, then Investigations, then Usability."); r += 1
+rm(r, "Classification method matters for blocking", "A product that blocks on a pattern match may only alert when the same content is identified by exact data match, AI classification or origin. When a Block passes on the Policy sheet, repeat it once with content each of those methods identifies, and record the result in Notes."); r += 1
+rm(r, "Test the negative cases", "Several rows carry a deliberate negative control: Luhn-invalid card numbers that must not match, a routine expense report alongside the board material, a 20-record file alongside the bulk export. A tool that matches everything is not a passing tool, and precision only shows up if you test for it."); r += 1
+rm(r, "Record the gaps, do not hide them", "The retyping row on the Policy sheet exists so the residual risk is written down rather than assumed away: nothing catches a person reading data off the screen and typing it somewhere else. The same goes for every cell you mark Fail: that is a finding, not a blank."); r += 1
 
 r += 1
 ws.cell(row=r, column=2, value="SHEETS").font = SUB
 r += 1
 for label, text in [
     ("1. Classification", f"Can the tool find the data? {len(CLASSIFICATION)} tests across four use cases: regulatory PII/PHI/PCI, intellectual property and source code, financial reporting and MNPI, and bulk exports from business applications."),
-    ("2. Policy", f"Can the tool act on it? {len(POLICY)} rows - one per egress channel per operating system, scored for Monitor / Warn together and for Block separately, because seeing a channel is the easy half."),
-    ("3. Enforcement", "Why some classifications cannot be enforced inline. Each row says what Pass means for that detection method - usually that the product blocks in the moment rather than alerting once the data has gone."),
-    ("4. Investigations", "What happens after an alert. Evidence, lineage, pivoting, insider-risk context, case workflow, privacy controls, and response."),
-    ("5. Usability", "What it costs to run. AI-assisted classification, policy authoring and triage, rollout and change control, agent footprint and user-visible latency, and the end-user experience that decides whether people route around the agent."),
-    ("Scoring Summary", "Rolls up every Result column - by sheet, by operating system and by maturity tier - and lists every table stakes row that failed. Formulas, not typed values: it updates as you fill the sheets in."),
+    ("2. Policy", f"Can the tool act on it? {len(POLICY)} rows, one per egress channel per operating system, scored for Monitor / Warn together and for Block separately, because seeing a channel is the easy half. A Block timing column records whether each block landed before the data left; it is not scored."),
+    ("3. Investigations", "What happens after an alert. Evidence, lineage, pivoting, insider-risk context, case workflow, privacy controls, response, and AI agent activity: which agents run on an endpoint, what they did, and which identity they acted under."),
+    ("4. Usability", "What it costs to run. AI-assisted classification, policy authoring and triage, rollout and change control, agent footprint and user-visible latency, and the end-user experience that decides whether people route around the agent."),
+    ("Scoring Summary", "Rolls up every Result column by sheet, by operating system and by maturity tier, and lists every table stakes row that failed. Formulas, not typed values: it updates as you fill the sheets in."),
+    ("Change Log", "What changed in each version, and why. Row IDs in an entry are as they were in that version: IDs are renumbered whenever rows are added or removed. The tab ends with an ID map: every row whose ID changed between v6 and v7, plus rows reworded enough that their v6 result should be re-scored rather than copied."),
 ]:
     rm(r, label, text); r += 1
 
@@ -183,8 +208,8 @@ ws.cell(row=r, column=2, value="LEGEND").font = SUB
 r += 1
 for label, text in [
     ("Result", "Pass = works as described.  Partial = works with caveats, record them in Notes.  Fail = does not work, or requires an unacceptable workaround.  N/A = not applicable to your environment (excluded from scoring)."),
-    ("Support (Policy sheet)", "Yes / Partial / No / N/A for each operating system and each enforcement action. Leave blank for anything you did not test - blank and No mean different things."),
-    ("Maturity tier", f"Table stakes = the basics. Table stakes coverage below {TS_FLOOR:.0%} means the product cannot cover the basics, whatever its differentiator score. Individual Fails here belong in your findings rather than averaged into a percentage - the Scoring Summary lists them by row.  Advanced = where mature products separate from adequate ones.  Differentiator = few products pass many of these; a low score is information, not a verdict."),
+    ("Block timing", "Policy sheet only. Inline = the action was stopped before the data left. After the fact = the tool reacted, but only once the data had already gone. Not blocked = the action completed. Recorded, not scored."),
+    ("Maturity tier", f"Table stakes = the basics. Table stakes coverage below {TS_FLOOR:.0%} means the product cannot cover the basics, whatever its differentiator score. Individual Fails here belong in your findings rather than averaged into a percentage. The Scoring Summary lists them by row.  Advanced = where mature products separate from adequate ones.  Differentiator = few products pass many of these; a low score is information, not a verdict."),
     ("Blank", "Not yet tested. Blanks are excluded from the coverage percentage on the Scoring Summary."),
 ]:
     rm(r, label, text); r += 1
@@ -192,44 +217,43 @@ for label, text in [
 r += 1
 ws.cell(row=r, column=2, value="GLOSSARY").font = SUB
 r += 1
-ws.cell(row=r, column=3, value="Abbreviations used in this workbook. DLP vocabulary is not standardised across vendors - where a term is one vendor's name for a general idea, that is said explicitly.").font = Font(name=FONT, size=9, italic=True, color=GREY)
+ws.cell(row=r, column=3, value="Abbreviations used in this workbook. DLP vocabulary is not standardised across vendors. Where a term is one vendor's name for a general idea, that is said explicitly.").font = Font(name=FONT, size=9, italic=True, color=GREY)
 ws.cell(row=r, column=3).alignment = TOP
 r += 1
 
 GLOSSARY = [
  (None, "Detection and classification"),
- ("Classifier", "Any named detector the tool matches content against - a regular expression, a keyword dictionary, a checksum-validated identifier, or a trained model. Every vendor has its own word for this. Where this workbook means the regular-expression kind specifically, it says pattern."),
- ("EDM", "Exact data match - matching against a hashed index of your own records, so only real customers match rather than anything SSN-shaped. See C-A08."),
- ("Confidence level", "How much supporting evidence sits near an identifier. Usually exposed as three named levels, sometimes with numbers attached (65 / 75 / 85 is one common scheme). It is NOT a percentage of the pattern matched. See C-A07."),
- ("Proximity", "The character distance between a primary element and its supporting keyword - the mechanism underneath confidence. See C-A07."),
- ("Weighted dictionary", "A keyword list where phrases carry different weights toward a match threshold, so strong evidence counts for more than weak - the second way platforms express the idea in C-A07."),
- ("Data lineage", "Recording where data came from and following it through copies, renames and pastes, so sensitivity is inferred from ORIGIN rather than content. See C-B02 and E-04."),
- ("AI Classification", "An LLM labelling what a file IS - a contract, source code, a billing record - from a natural-language description rather than a pattern. Usually combined with structural constraints (an extension or path that must also match) and exclusion rules, and tested against sample files before deployment. The term DSPM vendors use, now arriving at the endpoint. See E-02."),
- ("Trainable classifier", "The older supervised form of the same idea - a detector trained on example documents rather than described in a prompt. Being displaced by AI Classification."),
- ("OCR", "Optical character recognition - reading text out of images, so screenshots can be classified. See C-A10."),
+ ("Classifier", "Any named detector the tool matches content against: a regular expression, a keyword dictionary, a checksum-validated identifier, or a trained model. Every vendor has its own word for this. Where this workbook means the regular-expression kind specifically, it says pattern."),
+ ("EDM", f"Exact data match: matching against a hashed index of your own records, so only real customers match rather than anything SSN-shaped. See {ref('Exact Data Match', 'C')}."),
+ ("Confidence level", f"How much supporting evidence sits near an identifier. Usually exposed as three named levels. It is not a percentage of the pattern matched. See {ref('Confidence level', 'C')}."),
+ ("Proximity", f"The character distance between a primary element and its supporting keyword (the mechanism underneath confidence). See {ref('Confidence level', 'C')}."),
+ ("Weighted dictionary", f"A keyword list where phrases carry different weights toward a match threshold, so strong evidence counts for more than weak. This is the second way platforms express the idea in {ref('Confidence level', 'C')}."),
+ ("Data lineage", f"Recording where data came from and following it through copies, renames and pastes, so sensitivity is inferred from origin rather than content. See {ref('Origin-based sensitivity', 'C')}."),
+ ("AI Classification", f"An LLM labelling what kind of document a file is (a contract, source code, a billing record) from a plain-language description rather than a pattern. Usually combined with structural constraints, such as an extension or path that must also match, and exclusion rules, and tested against sample files before deployment. See {ref('AI Classification of a business-specific', 'C')}."),
+ ("Trainable classifier", "The older supervised form of the same idea: a detector trained on example documents rather than described in a prompt. Being displaced by AI Classification."),
+ ("OCR", f"Optical character recognition: reading text out of images, so screenshots can be classified. See {ref('OCR on images', 'C')}."),
  (None, "Investigation and risk"),
- ("UEBA", "User and entity behaviour analytics - baselining normal activity per user and flagging deviation from it."),
- ("UAM", "User activity monitoring - recording what users do independently of any policy match. See I-14."),
- ("IRM", "Insider risk management - risk arising from people inside the organisation, whether malicious, negligent, or compromised."),
- ("SIEM / SOAR", "Log aggregation and response-automation platforms. See I-21."),
- ("MCP", "Model Context Protocol - an open standard that lets AI clients call external tools. Some DLP platforms expose one as a natural-language admin interface. See U-10."),
+ ("UEBA", "User and entity behaviour analytics: baselining normal activity per user and flagging deviation from it."),
+ ("UAM", f"User activity monitoring: recording what users do independently of any policy match. See {ref('All user activity', 'I')}."),
+ ("IRM", "Insider risk management: risk arising from people inside the organisation, whether malicious, negligent, or compromised."),
+ ("SIEM / SOAR", f"Log aggregation and response-automation platforms. See {ref('SIEM / SOAR', 'I')}."),
+ ("MCP", f"Model Context Protocol: an open standard that lets AI clients call external tools. Some DLP platforms expose one as a natural-language admin interface. See {ref('MCP interface', 'U')}."),
  (None, "Identifiers used in the test data"),
  ("PII / PHI / PCI", "Personally identifiable information / protected health information / payment card data."),
- ("MNPI", "Material nonpublic information - company information not yet public that would move the share price. Use case C on the Classification sheet."),
+ ("MNPI", "Material nonpublic information: company information not yet public that would move the share price. Use case C on the Classification sheet."),
  ("SSN / CCN / DOB", "Social security number / credit card number / date of birth."),
  ("MRN", "Medical record number."),
- ("NPI / DEA", "US National Provider Identifier and Drug Enforcement Administration registration number - both healthcare provider identifiers."),
+ ("NPI / DEA", "US National Provider Identifier and Drug Enforcement Administration registration number, both healthcare provider identifiers."),
  ("NI / NHS", "UK National Insurance number and NHS number."),
  ("SIN", "Canadian Social Insurance Number."),
  ("VAT / IBAN", "EU VAT registration number and International Bank Account Number."),
- ("Luhn", "The check-digit algorithm that validates credit card numbers. A tool that does not apply it will match any 16 digits. See C-A02."),
+ ("Luhn", f"The check-digit algorithm that validates credit card numbers. A tool that does not apply it will match any 16 digits. See {ref('Luhn', 'C')}."),
  (None, "Channels and platforms"),
- ("Shadow browser", "Any browser outside the managed one - Brave, Vivaldi, Tor, a portable build. Usually blocked wholesale or invisible, rarely inspected. See P-B01."),
- ("Agentic browser", "A browser that acts on the user's behalf (Comet, Atlas, Dia). The agent performs the egress, which breaks both attribution and intent. See P-G06."),
- ("MTP / PTP", "Media and Picture Transfer Protocol - how phones and cameras appear over USB. Not mass storage, so USB policy often misses them entirely. See P-P03."),
- ("VDI / AVD", "Virtual desktop infrastructure / Azure Virtual Desktop."),
- ("WSL", "Windows Subsystem for Linux - file writes there bypass many Windows agents. See P-N04."),
- ("HRIS", "Human resources information system, such as Workday. See C-D03."),
+ ("Shadow browser", f"Any browser outside the managed one, such as Brave, Vivaldi, Tor or a portable build. Usually blocked wholesale or invisible, rarely inspected. See {ref('shadow browsers', 'P')}."),
+ ("Agentic browser", f"A browser that acts on the user's behalf (Comet, Atlas, Dia). The agent performs the egress, which breaks both attribution and intent. See {ref('Agentic browsers', 'P')}."),
+ ("MTP / PTP", f"Media and Picture Transfer Protocol: how phones and cameras appear over USB. Not mass storage, so USB policy often misses them entirely. See {ref('MTP / PTP', 'P')}."),
+ ("VDI", f"Virtual desktop infrastructure. See {ref('Deployment method coverage', 'U')}."),
+ ("HRIS", f"Human resources information system, such as Workday. See {ref('HRIS export', 'C')}."),
 ]
 for term, text in GLOSSARY:
     if term is None:
@@ -249,7 +273,7 @@ for label, text in [
     ("dlptest.com/generate/", "Generates synthetic datasets on demand, including Luhn-valid card numbers, NPI and DEA numbers, UK NI and NHS numbers, Canadian SIN, EU VAT and IBAN, passport and driver's licence numbers."),
     ("dlptest.com/http-post/ and /https-post/", "Live POST endpoints for testing cleartext and TLS web upload detection."),
     ("dlptest.com/ftp-test/", "Public FTP and S3 test targets for file-transfer channel tests."),
-    ("dlptest.com/regex/", "A library of 103 DLP-relevant regex patterns with worked examples - useful for building the credential and secret test files in C-B01."),
+    ("dlptest.com/regex/", f"A library of 103 DLP-relevant regex patterns with worked examples, useful for building the credential and secret test files in {ref('Secrets and credentials', 'C')}."),
     ("Important", "All data on dlptest.com is synthetic. Never use real customer, employee, or patient data to test a DLP tool."),
 ]:
     rm(r, label, text); r += 1
@@ -257,9 +281,9 @@ for label, text in [
 r += 1
 ws.cell(row=r, column=2, value="NOTES ON SOURCES").font = SUB
 r += 1
-rm(r, "Vendor neutrality", "This plan names no DLP product. Every row is written as a capability to test rather than a feature to look for, so it applies equally to any endpoint DLP tool - and so that no product is advantaged or disadvantaged by being listed or left out. Where a capability is genuinely rare, the Maturity Tier column says so instead."); r += 1
-rm(r, "Platform parity", "Several rows note that a control is commonly Windows-only - some print sub-features, RDP copy, Recall snapshot exclusion, just-in-time protection. Platform parity is the exception rather than the rule in endpoint DLP. Treat every macOS and Linux cell as unproven until you have tested it yourself rather than read it off a datasheet."); r += 1
-rm(r, "Linux", "Linux columns are included because Linux endpoints exist in most engineering organisations. Coverage across the market is far thinner than for Windows and macOS - expect most Linux cells to be No or blank, and treat that as a finding rather than an omission."); r += 1
+rm(r, "Vendor neutrality", "This plan names no DLP product. Every row is written as a capability to test rather than a feature to look for, so it applies equally to any endpoint DLP tool, and so that no product is advantaged or disadvantaged by being listed or left out. Where a capability is rare, the Maturity Tier column says so instead."); r += 1
+rm(r, "Platform parity", "Some controls are commonly Windows-only, as the offline enforcement and RDP rows note. Platform parity is the exception rather than the rule in endpoint DLP. Treat every macOS and Linux cell as unproven until you have tested it yourself rather than read it off a datasheet."); r += 1
+rm(r, "Linux", "Linux rows are included because Linux endpoints exist in most engineering organisations. Coverage across the market is far thinner than for Windows and macOS: expect most Linux cells to be Fail or blank, and treat that as a finding rather than an omission."); r += 1
 
 # ══════════════════════════════════════════════════════ 1. Classification
 ws = wb.create_sheet("1. Classification")
@@ -293,7 +317,7 @@ CLASS_LAST = last
 
 # ══════════════════════════════════════════════════════ 2. Policy
 ws = wb.create_sheet("2. Policy")
-W = [17, 22, 40, 11, 82, 14, 11, 15, 26]
+W = [17, 22, 40, 11, 82, 14, 11, 15, 26, 15]
 set_widths(ws, W)
 
 ws.merge_cells("A1:A2"); ws["A1"] = "ID"
@@ -304,11 +328,12 @@ ws.merge_cells("E1:E2"); ws["E1"] = "What to Test"
 ws.merge_cells("F1:G1"); ws["F1"] = "Result"
 ws.merge_cells("H1:H2"); ws["H1"] = "Maturity Tier"
 ws.merge_cells("I1:I2"); ws["I1"] = "Notes"
+ws.merge_cells("J1:J2"); ws["J1"] = "Block timing"
 ws["F2"] = "Monitor / Warn"
 ws["G2"] = "Block"
 
-style_header(ws, 1, 9, height=26)
-style_header(ws, 2, 9, height=30)
+style_header(ws, 1, 10, height=26)
+style_header(ws, 2, 10, height=30)
 for col in "FG":
     for r_ in (1, 2):
         ws[f"{col}{r_}"].fill = PatternFill("solid", fgColor=BLUE)
@@ -322,13 +347,14 @@ OS_FILL = {"Windows": PatternFill("solid", fgColor="E7F1FF"),
 for i, (pid, cat, chan, os_name, test, tier) in enumerate(POLICY, start=3):
     for c, v in ((1, pid), (2, cat), (3, chan), (4, os_name), (5, test), (8, tier)):
         ws.cell(row=i, column=c, value=v)
-    for c in range(1, 10):
+    for c in range(1, 11):
         cell = ws.cell(row=i, column=c)
         cell.font = B_FONT
         cell.alignment = TOP
         cell.border = BOX
     ws.cell(row=i, column=1).font = BB_FONT
     ws.cell(row=i, column=3).font = BB_FONT
+    ws.cell(row=i, column=10).alignment = CTR
     ws.cell(row=i, column=4).fill = OS_FILL[os_name]
     ws.cell(row=i, column=4).alignment = CTR
     for c in (6, 7, 8):
@@ -339,53 +365,14 @@ for i, (pid, cat, chan, os_name, test, tier) in enumerate(POLICY, start=3):
 last = len(POLICY) + 2
 add_dv(ws, RESULT_OPTS, f"F3:G{last}")
 add_cf(ws, f"F3:G{last}", RESULT_CF)
+add_dv(ws, BLOCK_TIMING_OPTS, f"J3:J{last}")
+add_cf(ws, f"J3:J{last}", BLOCK_TIMING_CF)
 ws.freeze_panes = "F3"
-ws.auto_filter.ref = f"A2:I{last}"
+ws.auto_filter.ref = f"A2:J{last}"
 POLICY_LAST = last
 
-# ══════════════════════════════════════════════════════ 3. Enforcement
-ws = wb.create_sheet("3. Enforcement")
-W = [8, 36, 92, 11, 15, 28]
-set_widths(ws, W)
-note = ("The Policy sheet asks whether a channel can be controlled. This sheet asks what the tool can "
-        "control it ON. Each row says what Pass means for that detection method - usually that the "
-        "product blocks the action in the moment rather than alerting after the data has gone. This "
-        "is where you find out why a team that can block PII going to a GenAI tool often cannot block "
-        "AI-classified data going to the same tool.")
-ws["A1"] = note
-ws.merge_cells("A1:F1")
-ws["A1"].font = Font(name=FONT, size=10, italic=True, color=GREY)
-ws["A1"].alignment = TOP
-ws["A1"].fill = PatternFill("solid", fgColor=BAND)
-ws.row_dimensions[1].height = est_height([(note, 300)], base=14)
-
-hdrs = ["ID", "Classification Method", "What to Test", "Result", "Maturity Tier", "Notes"]
-for c, h in enumerate(hdrs, start=1):
-    ws.cell(row=2, column=c, value=h)
-style_header(ws, 2, len(hdrs), height=30)
-for i, (xid, method, test, tier) in enumerate(XPOLICY, start=3):
-    for c, v in ((1, xid), (2, method), (3, test), (5, tier)):
-        ws.cell(row=i, column=c, value=v)
-    for c in range(1, len(hdrs) + 1):
-        cell = ws.cell(row=i, column=c)
-        cell.font = B_FONT
-        cell.alignment = TOP
-        cell.border = BOX
-    ws.cell(row=i, column=1).font = BB_FONT
-    ws.cell(row=i, column=2).font = BB_FONT
-    for c in (4, 5):
-        ws.cell(row=i, column=c).alignment = CTR
-    ws.cell(row=i, column=5).fill = TIER_FILL.get(tier, PatternFill())
-    ws.row_dimensions[i].height = est_height([(test, W[2]), (method, W[1])])
-last = len(XPOLICY) + 2
-add_dv(ws, RESULT_OPTS, f"D3:D{last}")
-add_cf(ws, f"D3:D{last}", RESULT_CF)
-ws.freeze_panes = "C3"
-ws.auto_filter.ref = f"A2:F{last}"
-XP_LAST = last
-
 # ══════════════════════════════════════════════════════ 3. Investigations
-ws = wb.create_sheet("4. Investigations")
+ws = wb.create_sheet("3. Investigations")
 W = [8, 26, 40, 56, 62, 15, 11, 30]
 set_widths(ws, W)
 hdrs = ["ID", "Capability Area", "Capability", "Why It Matters", "How to Test / What to Ask",
@@ -414,7 +401,7 @@ ws.auto_filter.ref = f"A1:H{last}"
 INV_LAST = last
 
 # ══════════════════════════════════════════════════════ 4. Usability
-ws = wb.create_sheet("5. Usability")
+ws = wb.create_sheet("4. Usability")
 W = [8, 24, 40, 54, 62, 15, 11, 30]
 set_widths(ws, W)
 hdrs = ["ID", "Area", "Capability", "Why It Matters", "How to Test / What to Ask",
@@ -443,9 +430,12 @@ ws.auto_filter.ref = f"A1:H{last}"
 USE_LAST = last
 
 # ══════════════════════════════════════════════════════ Table stakes Fail helpers
-# One hidden column per data sheet: the row's ID when it is a table stakes row scored Fail,
-# otherwise blank. The Scoring Summary TEXTJOINs these into a per-sheet list. A plain range
-# argument means no array formula, so it works in merged cells and needs no Ctrl-Shift-Enter.
+# One hidden column per data sheet holding a running list: each cell is the previous cell's
+# list, plus this row's ID when it is a table stakes row scored Fail. The last cell is the whole
+# list, and the Scoring Summary just reads it. Deliberately not TEXTJOIN: TEXTJOIN's
+# ignore_empty skips the helpers' "" results in Excel, but an independent recalculation engine
+# joined them (", , , ...") and other spreadsheet apps may too. IF, AND and & evaluate the same
+# everywhere, need no _xlfn. prefix, and work in Excel versions without TEXTJOIN.
 TS_HELPERS = {}
 
 def add_ts_fail_helper(ws, helper_col, id_col, tier_col, res_col, first, last, hdr_rows):
@@ -453,20 +443,25 @@ def add_ts_fail_helper(ws, helper_col, id_col, tier_col, res_col, first, last, h
     for hr in hdr_rows:
         c = ws.cell(row=hr, column=helper_col)
         c.font, c.fill, c.alignment, c.border = H_FONT, H_FILL, HDRA, BOX
-    ws.cell(row=hdr_rows[-1], column=helper_col, value="Table stakes Fail (auto)")
+    ws.cell(row=hdr_rows[-1], column=helper_col, value="Table stakes Fails so far (auto)")
+    H, T, R, I_ = L(helper_col), L(tier_col), L(res_col), L(id_col)
     for r_ in range(first, last + 1):
-        ws.cell(row=r_, column=helper_col,
-                value=f'=IF(AND({L(tier_col)}{r_}="Table stakes",{L(res_col)}{r_}="Fail"),{L(id_col)}{r_},"")')
+        hit = f'AND({T}{r_}="Table stakes",{R}{r_}="Fail")'
+        if r_ == first:
+            f = f'=IF({hit},{I_}{r_},"")'
+        else:
+            prev = f"{H}{r_ - 1}"
+            f = f'=IF({hit},IF({prev}="",{I_}{r_},{prev}&", "&{I_}{r_}),{prev})'
+        ws.cell(row=r_, column=helper_col, value=f)
     ws.column_dimensions[L(helper_col)].width = 18
     ws.column_dimensions[L(helper_col)].hidden = True
     TS_HELPERS[ws.title] = (L(helper_col), first, last)
 
 #                                sheet                  helper  id  tier  result  first  last         header rows
 add_ts_fail_helper(wb["1. Classification"], 11, 1, 8, 9, 2, CLASS_LAST, [1])
-add_ts_fail_helper(wb["2. Policy"],         10, 1, 8, 7, 3, POLICY_LAST, [1, 2])   # Block
-add_ts_fail_helper(wb["3. Enforcement"],     7, 1, 5, 4, 3, XP_LAST, [2])
-add_ts_fail_helper(wb["4. Investigations"],  9, 1, 6, 7, 2, INV_LAST, [1])
-add_ts_fail_helper(wb["5. Usability"],       9, 1, 6, 7, 2, USE_LAST, [1])
+add_ts_fail_helper(wb["2. Policy"],         11, 1, 8, 7, 3, POLICY_LAST, [1, 2])   # Block
+add_ts_fail_helper(wb["3. Investigations"],  9, 1, 6, 7, 2, INV_LAST, [1])
+add_ts_fail_helper(wb["4. Usability"],       9, 1, 6, 7, 2, USE_LAST, [1])
 
 # ══════════════════════════════════════════════════════ Scoring Summary
 ws = wb.create_sheet("Scoring Summary")
@@ -510,24 +505,22 @@ def score_row(row, label, counts, total, meaning, bold_label=True):
 # ---- ranges on the source sheets -------------------------------------------
 CLS = ("'1. Classification'", f"$I$2:$I${CLASS_LAST}", f"$H$2:$H${CLASS_LAST}", CLASS_LAST - 1)
 POL = ("'2. Policy'", f"$F$3:$G${POLICY_LAST}", f"$H$3:$H${POLICY_LAST}", (POLICY_LAST - 2) * 2)
-ENF = ("'3. Enforcement'", f"$D$3:$D${XP_LAST}", f"$E$3:$E${XP_LAST}", XP_LAST - 2)
-INV = ("'4. Investigations'", f"$G$2:$G${INV_LAST}", f"$F$2:$F${INV_LAST}", INV_LAST - 1)
-USE = ("'5. Usability'", f"$G$2:$G${USE_LAST}", f"$F$2:$F${USE_LAST}", USE_LAST - 1)
+INV = ("'3. Investigations'", f"$G$2:$G${INV_LAST}", f"$F$2:$F${INV_LAST}", INV_LAST - 1)
+USE = ("'4. Usability'", f"$G$2:$G${USE_LAST}", f"$F$2:$F${USE_LAST}", USE_LAST - 1)
 
 # ---- section 1: by sheet ----------------------------------------------------
 section_header(5, "Section", "What the score means")
 CHART_FIRST = 6
 for i, (label, (sheet, rng, _tier, total), meaning) in enumerate([
     ("1. Classification", CLS, "Can the tool find your data? A low score here caps every other sheet."),
-    ("2. Policy",         POL, f"{POLICY_LAST - 2} channel x OS rows, scored for Monitor / Warn and for Block - {(POLICY_LAST - 2) * 2} cells."),
-    ("3. Enforcement",    ENF, "What the tool can enforce in real time, as opposed to detect after the fact."),
-    ("4. Investigations", INV, "What it costs you per incident, in analyst hours."),
-    ("5. Usability",      USE, "Whether the programme is still running in a year."),
+    ("2. Policy",         POL, f"{POLICY_LAST - 2} channel x OS rows, scored for Monitor / Warn and for Block ({(POLICY_LAST - 2) * 2} cells)."),
+    ("3. Investigations", INV, "What it costs you per incident, in analyst hours."),
+    ("4. Usability",      USE, "Whether the programme is still running in a year."),
 ]):
     r = CHART_FIRST + i
     score_row(r, label, [f'=COUNTIF({sheet}!{rng},"{v}")' for v in RES], total, meaning)
     ws.row_dimensions[r].height = est_height([(meaning, 50)])
-CHART_LAST = CHART_FIRST + 4
+CHART_LAST = r          # last by-sheet row written; follows the sheet count
 
 # ---- section 2: policy by operating system ---------------------------------
 r = CHART_LAST + 2
@@ -548,7 +541,7 @@ for os_name in ("Windows", "macOS", "Linux"):
         ws.row_dimensions[r].height = 16
         r += 1
 ws.cell(row=hdr_row + 1, column=9,
-        value="Channel counts differ by OS because not every channel exists everywhere - "
+        value="Channel counts differ by OS because not every channel exists everywhere: "
               f"Windows {OS_ROWCOUNT['Windows']}, macOS {OS_ROWCOUNT['macOS']}, Linux {OS_ROWCOUNT['Linux']}.")
 ws.cell(row=hdr_row + 1, column=9).font = Font(name=FONT, size=9, color=GREY)
 ws.cell(row=hdr_row + 1, column=9).alignment = TOP
@@ -561,15 +554,15 @@ section_header(r, "Maturity tier", "Why it matters")
 tier_hdr = r
 r += 1
 TIER_SRC = [(CLS[0], CLS[2], CLS[1]), (POL[0], POL[2], f"$G$3:$G${POLICY_LAST}"),
-            (ENF[0], ENF[2], ENF[1]), (INV[0], INV[2], INV[1]), (USE[0], USE[2], USE[1])]
+            (INV[0], INV[2], INV[1]), (USE[0], USE[2], USE[1])]
 TIER_TOTALS = {}
 for tier in ("Table stakes", "Advanced", "Differentiator"):
     n = (sum(1 for x in CLASSIFICATION if x[7] == tier) + sum(1 for x in POLICY if x[5] == tier)
-         + sum(1 for x in XPOLICY if x[3] == tier) + sum(1 for x in INVESTIGATIONS if x[5] == tier)
+         + sum(1 for x in INVESTIGATIONS if x[5] == tier)
          + sum(1 for x in USABILITY if x[5] == tier))
     TIER_TOTALS[tier] = n
 MEANING = {
- "Table stakes": f"Table stakes coverage below {TS_FLOOR:.0%} means the product cannot cover the basics, whatever its differentiator score. Individual Fails here belong in your findings rather than averaged into a percentage - they are listed by row below.",
+ "Table stakes": f"Table stakes coverage below {TS_FLOOR:.0%} means the product cannot cover the basics, whatever its differentiator score. Individual Fails here belong in your findings rather than averaged into a percentage. They are listed by row below.",
  "Advanced": "Where mature products separate from adequate ones.",
  "Differentiator": "Few products pass many of these. A low score is information, not a verdict.",
 }
@@ -607,9 +600,8 @@ r += 1
 FAIL_SRC = [
     ("1. Classification", "1. Classification", CLS[0], CLS[2], CLS[1], CLASSIFICATION, 7),
     ("2. Policy",         "2. Policy (Block)", POL[0], POL[2], f"$G$3:$G${POLICY_LAST}", POLICY, 5),
-    ("3. Enforcement",    "3. Enforcement",    ENF[0], ENF[2], ENF[1], XPOLICY, 3),
-    ("4. Investigations", "4. Investigations", INV[0], INV[2], INV[1], INVESTIGATIONS, 5),
-    ("5. Usability",      "5. Usability",      USE[0], USE[2], USE[1], USABILITY, 5),
+    ("3. Investigations", "3. Investigations", INV[0], INV[2], INV[1], INVESTIGATIONS, 5),
+    ("4. Usability",      "4. Usability",      USE[0], USE[2], USE[1], USABILITY, 5),
 ]
 FAIL_LIST_ROWS = {}
 for sheet_name, label, sh, tier_rng, res_rng, rows_, tier_idx in FAIL_SRC:
@@ -619,7 +611,7 @@ for sheet_name, label, sh, tier_rng, res_rng, rows_, tier_idx in FAIL_SRC:
     ws.cell(row=r, column=3, value=f'=COUNTIF({sh}!{tier_rng},"Table stakes")')
     ws.cell(row=r, column=4, value=f'=COUNTIFS({sh}!{tier_rng},"Table stakes",{sh}!{res_rng},"Fail")')
     ws.cell(row=r, column=5,
-            value=f'=IF(D{r}=0,"None recorded",_xlfn.TEXTJOIN(", ",TRUE,{sh}!${hcol}${hfirst}:${hcol}${hlast}))')
+            value=f'=IF(D{r}=0,"None recorded",{sh}!${hcol}${hlast})')
     ws.merge_cells(start_row=r, start_column=5, end_row=r, end_column=9)
     for c in range(2, 10):
         cell = ws.cell(row=r, column=c)
@@ -653,6 +645,66 @@ for series, colour in zip(chart.series, ("D6EFD8", "FDF0CE", "FADBD6", "EEEEEE",
     series.graphicalProperties.line.solidFill = "B8C2D0"
     series.graphicalProperties.line.width = 9525
 ws.add_chart(chart, f"B{NOTE_ROW + 2}")
+
+# ══════════════════════════════════════════════════════ Change Log
+ws = wb.create_sheet("Change Log")
+W = [15, 15, 24, 66, 66]
+set_widths(ws, W)
+note = ("What changed in each version, and why. Row IDs in an entry are as they were in that version: "
+        "IDs are renumbered whenever rows are added or removed, so an older entry may name a row that "
+        "now has a different ID.")
+ws["A1"] = note
+ws.merge_cells("A1:E1")
+ws["A1"].font = Font(name=FONT, size=10, italic=True, color=GREY)
+ws["A1"].alignment = TOP
+ws["A1"].fill = PatternFill("solid", fgColor=BAND)
+ws.row_dimensions[1].height = est_height([(note, 170)], base=14)
+for c, h in enumerate(["Version", "Date", "Rows", "Change", "Why"], start=1):
+    ws.cell(row=2, column=c, value=h)
+style_header(ws, 2, 5, height=26)
+for i, (ver, date, rows_, change, why) in enumerate(CHANGELOG, start=3):
+    for c, v in enumerate((ver, date, rows_, change, why), start=1):
+        cell = ws.cell(row=i, column=c, value=v)
+        cell.font, cell.alignment, cell.border = B_FONT, TOP, BOX
+    ws.cell(row=i, column=1).alignment = CTR
+    ws.cell(row=i, column=1).font = BB_FONT
+    ws.cell(row=i, column=3).font = BB_FONT
+    ws.row_dimensions[i].height = est_height([(change, W[3]), (why, W[4]), (rows_, W[2])])
+ws.freeze_panes = "A3"
+ws.auto_filter.ref = f"A2:E{len(CHANGELOG) + 2}"
+
+# ID map: previous ID -> current ID in adjacent columns, so porting a scored workbook is a
+# VLOOKUP over the two ID columns. The row name spans the rest of the width.
+r = len(CHANGELOG) + 4
+ws.cell(row=r, column=1, value=f"ID map: v{IDMAP_FROM[0]} to v{VERSION}").font = SUB
+r += 1
+map_note = (f"Every row whose ID differs between v{IDMAP_FROM[0]} and v{VERSION}, plus any row reworded "
+            f"enough that its old result should be re-scored rather than copied. To port a scored "
+            f"v{IDMAP_FROM[0]} workbook, look up each old ID in the first column and copy its result "
+            f"to the row in the second. Removed rows have no v{VERSION} home; New rows have no "
+            f"v{IDMAP_FROM[0]} score to bring across; a row whose name says re-score keeps its ID but needs "
+            f"scoring again.")
+ws.cell(row=r, column=1, value=map_note).font = Font(name=FONT, size=9, italic=True, color=GREY)
+ws.cell(row=r, column=1).alignment = TOP
+ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=5)
+ws.row_dimensions[r].height = est_height([(map_note, 180)])
+r += 1
+for c, h in ((1, f"v{IDMAP_FROM[0]} ID"), (2, f"v{VERSION} ID"), (3, "Row name")):
+    ws.cell(row=r, column=c, value=h)
+style_header(ws, r, 5, height=22)
+ws.merge_cells(start_row=r, start_column=3, end_row=r, end_column=5)
+IDMAP_HDR = r
+for old_id, new_id, name in IDMAP:
+    r += 1
+    for c, v in ((1, old_id), (2, new_id), (3, name)):
+        cell = ws.cell(row=r, column=c, value=v)
+        cell.font, cell.alignment, cell.border = B_FONT, TOP, BOX
+    for c in (4, 5):
+        ws.cell(row=r, column=c).border = BOX
+    ws.merge_cells(start_row=r, start_column=3, end_row=r, end_column=5)
+    for c, v in ((1, old_id), (2, new_id)):
+        if v in ("New", "Removed"):
+            ws.cell(row=r, column=c).font = Font(name=FONT, size=10, italic=True, color=GREY)
 
 for s in wb.worksheets:
     s.page_setup.orientation = "landscape"

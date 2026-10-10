@@ -7,7 +7,6 @@ any reference points at a row that no longer exists.
 
   C-<A|B|C|D>NN   Classification, by use case
   P-<G|M|C|B|P|N>NN  Policy, by channel category
-  E-NN            Enforcement
   I-NN            Investigations
   U-NN            Usability
 """
@@ -38,7 +37,6 @@ def build_map():
         sec = CATLET[row[1].split()[0].rstrip("&")]
         counters[sec] = counters.get(sec, 0) + 1
         m[base] = f"P-{sec}{counters[sec]:02d}"
-    for i, row in enumerate(content_xp.XPOLICY, 1):        m[row[0]] = f"E-{i:02d}"
     for i, row in enumerate(content_xp.INVESTIGATIONS, 1): m[row[0]] = f"I-{i:02d}"
     for i, row in enumerate(content_use.USABILITY, 1):     m[row[0]] = f"U-{i:02d}"
     dupes = [v for v in m.values() if v in seen or seen.add(v)]
