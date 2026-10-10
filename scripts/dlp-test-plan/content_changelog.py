@@ -56,7 +56,7 @@ CHANGELOG = [
  (7, "2026-10-09", "Read Me",
   "New guidance: Check Linux first, Short on time, Endpoint controls only, and Classification method matters for blocking.",
   "The new Read Me lines help evaluators prioritise."),
- (7, "2026-10-09", "All sheets",
+ (7, "2026-10-09", "All sheets, including C-C02, C-D03, C-D04, I-10 and I-28",
   "Rewrote unsupported claims and one-line sayings, marked optional checks as not required for Pass, and replaced spaced dashes and emphasis caps.",
   "Wording cleanup: unsupported claims removed, optional checks marked as not required for Pass, and dashes and emphasis caps removed."),
  (7, "2026-10-09", "Read Me",
@@ -68,12 +68,14 @@ CHANGELOG = [
 ]
 
 # ID map from the previous version, so a scored workbook can be ported by lookup:
-# (previous ID, current ID, row name). "New" / "Removed" mark added and cut rows.
+# (previous ID, current ID, row name). "New" / "Removed" mark added and cut rows. A row
+# can also appear with an unchanged ID when it was reworded enough that its old result
+# should be re-scored rather than copied; its name says so.
 # IDMAP_FROM is (previous version, its row count); verify.py checks the map reconciles:
 # previous rows - removed + new == current rows.
 IDMAP_FROM = (6, 168)
 IDMAP = [
- ("C-A05", "Removed", "Unique vs total match counting (merged into C-A05)"),
+ ("C-A05", "Removed", "Unique vs total match counting (merged into Severity tiers by match count)"),
  ("C-A06", "C-A05", "Severity tiers by match count"),
  ("C-A07", "C-A06", "Confidence level / threshold tuning"),
  ("C-A08", "C-A07", "Exact Data Match (EDM)"),
@@ -93,6 +95,7 @@ IDMAP = [
  ("New", "I-29", "Structured capture of agent sessions"),
  ("New", "I-30", "Agent, person and account attribution"),
  ("New", "I-31", "Agent tool chain: MCP servers and sub-agents"),
+ ("U-06", "U-06", "Justification as a control, not a log entry (reworded and broadened from 'AI review of user override justifications'; re-score, do not copy the v6 result)"),
  ("U-18", "U-19", "Policy tip clarity"),
  ("U-19", "U-20", "Business justification capture on warn"),
  ("U-20", "U-21", "False-positive reporting from the endpoint"),

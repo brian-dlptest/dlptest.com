@@ -59,7 +59,7 @@ INVESTIGATIONS = [
  "Differentiator"),
 
 ("I-10", A1, "Events before the policy existed",
- "Most investigations start after the fact. Retroactive visibility decides whether you can answer at all.",
+ "When an investigation starts after the fact, retroactive visibility decides whether you can answer at all.",
  "Enable always-on activity auditing. Create a new policy today and ask what that user did last month.",
  "Advanced"),
 
@@ -155,7 +155,7 @@ INVESTIGATIONS = [
 
 # -------------------------------------------------------- AI Agent Activity
 ("I-28", A7, "AI agent and tool inventory",
- "You cannot govern agents you do not know are running. Local model runtimes and MCP servers are the ones most often missed.",
+ "You cannot govern agents you do not know are running. Include local model runtimes and MCP servers.",
  "Over a two-week pilot, ask for every AI agent, coding assistant, local model runtime, plugin and MCP server the tool found running on endpoints, with versions and devices. Compare it with what you know is installed.",
  "Advanced"),
 

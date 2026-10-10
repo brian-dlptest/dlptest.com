@@ -199,7 +199,7 @@ for label, text in [
     ("3. Investigations", "What happens after an alert. Evidence, lineage, pivoting, insider-risk context, case workflow, privacy controls, response, and AI agent activity: which agents run on an endpoint, what they did, and which identity they acted under."),
     ("4. Usability", "What it costs to run. AI-assisted classification, policy authoring and triage, rollout and change control, agent footprint and user-visible latency, and the end-user experience that decides whether people route around the agent."),
     ("Scoring Summary", "Rolls up every Result column by sheet, by operating system and by maturity tier, and lists every table stakes row that failed. Formulas, not typed values: it updates as you fill the sheets in."),
-    ("Change Log", "What changed in each version, and why. Row IDs in an entry are as they were in that version: IDs are renumbered whenever rows are added or removed. The tab ends with a map from every v6 row ID that changed to its v7 ID."),
+    ("Change Log", "What changed in each version, and why. Row IDs in an entry are as they were in that version: IDs are renumbered whenever rows are added or removed. The tab ends with an ID map: every row whose ID changed between v6 and v7, plus rows reworded enough that their v6 result should be re-scored rather than copied."),
 ]:
     rm(r, label, text); r += 1
 
@@ -678,10 +678,12 @@ ws.auto_filter.ref = f"A2:E{len(CHANGELOG) + 2}"
 r = len(CHANGELOG) + 4
 ws.cell(row=r, column=1, value=f"ID map: v{IDMAP_FROM[0]} to v{VERSION}").font = SUB
 r += 1
-map_note = (f"Every row whose ID differs between v{IDMAP_FROM[0]} and v{VERSION}. To port a scored "
+map_note = (f"Every row whose ID differs between v{IDMAP_FROM[0]} and v{VERSION}, plus any row reworded "
+            f"enough that its old result should be re-scored rather than copied. To port a scored "
             f"v{IDMAP_FROM[0]} workbook, look up each old ID in the first column and copy its result "
             f"to the row in the second. Removed rows have no v{VERSION} home; New rows have no "
-            f"v{IDMAP_FROM[0]} score to bring across.")
+            f"v{IDMAP_FROM[0]} score to bring across; a row whose name says re-score keeps its ID but needs "
+            f"scoring again.")
 ws.cell(row=r, column=1, value=map_note).font = Font(name=FONT, size=9, italic=True, color=GREY)
 ws.cell(row=r, column=1).alignment = TOP
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=5)

@@ -471,7 +471,7 @@ else:
     removed, added = news.count("Removed"), olds.count("New")
     total_now = sum(e[2] for e in extents.values())
     ok_sum = prev_rows - removed + added == total_now
-    print(f"  {len(olds)} rows: removed {removed}, new {added}, shifted {len(olds) - removed - added}")
+    print(f"  {len(olds)} rows: removed {removed}, new {added}, renumbered or re-score {len(olds) - removed - added}")
     print(f"  reconcile: v{prev_ver} {prev_rows} - {removed} + {added} = {prev_rows - removed + added}, "
           f"v{cur_ver} has {total_now}  {'OK' if ok_sum else 'MISMATCH'}")
     if not ok_sum:

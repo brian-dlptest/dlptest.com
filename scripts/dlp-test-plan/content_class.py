@@ -103,7 +103,7 @@ CLASSIFICATION = [
 ("C-C02", UC_C, "Time-boxed sensitivity: pre- vs post-publication",
  "The core MNPI problem, from two directions. A draft 10-Q is material nonpublic information before filing and ordinary public data after, so sensitivity has to change with the calendar, and the tool has to be able to tell a forecast from a published result in the first place.",
  "Two parts. (1) Apply a policy with an effective date window, then move the same file inside the window and again after it closes. (2) Send a file of projected FY27 revenue and a file of already-published FY25 results, formatted alike and with similar numbers.",
- "(1) Enforcement changes with the date without the policy being rewritten. Most tools cannot do this, so record the workaround. (2) The forward-looking file is treated as more sensitive; a keyword-only tool will treat the two identically.",
+ "(1) Enforcement changes with the date without the policy being rewritten. If the tool cannot do this, record the workaround. (2) The forward-looking file is treated as more sensitive; a keyword-only tool will treat the two identically.",
  "Policy scheduling / AI Classification", "Differentiator"),
 
 ("C-C03", UC_C, "Insider-list / need-to-know scoping",
@@ -126,7 +126,7 @@ CLASSIFICATION = [
  "Data lineage", "Differentiator"),
 
 ("C-D03", UC_D, "HRIS export with compensation data",
- "Employee data: often the most sensitive export and the least policed.",
+ "Employee data exported from the HRIS.",
  "Export a roster with name, SSN, salary, and performance rating.",
  "Detected as HR data. Confirm HR staff who legitimately run this export are handled by scope, not by an exception that disables the rule.",
  "Pattern + lineage", "Table stakes"),
@@ -134,7 +134,7 @@ CLASSIFICATION = [
 ("C-D04", UC_D, "Direct database extracts",
  "Bypassing the application and querying the database directly.",
  "Run a SELECT in DBeaver / pgAdmin / SSMS and use 'export results to file'. Then pipe a query to a file from the CLI.",
- "Both are visible and attributable to the process. CLI extraction is where most tools lose sight.",
+ "Both are visible and attributable to the process.",
  "Process context", "Differentiator"),
 
 ]
