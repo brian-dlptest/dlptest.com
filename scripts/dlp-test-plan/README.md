@@ -27,6 +27,12 @@ python3 scripts/dlp-test-plan/verify.py     # 3. check it
 The order is not optional. `renumber.py` rewrites the content modules in place; running
 `build.py` first bakes stale IDs into the workbook.
 
+**4. Review the test data.** If you added, removed, merged or reworded any row, the test
+data library has to be reviewed against the change before the version ships — see
+[TEST-DATA-REVIEW.md](TEST-DATA-REVIEW.md). IDs are regenerated on every build, so a
+library keyed by row ID silently points at the wrong tests otherwise, and the `v=`
+cache-buster means the old workbook cannot be fetched back to diff against.
+
 ## Files
 
 | File | What it holds |
@@ -39,6 +45,7 @@ The order is not optional. `renumber.py` rewrites the content modules in place; 
 | `build.py` | Layout, styling, dropdowns, conditional formatting, scoring formulas, chart |
 | `renumber.py` | Sequential IDs + cross-reference rewriting |
 | `verify.py` | Static checks (see below) |
+| `TEST-DATA-REVIEW.md` | The dataset review required on every row change (workflow step 4) |
 
 ## IDs
 

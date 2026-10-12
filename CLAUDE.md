@@ -28,6 +28,22 @@ When the user says "commit and push" without specifying a branch, assume the fea
 
 ---
 
+## Endpoint DLP Test Plan — test data review is part of every change
+
+The workbook at `/endpoint-dlp-test-plan/` is generated from `scripts/dlp-test-plan/`. **Never hand-edit the .xlsx.**
+
+Row IDs are regenerated on every build (`renumber.py` assigns them by sheet position), so inserting or removing a single row shifts every ID below it. A test data library is maintained alongside the plan and is keyed by those IDs, which means a renumber silently repoints it at the wrong tests — nothing errors, the folders just describe the wrong row.
+
+**So: if a change adds, removes, merges or rewords any row, review the test data against it before shipping the version.** The procedure and its decision rules are in [`scripts/dlp-test-plan/TEST-DATA-REVIEW.md`](scripts/dlp-test-plan/TEST-DATA-REVIEW.md); it is step 4 of the build workflow.
+
+Two things that make this non-recoverable if skipped:
+- The `v=` parameter on the download URL is a **cache-buster, not a version selector** — `&v=6` serves whatever object is current. Once a new workbook is uploaded the previous one is gone, so there is no after-the-fact diff.
+- That makes the **Change Log sheet and its ID map the only record of what moved.** Every added, removed, merged or reworded row needs an entry, and every changed ID needs an ID-map row, or the library cannot be migrated mechanically.
+
+The library is not in this repo: it is ~14 MB of synthetic payloads including credential-shaped strings that GitHub push protection rejects.
+
+---
+
 ## Completed
 
 ### Copy-to-clipboard buttons on sample data tables (PR #14)
