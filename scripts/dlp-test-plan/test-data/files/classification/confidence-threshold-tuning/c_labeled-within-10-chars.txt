@@ -1,0 +1,5 @@
+Applicant record
+
+SSN: 778-35-2579
+
+The label sits within 10 characters of the identifier.

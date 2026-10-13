@@ -478,5 +478,104 @@ else:
         bad_map.append(f"v{prev_ver} {prev_rows} - {removed} removed + {added} new != {total_now} rows now")
     for b in bad_map: fail.append(f"ID map: {b}")
 
+# ---- 9. test data database (test-data/cases.json) -------------------------
+# Row IDs are reassigned by sheet position on every build, so a test can keep its ID
+# while becoming a different test (v7: U-22 went from "User-visible latency" to
+# "Working redirect to the sanctioned alternative"). Comparing ID sets would pass that.
+# So every case is checked by ID AND name. See TEST-DATA-REVIEW.md.
+print("\nTEST DATA DATABASE  (test-data/cases.json)")
+import json
+td = os.path.join(here, "test-data")
+try:
+    db = json.load(open(os.path.join(td, "cases.json")))
+except (OSError, ValueError) as e:
+    db = None
+    fail.append(f"test-data/cases.json unreadable: {e}")
+if db is not None:
+    reviewed = db.get("reviewed_for_version")
+    print(f"  reviewed_for_version={reviewed}  build.py VERSION={build_ver}")
+    if reviewed != build_ver:
+        fail.append(f"test data last reviewed for v{reviewed}, workbook is v{build_ver} - run the "
+                    "review in TEST-DATA-REVIEW.md, then set reviewed_for_version")
+
+    want = [(r[0], r[2]) for r in content_class.CLASSIFICATION + content_policy.POLICY
+            + content_xp.INVESTIGATIONS + content_use.USABILITY]
+    have = {c["id"]: c for c in db.get("cases", [])}
+    want_ids = {i for i, _ in want}
+    moved, missing = [], []
+    for rid, name in want:
+        case = have.get(rid)
+        if case is None:
+            missing.append(rid)
+        elif case.get("name") != name:
+            moved.append(f"{rid}: cases.json says {case.get('name')!r}, workbook says {name!r}")
+    stale = sorted(set(have) - want_ids)
+    print(f"  {len(want)} rows  {len(have)} cases  missing={len(missing)}  "
+          f"name changed={len(moved)}  stale={len(stale)}")
+    for m in missing:
+        fail.append(f"cases.json: no case for {m} - new row? decide its files (TEST-DATA-REVIEW.md R3)")
+    for m in moved:
+        fail.append(f"cases.json: {m} - this ID now names a different test; re-map it")
+    for m in stale:
+        fail.append(f"cases.json: {m} is not in the workbook - removed row? (TEST-DATA-REVIEW.md R2)")
+
+    referenced, bad_paths, unexplained = set(), [], []
+    for c in db.get("cases", []):
+        files = c.get("files", [])
+        if not files and not c.get("no_file_reason"):
+            unexplained.append(c["id"])
+        for f_ in files:
+            referenced.add(f_)
+            if f_.startswith("generated/"):
+                continue          # built locally (credential-shaped / nested git), not committed
+            if not f_.startswith("files/") or not os.path.isfile(os.path.join(td, f_)):
+                bad_paths.append(f"{c['id']}: {f_}")
+    # Data a Read Me instruction needs but no row does. If the instruction is deleted from
+    # build.py, the data loses its reason to exist - fail so someone decides (R2).
+    for req in db.get("readme_requirements", []):
+        if req["name"] not in build_src:
+            fail.append(f"cases.json: Read Me instruction {req['name']!r} no longer in build.py "
+                        "- remove or re-home its files (TEST-DATA-REVIEW.md R2)")
+        for f_ in req.get("files", []):
+            referenced.add(f_)
+            if not os.path.isfile(os.path.join(td, f_)):
+                bad_paths.append(f"Read Me {req['name']!r}: {f_}")
+    for u in unexplained:
+        fail.append(f"cases.json: {u} has no files and no no_file_reason")
+    for b in bad_paths:
+        fail.append(f"cases.json: missing committed file {b}")
+
+    DOCS = ("README.txt", "README.md", "RUNBOOK.md")
+    on_disk, orphans = [], []
+    for dp, dn, fn in os.walk(os.path.join(td, "files")):
+        for f_ in fn:
+            if f_ == ".DS_Store":
+                continue
+            rel = os.path.relpath(os.path.join(dp, f_), td).replace(os.sep, "/")
+            on_disk.append(rel)
+            if f_ not in DOCS and rel not in referenced:
+                orphans.append(rel)
+    print(f"  {len(on_disk)} committed files, {len(referenced)} referenced, "
+          f"{len(orphans)} orphaned, {len(bad_paths)} missing")
+    for o in orphans[:10]:
+        fail.append(f"test-data: {o} is not used by any case - remove it, or map it (R2)")
+    if len(orphans) > 10:
+        fail.append(f"test-data: {len(orphans) - 10} more orphaned files")
+
+    # Row IDs live in cases.json only. A README that names a row goes stale on the next
+    # renumber without anything noticing - which is the failure this whole section exists for.
+    id_docs = []
+    for dp, dn, fn in os.walk(td):
+        dn[:] = [d for d in dn if d not in ("generated", "tools", ".git")]
+        for f_ in fn:
+            if f_ in DOCS + ("TASK.md", "VALIDATION.md"):
+                pth = os.path.join(dp, f_)
+                hit = ID_RE.search(open(pth, errors="replace").read())
+                if hit:
+                    id_docs.append(f"{os.path.relpath(pth, td)} mentions {hit.group(1)}")
+    print(f"  row IDs in test-data docs: {len(id_docs)}")
+    for d_ in id_docs:
+        fail.append(f"test-data: {d_} - name the capability instead; IDs belong in cases.json")
+
 print("\n" + ("FAILURES:\n  " + "\n  ".join(fail) if fail else "ALL CHECKS PASSED"))
 sys.exit(1 if fail else 0)

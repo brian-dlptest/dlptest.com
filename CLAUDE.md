@@ -32,15 +32,19 @@ When the user says "commit and push" without specifying a branch, assume the fea
 
 The workbook at `/endpoint-dlp-test-plan/` is generated from `scripts/dlp-test-plan/`. **Never hand-edit the .xlsx.**
 
-Row IDs are regenerated on every build (`renumber.py` assigns them by sheet position), so inserting or removing a single row shifts every ID below it. A test data library is maintained alongside the plan and is keyed by those IDs, which means a renumber silently repoints it at the wrong tests — nothing errors, the folders just describe the wrong row.
+The files the plan asks testers to use live in `scripts/dlp-test-plan/test-data/`. `test-data/cases.json` maps every workbook row to them, by row ID **and** row name.
 
-**So: if a change adds, removes, merges or rewords any row, review the test data against it before shipping the version.** The procedure and its decision rules are in [`scripts/dlp-test-plan/TEST-DATA-REVIEW.md`](scripts/dlp-test-plan/TEST-DATA-REVIEW.md); it is step 4 of the build workflow.
+Row IDs are reassigned on every build (`renumber.py` numbers rows by sheet position), so inserting or removing one row shifts every ID below it. In v6 → v7, 14 IDs moved, and five v6 Usability IDs now name tests that did not exist in v6. A check on the set of IDs would pass all of that, which is why `cases.json` stores names too.
 
-Two things that make this non-recoverable if skipped:
-- The `v=` parameter on the download URL is a **cache-buster, not a version selector** — `&v=6` serves whatever object is current. Once a new workbook is uploaded the previous one is gone, so there is no after-the-fact diff.
-- That makes the **Change Log sheet and its ID map the only record of what moved.** Every added, removed, merged or reworded row needs an entry, and every changed ID needs an ID-map row, or the library cannot be migrated mechanically.
+**If a change adds, removes, merges or rewords a row, review the test data against it before shipping the version.** The procedure and its decision rules are in [`scripts/dlp-test-plan/TEST-DATA-REVIEW.md`](scripts/dlp-test-plan/TEST-DATA-REVIEW.md); it is step 4 of the build workflow. `verify.py` enforces the mechanical part. It fails when:
+- a row is missing from `cases.json`, or its name there differs from the workbook;
+- `reviewed_for_version` differs from `VERSION`;
+- a committed file is used by no case (an orphan);
+- a README under `test-data/` mentions a row ID. Folders are named by content and IDs live only in `cases.json`, so nothing else drifts on a renumber.
 
-The library is not in this repo: it is ~14 MB of synthetic payloads including credential-shaped strings that GitHub push protection rejects.
+Credential-shaped files and nested git repositories are **not** committed, because GitHub push protection rejects fake key-shaped strings. `test-data/tools/build.py ip shared` builds them into the gitignored `test-data/generated/`. Write any credential-shaped literal in generator source with `syn()` fragments.
+
+The R2 object at the download URL is overwritten on every publish, and the `v=` parameter is a cache-buster the downloads route never reads. Earlier workbooks still rebuild from git (`git worktree add /tmp/plan-v6 22e0667`, then run that tree's `build.py`). The Change Log's ID map is the quick way to see what moved; git is the fallback.
 
 ---
 

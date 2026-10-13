@@ -1,0 +1,15 @@
+PATIENT RECORD — Thompson, Christopher
+Date of Birth: 11/15/1997  |  MRN: MRN-46461913  |  Direct: (792) 764-5947
+Primary Dx: M17.11  —  Procedure Code: CPT-80053
+
+PATIENT RECORD — Hill, Betty
+Date of Birth: 4/8/1965  |  MRN: MRN-67027353  |  Direct: (845) 484-3871
+Primary Dx: E11.9  —  Procedure Code: CPT-99213
+
+PATIENT RECORD — Smith, Anthony
+Date of Birth: 1/7/1982  |  MRN: MRN-45181447  |  Direct: (689) 347-7135
+Primary Dx: Z23  —  Procedure Code: CPT-99386
+
+PATIENT RECORD — Moore, Richard
+Date of Birth: 12/31/1978  |  MRN: MRN-22250212  |  Direct: (773) 825-5625
+Primary Dx: E78.5  —  Procedure Code: CPT-97110

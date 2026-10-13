@@ -1,91 +1,150 @@
 # Test data review — required on every test plan change
 
-**Rule: a change to the test plan is not finished until the test data library has been
-reviewed against it.** Adding, removing, retiering or rewording a row can change what
-files a tester needs. The workbook names the files it wants; it does not ship them.
+**Rule: a change that adds, removes, merges or rewords a row is not finished until the
+test data has been reviewed against it.** The workbook names the files a tester needs;
+it does not ship them. The files live in [`test-data/`](test-data/), and
+[`test-data/cases.json`](test-data/cases.json) maps every row to them.
 
-This is step 4 of the workflow in [README.md](README.md). It is not optional, and it is
-not a tidy-up for later — a library that points at the wrong rows is worse than no
-library, because the row IDs still resolve and the mistake is invisible.
+This is step 4 of the workflow in [README.md](README.md). `verify.py` enforces most of it:
+the build does not reach `ALL CHECKS PASSED` until `cases.json` matches the workbook.
 
 ## Why this exists
 
-The plan tells a tester to "send a file containing 25 SSNs" or "zip it with a password"
-but ships no such file, so a test data library is maintained alongside it (see
-[Where the library lives](#where-the-library-lives)). That library is keyed by row ID.
+Row IDs are **reassigned on every build**: `renumber.py` numbers rows by sheet position,
+so inserting or removing one row shifts every ID below it. Anything keyed by row ID
+silently points at the wrong test afterwards. Nothing errors.
 
-Row IDs are **regenerated on every build** — `renumber.py` assigns them by sheet
-position, so inserting one row shifts every ID below it. A library folder named
-`C-A09_ocr-on-images` keeps resolving after OCR moves to `C-A09`→`C-A10`; it just points
-at the wrong test now, and nothing errors.
+v6 → v7 shows both ways this goes wrong:
 
-The v6 → v7 change is the worked example. It renumbered six Classification rows, merged
-one row into another, deleted an entire sheet, and added thirteen rows. Four of those
-additions needed files that did not exist. None of it would have surfaced on its own.
+- **An ID that now names a different test.** v7 removed v6's `C-A05` and the six rows
+  below it moved up one. A folder named `C-A10_ocr-on-images`, which was correct for v6,
+  now resolves to v7's `C-A10`: *Archives and nested files*. OCR is `C-A09`.
+- **Fourteen IDs moved, not six.** Besides those six Classification rows, eight Usability
+  rows moved: v6 `U-18`…`U-25` became `U-19`…`U-21` and `U-27`…`U-31`. v6's `U-18` was
+  *Policy tip clarity*; v7's `U-18` is *Approval workflow for enforcement changes*. Five
+  v6 Usability IDs now name a test that did not exist in v6.
 
-**There is no way to diff the workbook against its predecessor after the fact.** The `v=`
-parameter on the download URL is a cache-buster, not a version selector (see
-[README.md § Publishing](README.md#publishing)) — `&v=6` serves whatever the current
-object is. Once a new workbook is uploaded, the previous one is gone. The Change Log
-sheet and its ID map are therefore the *only* record of what moved, which is why the
-next section is a hard requirement rather than a nicety.
+A check on the *set* of IDs passes every one of those cases, because the set is still
+complete. That is why the checks below compare each row's ID **and** name.
 
-## What the plan owes the library
+## How the test data is laid out to survive this
 
-Every build that changes rows must leave the Change Log complete, because the library
-migration is driven from it, not from a reconstruction:
+- **Folders are named by content, not by row ID**: `files/classification/ocr-on-images/`,
+  not `C-A09_…`. A renumber never moves a folder.
+- **Row IDs appear in exactly one place: `cases.json`.** Each case records the row's ID,
+  its name, and the files it uses, or a `no_file_reason`. READMEs under `test-data/`
+  describe tests by name. `verify.py` fails if one of them mentions a row ID.
+- **Data a Read Me instruction needs but no row does** is listed under
+  `readme_requirements`, so it is accounted for rather than looking orphaned.
 
-- an entry for every added, removed, merged or reworded row, with the reason;
-- an **ID map** row for every ID that differs from the previous version, including
-  `Removed` and `New` entries;
-- a `re-score` note on any row whose wording changed enough that an old result should
-  not be copied forward.
+## What verify.py checks
 
-If the ID map is incomplete, the library cannot be migrated mechanically and someone has
-to diff 174 rows by hand.
+| Check | Fails when |
+|---|---|
+| Version | `reviewed_for_version` in `cases.json` differs from `VERSION` in `build.py` |
+| Missing row | a workbook row has no case: a new row nobody has mapped |
+| Moved row | a case's name differs from the workbook's name for that ID |
+| Stale case | a case names an ID the workbook no longer has: a removed row |
+| Unexplained row | a case has no files and no `no_file_reason` |
+| Missing file | a case names a committed file that does not exist |
+| Orphan | a committed file is used by no case and no Read Me requirement |
+| Read Me requirement | its instruction no longer appears in `build.py` |
+| ID in docs | a README, RUNBOOK, TASK or VALIDATION file under `test-data/` names a row |
 
-## The review
-
-Work through every changed row and apply these three rules. They are meant to be
-mechanical — the output is a decision per row, not an opinion.
+These are mechanical. The decisions they force are not, so apply these rules to each
+failure. They are meant to produce one decision per row, not an opinion:
 
 | | Condition | Decision |
 |---|---|---|
-| **R1** | The row's test is unchanged and a payload already exists | **Keep.** Rename the folder if the ID moved. |
-| **R2** | A payload's row no longer exists in the new version | **Remove** — unless another row still requires that exact content, in which case **re-home** it and say where it went. |
-| **R3** | The row is new, or its *How to Test* names an artefact the library does not have | **Create.** |
+| **R1** | The row's test is unchanged and its files exist | **Keep.** Update the case's ID if it moved. |
+| **R2** | A file serves no row and no Read Me requirement | **Remove** it, unless another row still needs that content, in which case **re-home** it and record where it went. |
+| **R3** | The row is new, or its *How to Test* now names a file the data does not have | **Create** the file, or record why none is needed. |
 
-R3 is the one that gets missed, and it is not only about new rows. A reworded *How to
-Test* on an existing row can create a need: v7 left `I-08` in place but changed "zip it"
-to "zip it **with a password**", which no file in the library satisfied.
+## Which rewording counts
 
-Two traps worth naming:
+Only rewording that changes the **steps, or the files a test names**. Wording cleanup
+does not. v7 changed the *How to Test* text of 35 rows, counting each Policy channel once,
+almost all of it cleanup under one "All sheets" Change Log entry. Three of those changes
+altered the files needed:
 
-- **A new row does not always mean new data.** v7 added `P-G07` (GenAI image upload), but
-  it reuses the OCR images that were already there. The manifest changed; the library
-  did not.
-- **A deleted sheet does not always mean deleted data.** v7 removed the Enforcement
-  sheet, but its question survived as a Read Me instruction ("repeat a passing Block with
-  content identified by exact data match, AI classification or origin"), so its payloads
-  were re-homed rather than deleted.
+- *GenAI web chat* and *GenAI desktop apps* stopped using an image. The image upload
+  became its own channel, *GenAI image upload*.
+- *Severity tiers by match count* absorbed the unique-vs-total counting step, so its
+  files now include the repeated-SSN and 100-distinct files.
 
-## Finishing the review
+A rewording can also keep the ID and change what is tested. v7's `U-06` went from *AI
+review of user override justifications* to *Justification as a control, not a log
+entry*, and the ID map marks it re-score. `verify.py` catches that one by name.
 
-- Regenerate the library's manifest so every row ID in the new version maps to a file or
-  to an explicit "no file needed, because…". The manifest build asserts that every ID on
-  every sheet appears exactly once; an unmapped row fails it.
-- Re-run the library's validation pass. Payloads are validated against the published
-  regex library through the MCP server, and renaming a folder breaks those paths.
-- Fix cross-references. Folder names, per-folder READMEs and the manifest all carry row
-  IDs, and all three drift independently.
+## What v7 needed, row by row
 
-## Where the library lives
+New rows in v7: *GenAI image upload* (three OS rows), the four AI Agent Activity rows,
+*Approval workflow for enforcement changes*, and five End-User Experience rows. Three
+needed files the data did not have:
 
-Not in this repo — it is ~14 MB of synthetic payloads, including credential-shaped
-strings that GitHub push protection rejects (see [CLAUDE.md](../../CLAUDE.md)). It is
-built and kept locally, alongside a `_generation/` folder holding the scripts and the raw
-generator responses, so it can be rebuilt or migrated from source.
+- *Structured capture of agent sessions*, which needs a workspace and a task that make
+  an agent read a PII file, run a command and edit a file. The other three AI Agent
+  Activity rows reuse it.
+- *Modify the action rather than stop it*, which needs a paste that is mostly prose, so
+  the remainder can be seen arriving once the identifiers are redacted.
+- *Intervention fatigue*, which needs 30 distinct files that trigger the same rule.
 
-Ask the maintainer for the current location rather than assuming a path; what matters
-here is that **the review happens**, and that the Change Log is complete enough for
-whoever holds the library to act on it.
+*GenAI image upload* needed no new file: it uses the OCR images. The rest are capability
+questions with no payload.
+
+**A review also finds gaps that predate the change.** Two v6 rows had no matching file in
+the library, and neither changed in v7: *Obfuscation chained into one story* asks for a
+password-protected zip, and *Alert grouping and deduplication* asks for 400 files. Both
+have asked for those since the build scripts were first committed. Both gaps are now
+filled. They are recorded here so they are not mistaken for v7 changes.
+
+### Where the Enforcement sheet's data went
+
+v7 deleted the Enforcement sheet. The Read Me line *Classification method matters for
+blocking* keeps part of it: "When a Block passes on the Policy sheet, repeat it once with
+content each of those methods identifies, and record the result in Notes." The methods
+are exact data match, AI classification and origin, which are v6's `E-01`, `E-02` and
+`E-04`. It does not cover `E-03`, `E-05` or `E-06`.
+
+| v6 row | v7 home | Its data now |
+|---|---|---|
+| `E-01` Exact data match | Read Me requirement | `files/classification/exact-data-match/`, unchanged |
+| `E-02` AI classification | Read Me requirement | Used the MSA set, `files/classification/ai-classification-msa/`, unchanged. The Read Me repeat uses the MNPI file below instead, because one payload with nothing a regex can match isolates AI classification from pattern matching. |
+| `E-04` Data lineage / origin | Read Me requirement | `files/classification/lineage-obfuscation-chain/step3_zipped.zip`, unchanged |
+| `E-03` AI classification with a cached verdict | none | Its file, `mnpi_500-words.txt`, moved to `files/block-method-checks/` and now serves the Read Me's AI-classification repeat. |
+| `E-05` Behavioural / intent | none | Its 50,000-record export still serves *Behavioural baseline and deviation* and *Bulk CRM export detection*. |
+| `E-06` Agentic / autonomous AI decisioning | none | Had no file. Nothing to move. |
+
+## What the plan owes the review
+
+Every build that changes rows should leave the Change Log complete: an entry for every
+added, removed or merged row; an entry for rewording that changes the steps or the files
+a test names; an ID-map row for every ID that differs from the previous version; and a
+`re-score` note where an old result should not be copied forward. The ID map is the
+quickest way to see what moved.
+
+**It is not the only record.** The R2 object at the download URL is overwritten on
+every publish, and the `v=` parameter is a cache-buster the downloads route never reads,
+so the previous workbook cannot be fetched from the site. But the workbook is generated
+from committed source, so any earlier version rebuilds from git:
+
+```bash
+git worktree add /tmp/plan-v6 22e0667
+python3 /tmp/plan-v6/scripts/dlp-test-plan/build.py
+```
+
+There are no tags today, so finding that commit takes `git log`. Tagging the commit each
+published version was built from (`test-plan-v7`, and so on) would make it a one-liner.
+
+## Running the review
+
+1. Make the plan change, then run `renumber.py`, `build.py` and `verify.py`.
+2. For each test-data failure `verify.py` reports, apply R1, R2 or R3, and edit
+   `test-data/cases.json`.
+3. If you created or changed files, add the generator to `test-data/tools/`, run
+   `tools/build.py`, then `tools/validate.py`. It checks the files against
+   dlptest.com's DLP patterns through the MCP server and rewrites `VALIDATION.md`.
+4. Set `reviewed_for_version` to the new `VERSION` and re-run `verify.py`.
+
+See [test-data/README.md](test-data/README.md) for the layout, and for the files that are
+built locally rather than committed.

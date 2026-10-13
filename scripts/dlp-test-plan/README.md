@@ -16,7 +16,7 @@ Nothing else. No LibreOffice — see [Verification](#verification) for why that 
 
 ## Workflow
 
-Run all three, in this order, every time:
+Four steps, in this order, every time. The first three are scripts:
 
 ```bash
 python3 scripts/dlp-test-plan/renumber.py   # 1. fix IDs + cross-references
@@ -27,11 +27,12 @@ python3 scripts/dlp-test-plan/verify.py     # 3. check it
 The order is not optional. `renumber.py` rewrites the content modules in place; running
 `build.py` first bakes stale IDs into the workbook.
 
-**4. Review the test data.** If you added, removed, merged or reworded any row, the test
-data library has to be reviewed against the change before the version ships — see
-[TEST-DATA-REVIEW.md](TEST-DATA-REVIEW.md). IDs are regenerated on every build, so a
-library keyed by row ID silently points at the wrong tests otherwise, and the `v=`
-cache-buster means the old workbook cannot be fetched back to diff against.
+**4. Review the test data.** If the change adds, removes, merges or rewords a row,
+review [`test-data/`](test-data/) against it before the version ships. See
+[TEST-DATA-REVIEW.md](TEST-DATA-REVIEW.md). IDs are reassigned on every build, so anything
+keyed by row ID silently points at the wrong test afterwards. `verify.py` enforces the
+mechanical part: it fails until `test-data/cases.json` maps every row by ID and name, and
+until `reviewed_for_version` matches `VERSION`.
 
 ## Files
 
@@ -45,7 +46,8 @@ cache-buster means the old workbook cannot be fetched back to diff against.
 | `build.py` | Layout, styling, dropdowns, conditional formatting, scoring formulas, chart |
 | `renumber.py` | Sequential IDs + cross-reference rewriting |
 | `verify.py` | Static checks (see below) |
-| `TEST-DATA-REVIEW.md` | The dataset review required on every row change (workflow step 4) |
+| `TEST-DATA-REVIEW.md` | The test data review required on every row change (workflow step 4) |
+| `test-data/` | The test files the plan refers to, `cases.json` mapping every row to them, and the generators that build them from the DLPTest MCP server |
 
 ## IDs
 

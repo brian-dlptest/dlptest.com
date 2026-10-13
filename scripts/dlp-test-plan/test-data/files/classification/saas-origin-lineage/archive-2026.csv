@@ -1,0 +1,251 @@
+Ticket Number,Caller First,Caller Last,Caller Email,Caller Phone,Source IP,Priority,Short Description,State
+1,Joshua,Taylor,jcampbell@aol.com,(290) 526-5583,48.40.83.169,3 - Moderate,Laptop replacement - hardware failure,In Progress
+2,Robert,Miller,sandra38@hotmail.com,(613) 380-2141,236.217.207.131,4 - Low,Laptop replacement - hardware failure,Resolved
+3,Charles,Allen,patricia87@me.com,(259) 360-4167,172.160.231.226,2 - High,Laptop replacement - hardware failure,Resolved
+4,Anthony,Martinez,wroberts@yahoo.com,(452) 383-6644,251.4.128.28,3 - Moderate,Laptop replacement - hardware failure,New
+5,Elizabeth,Smith,mary.young@icloud.com,(819) 538-9721,233.2.117.168,1 - Critical,VPN client will not connect,Resolved
+6,Patricia,Thomas,robert53@msn.com,(989) 545-4225,21.224.3.228,3 - Moderate,Access request - finance shared drive,Resolved
+7,Steven,Nguyen,paul32@me.com,(706) 387-8479,254.49.33.250,4 - Low,VPN client will not connect,Closed
+8,Patricia,Sanchez,karen29@live.com,(553) 612-8325,235.181.173.161,2 - High,Access request - finance shared drive,Resolved
+9,Sandra,Baker,emily76@icloud.com,(705) 741-3229,19.123.87.146,2 - High,Password reset request,Closed
+10,Jessica,White,deborah.wright@live.com,(343) 588-6939,179.22.150.66,2 - High,VPN client will not connect,Resolved
+11,Daniel,Clark,susanallen@live.com,(882) 483-1443,173.107.150.118,4 - Low,Access request - finance shared drive,Resolved
+12,Joshua,Taylor,dwhite@msn.com,(435) 707-1896,183.107.251.35,3 - Moderate,Password reset request,New
+13,Betty,Garcia,mclark@msn.com,(577) 824-2775,149.94.39.30,2 - High,Mailbox quota exceeded,Resolved
+14,Andrew,Jones,amartin@facebook.com,(762) 656-5111,234.175.12.174,2 - High,Mailbox quota exceeded,New
+15,Brian,White,paul.ramirez@gmail.com,(934) 520-8647,57.164.224.17,3 - Moderate,VPN client will not connect,Resolved
+16,Charles,Nguyen,deborah28@icloud.com,(436) 623-9755,60.166.147.34,3 - Moderate,Laptop replacement - hardware failure,Resolved
+17,Kevin,Martinez,glopez@icloud.com,(958) 603-8779,38.85.71.54,2 - High,Mailbox quota exceeded,Closed
+18,Sarah,Flores,carol43@facebook.com,(638) 897-1862,102.156.16.247,1 - Critical,VPN client will not connect,In Progress
+19,Jessica,Lewis,jamesnguyen@aol.com,(362) 830-8644,178.236.109.75,3 - Moderate,Access request - finance shared drive,New
+20,Robert,Hernandez,mary52@aol.com,(861) 353-9938,31.201.223.118,2 - High,Mailbox quota exceeded,Resolved
+21,Steven,Nelson,sandrawilson@yahoo.com,(780) 321-8909,175.209.208.182,3 - Moderate,VPN client will not connect,New
+22,William,Flores,aallen@me.com,(530) 744-4864,220.122.172.39,3 - Moderate,Access request - finance shared drive,Closed
+23,Karen,Lopez,briangreen@me.com,(417) 740-3000,159.85.100.140,1 - Critical,Access request - finance shared drive,In Progress
+24,Matthew,Hernandez,william.jackson@live.com,(999) 828-8466,231.68.201.179,4 - Low,Password reset request,In Progress
+25,Steven,Robinson,susan.thompson@icloud.com,(715) 973-9260,94.215.138.132,2 - High,Password reset request,New
+26,Brian,Ramirez,amanda.davis@msn.com,(546) 270-3477,73.184.143.37,4 - Low,VPN client will not connect,Closed
+27,Lisa,Robinson,melissa.wilson@live.com,(474) 226-4424,171.181.21.226,2 - High,Laptop replacement - hardware failure,In Progress
+28,David,Wilson,elizabethrivera@outlook.com,(720) 866-9595,145.2.242.245,4 - Low,VPN client will not connect,New
+29,Susan,Davis,melissa29@me.com,(649) 959-3327,189.235.139.189,3 - Moderate,VPN client will not connect,New
+30,Emily,Torres,timothy80@yahoo.com,(699) 426-3830,117.150.74.53,3 - Moderate,VPN client will not connect,In Progress
+31,Barbara,Lopez,timothygreen@hotmail.com,(977) 314-2183,172.197.216.3,2 - High,Password reset request,In Progress
+32,Brian,Robinson,jessica35@gmail.com,(527) 943-4752,10.117.21.22,2 - High,Access request - finance shared drive,New
+33,Betty,Perez,linda.brown@me.com,(343) 617-9722,134.92.226.110,2 - High,Access request - finance shared drive,Closed
+34,Jessica,Perez,daniel.flores@me.com,(588) 256-8580,193.77.160.104,4 - Low,Laptop replacement - hardware failure,In Progress
+35,Mark,Rodriguez,thomas.hall@gmail.com,(731) 921-3798,63.77.106.110,1 - Critical,Password reset request,New
+36,James,Lopez,jmitchell@me.com,(950) 507-8595,173.199.165.157,3 - Moderate,Password reset request,In Progress
+37,James,Smith,donaldhall@live.com,(723) 704-6925,148.146.15.250,1 - Critical,Password reset request,In Progress
+38,Amanda,Allen,margaret65@live.com,(412) 451-1604,95.35.33.226,4 - Low,VPN client will not connect,In Progress
+39,Carol,Wright,matthew58@yahoo.com,(891) 888-1865,230.18.97.112,2 - High,Mailbox quota exceeded,New
+40,Kenneth,King,jdavis@icloud.com,(910) 408-2809,43.189.33.111,4 - Low,Access request - finance shared drive,Resolved
+41,Sandra,Perez,mlewis@icloud.com,(451) 711-6424,151.63.70.82,1 - Critical,Mailbox quota exceeded,Resolved
+42,Timothy,Martinez,steven.adams@icloud.com,(393) 525-1497,104.125.93.106,1 - Critical,Access request - finance shared drive,In Progress
+43,Barbara,Jones,matthewanderson@aol.com,(730) 288-7853,37.163.174.248,1 - Critical,Laptop replacement - hardware failure,Closed
+44,Michelle,Jackson,jennifer.white@hotmail.com,(564) 875-5237,86.113.21.201,1 - Critical,Laptop replacement - hardware failure,In Progress
+45,Susan,Nelson,johnsanchez@msn.com,(365) 790-5719,16.11.30.15,4 - Low,Access request - finance shared drive,In Progress
+46,Mark,Garcia,sandra51@live.com,(706) 759-6821,254.95.82.100,3 - Moderate,Access request - finance shared drive,New
+47,Karen,Lewis,daniel69@gmail.com,(434) 751-6270,61.118.210.25,1 - Critical,VPN client will not connect,Resolved
+48,Anthony,Green,charles37@me.com,(354) 455-3648,184.106.45.212,2 - High,VPN client will not connect,Closed
+49,Timothy,Garcia,caroljackson@msn.com,(891) 625-5573,159.95.238.103,1 - Critical,Mailbox quota exceeded,Resolved
+50,John,Robinson,ashley48@outlook.com,(356) 533-7300,119.54.248.134,3 - Moderate,Password reset request,Closed
+51,Patricia,Baker,pramirez@live.com,(521) 656-7130,22.198.101.165,4 - Low,Access request - finance shared drive,In Progress
+52,Kevin,Brown,jessica79@aol.com,(431) 663-6666,99.32.79.160,2 - High,Password reset request,Closed
+53,Steven,Nguyen,elizabeth95@facebook.com,(769) 335-3290,7.111.66.252,3 - Moderate,VPN client will not connect,New
+54,Kenneth,Hill,daniel.thompson@aol.com,(416) 818-7121,201.189.150.90,4 - Low,VPN client will not connect,In Progress
+55,Joshua,Brown,barbara99@gmail.com,(580) 921-7468,186.143.243.254,2 - High,Password reset request,Closed
+56,Melissa,Wilson,robertwright@gmail.com,(501) 575-3395,165.39.26.174,4 - Low,Password reset request,In Progress
+57,James,Brown,charles45@outlook.com,(750) 426-7603,237.60.138.161,3 - Moderate,Mailbox quota exceeded,Closed
+58,Anthony,Williams,michael.anderson@hotmail.com,(371) 326-1684,34.144.150.132,3 - Moderate,Password reset request,Resolved
+59,Susan,Lee,lthomas@outlook.com,(875) 230-9421,82.251.79.123,3 - Moderate,Laptop replacement - hardware failure,Closed
+60,Michael,Taylor,kenneththompson@msn.com,(646) 772-1956,224.60.251.124,2 - High,Password reset request,In Progress
+61,Mary,Gonzalez,susanmartin@hotmail.com,(570) 267-4259,136.172.127.106,4 - Low,Mailbox quota exceeded,Resolved
+62,Joshua,Scott,sgonzalez@aol.com,(625) 452-1268,112.236.81.172,4 - Low,Password reset request,Resolved
+63,Deborah,Torres,dwilliams@facebook.com,(241) 430-7751,64.112.219.57,3 - Moderate,VPN client will not connect,Resolved
+64,Elizabeth,Scott,jessica17@hotmail.com,(466) 545-1752,119.85.44.55,2 - High,Laptop replacement - hardware failure,Resolved
+65,Karen,Wilson,mark.jackson@live.com,(975) 584-7870,45.114.134.124,4 - Low,VPN client will not connect,Resolved
+66,Emily,Jackson,brian70@facebook.com,(383) 466-7775,250.111.172.60,1 - Critical,Laptop replacement - hardware failure,Resolved
+67,Michelle,Harris,nancy30@aol.com,(561) 251-2316,163.75.149.148,1 - Critical,Laptop replacement - hardware failure,In Progress
+68,Nancy,Wright,mark21@yahoo.com,(751) 943-7846,18.193.136.172,2 - High,Access request - finance shared drive,Resolved
+69,Matthew,Rodriguez,christopher82@me.com,(493) 598-9656,74.248.174.207,1 - Critical,Laptop replacement - hardware failure,In Progress
+70,Lisa,Jones,anthony38@outlook.com,(487) 407-8094,195.119.102.72,2 - High,Access request - finance shared drive,In Progress
+71,Brian,Martin,dorothy.garcia@hotmail.com,(691) 603-1611,37.10.9.174,3 - Moderate,Access request - finance shared drive,Closed
+72,Mark,Scott,donna37@msn.com,(659) 644-6398,185.119.165.194,1 - Critical,Access request - finance shared drive,Resolved
+73,Mary,Martinez,jennifermoore@yahoo.com,(505) 348-3187,28.14.69.53,3 - Moderate,Access request - finance shared drive,New
+74,Linda,Ramirez,timothy80@yahoo.com,(638) 962-5198,32.107.43.253,1 - Critical,Password reset request,New
+75,Kimberly,Sanchez,patriciamoore@live.com,(585) 952-6622,59.115.88.30,1 - Critical,Password reset request,New
+76,Karen,Nelson,margaretperez@live.com,(530) 307-7498,77.80.13.203,4 - Low,VPN client will not connect,Resolved
+77,Brian,Adams,timothy.lewis@aol.com,(290) 461-5735,29.25.136.188,3 - Moderate,Mailbox quota exceeded,Closed
+78,Paul,Harris,pdavis@yahoo.com,(365) 397-3299,133.154.140.14,4 - Low,Mailbox quota exceeded,In Progress
+79,Carol,White,lisa74@aol.com,(860) 606-8059,50.4.93.82,3 - Moderate,Mailbox quota exceeded,New
+80,Mark,Williams,christopher82@msn.com,(627) 676-8629,31.145.113.75,4 - Low,Mailbox quota exceeded,Closed
+81,Joshua,King,williamhill@msn.com,(782) 444-8330,92.116.223.217,4 - Low,Password reset request,New
+82,Kevin,Jones,michael75@hotmail.com,(613) 486-2942,234.22.67.131,3 - Moderate,Mailbox quota exceeded,Closed
+83,Margaret,White,tmiller@facebook.com,(529) 496-1080,7.30.87.211,1 - Critical,Laptop replacement - hardware failure,Resolved
+84,Michelle,Roberts,kperez@gmail.com,(467) 733-1801,114.189.58.16,1 - Critical,VPN client will not connect,Resolved
+85,Paul,Hall,aadams@msn.com,(436) 873-2206,35.156.39.21,3 - Moderate,Laptop replacement - hardware failure,Resolved
+86,Joshua,Nelson,timothy59@aol.com,(332) 968-4179,110.231.125.213,4 - Low,Password reset request,Closed
+87,James,Allen,kenneth55@me.com,(997) 588-4301,59.30.129.186,4 - Low,Access request - finance shared drive,Closed
+88,Sandra,Brown,charlessmith@outlook.com,(876) 255-9812,56.31.64.153,3 - Moderate,Password reset request,In Progress
+89,Barbara,Williams,elizabethrodriguez@msn.com,(829) 962-1949,164.84.107.41,2 - High,Mailbox quota exceeded,New
+90,Susan,King,ajohnson@msn.com,(474) 744-6525,247.89.251.31,4 - Low,Password reset request,New
+91,Michelle,Perez,deborah.green@outlook.com,(295) 546-3529,35.119.206.94,4 - Low,VPN client will not connect,Closed
+92,Nancy,Rodriguez,dmoore@outlook.com,(493) 239-2507,96.57.201.79,1 - Critical,Mailbox quota exceeded,Resolved
+93,Sandra,Miller,robert.mitchell@gmail.com,(641) 224-5193,17.12.19.2,1 - Critical,Laptop replacement - hardware failure,In Progress
+94,Donald,Torres,lisa34@icloud.com,(515) 828-1050,192.135.66.93,4 - Low,Password reset request,Resolved
+95,Mary,Gonzalez,ashley.brown@me.com,(430) 638-5215,216.68.90.27,1 - Critical,Laptop replacement - hardware failure,In Progress
+96,Jennifer,Johnson,patriciadavis@me.com,(615) 285-3971,31.60.31.54,4 - Low,Mailbox quota exceeded,New
+97,Nancy,Perez,deborah.torres@outlook.com,(347) 529-3422,136.194.194.141,3 - Moderate,Laptop replacement - hardware failure,Resolved
+98,Mark,Perez,wmoore@aol.com,(632) 215-5902,59.2.161.150,3 - Moderate,Laptop replacement - hardware failure,Resolved
+99,Richard,Wilson,margaret63@outlook.com,(873) 229-7173,88.251.96.180,3 - Moderate,Mailbox quota exceeded,Closed
+100,Michael,Perez,donald.martin@facebook.com,(201) 840-1152,35.39.39.239,2 - High,Access request - finance shared drive,Resolved
+101,Ashley,Green,josephhill@outlook.com,(971) 680-7778,21.23.246.37,1 - Critical,VPN client will not connect,Closed
+102,Carol,Lewis,davidgonzalez@yahoo.com,(905) 581-5753,207.165.230.96,1 - Critical,Laptop replacement - hardware failure,Resolved
+103,Jessica,Harris,amanda30@hotmail.com,(260) 582-1222,152.10.22.155,3 - Moderate,Mailbox quota exceeded,Closed
+104,Emily,Sanchez,anthony69@me.com,(849) 963-7263,238.139.203.136,4 - Low,Mailbox quota exceeded,Closed
+105,Margaret,Young,cdavis@msn.com,(928) 590-8189,193.39.106.128,2 - High,Password reset request,Resolved
+106,Kevin,Martinez,nancyking@gmail.com,(838) 676-7502,140.240.104.83,1 - Critical,Access request - finance shared drive,In Progress
+107,Elizabeth,Clark,melissa53@live.com,(781) 768-7789,80.119.133.149,4 - Low,Laptop replacement - hardware failure,New
+108,Thomas,Thomas,anthony.campbell@live.com,(756) 213-7740,238.11.245.90,3 - Moderate,Password reset request,Closed
+109,Mary,Rodriguez,nancylopez@live.com,(270) 949-7865,193.213.152.18,1 - Critical,Mailbox quota exceeded,Resolved
+110,Betty,Hall,donna.clark@facebook.com,(708) 510-2320,34.216.208.33,2 - High,Access request - finance shared drive,Closed
+111,Joshua,Davis,thomas78@facebook.com,(812) 454-1003,189.231.45.184,3 - Moderate,Mailbox quota exceeded,Closed
+112,Deborah,Walker,kwilson@aol.com,(361) 409-9403,91.25.193.66,1 - Critical,Mailbox quota exceeded,Closed
+113,Steven,Scott,thomasmitchell@yahoo.com,(555) 276-9565,66.190.47.191,3 - Moderate,Access request - finance shared drive,Resolved
+114,Nancy,Moore,timothy45@gmail.com,(935) 843-5696,244.169.124.68,2 - High,Password reset request,In Progress
+115,William,Young,amanda24@aol.com,(332) 541-6793,177.17.185.47,2 - High,VPN client will not connect,Resolved
+116,Richard,Adams,cadams@yahoo.com,(870) 274-9754,29.29.141.60,4 - Low,Laptop replacement - hardware failure,New
+117,Sandra,Jackson,paul80@aol.com,(274) 564-3481,36.94.120.57,4 - Low,Laptop replacement - hardware failure,New
+118,Sandra,Sanchez,margaret11@icloud.com,(533) 732-1587,210.43.45.34,2 - High,Password reset request,New
+119,Mary,Perez,melissagreen@hotmail.com,(915) 211-5995,131.3.127.174,4 - Low,Laptop replacement - hardware failure,In Progress
+120,Nancy,Gonzalez,emily59@me.com,(937) 398-2588,61.43.23.212,1 - Critical,Access request - finance shared drive,Closed
+121,Amanda,Nguyen,james.flores@live.com,(338) 410-7209,64.164.33.109,4 - Low,Password reset request,Closed
+122,Emily,Lee,sandra98@yahoo.com,(366) 657-6473,108.19.101.88,3 - Moderate,Laptop replacement - hardware failure,New
+123,David,Anderson,brian.miller@yahoo.com,(862) 241-7387,161.212.196.203,3 - Moderate,Access request - finance shared drive,Resolved
+124,Robert,Hernandez,patricia72@outlook.com,(958) 608-8860,72.101.214.169,1 - Critical,Mailbox quota exceeded,In Progress
+125,Joshua,Flores,michelle.roberts@aol.com,(541) 925-2221,125.64.118.246,3 - Moderate,Mailbox quota exceeded,New
+126,Brian,Walker,betty.martin@aol.com,(302) 921-3386,232.117.213.65,3 - Moderate,Password reset request,New
+127,Carol,Wilson,paul61@outlook.com,(982) 818-2747,143.180.191.81,2 - High,VPN client will not connect,Resolved
+128,Charles,Martin,donald25@msn.com,(221) 759-2814,144.206.47.243,2 - High,Laptop replacement - hardware failure,Closed
+129,James,Anderson,mary22@msn.com,(987) 236-5207,192.64.106.242,4 - Low,Password reset request,In Progress
+130,Margaret,Hernandez,karen.brown@facebook.com,(708) 358-8650,12.197.209.226,2 - High,Laptop replacement - hardware failure,Closed
+131,James,Adams,georgethomas@gmail.com,(516) 662-5218,39.254.62.38,4 - Low,Mailbox quota exceeded,Closed
+132,Karen,Lopez,joshua73@me.com,(399) 884-5785,229.60.127.213,2 - High,Mailbox quota exceeded,New
+133,Sarah,Flores,elizabeth49@yahoo.com,(308) 886-2879,170.43.211.33,3 - Moderate,Access request - finance shared drive,In Progress
+134,David,Lopez,kwright@live.com,(521) 626-5693,90.14.84.43,4 - Low,Mailbox quota exceeded,New
+135,Karen,Clark,michael.torres@icloud.com,(832) 212-2807,155.95.11.206,3 - Moderate,Access request - finance shared drive,Resolved
+136,Nancy,Hernandez,betty.nelson@facebook.com,(444) 213-8728,252.5.74.133,3 - Moderate,VPN client will not connect,Closed
+137,Joseph,Gonzalez,kenneth65@msn.com,(593) 304-9512,6.75.14.226,4 - Low,Laptop replacement - hardware failure,Resolved
+138,Melissa,Moore,swalker@live.com,(369) 924-9813,177.135.155.33,4 - Low,Mailbox quota exceeded,New
+139,Paul,Moore,jennifer.sanchez@live.com,(206) 385-2846,25.246.88.117,4 - Low,Laptop replacement - hardware failure,In Progress
+140,John,Williams,dgonzalez@facebook.com,(634) 722-6278,27.227.93.185,3 - Moderate,Mailbox quota exceeded,Closed
+141,Matthew,Mitchell,clopez@hotmail.com,(555) 389-5230,175.114.8.62,1 - Critical,Laptop replacement - hardware failure,In Progress
+142,Richard,Roberts,gnguyen@outlook.com,(847) 271-9443,62.156.60.254,4 - Low,Password reset request,Closed
+143,Thomas,Johnson,john.jones@outlook.com,(448) 540-3769,97.127.199.231,3 - Moderate,Mailbox quota exceeded,In Progress
+144,Nancy,Adams,andrewflores@outlook.com,(383) 340-3904,102.43.78.81,2 - High,Laptop replacement - hardware failure,Closed
+145,Susan,Hill,pharris@hotmail.com,(893) 448-8513,57.7.223.145,2 - High,Laptop replacement - hardware failure,In Progress
+146,William,Nelson,kimberly.clark@outlook.com,(542) 409-1153,119.110.214.2,4 - Low,Laptop replacement - hardware failure,In Progress
+147,James,Baker,david.taylor@facebook.com,(690) 289-1914,144.46.70.93,3 - Moderate,Access request - finance shared drive,In Progress
+148,Steven,Nguyen,bettysmith@yahoo.com,(927) 330-1352,62.162.23.60,4 - Low,Mailbox quota exceeded,Closed
+149,Timothy,Garcia,jrobinson@facebook.com,(425) 412-3223,195.109.109.141,3 - Moderate,Laptop replacement - hardware failure,Closed
+150,Charles,Thomas,patricia.miller@live.com,(639) 553-5418,140.209.252.41,2 - High,Mailbox quota exceeded,New
+151,Karen,Anderson,steven.robinson@gmail.com,(906) 349-8729,175.78.26.10,2 - High,VPN client will not connect,In Progress
+152,Kevin,Nelson,john32@aol.com,(750) 673-6892,185.43.209.116,1 - Critical,Access request - finance shared drive,Closed
+153,Brian,Rivera,lisa.roberts@gmail.com,(877) 394-7392,187.145.100.180,2 - High,VPN client will not connect,New
+154,Sarah,King,chernandez@facebook.com,(287) 684-6042,208.192.196.99,2 - High,VPN client will not connect,In Progress
+155,Elizabeth,Anderson,michael62@gmail.com,(234) 584-3151,190.59.75.193,2 - High,Access request - finance shared drive,In Progress
+156,Timothy,Carter,george.walker@yahoo.com,(581) 888-4542,136.122.60.84,4 - Low,VPN client will not connect,Closed
+157,Donna,Smith,susan.sanchez@icloud.com,(348) 635-5358,113.84.7.118,4 - Low,Laptop replacement - hardware failure,Closed
+158,Jessica,King,charles61@icloud.com,(970) 806-8801,35.171.180.196,4 - Low,VPN client will not connect,Resolved
+159,Patricia,Wilson,stevenlopez@live.com,(775) 458-1559,3.51.12.195,3 - Moderate,Password reset request,In Progress
+160,Karen,Smith,david.allen@msn.com,(723) 725-3875,89.190.42.231,1 - Critical,Password reset request,In Progress
+161,Nancy,Martinez,michelle78@icloud.com,(299) 436-9828,152.252.167.177,1 - Critical,Access request - finance shared drive,New
+162,Donald,Hall,johntaylor@msn.com,(438) 281-1056,200.109.186.63,1 - Critical,Access request - finance shared drive,Closed
+163,Nancy,Clark,kimberlymartin@yahoo.com,(838) 728-3288,244.0.16.25,4 - Low,Password reset request,Closed
+164,Charles,Johnson,kcarter@outlook.com,(399) 389-6483,112.87.205.246,4 - Low,Mailbox quota exceeded,Closed
+165,Matthew,Anderson,matthew66@gmail.com,(477) 993-7281,236.45.140.37,1 - Critical,Password reset request,Resolved
+166,Donald,Williams,dorothywalker@msn.com,(387) 687-2567,252.83.38.79,1 - Critical,VPN client will not connect,New
+167,Michelle,Taylor,kbaker@live.com,(773) 229-8179,220.29.61.79,2 - High,Mailbox quota exceeded,New
+168,Anthony,Gonzalez,margaret.walker@yahoo.com,(794) 760-8878,191.166.8.21,2 - High,Laptop replacement - hardware failure,In Progress
+169,Paul,Baker,mgreen@icloud.com,(898) 857-8478,82.198.102.89,3 - Moderate,Access request - finance shared drive,New
+170,Karen,Rodriguez,kevinadams@hotmail.com,(834) 394-4996,219.249.0.137,2 - High,VPN client will not connect,Resolved
+171,Michael,Torres,betty31@hotmail.com,(687) 591-9932,233.11.0.37,4 - Low,VPN client will not connect,Resolved
+172,Dorothy,Flores,markgreen@icloud.com,(308) 624-9833,36.21.51.184,3 - Moderate,VPN client will not connect,New
+173,Anthony,Smith,mwilson@gmail.com,(569) 216-9022,147.51.38.228,3 - Moderate,Laptop replacement - hardware failure,Closed
+174,Susan,Wilson,lbrown@gmail.com,(805) 390-5502,121.20.101.194,3 - Moderate,Mailbox quota exceeded,New
+175,Carol,Rivera,charlestaylor@yahoo.com,(327) 348-8436,158.112.24.70,2 - High,Access request - finance shared drive,New
+176,Mary,Jones,mramirez@msn.com,(595) 649-4079,2.172.180.30,4 - Low,Mailbox quota exceeded,New
+177,Donald,Lopez,james.jackson@me.com,(654) 862-8469,51.252.209.34,4 - Low,VPN client will not connect,Closed
+178,Melissa,Sanchez,barbara.walker@icloud.com,(368) 832-9531,41.147.165.165,4 - Low,Mailbox quota exceeded,New
+179,Robert,Smith,david.wilson@me.com,(318) 664-9791,173.24.66.184,4 - Low,Laptop replacement - hardware failure,Closed
+180,Joseph,Rivera,byoung@yahoo.com,(499) 293-4873,122.52.96.141,1 - Critical,Access request - finance shared drive,In Progress
+181,Brian,Thompson,donna.hernandez@me.com,(964) 523-7995,45.41.253.132,2 - High,VPN client will not connect,New
+182,Amanda,Miller,williamhill@yahoo.com,(536) 828-9536,24.254.108.51,2 - High,Password reset request,In Progress
+183,William,Sanchez,tbrown@gmail.com,(292) 699-1361,59.73.231.67,2 - High,Mailbox quota exceeded,Closed
+184,Matthew,Brown,johngreen@facebook.com,(964) 752-4678,51.142.194.1,1 - Critical,VPN client will not connect,Resolved
+185,Kimberly,Martin,sthomas@hotmail.com,(294) 913-6361,231.131.67.96,3 - Moderate,Access request - finance shared drive,New
+186,William,Anderson,matthew.nguyen@me.com,(777) 808-7221,39.184.42.72,2 - High,Mailbox quota exceeded,In Progress
+187,Emily,Gonzalez,richardlee@aol.com,(326) 755-2525,157.231.65.165,3 - Moderate,Password reset request,New
+188,Sarah,White,karen.anderson@yahoo.com,(787) 583-5100,137.192.52.153,1 - Critical,VPN client will not connect,Resolved
+189,Melissa,Taylor,jennifer62@yahoo.com,(389) 326-4126,171.16.215.20,4 - Low,Laptop replacement - hardware failure,Resolved
+190,Sarah,Lewis,kimberly10@icloud.com,(921) 475-3182,17.82.138.198,2 - High,VPN client will not connect,Resolved
+191,Emily,Rodriguez,robert65@yahoo.com,(257) 846-3109,229.206.168.38,4 - Low,Password reset request,Closed
+192,Christopher,Ramirez,lisalee@yahoo.com,(536) 977-3210,23.200.82.234,1 - Critical,Laptop replacement - hardware failure,In Progress
+193,Sarah,Miller,sarah39@gmail.com,(844) 569-1135,83.66.31.189,4 - Low,Password reset request,Resolved
+194,George,Flores,jgonzalez@outlook.com,(975) 549-6767,16.96.184.113,4 - Low,Password reset request,In Progress
+195,Kimberly,Walker,robert.flores@hotmail.com,(524) 366-7553,220.149.20.181,3 - Moderate,Password reset request,New
+196,George,Baker,pwilson@me.com,(622) 880-9291,210.61.67.109,2 - High,Mailbox quota exceeded,Resolved
+197,Daniel,Taylor,joshuamartin@hotmail.com,(927) 786-8488,104.107.40.55,1 - Critical,Access request - finance shared drive,New
+198,Amanda,Roberts,nmitchell@icloud.com,(725) 212-1829,184.192.27.37,2 - High,Laptop replacement - hardware failure,New
+199,Steven,Thompson,timothythompson@aol.com,(203) 346-3697,225.170.139.72,4 - Low,Laptop replacement - hardware failure,Resolved
+200,Thomas,Smith,barbara.jackson@outlook.com,(622) 681-9830,21.223.167.237,2 - High,Mailbox quota exceeded,New
+201,Anthony,Sanchez,linda52@yahoo.com,(402) 957-2605,108.162.62.82,2 - High,VPN client will not connect,Resolved
+202,John,Torres,mcarter@yahoo.com,(352) 595-9407,31.164.133.42,1 - Critical,Mailbox quota exceeded,Resolved
+203,Kenneth,Gonzalez,danielnguyen@outlook.com,(587) 635-1889,80.177.220.188,3 - Moderate,Password reset request,Resolved
+204,Jessica,Davis,mallen@me.com,(865) 943-2232,99.2.177.24,4 - Low,Access request - finance shared drive,Closed
+205,Nancy,Smith,matthew94@yahoo.com,(428) 885-7108,59.121.124.250,4 - Low,Laptop replacement - hardware failure,Closed
+206,Karen,Lee,ashleythompson@aol.com,(488) 510-2648,116.187.228.221,3 - Moderate,Access request - finance shared drive,In Progress
+207,Thomas,Thomas,ashleycarter@outlook.com,(579) 617-8804,114.215.36.102,1 - Critical,Laptop replacement - hardware failure,In Progress
+208,William,Mitchell,christopher89@me.com,(334) 525-7465,68.240.187.74,4 - Low,Mailbox quota exceeded,Resolved
+209,Lisa,Thompson,amanda.baker@facebook.com,(640) 541-9506,61.67.134.213,2 - High,Access request - finance shared drive,Closed
+210,Susan,Harris,deborah33@me.com,(471) 861-6063,183.235.17.168,4 - Low,Laptop replacement - hardware failure,Closed
+211,Linda,White,deborah.thomas@outlook.com,(815) 788-8470,28.173.224.105,4 - Low,Password reset request,Resolved
+212,Donna,Ramirez,sandratorres@yahoo.com,(991) 375-2601,165.165.42.71,2 - High,Mailbox quota exceeded,Resolved
+213,Paul,Mitchell,lgonzalez@aol.com,(488) 908-9856,145.151.246.198,4 - Low,VPN client will not connect,Resolved
+214,John,Miller,timothy.brown@outlook.com,(975) 959-6607,152.155.17.70,3 - Moderate,Password reset request,In Progress
+215,Jessica,Baker,elizabeth.wilson@hotmail.com,(726) 797-1330,58.228.179.32,4 - Low,Laptop replacement - hardware failure,Resolved
+216,Elizabeth,Green,stevengonzalez@live.com,(821) 677-2609,226.180.201.101,2 - High,VPN client will not connect,New
+217,Michael,Johnson,james.taylor@aol.com,(561) 389-4055,139.62.128.93,4 - Low,Mailbox quota exceeded,In Progress
+218,Thomas,Allen,michaelmiller@icloud.com,(845) 366-6403,88.168.124.125,4 - Low,Laptop replacement - hardware failure,Closed
+219,Jessica,Martin,carol.brown@icloud.com,(216) 613-6237,201.181.237.2,1 - Critical,Access request - finance shared drive,In Progress
+220,Jessica,Martinez,dorothy.hill@outlook.com,(782) 276-5885,162.64.200.148,2 - High,Access request - finance shared drive,New
+221,Michelle,Hill,jjohnson@icloud.com,(790) 647-7738,226.39.171.209,1 - Critical,Password reset request,In Progress
+222,Sandra,Garcia,michael40@gmail.com,(303) 204-6546,195.4.208.231,4 - Low,Mailbox quota exceeded,In Progress
+223,Thomas,Perez,andrew69@gmail.com,(618) 633-9777,135.196.6.42,4 - Low,Laptop replacement - hardware failure,Resolved
+224,Thomas,Martinez,dorothy87@live.com,(915) 553-7457,93.138.185.61,1 - Critical,Laptop replacement - hardware failure,In Progress
+225,David,Williams,dclark@gmail.com,(960) 441-9337,231.208.201.23,3 - Moderate,Password reset request,Closed
+226,Michelle,Rivera,donnathomas@yahoo.com,(977) 884-9411,6.56.83.20,3 - Moderate,Access request - finance shared drive,In Progress
+227,Betty,Campbell,tbrown@yahoo.com,(566) 534-6935,251.255.99.144,3 - Moderate,Access request - finance shared drive,New
+228,Sandra,Jackson,michelle79@live.com,(503) 874-7094,117.10.72.48,1 - Critical,Access request - finance shared drive,New
+229,Melissa,Martinez,david16@live.com,(839) 777-9760,200.91.212.83,1 - Critical,Laptop replacement - hardware failure,Resolved
+230,Richard,Taylor,karenwhite@outlook.com,(967) 224-5437,42.2.7.15,1 - Critical,Mailbox quota exceeded,In Progress
+231,Christopher,Jones,michael11@yahoo.com,(986) 592-8960,147.207.150.48,3 - Moderate,Access request - finance shared drive,In Progress
+232,Jessica,Rivera,matthew42@msn.com,(445) 349-7123,33.24.193.10,2 - High,Mailbox quota exceeded,Resolved
+233,Richard,Garcia,richardwilson@aol.com,(513) 960-3291,122.214.186.207,4 - Low,Mailbox quota exceeded,Closed
+234,Andrew,Taylor,jenniferallen@msn.com,(629) 628-5734,57.72.79.16,3 - Moderate,VPN client will not connect,New
+235,Joshua,Mitchell,carolbaker@facebook.com,(379) 980-9963,224.57.126.193,4 - Low,Laptop replacement - hardware failure,Closed
+236,Brian,Hernandez,dmartin@yahoo.com,(361) 608-8316,205.96.243.21,1 - Critical,Mailbox quota exceeded,Closed
+237,William,Clark,john33@gmail.com,(486) 605-7725,157.87.243.131,2 - High,Laptop replacement - hardware failure,Closed
+238,Elizabeth,Roberts,droberts@live.com,(392) 865-9673,235.104.227.206,2 - High,Mailbox quota exceeded,Resolved
+239,Daniel,Green,jennifer24@icloud.com,(533) 411-6869,8.41.152.173,3 - Moderate,Access request - finance shared drive,Resolved
+240,Sandra,Wright,mark.torres@icloud.com,(690) 948-6642,59.117.80.221,1 - Critical,Access request - finance shared drive,Resolved
+241,David,Nguyen,danielmiller@facebook.com,(948) 724-9705,95.106.137.242,3 - Moderate,VPN client will not connect,New
+242,Brian,Sanchez,james83@outlook.com,(984) 998-4557,94.183.179.178,4 - Low,Mailbox quota exceeded,Closed
+243,Joseph,Sanchez,sarahtaylor@hotmail.com,(739) 205-1499,36.120.61.244,2 - High,Mailbox quota exceeded,Closed
+244,Karen,Martin,mperez@icloud.com,(285) 345-7291,67.119.86.51,1 - Critical,Mailbox quota exceeded,Closed
+245,Donald,Clark,sarah83@outlook.com,(656) 546-5851,77.188.37.151,2 - High,Mailbox quota exceeded,Resolved
+246,Nancy,Walker,sarah.walker@hotmail.com,(445) 773-7006,224.112.52.118,4 - Low,Access request - finance shared drive,New
+247,Jessica,Wilson,lindaroberts@gmail.com,(570) 483-1793,244.142.134.4,2 - High,Mailbox quota exceeded,Resolved
+248,Linda,Martinez,sgreen@msn.com,(795) 850-2570,200.65.177.19,2 - High,Laptop replacement - hardware failure,New
+249,Mark,Clark,joseph.campbell@gmail.com,(236) 294-3737,53.2.137.250,1 - Critical,Mailbox quota exceeded,Closed
+250,Robert,Wright,emily34@msn.com,(332) 808-7696,190.144.92.67,3 - Moderate,VPN client will not connect,Resolved
