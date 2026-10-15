@@ -28,6 +28,31 @@ When the user says "commit and push" without specifying a branch, assume the fea
 
 ---
 
+## Endpoint DLP Test Plan — test data review is part of every change
+
+The workbook at `/endpoint-dlp-test-plan/` is generated from `scripts/dlp-test-plan/`. **Never hand-edit the .xlsx.**
+
+The files the plan asks testers to use live in `scripts/dlp-test-plan/test-data/`. `test-data/cases.json` maps every workbook row to them, by row ID **and** row name.
+
+Row IDs are reassigned on every build (`renumber.py` numbers rows by sheet position), so inserting or removing one row shifts every ID below it. In v6 → v7, 14 IDs moved, and five v6 Usability IDs now name tests that did not exist in v6. A check on the set of IDs would pass all of that, which is why `cases.json` stores names too.
+
+`renumber.py` rewrites the IDs in `cases.json` along with the content modules, so each case follows its row.
+
+**If a change adds, removes, merges or rewords a row, review the test data against it before shipping the version.** The procedure and its decision rules are in [`scripts/dlp-test-plan/TEST-DATA-REVIEW.md`](scripts/dlp-test-plan/TEST-DATA-REVIEW.md); it is step 4 of the build workflow. `verify.py` enforces the mechanical part. It fails when:
+- a row is missing from `cases.json`, its name there differs from the workbook, or its steps no longer match the case's `steps_sha`;
+- `reviewed_for_version` differs from `VERSION`;
+- two cases share an ID;
+- a committed file is used by no case (an orphan), or a case names a file that does not exist;
+- a README under `test-data/`, or a file or folder name, mentions a row ID. Folders are named by content and IDs live only in `cases.json`, so nothing else drifts on a renumber.
+
+After the review, `verify.py --stamp` records each row's steps hash and sets `reviewed_for_version`.
+
+Credential-shaped files and nested git repositories are **not** committed, because GitHub push protection rejects fake key-shaped strings. `test-data/tools/build.py local` builds them into the gitignored `test-data/generated/` and touches no tracked file. `build.py refresh <stage>` is the only command that rewrites committed payloads. Write any credential-shaped literal in generator source with `syn()` fragments.
+
+The R2 object at the download URL is overwritten on every publish, and the `v=` parameter is a cache-buster the downloads route never reads. Earlier workbooks still rebuild from git (`git worktree add /tmp/plan-v6 22e0667`, then run that tree's `build.py`). The Change Log's ID map is the quick way to see what moved; git is the fallback.
+
+---
+
 ## Completed
 
 ### Copy-to-clipboard buttons on sample data tables (PR #14)

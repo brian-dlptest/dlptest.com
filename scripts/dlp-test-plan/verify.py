@@ -478,5 +478,170 @@ else:
         bad_map.append(f"v{prev_ver} {prev_rows} - {removed} removed + {added} new != {total_now} rows now")
     for b in bad_map: fail.append(f"ID map: {b}")
 
+# ---- 9. test data database (test-data/cases.json) -------------------------
+# Row IDs are reassigned by sheet position on every build, so a test can keep its ID
+# while becoming a different test (v7: U-22 went from "User-visible latency" to
+# "Working redirect to the sanctioned alternative"). Comparing ID sets would pass that.
+# So every case is checked by ID AND name, and by a hash of the row's steps, which
+# catches a reworded row that kept its name. See TEST-DATA-REVIEW.md.
+#
+#   python3 verify.py --stamp   after a review: record each row's current steps hash
+#                               and set reviewed_for_version, then re-run verify.py
+print("\nTEST DATA DATABASE  (test-data/cases.json)")
+import collections, hashlib, json
+td = os.path.join(here, "test-data")
+STAMP = "--stamp" in sys.argv
+# Row IDs in prose, file names or folder names. Not \b: `C-A10_ocr-on-images` has no
+# word boundary between the ID and the underscore.
+DOC_ID_RE = re.compile(r"(?<![A-Za-z0-9])((?:C|P|E|I|U)-[A-Z]?\d{2})(?![0-9])")
+
+
+def steps_sha(row, sheet_rows):
+    """Hash of what a tester is told to do: How to Test (What to Test on Policy), plus
+    the expected result on Classification. Wording cleanup changes it too; the review
+    decides whether the change matters (TEST-DATA-REVIEW.md, "Which rewording counts")."""
+    text = row[4] + ("\n" + row[5] if sheet_rows is content_class.CLASSIFICATION else "")
+    return hashlib.sha256(text.encode()).hexdigest()[:12]
+
+
+try:
+    db = json.load(open(os.path.join(td, "cases.json")))
+except (OSError, ValueError) as e:
+    db = None
+    fail.append(f"test-data/cases.json unreadable: {e}")
+if db is not None:
+    reviewed = db.get("reviewed_for_version")
+    print(f"  reviewed_for_version={reviewed}  build.py VERSION={build_ver}")
+
+    rows = {}
+    for sheet_rows in (content_class.CLASSIFICATION, content_policy.POLICY,
+                       content_xp.INVESTIGATIONS, content_use.USABILITY):
+        for r in sheet_rows:
+            rows[r[0]] = (r[2], steps_sha(r, sheet_rows))
+    cases = db.get("cases", [])
+    dupes = sorted(i for i, n in collections.Counter(c["id"] for c in cases).items() if n > 1)
+    for d_ in dupes:
+        fail.append(f"cases.json: {d_} appears more than once - keep one case per row")
+    have = {c["id"]: c for c in cases}
+
+    if STAMP:
+        stamped = 0
+        for c in cases:
+            if c["id"] in rows and c.get("name") == rows[c["id"]][0]:
+                stamped += c.get("steps_sha") != rows[c["id"]][1]
+                c["steps_sha"] = rows[c["id"]][1]
+        db["reviewed_for_version"] = reviewed = build_ver
+        with open(os.path.join(td, "cases.json"), "w") as fh:
+            fh.write(json.dumps(db, indent=2, ensure_ascii=False) + "\n")
+        print(f"  --stamp: recorded steps_sha on {stamped} changed cases, "
+              f"reviewed_for_version={build_ver}")
+
+    if reviewed != build_ver:
+        fail.append(f"test data last reviewed for v{reviewed}, workbook is v{build_ver} - run the "
+                    "review in TEST-DATA-REVIEW.md, then verify.py --stamp")
+    moved, missing, reworded = [], [], []
+    for rid, (name, sha) in rows.items():
+        case = have.get(rid)
+        if case is None:
+            missing.append(rid)
+        elif case.get("name") != name:
+            moved.append(f"{rid}: cases.json says {case.get('name')!r}, workbook says {name!r}")
+        elif case.get("steps_sha") != sha:
+            reworded.append(f"{rid} ({name})")
+    stale = sorted(set(have) - set(rows))
+    print(f"  {len(rows)} rows  {len(cases)} cases  missing={len(missing)}  "
+          f"name changed={len(moved)}  steps changed={len(reworded)}  stale={len(stale)}  "
+          f"duplicate={len(dupes)}")
+    for m in missing:
+        fail.append(f"cases.json: no case for {m} - new row? decide its files (TEST-DATA-REVIEW.md R3)")
+    for m in moved:
+        fail.append(f"cases.json: {m} - this ID now names a different test; re-map it")
+    for m in reworded:
+        fail.append(f"cases.json: {m} - its steps changed since the last review; check its "
+                    "files still fit (R1 or R3), then verify.py --stamp")
+    for m in stale:
+        fail.append(f"cases.json: {m} is not in the workbook - removed row? (TEST-DATA-REVIEW.md R2)")
+
+    # Files under generated/ are built locally and never committed, so they cannot be
+    # checked for on disk in a clean clone. They are checked against the list of outputs
+    # `build.py local` promises to write (tools/outputs.py), and on disk when built.
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location(
+        "test_data_outputs", os.path.join(td, "tools", "outputs.py"))
+    _outputs = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_outputs)
+    generated_outputs = set(_outputs.GENERATED_OUTPUTS)
+    generated_built = os.path.isdir(os.path.join(td, "generated"))
+
+    referenced, bad_paths, unexplained = set(), [], []
+    for c in cases:
+        files = c.get("files", [])
+        if not files and not c.get("no_file_reason"):
+            unexplained.append(c["id"])
+        for f_ in files:
+            referenced.add(f_)
+            if f_.startswith("generated/"):
+                if f_ not in generated_outputs:
+                    bad_paths.append(f"{c['id']}: {f_} (not an output of build.py local)")
+                elif generated_built and not os.path.isfile(os.path.join(td, f_)):
+                    bad_paths.append(f"{c['id']}: {f_} (re-run build.py local)")
+            elif not f_.startswith("files/") or not os.path.isfile(os.path.join(td, f_)):
+                bad_paths.append(f"{c['id']}: {f_}")
+    # Data a Read Me instruction needs but no row does. If the instruction leaves the
+    # rendered Read Me, the data loses its reason to exist - fail so someone decides (R2).
+    readme_cells = {str(v).strip() for row in wb["Read Me"].iter_rows(values_only=True)
+                    for v in row if v is not None}
+    for req in db.get("readme_requirements", []):
+        if req["name"] not in readme_cells:
+            fail.append(f"cases.json: Read Me instruction {req['name']!r} is no longer in the "
+                        "workbook's Read Me - remove or re-home its files (TEST-DATA-REVIEW.md R2)")
+        for f_ in req.get("files", []):
+            referenced.add(f_)
+            if not os.path.isfile(os.path.join(td, f_)):
+                bad_paths.append(f"Read Me {req['name']!r}: {f_}")
+    for u in unexplained:
+        fail.append(f"cases.json: {u} has no files and no no_file_reason")
+    for b in bad_paths:
+        fail.append(f"cases.json: missing file {b}")
+
+    DOCS = ("README.txt", "README.md", "RUNBOOK.md")
+    on_disk, orphans, id_paths = [], [], []
+    for dp, dn, fn in os.walk(os.path.join(td, "files")):
+        for d_ in dn:
+            if DOC_ID_RE.search(d_):
+                id_paths.append(os.path.relpath(os.path.join(dp, d_), td) + "/")
+        for f_ in fn:
+            if f_ == ".DS_Store":
+                continue
+            rel = os.path.relpath(os.path.join(dp, f_), td).replace(os.sep, "/")
+            on_disk.append(rel)
+            if DOC_ID_RE.search(f_):
+                id_paths.append(rel)
+            if f_ not in DOCS and rel not in referenced:
+                orphans.append(rel)
+    print(f"  {len(on_disk)} committed files, {len(referenced)} referenced, "
+          f"{len(orphans)} orphaned, {len(bad_paths)} missing")
+    for o in orphans[:10]:
+        fail.append(f"test-data: {o} is not used by any case - remove it, or map it (R2)")
+    if len(orphans) > 10:
+        fail.append(f"test-data: {len(orphans) - 10} more orphaned files")
+
+    # Row IDs live in cases.json only. A README, file or folder that names a row goes
+    # stale on the next renumber without anything noticing - which is the failure this
+    # whole section exists for.
+    id_docs = []
+    for dp, dn, fn in os.walk(td):
+        dn[:] = [d for d in dn if d not in ("generated", "tools", ".git")]
+        for f_ in fn:
+            if f_ in DOCS + ("TASK.md", "VALIDATION.md"):
+                pth = os.path.join(dp, f_)
+                hit = DOC_ID_RE.search(open(pth, errors="replace").read())
+                if hit:
+                    id_docs.append(f"{os.path.relpath(pth, td)} mentions {hit.group(1)}")
+    id_docs += [f"{p_} has a row ID in its name" for p_ in id_paths]
+    print(f"  row IDs in test-data docs and paths: {len(id_docs)}")
+    for d_ in id_docs:
+        fail.append(f"test-data: {d_} - name the capability instead; IDs belong in cases.json")
+
 print("\n" + ("FAILURES:\n  " + "\n  ".join(fail) if fail else "ALL CHECKS PASSED"))
 sys.exit(1 if fail else 0)

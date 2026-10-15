@@ -42,6 +42,16 @@ def _run(stages, entry):
     print("MCP calls: %(network)d network, %(cache)d from cache" % mcp.CALLS)
 
 
+def _check_outputs():
+    """Every path cases.json may cite under generated/ must exist after a local build."""
+    import os
+    from outputs import GENERATED_OUTPUTS
+    missing = [p for p in GENERATED_OUTPUTS if not os.path.isfile(os.path.join(mcp.TEST_DATA, p))]
+    if missing:
+        sys.exit("build.py local did not write: %s" % ", ".join(missing))
+    print("generated/: all %d outputs in outputs.py present" % len(GENERATED_OUTPUTS))
+
+
 def main(argv):
     if "--refetch" in argv:
         mcp.REFETCH = True
@@ -54,6 +64,7 @@ def main(argv):
             sys.exit("`local` takes no stage names; it builds generated/ for %s"
                      % ", ".join(LOCAL_STAGES))
         _run(LOCAL_STAGES, "run_local")
+        _check_outputs()
         return
     if names == ["all"]:
         names = STAGES
@@ -61,7 +72,10 @@ def main(argv):
     if not names or unknown:
         sys.exit("refresh needs stage names or `all` (choose from %s)%s"
                  % (", ".join(STAGES), "; unknown: " + ", ".join(unknown) if unknown else ""))
-    _run([s for s in STAGES if s in names], "run")
+    stages = [s for s in STAGES if s in names]
+    _run(stages, "run")
+    if set(LOCAL_STAGES) <= set(stages):
+        _check_outputs()
 
 
 if __name__ == "__main__":
