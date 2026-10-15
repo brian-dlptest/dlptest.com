@@ -48,6 +48,7 @@ both.
 | `content_changelog.py` | Change Log sheet — one entry per change, newest version first. **Not** run through `renumber.py`: an entry keeps the row IDs it had in its version |
 | `build.py` | Layout, styling, dropdowns, conditional formatting, scoring formulas, chart |
 | `renumber.py` | Sequential IDs + cross-reference rewriting |
+| `row_ids.py` | The row-ID pattern `renumber.py` and `verify.py` share |
 | `verify.py` | Static checks (see below) |
 | `TEST-DATA-REVIEW.md` | The test data review required on every row change (workflow step 4) |
 | `test-data/` | The test files the plan refers to, `cases.json` mapping every row to them, and the generators that build them from the DLPTest MCP server |

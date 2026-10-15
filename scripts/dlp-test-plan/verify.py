@@ -292,7 +292,7 @@ if scored_timing:
 
 # ---- 5. reference integrity -------------------------------------------------
 print("\nREFERENCE INTEGRITY")
-ID_RE = re.compile(r"\b((?:C|P|E|I|U)-[A-Z]?\d{2}[a-z]?)\b")
+from row_ids import ID_RE, PREFIXES
 ids = set()
 for ws in wb.worksheets:
     for r_ in range(1, ws.max_row + 1):
@@ -493,7 +493,7 @@ td = os.path.join(here, "test-data")
 STAMP = "--stamp" in sys.argv
 # Row IDs in prose, file names or folder names. Not \b: `C-A10_ocr-on-images` has no
 # word boundary between the ID and the underscore.
-DOC_ID_RE = re.compile(r"(?<![A-Za-z0-9])((?:C|P|E|I|U)-[A-Z]?\d{2})(?![0-9])")
+DOC_ID_RE = re.compile(rf"(?<![A-Za-z0-9])((?:{PREFIXES})-[A-Z]?\d{{2}})(?![0-9])")
 
 
 def steps_sha(row, sheet_rows):
