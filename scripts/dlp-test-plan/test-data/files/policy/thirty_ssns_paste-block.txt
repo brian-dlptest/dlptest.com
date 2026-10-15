@@ -1,0 +1,37 @@
+Customer verification batch - 30 records
+Copy everything below this line and paste it into the destination under test.
+----------------------------------------------------------------
+
+Margaret Hill             444-58-0441  9/12/1948
+Nancy Baker               058-49-6846  9/21/1949
+Timothy Gonzalez          837-79-6936  3/19/1988
+John Thomas               066-68-6356  1/30/2001
+Betty Thomas              890-09-8215  9/11/1979
+Anthony Jackson           731-13-3527  7/25/2003
+Deborah Williams          734-85-1819  10/22/2003
+Amanda Martin             136-32-0969  1/5/1969
+Susan Rodriguez           277-21-5196  10/4/1964
+Linda Thompson            547-07-3388  4/7/1992
+Carol Williams            257-60-5557  9/13/1947
+Margaret Robinson         605-15-5179  7/23/1964
+Emily Baker               143-45-0741  12/22/1984
+Michael Green             725-33-5309  4/1/1947
+Patricia Johnson          123-49-3001  5/21/1965
+William Hill              624-14-3533  10/6/1975
+Mark Nelson               748-91-6051  3/30/1951
+Christopher Martin        649-45-8250  2/2/1955
+Linda Adams               780-76-6197  4/12/1972
+Mark Carter               120-13-9810  10/27/1965
+Melissa Lopez             003-62-5247  8/26/1989
+Christopher Jackson       575-29-1741  10/7/1975
+Dorothy Thomas            825-96-3324  1/14/2004
+Sandra Johnson            047-62-0384  4/18/1972
+Emily Gonzalez            117-38-8429  11/22/1986
+Christopher Ramirez       170-96-0062  12/27/2002
+Kimberly Davis            264-94-1681  10/8/2003
+Mary Martinez             027-06-8296  8/1/1966
+Michelle Anderson         402-28-9063  10/10/1961
+Andrew Rodriguez          557-90-5247  1/1/1974
+
+----------------------------------------------------------------
+End of batch. 30 records, 30 distinct SSNs.

@@ -1,0 +1,1978 @@
+{
+  "_about": "Test case file database for the Endpoint DLP Test Plan. One entry per workbook row. verify.py checks every row's id AND name against the content modules, so a renumber that moves a test to a new ID fails the build until this file is reviewed. See ../TEST-DATA-REVIEW.md. readme_requirements holds data that a Read Me instruction needs but no row does; verify.py checks the instruction still exists in build.py.",
+  "reviewed_for_version": 7,
+  "cases": [
+    {
+      "id": "C-A01",
+      "sheet": "1. Classification",
+      "name": "US SSN detection",
+      "files": [
+        "files/classification/us-ssn-detection/ssns_25.csv",
+        "files/classification/us-ssn-detection/ssns_25.docx"
+      ]
+    },
+    {
+      "id": "C-A02",
+      "sheet": "1. Classification",
+      "name": "Credit card (PCI-DSS) detection with Luhn",
+      "files": [
+        "files/classification/credit-card-luhn/cards_luhn_invalid.csv",
+        "files/classification/credit-card-luhn/cards_valid.csv",
+        "files/classification/credit-card-luhn/negative_control_non-card-16digit.csv"
+      ]
+    },
+    {
+      "id": "C-A03",
+      "sheet": "1. Classification",
+      "name": "PHI detection (HIPAA)",
+      "files": [
+        "files/classification/phi-hipaa/phi_encounters.csv",
+        "files/classification/phi-hipaa/phi_mrn_format-variants.csv",
+        "files/classification/phi-hipaa/phi_narrative_note.txt",
+        "files/classification/phi-hipaa/phi_patient_encounter_summary.docx",
+        "files/classification/phi-hipaa/providers_npi_dea.csv"
+      ]
+    },
+    {
+      "id": "C-A04",
+      "sheet": "1. Classification",
+      "name": "International identifier coverage",
+      "files": [
+        "files/classification/international-identifiers/canada.csv",
+        "files/classification/international-identifiers/eu_vat.csv",
+        "files/classification/international-identifiers/france_germany_japan.csv",
+        "files/classification/international-identifiers/international_identifiers_all.csv",
+        "files/classification/international-identifiers/passport.csv",
+        "files/classification/international-identifiers/uk.csv",
+        "files/classification/international-identifiers/uk_invalid-prefix_negative-control.csv"
+      ]
+    },
+    {
+      "id": "C-A05",
+      "sheet": "1. Classification",
+      "name": "Severity tiers by match count",
+      "files": [
+        "files/classification/severity-tiers/file1_one-ssn-repeated-x100.csv",
+        "files/classification/severity-tiers/file2_100-distinct-ssns.csv",
+        "files/classification/severity-tiers/high_100-distinct-records.csv",
+        "files/classification/severity-tiers/low_5-distinct-records.csv",
+        "files/classification/severity-tiers/medium_25-distinct-records.csv"
+      ]
+    },
+    {
+      "id": "C-A06",
+      "sheet": "1. Classification",
+      "name": "Confidence level / threshold tuning",
+      "files": [
+        "files/classification/confidence-threshold-tuning/a_bare-9-digit-number.txt",
+        "files/classification/confidence-threshold-tuning/b_formatted-123-45-6789.txt",
+        "files/classification/confidence-threshold-tuning/c_labeled-within-10-chars.txt",
+        "files/classification/confidence-threshold-tuning/d_titled-social-security.docx"
+      ]
+    },
+    {
+      "id": "C-A07",
+      "sheet": "1. Classification",
+      "name": "Exact Data Match (EDM)",
+      "files": [
+        "files/classification/exact-data-match/edm_answer-key_DO-NOT-SEND.csv",
+        "files/classification/exact-data-match/edm_source_index_10000-records.csv",
+        "files/classification/exact-data-match/edm_test-upload_50in-50out.csv"
+      ]
+    },
+    {
+      "id": "C-A08",
+      "sheet": "1. Classification",
+      "name": "AI Classification of a business-specific document type",
+      "files": [
+        "files/classification/ai-classification-msa/near-miss/dpa_01_meridian.docx",
+        "files/classification/ai-classification-msa/near-miss/dpa_02_cobourg.docx",
+        "files/classification/ai-classification-msa/near-miss/dpa_03_tamarind.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_01_brightwater.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_02_kestrel.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_03_pinehurst.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_04_vantage.docx",
+        "files/classification/ai-classification-msa/near-miss/sow_01_aurelia.docx",
+        "files/classification/ai-classification-msa/near-miss/sow_02_stonebridge.docx",
+        "files/classification/ai-classification-msa/near-miss/sow_03_halcyon.docx",
+        "files/classification/ai-classification-msa/positive/msa_01_brightwater.docx",
+        "files/classification/ai-classification-msa/positive/msa_02_kestrel.docx",
+        "files/classification/ai-classification-msa/positive/msa_03_pinehurst.docx",
+        "files/classification/ai-classification-msa/positive/msa_04_vantage.docx",
+        "files/classification/ai-classification-msa/positive/msa_05_aurelia.docx",
+        "files/classification/ai-classification-msa/positive/msa_06_stonebridge.docx",
+        "files/classification/ai-classification-msa/positive/msa_07_halcyon.docx",
+        "files/classification/ai-classification-msa/positive/msa_08_meridian.docx",
+        "files/classification/ai-classification-msa/positive/msa_09_cobourg.docx",
+        "files/classification/ai-classification-msa/positive/msa_10_tamarind.docx"
+      ]
+    },
+    {
+      "id": "C-A09",
+      "sheet": "1. Classification",
+      "name": "OCR on images",
+      "files": [
+        "files/classification/ocr-on-images/_source_rows.csv",
+        "files/classification/ocr-on-images/ssn_table_highres.png",
+        "files/classification/ocr-on-images/ssn_table_photo-quality.jpg",
+        "files/classification/ocr-on-images/ssn_table_rotated.png",
+        "files/classification/ocr-on-images/ssn_table_screenshot.png"
+      ]
+    },
+    {
+      "id": "C-A10",
+      "sheet": "1. Classification",
+      "name": "Archives and nested files",
+      "files": [
+        "files/classification/archives-and-nested-files/archive.7z",
+        "files/classification/archives-and-nested-files/archive.tar.gz",
+        "files/classification/archives-and-nested-files/level1_single-zip.zip",
+        "files/classification/archives-and-nested-files/nested_three-levels.zip",
+        "files/classification/archives-and-nested-files/nested_zip-in-zip.zip",
+        "files/classification/archives-and-nested-files/password-protected.zip"
+      ]
+    },
+    {
+      "id": "C-B01",
+      "sheet": "1. Classification",
+      "name": "Secrets and credentials in code",
+      "files": [
+        "generated/classification/secrets-and-credentials/secrets_live-looking.env",
+        "generated/classification/secrets-and-credentials/secrets_obvious-placeholder_negative-ish.env"
+      ]
+    },
+    {
+      "id": "C-B02",
+      "sheet": "1. Classification",
+      "name": "Origin-based sensitivity (data lineage)",
+      "files": [
+        "generated/classification/origin-based-lineage/from_internal-repo/auth_client.py",
+        "generated/classification/origin-based-lineage/from_public-github/auth_client.py"
+      ]
+    },
+    {
+      "id": "C-B03",
+      "sheet": "1. Classification",
+      "name": "Lineage survival through obfuscation",
+      "files": [
+        "files/classification/lineage-obfuscation-chain/step0_original_from-internal-repo.py",
+        "files/classification/lineage-obfuscation-chain/step1_renamed_quarterly-notes.py",
+        "files/classification/lineage-obfuscation-chain/step2_extension-changed.dat",
+        "files/classification/lineage-obfuscation-chain/step3_zipped.zip",
+        "files/classification/lineage-obfuscation-chain/step3b_zipped-password-protected.zip",
+        "files/classification/lineage-obfuscation-chain/step4_contents-copied-into-new-blank-file.py",
+        "files/classification/lineage-obfuscation-chain/step5_pasted-section-into-chat-app.txt"
+      ]
+    },
+    {
+      "id": "C-B04",
+      "sheet": "1. Classification",
+      "name": "Project codenames and trade-secret terms",
+      "files": [
+        "files/classification/project-codenames/mercury_false-positive-control.docx",
+        "files/classification/project-codenames/project-codename-dictionary_20-terms.csv",
+        "files/classification/project-codenames/sample_doc_using_codenames.docx"
+      ]
+    },
+    {
+      "id": "C-C01",
+      "sheet": "1. Classification",
+      "name": "Earnings and board material detection",
+      "files": [
+        "files/classification/earnings-and-board-material/board_deck.pptx",
+        "files/classification/earnings-and-board-material/cap_table.xlsx",
+        "files/classification/earnings-and-board-material/draft_earnings-release.docx",
+        "files/classification/earnings-and-board-material/routine_expense-report_negative-control.docx",
+        "files/classification/earnings-and-board-material/three-statement-model.xlsx"
+      ]
+    },
+    {
+      "id": "C-C02",
+      "sheet": "1. Classification",
+      "name": "Time-boxed sensitivity: pre- vs post-publication",
+      "files": [
+        "files/classification/time-boxed-mnpi/projected_fy27-revenue.xlsx",
+        "files/classification/time-boxed-mnpi/published_fy25-results.xlsx"
+      ],
+      "note": "Part 1 (effective-date window) uses any file here with a scheduled policy; the two workbooks serve part 2."
+    },
+    {
+      "id": "C-C03",
+      "sheet": "1. Classification",
+      "name": "Insider-list / need-to-know scoping",
+      "files": [
+        "files/classification/insider-list/has-file-access_not-on-insider-list.csv",
+        "files/classification/insider-list/insider-list_project-kingfisher.csv",
+        "files/classification/insider-list/project-kingfisher_board-update.docx"
+      ],
+      "note": "The two lists name who gets file access and who is on the insider list."
+    },
+    {
+      "id": "C-D01",
+      "sheet": "1. Classification",
+      "name": "Bulk CRM export detection",
+      "files": [
+        "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv",
+        "files/classification/bulk-crm-export/crm_export_50000-records.csv"
+      ]
+    },
+    {
+      "id": "C-D02",
+      "sheet": "1. Classification",
+      "name": "Origin-based classification from SaaS apps",
+      "files": [
+        "files/classification/saas-origin-lineage/archive-2026.csv",
+        "files/classification/saas-origin-lineage/q3-notes.csv",
+        "files/classification/saas-origin-lineage/roster-backup.csv",
+        "files/classification/saas-origin-lineage/salesforce_opportunity-export.csv",
+        "files/classification/saas-origin-lineage/servicenow_ticket-export.csv",
+        "files/classification/saas-origin-lineage/workday_employee-export.csv"
+      ],
+      "note": "Content and rename only. True origin lineage needs a real export from the real tenant; these files carry no download provenance."
+    },
+    {
+      "id": "C-D03",
+      "sheet": "1. Classification",
+      "name": "HRIS export with compensation data",
+      "files": [
+        "files/classification/hris-compensation-export/hris_roster_name-ssn-salary-rating.csv",
+        "files/classification/hris-compensation-export/hris_roster_name-ssn-salary-rating.xlsx"
+      ]
+    },
+    {
+      "id": "C-D04",
+      "sheet": "1. Classification",
+      "name": "Direct database extracts",
+      "files": [
+        "files/classification/direct-database-extracts/db_extract_cli-command.sh",
+        "files/classification/direct-database-extracts/db_extract_cli-piped-output.txt",
+        "files/classification/direct-database-extracts/db_extract_gui-export-results-to-file.csv"
+      ]
+    },
+    {
+      "id": "P-G01.Windows",
+      "sheet": "2. Policy",
+      "name": "GenAI web chat - paste and file upload",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
+      ],
+      "note": "Paste, then attach the .csv."
+    },
+    {
+      "id": "P-G01.macOS",
+      "sheet": "2. Policy",
+      "name": "GenAI web chat - paste and file upload",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
+      ],
+      "note": "Paste, then attach the .csv."
+    },
+    {
+      "id": "P-G01.Linux",
+      "sheet": "2. Policy",
+      "name": "GenAI web chat - paste and file upload",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
+      ],
+      "note": "Paste, then attach the .csv."
+    },
+    {
+      "id": "P-G02.Windows",
+      "sheet": "2. Policy",
+      "name": "GenAI desktop apps (ChatGPT, Claude, Copilot)",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
+      ],
+      "note": "Same paste and .csv as the web chat, through each desktop app."
+    },
+    {
+      "id": "P-G02.macOS",
+      "sheet": "2. Policy",
+      "name": "GenAI desktop apps (ChatGPT, Claude, Copilot)",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
+      ],
+      "note": "Same paste and .csv as the web chat, through each desktop app."
+    },
+    {
+      "id": "P-G03.Windows",
+      "sheet": "2. Policy",
+      "name": "AI coding assistants in the IDE (Copilot, Cursor, Windsurf, Claude Code)",
+      "files": [
+        "generated/policy/git-repo-with-api-key/config.py",
+        "generated/policy/git-repo-with-api-key/settlement.py"
+      ],
+      "note": "Open both files with the assistant attached and accept a completion."
+    },
+    {
+      "id": "P-G03.macOS",
+      "sheet": "2. Policy",
+      "name": "AI coding assistants in the IDE (Copilot, Cursor, Windsurf, Claude Code)",
+      "files": [
+        "generated/policy/git-repo-with-api-key/config.py",
+        "generated/policy/git-repo-with-api-key/settlement.py"
+      ],
+      "note": "Open both files with the assistant attached and accept a completion."
+    },
+    {
+      "id": "P-G03.Linux",
+      "sheet": "2. Policy",
+      "name": "AI coding assistants in the IDE (Copilot, Cursor, Windsurf, Claude Code)",
+      "files": [
+        "generated/policy/git-repo-with-api-key/config.py",
+        "generated/policy/git-repo-with-api-key/settlement.py"
+      ],
+      "note": "Open both files with the assistant attached and accept a completion."
+    },
+    {
+      "id": "P-G04.Windows",
+      "sheet": "2. Policy",
+      "name": "AI CLI tools and MCP servers reading local files",
+      "files": [],
+      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file."
+    },
+    {
+      "id": "P-G04.macOS",
+      "sheet": "2. Policy",
+      "name": "AI CLI tools and MCP servers reading local files",
+      "files": [],
+      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file."
+    },
+    {
+      "id": "P-G04.Linux",
+      "sheet": "2. Policy",
+      "name": "AI CLI tools and MCP servers reading local files",
+      "files": [],
+      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file."
+    },
+    {
+      "id": "P-G05.Windows",
+      "sheet": "2. Policy",
+      "name": "Agentic browsers (Comet, Atlas, Dia) acting autonomously",
+      "files": [
+        "files/classification/phi-hipaa/phi_patient_encounter_summary.docx"
+      ]
+    },
+    {
+      "id": "P-G05.macOS",
+      "sheet": "2. Policy",
+      "name": "Agentic browsers (Comet, Atlas, Dia) acting autonomously",
+      "files": [
+        "files/classification/phi-hipaa/phi_patient_encounter_summary.docx"
+      ]
+    },
+    {
+      "id": "P-G06.Windows",
+      "sheet": "2. Policy",
+      "name": "Shadow AI discovery",
+      "files": [],
+      "no_file_reason": "Two-week destination-discovery exercise; no payload."
+    },
+    {
+      "id": "P-G06.macOS",
+      "sheet": "2. Policy",
+      "name": "Shadow AI discovery",
+      "files": [],
+      "no_file_reason": "Two-week destination-discovery exercise; no payload."
+    },
+    {
+      "id": "P-G06.Linux",
+      "sheet": "2. Policy",
+      "name": "Shadow AI discovery",
+      "files": [],
+      "no_file_reason": "Two-week destination-discovery exercise; no payload."
+    },
+    {
+      "id": "P-G07.Windows",
+      "sheet": "2. Policy",
+      "name": "GenAI image upload",
+      "files": [
+        "files/classification/ocr-on-images/ssn_table_screenshot.png",
+        "files/classification/ocr-on-images/ssn_table_photo-quality.jpg"
+      ],
+      "note": "Record Block timing: text extraction from images is slow."
+    },
+    {
+      "id": "P-G07.macOS",
+      "sheet": "2. Policy",
+      "name": "GenAI image upload",
+      "files": [
+        "files/classification/ocr-on-images/ssn_table_screenshot.png",
+        "files/classification/ocr-on-images/ssn_table_photo-quality.jpg"
+      ],
+      "note": "Record Block timing: text extraction from images is slow."
+    },
+    {
+      "id": "P-G07.Linux",
+      "sheet": "2. Policy",
+      "name": "GenAI image upload",
+      "files": [
+        "files/classification/ocr-on-images/ssn_table_screenshot.png",
+        "files/classification/ocr-on-images/ssn_table_photo-quality.jpg"
+      ],
+      "note": "Record Block timing: text extraction from images is slow."
+    },
+    {
+      "id": "P-M01.Windows",
+      "sheet": "2. Policy",
+      "name": "Personal webmail - body and attachment",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Paste in the body, attach the .xlsx."
+    },
+    {
+      "id": "P-M01.macOS",
+      "sheet": "2. Policy",
+      "name": "Personal webmail - body and attachment",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Paste in the body, attach the .xlsx."
+    },
+    {
+      "id": "P-M01.Linux",
+      "sheet": "2. Policy",
+      "name": "Personal webmail - body and attachment",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Paste in the body, attach the .xlsx."
+    },
+    {
+      "id": "P-M02.Windows",
+      "sheet": "2. Policy",
+      "name": "Corporate mail client to an external recipient",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-M02.macOS",
+      "sheet": "2. Policy",
+      "name": "Corporate mail client to an external recipient",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-M02.Linux",
+      "sheet": "2. Policy",
+      "name": "Corporate mail client to an external recipient",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-M03.Windows",
+      "sheet": "2. Policy",
+      "name": "Consumer messaging web (WhatsApp Web, Telegram, Signal)",
+      "files": [
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "File and pasted block, in the browser and the desktop client."
+    },
+    {
+      "id": "P-M03.macOS",
+      "sheet": "2. Policy",
+      "name": "Consumer messaging web (WhatsApp Web, Telegram, Signal)",
+      "files": [
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "File and pasted block, in the browser and the desktop client."
+    },
+    {
+      "id": "P-M03.Linux",
+      "sheet": "2. Policy",
+      "name": "Consumer messaging web (WhatsApp Web, Telegram, Signal)",
+      "files": [
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "File and pasted block, in the browser and the desktop client."
+    },
+    {
+      "id": "P-M04.Windows",
+      "sheet": "2. Policy",
+      "name": "Collaboration apps - external and guest channels",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "External channel, then an internal channel as the control."
+    },
+    {
+      "id": "P-M04.macOS",
+      "sheet": "2. Policy",
+      "name": "Collaboration apps - external and guest channels",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "External channel, then an internal channel as the control."
+    },
+    {
+      "id": "P-M04.Linux",
+      "sheet": "2. Policy",
+      "name": "Collaboration apps - external and guest channels",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "External channel, then an internal channel as the control."
+    },
+    {
+      "id": "P-C01.Windows",
+      "sheet": "2. Policy",
+      "name": "Personal cloud storage - web upload",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-C01.macOS",
+      "sheet": "2. Policy",
+      "name": "Personal cloud storage - web upload",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-C01.Linux",
+      "sheet": "2. Policy",
+      "name": "Personal cloud storage - web upload",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-C02.Windows",
+      "sheet": "2. Policy",
+      "name": "Cloud sync client (desktop agent, not the browser)",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Via the synced folder, no browser."
+    },
+    {
+      "id": "P-C02.macOS",
+      "sheet": "2. Policy",
+      "name": "Cloud sync client (desktop agent, not the browser)",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Via the synced folder, no browser."
+    },
+    {
+      "id": "P-C02.Linux",
+      "sheet": "2. Policy",
+      "name": "Cloud sync client (desktop agent, not the browser)",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Via the synced folder, no browser."
+    },
+    {
+      "id": "P-C03.Windows",
+      "sheet": "2. Policy",
+      "name": "Personal account inside a sanctioned service",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-C03.macOS",
+      "sheet": "2. Policy",
+      "name": "Personal account inside a sanctioned service",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-C03.Linux",
+      "sheet": "2. Policy",
+      "name": "Personal account inside a sanctioned service",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-C04.Windows",
+      "sheet": "2. Policy",
+      "name": "Anonymous file transfer and paste sites",
+      "files": [
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "The .docx to transfer sites, the paste block to paste sites."
+    },
+    {
+      "id": "P-C04.macOS",
+      "sheet": "2. Policy",
+      "name": "Anonymous file transfer and paste sites",
+      "files": [
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "The .docx to transfer sites, the paste block to paste sites."
+    },
+    {
+      "id": "P-C04.Linux",
+      "sheet": "2. Policy",
+      "name": "Anonymous file transfer and paste sites",
+      "files": [
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "The .docx to transfer sites, the paste block to paste sites."
+    },
+    {
+      "id": "P-C05.Windows",
+      "sheet": "2. Policy",
+      "name": "FTP / SFTP / SCP client",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "ftp.dlptest.com, then over SFTP."
+    },
+    {
+      "id": "P-C05.macOS",
+      "sheet": "2. Policy",
+      "name": "FTP / SFTP / SCP client",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "ftp.dlptest.com, then over SFTP."
+    },
+    {
+      "id": "P-C05.Linux",
+      "sheet": "2. Policy",
+      "name": "FTP / SFTP / SCP client",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "ftp.dlptest.com, then over SFTP."
+    },
+    {
+      "id": "P-C06.Windows",
+      "sheet": "2. Policy",
+      "name": "HTTP and HTTPS POST to an arbitrary endpoint",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_50000-records.csv"
+      ],
+      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload."
+    },
+    {
+      "id": "P-C06.macOS",
+      "sheet": "2. Policy",
+      "name": "HTTP and HTTPS POST to an arbitrary endpoint",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_50000-records.csv"
+      ],
+      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload."
+    },
+    {
+      "id": "P-C06.Linux",
+      "sheet": "2. Policy",
+      "name": "HTTP and HTTPS POST to an arbitrary endpoint",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/classification/bulk-crm-export/crm_export_50000-records.csv"
+      ],
+      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload."
+    },
+    {
+      "id": "P-C07.Windows",
+      "sheet": "2. Policy",
+      "name": "Git push to a personal or unknown remote",
+      "files": [
+        "generated/policy/git-repo-with-api-key/config.py",
+        "generated/policy/git-repo-with-api-key/settlement.py"
+      ],
+      "note": "Push the generated repository to corporate, personal and unknown remotes."
+    },
+    {
+      "id": "P-C07.macOS",
+      "sheet": "2. Policy",
+      "name": "Git push to a personal or unknown remote",
+      "files": [
+        "generated/policy/git-repo-with-api-key/config.py",
+        "generated/policy/git-repo-with-api-key/settlement.py"
+      ],
+      "note": "Push the generated repository to corporate, personal and unknown remotes."
+    },
+    {
+      "id": "P-C07.Linux",
+      "sheet": "2. Policy",
+      "name": "Git push to a personal or unknown remote",
+      "files": [
+        "generated/policy/git-repo-with-api-key/config.py",
+        "generated/policy/git-repo-with-api-key/settlement.py"
+      ],
+      "note": "Push the generated repository to corporate, personal and unknown remotes."
+    },
+    {
+      "id": "P-B01.Windows",
+      "sheet": "2. Policy",
+      "name": "Unmanaged / shadow browsers (Brave, Vivaldi, Opera, Tor)",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ]
+    },
+    {
+      "id": "P-B01.macOS",
+      "sheet": "2. Policy",
+      "name": "Unmanaged / shadow browsers (Brave, Vivaldi, Opera, Tor)",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ]
+    },
+    {
+      "id": "P-B01.Linux",
+      "sheet": "2. Policy",
+      "name": "Unmanaged / shadow browsers (Brave, Vivaldi, Opera, Tor)",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ]
+    },
+    {
+      "id": "P-B02.Windows",
+      "sheet": "2. Policy",
+      "name": "Private mode and personal browser profiles",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-B02.macOS",
+      "sheet": "2. Policy",
+      "name": "Private mode and personal browser profiles",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-B02.Linux",
+      "sheet": "2. Policy",
+      "name": "Private mode and personal browser profiles",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-P01.Windows",
+      "sheet": "2. Policy",
+      "name": "USB mass storage write",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Copy, then Save As from a network path directly to the drive."
+    },
+    {
+      "id": "P-P01.macOS",
+      "sheet": "2. Policy",
+      "name": "USB mass storage write",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Copy, then Save As from a network path directly to the drive."
+    },
+    {
+      "id": "P-P01.Linux",
+      "sheet": "2. Policy",
+      "name": "USB mass storage write",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Copy, then Save As from a network path directly to the drive."
+    },
+    {
+      "id": "P-P02.Windows",
+      "sheet": "2. Policy",
+      "name": "MTP / PTP devices (phones, cameras)",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P02.macOS",
+      "sheet": "2. Policy",
+      "name": "MTP / PTP devices (phones, cameras)",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P02.Linux",
+      "sheet": "2. Policy",
+      "name": "MTP / PTP devices (phones, cameras)",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P03.Windows",
+      "sheet": "2. Policy",
+      "name": "Bluetooth file transfer",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P03.macOS",
+      "sheet": "2. Policy",
+      "name": "Bluetooth file transfer",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P03.Linux",
+      "sheet": "2. Policy",
+      "name": "Bluetooth file transfer",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P04.macOS",
+      "sheet": "2. Policy",
+      "name": "AirDrop (macOS)",
+      "files": [
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-P05.Windows",
+      "sheet": "2. Policy",
+      "name": "Printing - local, to file, and network queues",
+      "files": [
+        "files/policy/fifty_ssns_for_print-test.docx"
+      ]
+    },
+    {
+      "id": "P-P05.macOS",
+      "sheet": "2. Policy",
+      "name": "Printing - local, to file, and network queues",
+      "files": [
+        "files/policy/fifty_ssns_for_print-test.docx"
+      ]
+    },
+    {
+      "id": "P-P05.Linux",
+      "sheet": "2. Policy",
+      "name": "Printing - local, to file, and network queues",
+      "files": [
+        "files/policy/fifty_ssns_for_print-test.docx"
+      ]
+    },
+    {
+      "id": "P-P06.Windows",
+      "sheet": "2. Policy",
+      "name": "Screen capture (snipping tool, Cmd-Shift-4, Print Screen)",
+      "files": [
+        "files/classification/ocr-on-images/ssn_table_highres.png"
+      ],
+      "note": "Display full screen, capture, then upload the capture."
+    },
+    {
+      "id": "P-P06.macOS",
+      "sheet": "2. Policy",
+      "name": "Screen capture (snipping tool, Cmd-Shift-4, Print Screen)",
+      "files": [
+        "files/classification/ocr-on-images/ssn_table_highres.png"
+      ],
+      "note": "Display full screen, capture, then upload the capture."
+    },
+    {
+      "id": "P-P06.Linux",
+      "sheet": "2. Policy",
+      "name": "Screen capture (snipping tool, Cmd-Shift-4, Print Screen)",
+      "files": [
+        "files/classification/ocr-on-images/ssn_table_highres.png"
+      ],
+      "note": "Display full screen, capture, then upload the capture."
+    },
+    {
+      "id": "P-P07.Windows",
+      "sheet": "2. Policy",
+      "name": "Clipboard copy into a non-sanctioned app",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt"
+      ]
+    },
+    {
+      "id": "P-P07.macOS",
+      "sheet": "2. Policy",
+      "name": "Clipboard copy into a non-sanctioned app",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt"
+      ]
+    },
+    {
+      "id": "P-P07.Linux",
+      "sheet": "2. Policy",
+      "name": "Clipboard copy into a non-sanctioned app",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt"
+      ]
+    },
+    {
+      "id": "P-P08.Windows",
+      "sheet": "2. Policy",
+      "name": "Retyping / manual transcription",
+      "files": [],
+      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk."
+    },
+    {
+      "id": "P-P08.macOS",
+      "sheet": "2. Policy",
+      "name": "Retyping / manual transcription",
+      "files": [],
+      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk."
+    },
+    {
+      "id": "P-P08.Linux",
+      "sheet": "2. Policy",
+      "name": "Retyping / manual transcription",
+      "files": [],
+      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk."
+    },
+    {
+      "id": "P-N01.Windows",
+      "sheet": "2. Policy",
+      "name": "SMB / network share copy",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-N01.macOS",
+      "sheet": "2. Policy",
+      "name": "SMB / network share copy",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-N01.Linux",
+      "sheet": "2. Policy",
+      "name": "SMB / network share copy",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx"
+      ]
+    },
+    {
+      "id": "P-N02.Windows",
+      "sheet": "2. Policy",
+      "name": "RDP clipboard and drive redirection",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Paste block over the clipboard, .xlsx onto the redirected drive."
+    },
+    {
+      "id": "P-N02.macOS",
+      "sheet": "2. Policy",
+      "name": "RDP clipboard and drive redirection",
+      "files": [
+        "files/policy/thirty_ssns_paste-block.txt",
+        "files/policy/sensitive_customer_data.xlsx"
+      ],
+      "note": "Paste block over the clipboard, .xlsx onto the redirected drive."
+    },
+    {
+      "id": "P-N03.Windows",
+      "sheet": "2. Policy",
+      "name": "Off the corporate network - personal VPN and hotspot",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-N03.macOS",
+      "sheet": "2. Policy",
+      "name": "Off the corporate network - personal VPN and hotspot",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-N03.Linux",
+      "sheet": "2. Policy",
+      "name": "Off the corporate network - personal VPN and hotspot",
+      "files": [
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns.docx"
+      ]
+    },
+    {
+      "id": "P-N04.Windows",
+      "sheet": "2. Policy",
+      "name": "Fully offline enforcement",
+      "files": [
+        "files/policy/offline_make-fresh-file.ps1"
+      ],
+      "note": "Run offline_make-fresh-file.ps1 with networking off to create a never-evaluated file, then copy it to USB."
+    },
+    {
+      "id": "P-N04.macOS",
+      "sheet": "2. Policy",
+      "name": "Fully offline enforcement",
+      "files": [
+        "files/policy/offline_make-fresh-file.sh"
+      ],
+      "note": "Run offline_make-fresh-file.sh with networking off to create a never-evaluated file, then copy it to USB."
+    },
+    {
+      "id": "P-N04.Linux",
+      "sheet": "2. Policy",
+      "name": "Fully offline enforcement",
+      "files": [
+        "files/policy/offline_make-fresh-file.sh"
+      ],
+      "note": "Run offline_make-fresh-file.sh with networking off to create a never-evaluated file, then copy it to USB."
+    },
+    {
+      "id": "I-01",
+      "sheet": "3. Investigations",
+      "name": "The matched content is visible in the incident",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-02",
+      "sheet": "3. Investigations",
+      "name": "Forensic file capture",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-03",
+      "sheet": "3. Investigations",
+      "name": "Screen recording or screenshot around the event",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-04",
+      "sheet": "3. Investigations",
+      "name": "Full activity metadata on the event",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-05",
+      "sheet": "3. Investigations",
+      "name": "Destination detail, not just a category",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-06",
+      "sheet": "3. Investigations",
+      "name": "Auto-assembled incident timeline",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-07",
+      "sheet": "3. Investigations",
+      "name": "Full data lineage from origin to egress",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-08",
+      "sheet": "3. Investigations",
+      "name": "Obfuscation chained into one story",
+      "files": [
+        "files/classification/lineage-obfuscation-chain/step0_original_from-internal-repo.py",
+        "files/classification/lineage-obfuscation-chain/step1_renamed_quarterly-notes.py",
+        "files/classification/lineage-obfuscation-chain/step2_extension-changed.dat",
+        "files/classification/lineage-obfuscation-chain/step3_zipped.zip",
+        "files/classification/lineage-obfuscation-chain/step3b_zipped-password-protected.zip",
+        "files/classification/lineage-obfuscation-chain/step4_contents-copied-into-new-blank-file.py",
+        "files/classification/lineage-obfuscation-chain/step5_pasted-section-into-chat-app.txt"
+      ],
+      "note": "Steps 0-2, then step3b (password-protected), then upload."
+    },
+    {
+      "id": "I-09",
+      "sheet": "3. Investigations",
+      "name": "Trace through AI tools and agents",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-10",
+      "sheet": "3. Investigations",
+      "name": "Events before the policy existed",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-11",
+      "sheet": "3. Investigations",
+      "name": "Pivot from any point in an incident",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-12",
+      "sheet": "3. Investigations",
+      "name": "Free-text and structured search across all telemetry",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-13",
+      "sheet": "3. Investigations",
+      "name": "Natural-language investigation",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-14",
+      "sheet": "3. Investigations",
+      "name": "All user activity, not just DLP alerts",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-15",
+      "sheet": "3. Investigations",
+      "name": "Behavioural baseline and deviation",
+      "files": [
+        "files/classification/bulk-crm-export/crm_export_50000-records.csv"
+      ],
+      "note": "The 100x export after two weeks of normal activity."
+    },
+    {
+      "id": "I-16",
+      "sheet": "3. Investigations",
+      "name": "Sequence and scenario detection",
+      "files": [
+        "files/classification/bulk-crm-export/crm_export_50000-records.csv",
+        "files/policy/sensitive_customer_data.xlsx",
+        "files/policy/thirty_ssns.docx",
+        "files/policy/thirty_ssns_paste-block.txt"
+      ],
+      "note": "See RUNBOOK.md for the five-step sequence."
+    },
+    {
+      "id": "I-17",
+      "sheet": "3. Investigations",
+      "name": "HR and identity context",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-18",
+      "sheet": "3. Investigations",
+      "name": "Alert grouping and deduplication",
+      "files": [
+        "files/investigations-usability/alert-grouping-400-files/customer_record_001.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_002.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_003.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_004.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_005.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_006.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_007.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_008.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_009.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_010.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_011.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_012.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_013.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_014.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_015.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_016.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_017.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_018.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_019.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_020.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_021.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_022.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_023.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_024.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_025.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_026.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_027.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_028.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_029.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_030.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_031.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_032.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_033.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_034.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_035.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_036.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_037.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_038.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_039.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_040.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_041.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_042.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_043.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_044.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_045.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_046.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_047.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_048.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_049.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_050.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_051.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_052.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_053.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_054.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_055.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_056.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_057.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_058.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_059.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_060.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_061.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_062.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_063.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_064.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_065.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_066.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_067.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_068.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_069.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_070.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_071.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_072.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_073.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_074.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_075.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_076.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_077.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_078.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_079.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_080.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_081.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_082.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_083.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_084.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_085.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_086.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_087.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_088.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_089.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_090.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_091.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_092.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_093.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_094.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_095.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_096.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_097.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_098.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_099.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_100.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_101.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_102.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_103.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_104.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_105.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_106.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_107.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_108.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_109.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_110.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_111.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_112.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_113.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_114.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_115.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_116.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_117.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_118.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_119.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_120.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_121.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_122.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_123.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_124.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_125.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_126.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_127.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_128.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_129.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_130.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_131.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_132.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_133.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_134.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_135.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_136.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_137.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_138.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_139.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_140.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_141.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_142.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_143.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_144.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_145.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_146.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_147.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_148.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_149.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_150.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_151.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_152.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_153.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_154.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_155.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_156.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_157.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_158.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_159.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_160.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_161.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_162.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_163.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_164.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_165.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_166.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_167.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_168.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_169.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_170.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_171.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_172.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_173.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_174.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_175.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_176.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_177.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_178.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_179.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_180.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_181.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_182.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_183.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_184.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_185.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_186.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_187.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_188.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_189.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_190.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_191.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_192.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_193.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_194.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_195.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_196.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_197.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_198.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_199.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_200.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_201.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_202.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_203.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_204.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_205.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_206.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_207.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_208.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_209.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_210.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_211.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_212.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_213.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_214.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_215.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_216.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_217.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_218.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_219.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_220.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_221.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_222.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_223.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_224.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_225.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_226.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_227.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_228.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_229.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_230.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_231.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_232.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_233.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_234.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_235.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_236.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_237.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_238.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_239.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_240.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_241.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_242.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_243.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_244.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_245.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_246.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_247.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_248.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_249.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_250.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_251.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_252.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_253.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_254.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_255.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_256.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_257.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_258.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_259.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_260.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_261.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_262.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_263.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_264.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_265.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_266.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_267.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_268.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_269.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_270.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_271.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_272.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_273.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_274.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_275.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_276.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_277.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_278.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_279.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_280.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_281.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_282.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_283.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_284.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_285.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_286.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_287.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_288.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_289.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_290.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_291.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_292.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_293.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_294.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_295.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_296.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_297.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_298.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_299.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_300.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_301.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_302.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_303.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_304.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_305.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_306.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_307.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_308.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_309.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_310.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_311.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_312.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_313.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_314.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_315.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_316.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_317.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_318.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_319.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_320.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_321.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_322.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_323.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_324.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_325.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_326.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_327.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_328.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_329.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_330.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_331.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_332.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_333.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_334.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_335.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_336.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_337.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_338.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_339.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_340.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_341.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_342.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_343.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_344.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_345.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_346.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_347.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_348.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_349.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_350.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_351.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_352.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_353.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_354.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_355.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_356.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_357.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_358.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_359.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_360.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_361.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_362.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_363.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_364.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_365.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_366.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_367.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_368.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_369.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_370.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_371.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_372.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_373.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_374.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_375.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_376.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_377.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_378.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_379.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_380.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_381.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_382.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_383.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_384.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_385.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_386.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_387.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_388.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_389.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_390.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_391.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_392.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_393.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_394.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_395.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_396.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_397.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_398.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_399.csv",
+        "files/investigations-usability/alert-grouping-400-files/customer_record_400.csv"
+      ],
+      "note": "Copy all 400 in one action."
+    },
+    {
+      "id": "I-19",
+      "sheet": "3. Investigations",
+      "name": "Case management with assignment and annotation",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-20",
+      "sheet": "3. Investigations",
+      "name": "Evidence export for HR and Legal",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-21",
+      "sheet": "3. Investigations",
+      "name": "SIEM / SOAR integration",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-22",
+      "sheet": "3. Investigations",
+      "name": "Auto-close of known-good activity",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-23",
+      "sheet": "3. Investigations",
+      "name": "Pseudonymised investigation by default",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-24",
+      "sheet": "3. Investigations",
+      "name": "Role-based access to evidence",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-25",
+      "sheet": "3. Investigations",
+      "name": "Audit log of the investigators",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-26",
+      "sheet": "3. Investigations",
+      "name": "In-console response actions",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-27",
+      "sheet": "3. Investigations",
+      "name": "Remote forensics without touching the device",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "I-28",
+      "sheet": "3. Investigations",
+      "name": "AI agent and tool inventory",
+      "files": [
+        "files/investigations-usability/agent-session-task/TASK.md"
+      ],
+      "note": "Ask for the inventory before running the task."
+    },
+    {
+      "id": "I-29",
+      "sheet": "3. Investigations",
+      "name": "Structured capture of agent sessions",
+      "files": [
+        "files/investigations-usability/agent-session-task/TASK.md",
+        "files/investigations-usability/agent-session-task/workspace/data/customers_export.csv",
+        "files/investigations-usability/agent-session-task/workspace/notes.md",
+        "files/investigations-usability/agent-session-task/workspace/reconcile.py"
+      ]
+    },
+    {
+      "id": "I-30",
+      "sheet": "3. Investigations",
+      "name": "Agent, person and account attribution",
+      "files": [
+        "files/investigations-usability/agent-session-task/TASK.md"
+      ],
+      "note": "Re-run the task with a personal account, then an API key."
+    },
+    {
+      "id": "I-31",
+      "sheet": "3. Investigations",
+      "name": "Agent tool chain: MCP servers and sub-agents",
+      "files": [
+        "files/investigations-usability/agent-session-task/TASK.md"
+      ],
+      "note": "Add an MCP server with filesystem access."
+    },
+    {
+      "id": "U-01",
+      "sheet": "4. Usability",
+      "name": "AI builds business-specific classifiers for you",
+      "files": [
+        "files/classification/ai-classification-msa/near-miss/dpa_01_meridian.docx",
+        "files/classification/ai-classification-msa/near-miss/dpa_02_cobourg.docx",
+        "files/classification/ai-classification-msa/near-miss/dpa_03_tamarind.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_01_brightwater.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_02_kestrel.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_03_pinehurst.docx",
+        "files/classification/ai-classification-msa/near-miss/nda_04_vantage.docx",
+        "files/classification/ai-classification-msa/near-miss/sow_01_aurelia.docx",
+        "files/classification/ai-classification-msa/near-miss/sow_02_stonebridge.docx",
+        "files/classification/ai-classification-msa/near-miss/sow_03_halcyon.docx",
+        "files/classification/ai-classification-msa/positive/msa_01_brightwater.docx",
+        "files/classification/ai-classification-msa/positive/msa_02_kestrel.docx",
+        "files/classification/ai-classification-msa/positive/msa_03_pinehurst.docx",
+        "files/classification/ai-classification-msa/positive/msa_04_vantage.docx",
+        "files/classification/ai-classification-msa/positive/msa_05_aurelia.docx",
+        "files/classification/ai-classification-msa/positive/msa_06_stonebridge.docx",
+        "files/classification/ai-classification-msa/positive/msa_07_halcyon.docx",
+        "files/classification/ai-classification-msa/positive/msa_08_meridian.docx",
+        "files/classification/ai-classification-msa/positive/msa_09_cobourg.docx",
+        "files/classification/ai-classification-msa/positive/msa_10_tamarind.docx"
+      ],
+      "note": "Reuse the timing from the AI classification test."
+    },
+    {
+      "id": "U-02",
+      "sheet": "4. Usability",
+      "name": "Classification explained in plain language",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-03",
+      "sheet": "4. Usability",
+      "name": "Policy authored from a natural-language instruction",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-04",
+      "sheet": "4. Usability",
+      "name": "Policy recommendations from observed behaviour",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-05",
+      "sheet": "4. Usability",
+      "name": "Simulation before enforcement",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-06",
+      "sheet": "4. Usability",
+      "name": "Justification as a control, not a log entry",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-07",
+      "sheet": "4. Usability",
+      "name": "AI incident investigator",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-08",
+      "sheet": "4. Usability",
+      "name": "Intent inference, not just activity detection",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-09",
+      "sheet": "4. Usability",
+      "name": "Automated remediation with human-in-the-loop escalation",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-10",
+      "sheet": "4. Usability",
+      "name": "Natural-language / MCP interface for the security team",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-11",
+      "sheet": "4. Usability",
+      "name": "AI-generated reporting for executives and auditors",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-12",
+      "sheet": "4. Usability",
+      "name": "Mean time to triage an incident",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-13",
+      "sheet": "4. Usability",
+      "name": "Policy version history and one-click rollback",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-14",
+      "sheet": "4. Usability",
+      "name": "Staged rollout by group or device ring",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-15",
+      "sheet": "4. Usability",
+      "name": "Time to first meaningful detection",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-16",
+      "sheet": "4. Usability",
+      "name": "Policies required to cover the use cases on this plan",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-17",
+      "sheet": "4. Usability",
+      "name": "Role-based administration and separation of duties",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-18",
+      "sheet": "4. Usability",
+      "name": "Approval workflow for enforcement changes",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-19",
+      "sheet": "4. Usability",
+      "name": "Policy tip clarity",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-20",
+      "sheet": "4. Usability",
+      "name": "Business justification capture on warn",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-21",
+      "sheet": "4. Usability",
+      "name": "False-positive reporting from the endpoint",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-22",
+      "sheet": "4. Usability",
+      "name": "Working redirect to the sanctioned alternative",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-23",
+      "sheet": "4. Usability",
+      "name": "Request approval before proceeding",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-24",
+      "sheet": "4. Usability",
+      "name": "Time-bound exceptions",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-25",
+      "sheet": "4. Usability",
+      "name": "Modify the action rather than stop it",
+      "files": [
+        "files/investigations-usability/redaction-mixed-content.txt"
+      ]
+    },
+    {
+      "id": "U-26",
+      "sheet": "4. Usability",
+      "name": "Intervention fatigue",
+      "files": [
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_01.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_02.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_03.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_04.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_05.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_06.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_07.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_08.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_09.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_10.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_11.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_12.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_13.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_14.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_15.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_16.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_17.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_18.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_19.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_20.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_21.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_22.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_23.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_24.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_25.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_26.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_27.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_28.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_29.csv",
+        "files/investigations-usability/intervention-fatigue-30-files/attempt_30.csv"
+      ]
+    },
+    {
+      "id": "U-27",
+      "sheet": "4. Usability",
+      "name": "Agent resource footprint",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-28",
+      "sheet": "4. Usability",
+      "name": "User-visible latency on common actions",
+      "files": [
+        "files/investigations-usability/paste-latency-500-records.txt"
+      ]
+    },
+    {
+      "id": "U-29",
+      "sheet": "4. Usability",
+      "name": "Deployment method coverage",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-30",
+      "sheet": "4. Usability",
+      "name": "Tamper resistance and self-healing",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    },
+    {
+      "id": "U-31",
+      "sheet": "4. Usability",
+      "name": "Offline enforcement and event queueing",
+      "files": [],
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+    }
+  ],
+  "readme_requirements": [
+    {
+      "name": "Classification method matters for blocking",
+      "source": "Read Me",
+      "requirement": "When a Block passes on the Policy sheet, repeat it once with content each of those methods identifies (exact data match, AI classification, origin), and record the result in Notes.",
+      "files": [
+        "files/classification/exact-data-match/edm_test-upload_50in-50out.csv",
+        "files/block-method-checks/mnpi_500-words.txt",
+        "files/block-method-checks/mnpi_narrative_with-identifiers.txt",
+        "files/classification/lineage-obfuscation-chain/step3_zipped.zip"
+      ]
+    }
+  ]
+}
