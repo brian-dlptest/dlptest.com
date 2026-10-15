@@ -274,6 +274,7 @@ for label, text in [
     ("dlptest.com/http-post/ and /https-post/", "Live POST endpoints for testing cleartext and TLS web upload detection."),
     ("dlptest.com/ftp-test/", "Public FTP and S3 test targets for file-transfer channel tests."),
     ("dlptest.com/regex/", f"A library of 103 DLP-relevant regex patterns with worked examples, useful for building the credential and secret test files in {ref('Secrets and credentials', 'C')}."),
+    ("The test files for this plan", "Every file this plan asks for is ready-made in the test-data folder of the site's public repository: github.com/brian-dlptest/dlptest.com, under scripts/dlp-test-plan/test-data. Its cases.json lists the files for each row by name, and the folder's README explains how to build the few that cannot be stored there: credential-shaped files and git repositories."),
     ("Important", "All data on dlptest.com is synthetic. Never use real customer, employee, or patient data to test a DLP tool."),
 ]:
     rm(r, label, text); r += 1
