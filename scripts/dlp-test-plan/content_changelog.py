@@ -3,7 +3,8 @@
 # Deliberately NOT passed through renumber.py. An entry records row IDs as they were in
 # that version; rewriting them on a later renumber would point an old entry at a different
 # row, and a later cut would make renumber.py refuse to run over a "dangling" historical ID.
-# verify.py checks only that entries for the CURRENT version resolve to live rows.
+# verify.py checks entries for the CURRENT version only: each ID they cite must resolve to
+# a live row whose name matches CITED below.
 #
 # (version, date, rows, change, why)
 
@@ -66,6 +67,44 @@ CHANGELOG = [
   "Row IDs changed in Classification and Usability, and rows were added or removed on other sheets. The ID map below lists every row whose ID differs from v6.",
   "New rows were placed in their areas and removed rows closed their gaps, and IDs follow sheet position. The map lets a scored v6 workbook be ported to v7 by lookup."),
 ]
+
+# Row names for every ID the current version's entries cite (rows, change and why). The
+# entries hold literal IDs and renumber.py leaves this file alone, so a renumber within
+# the version would leave an entry naming whatever row now has that number. verify.py
+# fails if a cited ID is missing here, or if the workbook's name for it differs; fix the
+# entry's ID by hand, and the key here with it. Policy IDs are cited by base, so the name
+# has no OS. An entry that names an earlier version's row writes it as "C-A05 in v6";
+# that ID is not checked and is not recorded here. Empty this when VERSION goes up: older
+# entries keep the IDs they had and are not checked.
+CITED = {
+ "P-G01": "GenAI web chat - paste and file upload",
+ "P-G07": "GenAI image upload",
+ "P-P01": "USB mass storage write",
+ "C-A07": "Exact Data Match (EDM)",
+ "C-C03": "Insider-list / need-to-know scoping",
+ "I-15": "Behavioural baseline and deviation",
+ "I-17": "HR and identity context",
+ "U-04": "Policy recommendations from observed behaviour",
+ "U-07": "AI incident investigator",
+ "U-08": "Intent inference, not just activity detection",
+ "U-17": "Role-based administration and separation of duties",
+ "U-18": "Approval workflow for enforcement changes",
+ "U-05": "Simulation before enforcement",
+ "U-06": "Justification as a control, not a log entry",
+ "U-22": "Working redirect to the sanctioned alternative",
+ "U-26": "Intervention fatigue",
+ "I-28": "AI agent and tool inventory",
+ "I-31": "Agent tool chain: MCP servers and sub-agents",
+ "C-A05": "Severity tiers by match count",
+ "C-A06": "Confidence level / threshold tuning",
+ "P-G02": "GenAI desktop apps (ChatGPT, Claude, Copilot)",
+ "P-G04": "AI CLI tools and MCP servers reading local files",
+ "C-C02": "Time-boxed sensitivity: pre- vs post-publication",
+ "C-D03": "HRIS export with compensation data",
+ "C-D04": "Direct database extracts",
+ "I-10": "Events before the policy existed",
+ "C-B01": "Secrets and credentials in code",
+}
 
 # ID map from the previous version, so a scored workbook can be ported by lookup:
 # (previous ID, current ID, row name). "New" / "Removed" mark added and cut rows. A row
