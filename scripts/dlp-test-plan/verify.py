@@ -450,18 +450,35 @@ import content_changelog
 prev_ver, prev_rows = content_changelog.IDMAP_FROM
 full_ids = {wb[sh].cell(row=r_, column=1).value for sh, (f_, l_, _) in extents.items()
             for r_ in range(f_, l_ + 1)}
+# Row name as the ID map writes it: the name column, plus "(<OS>)" on Policy rows.
+def map_label(sh, r_):
+    name = wb[sh].cell(row=r_, column=3).value
+    return f"{name} ({wb[sh].cell(row=r_, column=4).value})" if sh == "2. Policy" else name
+labels = {wb[sh].cell(row=r_, column=1).value: map_label(sh, r_)
+          for sh, (f_, l_, _) in extents.items() for r_ in range(f_, l_ + 1)}
 cl_ = wb["Change Log"]
 hdr = next((r_ for r_ in range(1, cl_.max_row + 1) if cl_.cell(row=r_, column=1).value == f"v{prev_ver} ID"), None)
 if hdr is None:
     fail.append("Change Log has no ID map header")
 else:
-    olds, news, bad_map = [], [], []
+    olds, news, bad_map, named = [], [], [], 0
     r_ = hdr + 1
     while cl_.cell(row=r_, column=1).value:
         o, n_ = cl_.cell(row=r_, column=1).value, cl_.cell(row=r_, column=2).value
         olds.append(o); news.append(n_)
         if n_ != "Removed" and n_ not in full_ids:
             bad_map.append(f"row {r_}: v{cur_ver} ID {n_} does not exist")
+        # renumber.py does not rewrite content_changelog.py, so a second renumber in the
+        # same version leaves a new ID on whatever row now has that number. The recorded
+        # name catches it. A name may carry a trailing "(...)" note, as re-score rows do.
+        elif n_ != "Removed":
+            named += 1
+            rec, now = str(cl_.cell(row=r_, column=3).value or ""), labels[n_]
+            if rec != now and not (rec.startswith(now + " (") and rec.endswith(")")):
+                went = sorted((i for i, l in labels.items() if rec == l or rec.startswith(l + " (")),
+                              key=lambda i: labels[i] != rec)
+                bad_map.append(f"row {r_}: v{cur_ver} ID {n_} is {now!r}, but the map says "
+                               f"{rec!r}" + (f", which is now {went[0]}" if went else ""))
         if o != "New" and not re.fullmatch(r"(?:C-[ABCD]|P-[GMCBPN]|E-|I-|U-)\d{2}(?:\.(?:Windows|macOS|Linux))?", o):
             bad_map.append(f"row {r_}: v{prev_ver} ID {o!r} is malformed")
         r_ += 1
@@ -471,6 +488,7 @@ else:
     removed, added = news.count("Removed"), olds.count("New")
     total_now = sum(e[2] for e in extents.values())
     ok_sum = prev_rows - removed + added == total_now
+    print(f"  {named} current IDs checked against the row name the map records")
     print(f"  {len(olds)} rows: removed {removed}, new {added}, renumbered or re-score {len(olds) - removed - added}")
     print(f"  reconcile: v{prev_ver} {prev_rows} - {removed} + {added} = {prev_rows - removed + added}, "
           f"v{cur_ver} has {total_now}  {'OK' if ok_sum else 'MISMATCH'}")

@@ -85,6 +85,8 @@ There is no LibreOffice on the machines this was written on, so the usual
 - every count formula is simulated in Python against seeded values
 - one scoring vocabulary workbook-wide (`Pass / Partial / Fail / N/A`)
 - no dangling `C-`/`P-`/`E-`/`I-`/`U-` reference in any cell or comment
+- every current ID in the Change Log's ID map still names the row the map records, so a
+  renumber within a version cannot silently move an entry onto another row
 - the workbook's IDs match the content modules exactly, and every ID is well formed
 - the table stakes failures list is correct end to end: each sheet's hidden helper column points
   only at its own row and the cell above (a running list, so no `TEXTJOIN`), and after seeding Fails the

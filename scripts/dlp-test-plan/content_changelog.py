@@ -73,6 +73,10 @@ CHANGELOG = [
 # should be re-scored rather than copied; its name says so.
 # IDMAP_FROM is (previous version, its row count); verify.py checks the map reconciles:
 # previous rows - removed + new == current rows.
+# The row name is checked too: verify.py fails if a current ID no longer names that row,
+# which is what a renumber within the version does, since renumber.py leaves this file
+# alone. Fix the ID by hand; the failure says where the row went. Write the name as the
+# sheet does, with "(<OS>)" on Policy rows; a trailing "(...)" note is allowed after it.
 IDMAP_FROM = (6, 168)
 IDMAP = [
  ("C-A05", "Removed", "Unique vs total match counting (merged into Severity tiers by match count)"),
