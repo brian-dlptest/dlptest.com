@@ -1,0 +1,251 @@
+Opportunity ID,Account Contact First,Account Contact Last,Contact Email,Contact Phone,Billing State,Stage,Amount,Close Date
+1,Kimberly,Hill,carolmitchell@outlook.com,(914) 528-7859,MI,Closed Won,145500,2027-11-25
+2,Timothy,Hill,kimberlyramirez@me.com,(699) 672-6826,GA,Proposal,278000,2027-09-08
+3,Betty,Anderson,kevin22@me.com,(320) 833-8760,IA,Prospecting,158000,2027-06-18
+4,Betty,King,matthew27@gmail.com,(373) 357-5200,ND,Proposal,787500,2027-09-17
+5,James,Johnson,whernandez@yahoo.com,(749) 645-7472,AZ,Qualification,677000,2027-04-26
+6,Joshua,Miller,stevenbrown@icloud.com,(929) 741-2070,NV,Negotiation,931000,2027-11-27
+7,Jennifer,Harris,sarah81@yahoo.com,(571) 760-7665,NE,Negotiation,33000,2027-06-24
+8,Donna,Mitchell,janderson@outlook.com,(559) 943-7700,IL,Prospecting,166500,2027-10-25
+9,Brian,Jackson,robertking@outlook.com,(342) 823-3388,HI,Prospecting,310000,2027-01-16
+10,Linda,Taylor,mperez@me.com,(442) 677-2736,AR,Prospecting,518000,2027-10-17
+11,Dorothy,Taylor,christopher75@facebook.com,(677) 731-1844,NM,Qualification,822000,2027-10-12
+12,Matthew,Robinson,bcampbell@hotmail.com,(825) 383-5639,AL,Proposal,237000,2027-04-14
+13,Brian,Rivera,michellewilson@msn.com,(395) 662-1064,ID,Negotiation,876500,2027-04-02
+14,Timothy,Mitchell,matthewbaker@msn.com,(934) 248-6229,LA,Negotiation,526000,2027-04-07
+15,John,Hill,timothymartin@live.com,(388) 764-5935,MA,Proposal,556500,2027-05-24
+16,James,Hall,brian.gonzalez@live.com,(282) 828-4714,NH,Prospecting,591500,2027-08-02
+17,Robert,Garcia,jmartinez@aol.com,(948) 690-7852,IL,Prospecting,74000,2027-05-01
+18,Richard,Miller,dtaylor@msn.com,(457) 430-5223,IL,Closed Won,290500,2027-02-18
+19,John,Robinson,kmiller@gmail.com,(919) 787-1402,IN,Qualification,463500,2027-08-05
+20,John,Scott,kimberlywright@yahoo.com,(579) 238-3925,GA,Proposal,17000,2027-05-16
+21,Donna,Miller,brian23@hotmail.com,(210) 246-2088,AZ,Prospecting,869000,2027-02-06
+22,Elizabeth,Anderson,robert35@facebook.com,(794) 987-6802,NY,Negotiation,886000,2027-01-04
+23,George,Campbell,jtorres@yahoo.com,(677) 657-2288,MA,Closed Won,735500,2027-02-06
+24,Betty,Robinson,donald34@facebook.com,(696) 346-3572,NY,Qualification,684000,2027-02-19
+25,Kimberly,Nelson,david.nelson@live.com,(488) 280-1218,WY,Negotiation,576000,2027-08-25
+26,Nancy,Moore,jessica55@aol.com,(773) 906-8095,SC,Closed Won,542000,2027-01-18
+27,Ashley,Clark,david99@facebook.com,(386) 546-9329,NE,Closed Won,65000,2027-08-25
+28,Kenneth,Rivera,patriciamitchell@icloud.com,(422) 498-6961,LA,Negotiation,466000,2027-03-13
+29,Donna,Jones,dorothy.wilson@facebook.com,(421) 837-4448,MN,Proposal,823500,2027-03-15
+30,Matthew,Hill,barbara45@msn.com,(683) 746-1294,IA,Negotiation,160000,2027-11-28
+31,Betty,Sanchez,nhernandez@facebook.com,(285) 297-1804,MD,Negotiation,716000,2027-05-05
+32,Brian,Campbell,carol81@aol.com,(862) 481-1913,WY,Closed Won,382000,2027-06-01
+33,Richard,Young,christophermiller@gmail.com,(331) 643-4555,SC,Prospecting,327000,2027-12-19
+34,Robert,Smith,richard23@yahoo.com,(588) 212-1971,HI,Qualification,831500,2027-11-09
+35,Lisa,Wright,emily59@live.com,(314) 884-1580,TN,Proposal,326000,2027-02-04
+36,Paul,Young,georgemiller@live.com,(551) 680-2013,NH,Closed Won,448500,2027-01-23
+37,Anthony,Martinez,karen92@facebook.com,(942) 714-4597,TN,Proposal,937000,2027-10-17
+38,David,Anderson,lthompson@yahoo.com,(706) 254-1066,AK,Closed Won,193500,2027-11-09
+39,George,Baker,barbara11@msn.com,(746) 304-4015,AZ,Proposal,561000,2027-08-10
+40,Joseph,Clark,jhernandez@me.com,(811) 710-9733,NV,Qualification,409000,2027-08-23
+41,Steven,Robinson,david57@me.com,(891) 813-2627,NJ,Closed Won,252000,2027-10-17
+42,Amanda,Clark,kevin.perez@msn.com,(971) 250-7437,IA,Prospecting,917000,2027-02-07
+43,Andrew,Sanchez,jessica33@yahoo.com,(630) 393-2490,PA,Negotiation,440500,2027-04-28
+44,Robert,Nguyen,josephjackson@gmail.com,(939) 972-8534,MA,Prospecting,162500,2027-12-10
+45,William,Jones,christopherharris@outlook.com,(401) 346-3692,MD,Proposal,265000,2027-02-15
+46,Andrew,Lee,kevinbrown@msn.com,(659) 709-9185,IN,Closed Won,923500,2027-12-25
+47,Christopher,Ramirez,gnguyen@aol.com,(521) 874-8976,OH,Qualification,478000,2027-09-14
+48,Emily,White,williamsmith@icloud.com,(573) 927-5625,WA,Proposal,160000,2027-01-12
+49,Timothy,Taylor,brian34@yahoo.com,(400) 730-9667,MA,Prospecting,138500,2027-07-18
+50,Steven,Clark,jessica58@aol.com,(315) 302-5686,NE,Negotiation,19500,2027-03-01
+51,Melissa,Martin,jennifer.walker@hotmail.com,(544) 858-1639,NV,Qualification,435500,2027-06-18
+52,Sarah,Torres,steven.lopez@yahoo.com,(822) 456-3079,AK,Prospecting,747500,2027-02-26
+53,Michael,Thomas,carol.smith@me.com,(539) 684-6855,MO,Closed Won,122000,2027-11-23
+54,Deborah,Scott,donald31@me.com,(703) 853-7591,HI,Prospecting,303000,2027-01-08
+55,James,Harris,matthewperez@icloud.com,(609) 668-1872,IN,Proposal,508500,2027-02-25
+56,Matthew,Robinson,dgonzalez@live.com,(774) 714-9488,CO,Closed Won,469500,2027-04-18
+57,Melissa,Jackson,gflores@yahoo.com,(608) 978-9030,NY,Qualification,372500,2027-10-17
+58,William,Lopez,kenneth.gonzalez@hotmail.com,(972) 461-9092,DE,Negotiation,313500,2027-12-23
+59,Kenneth,Walker,thomas.ramirez@msn.com,(452) 422-5154,MT,Negotiation,715000,2027-10-02
+60,Sandra,Anderson,david40@outlook.com,(485) 601-9448,MO,Closed Won,901500,2027-01-27
+61,Lisa,Green,michael80@hotmail.com,(861) 678-7495,ME,Negotiation,734500,2027-02-13
+62,Anthony,Ramirez,danielmartin@live.com,(349) 783-1329,TN,Closed Won,605500,2027-08-02
+63,Richard,Lopez,msanchez@gmail.com,(879) 430-7279,TX,Negotiation,798000,2027-06-01
+64,Jennifer,Roberts,margaret91@aol.com,(381) 487-6838,ME,Closed Won,226000,2027-04-03
+65,Robert,Campbell,andrew.robinson@live.com,(320) 931-4730,NC,Closed Won,763000,2027-04-06
+66,Ashley,Jones,anthony.nguyen@me.com,(543) 745-1237,WI,Prospecting,133500,2027-12-08
+67,William,Rodriguez,klopez@outlook.com,(374) 395-1202,HI,Closed Won,115000,2027-03-13
+68,Michael,Campbell,michelle.lee@msn.com,(988) 527-4126,AK,Proposal,440000,2027-02-08
+69,George,Harris,anthonyhernandez@gmail.com,(833) 674-5028,RI,Closed Won,647500,2027-05-28
+70,Margaret,Campbell,robert49@msn.com,(949) 557-3621,TN,Negotiation,917000,2027-07-20
+71,Michael,Roberts,bettythomas@facebook.com,(907) 546-5702,IN,Proposal,440000,2027-09-18
+72,Sarah,Thompson,andrewlee@outlook.com,(220) 214-9094,MD,Qualification,440000,2027-09-06
+73,Melissa,Lee,johnwright@yahoo.com,(275) 344-6728,GA,Negotiation,649000,2027-12-16
+74,Donna,Roberts,robert.carter@gmail.com,(202) 709-6354,CO,Proposal,48500,2027-02-04
+75,Sandra,Johnson,nflores@hotmail.com,(431) 389-7512,WA,Negotiation,385500,2027-05-13
+76,Jennifer,Brown,josephthomas@hotmail.com,(573) 911-1573,IN,Negotiation,38000,2027-08-28
+77,Elizabeth,Hall,wtorres@facebook.com,(896) 283-4697,LA,Proposal,391500,2027-04-26
+78,George,Moore,donald90@hotmail.com,(304) 315-6380,AZ,Proposal,727000,2027-04-12
+79,Brian,Hill,robert.anderson@icloud.com,(490) 706-5333,MO,Qualification,426000,2027-03-24
+80,Steven,Nelson,tclark@outlook.com,(446) 320-2564,AR,Closed Won,925500,2027-12-27
+81,Daniel,Roberts,johncampbell@icloud.com,(904) 521-7526,OH,Prospecting,583500,2027-04-25
+82,Joseph,Moore,charles53@gmail.com,(255) 728-5177,GA,Qualification,907000,2027-12-27
+83,Kevin,Torres,sarah97@msn.com,(814) 273-4936,OH,Prospecting,583500,2027-01-01
+84,Daniel,Ramirez,paulanderson@msn.com,(983) 492-4618,IL,Qualification,178500,2027-05-15
+85,Lisa,Nguyen,dadams@yahoo.com,(760) 505-9732,MD,Closed Won,103000,2027-02-03
+86,Susan,Johnson,williamjohnson@outlook.com,(927) 807-9790,AR,Qualification,561500,2027-09-14
+87,Melissa,Campbell,cthomas@me.com,(591) 749-8163,LA,Closed Won,937500,2027-03-16
+88,David,Martin,susan.martin@facebook.com,(364) 887-7716,NJ,Proposal,553500,2027-07-04
+89,Sandra,Nelson,elizabethjohnson@msn.com,(436) 256-8753,NY,Negotiation,375000,2027-04-13
+90,Ashley,Clark,dorothy.lewis@me.com,(950) 979-1079,MN,Qualification,639000,2027-09-27
+91,Jennifer,Nguyen,charles.young@facebook.com,(204) 260-4732,ME,Closed Won,495000,2027-08-01
+92,Jessica,Scott,lcampbell@icloud.com,(636) 333-3606,CA,Prospecting,763500,2027-09-08
+93,Amanda,Robinson,carol73@facebook.com,(522) 688-4021,CT,Prospecting,789500,2027-10-14
+94,Kenneth,Moore,joseph32@outlook.com,(677) 420-8008,IL,Closed Won,443000,2027-05-13
+95,Amanda,Thompson,bmitchell@gmail.com,(560) 461-4718,NY,Prospecting,256500,2027-10-06
+96,Jessica,Lopez,dthomas@outlook.com,(287) 233-1564,NY,Prospecting,437000,2027-03-24
+97,Mark,Brown,christopher93@aol.com,(876) 321-9170,ID,Closed Won,524500,2027-11-16
+98,John,Thompson,thomas44@facebook.com,(374) 800-5275,MD,Negotiation,333500,2027-05-16
+99,Jennifer,Sanchez,jenniferdavis@gmail.com,(827) 648-4105,VT,Closed Won,148500,2027-05-03
+100,Joshua,Hernandez,steven.hill@facebook.com,(388) 487-8686,OH,Qualification,930500,2027-02-08
+101,Ashley,Hall,jenniferhill@icloud.com,(823) 822-4761,IN,Proposal,193000,2027-01-04
+102,Matthew,Nguyen,amitchell@yahoo.com,(985) 254-6286,KS,Proposal,213500,2027-06-24
+103,Donna,Roberts,patriciagreen@live.com,(547) 765-5233,WY,Qualification,399500,2027-05-03
+104,Kenneth,Harris,anthonyscott@msn.com,(938) 968-8354,AL,Negotiation,373500,2027-07-17
+105,Kenneth,Thomas,timothy.robinson@outlook.com,(863) 941-4663,MT,Prospecting,166500,2027-03-28
+106,Nancy,Carter,pthompson@gmail.com,(274) 584-4123,AK,Prospecting,29000,2027-10-04
+107,Donna,Lewis,linda.gonzalez@me.com,(331) 894-9050,WA,Closed Won,472000,2027-02-18
+108,Nancy,Torres,richardwilliams@hotmail.com,(899) 829-1099,GA,Qualification,252500,2027-04-20
+109,Joshua,White,pbrown@msn.com,(373) 853-5352,TN,Proposal,710000,2027-05-21
+110,Robert,Carter,nharris@facebook.com,(923) 729-4358,MT,Qualification,413000,2027-10-09
+111,Elizabeth,Adams,george.ramirez@outlook.com,(915) 816-9671,RI,Closed Won,811000,2027-02-06
+112,Mary,Taylor,brobinson@aol.com,(377) 491-1174,NV,Proposal,615500,2027-07-03
+113,John,Robinson,timothy50@gmail.com,(384) 352-6631,MT,Qualification,497000,2027-11-12
+114,Emily,Gonzalez,amanda76@aol.com,(972) 639-3961,NH,Closed Won,637000,2027-08-07
+115,Carol,Lopez,kmiller@me.com,(559) 818-1881,TN,Prospecting,917000,2027-08-22
+116,Mark,Moore,brian.flores@facebook.com,(419) 770-3310,TX,Prospecting,845500,2027-11-16
+117,Susan,Mitchell,danielcarter@facebook.com,(569) 910-2821,MN,Proposal,669000,2027-12-21
+118,Deborah,Sanchez,patriciathompson@hotmail.com,(995) 789-6148,AZ,Qualification,454000,2027-12-11
+119,Kimberly,Taylor,jennifer.taylor@icloud.com,(744) 244-5646,ME,Prospecting,737000,2027-05-21
+120,Richard,Torres,twhite@hotmail.com,(449) 763-4538,MD,Closed Won,206500,2027-09-02
+121,David,Johnson,kevin45@yahoo.com,(784) 955-5595,WI,Closed Won,679000,2027-01-14
+122,Sarah,Thompson,donnaroberts@facebook.com,(856) 327-7125,WV,Prospecting,101000,2027-07-28
+123,James,Hernandez,charlesmartin@yahoo.com,(452) 222-2826,NH,Closed Won,193500,2027-06-15
+124,Ashley,Jones,klee@icloud.com,(861) 846-5904,MT,Prospecting,513500,2027-07-06
+125,Joshua,Davis,amanda64@outlook.com,(319) 491-1211,ND,Closed Won,224000,2027-09-22
+126,Mark,Ramirez,brian96@gmail.com,(829) 839-5802,WA,Negotiation,789000,2027-12-01
+127,Andrew,Rodriguez,paul.rodriguez@gmail.com,(347) 512-3249,IA,Qualification,293000,2027-11-24
+128,Donna,Anderson,john.martin@icloud.com,(286) 873-3334,OK,Proposal,748500,2027-11-27
+129,Betty,Young,james17@facebook.com,(741) 871-3924,AZ,Closed Won,118500,2027-12-07
+130,Linda,Smith,michelle49@me.com,(720) 877-5000,TX,Prospecting,23500,2027-08-16
+131,Donald,Young,sandracarter@facebook.com,(281) 668-2486,SD,Proposal,420000,2027-10-22
+132,Paul,Perez,william.nguyen@icloud.com,(929) 558-4585,NE,Closed Won,815000,2027-11-10
+133,Melissa,Garcia,kevin.garcia@yahoo.com,(707) 629-4564,KS,Prospecting,716000,2027-10-03
+134,Anthony,Taylor,susantaylor@aol.com,(721) 681-3709,CA,Negotiation,356500,2027-07-28
+135,Patricia,White,karen86@hotmail.com,(813) 854-2804,MO,Qualification,63000,2027-01-12
+136,Kimberly,Garcia,kimberly.wright@aol.com,(260) 743-3356,NC,Qualification,313500,2027-08-13
+137,Patricia,Lewis,dorothy.baker@outlook.com,(293) 434-9049,VA,Closed Won,587000,2027-01-07
+138,Melissa,Lewis,susanjones@gmail.com,(828) 516-6067,ME,Proposal,67500,2027-05-05
+139,Susan,Flores,bjones@live.com,(475) 986-7174,CT,Closed Won,473000,2027-02-13
+140,Timothy,Martinez,margaret.allen@hotmail.com,(930) 250-5282,AL,Prospecting,567000,2027-05-02
+141,Michael,Clark,jennifer76@me.com,(416) 917-3561,OH,Negotiation,397500,2027-08-18
+142,Donna,Thomas,jroberts@outlook.com,(914) 375-8062,MO,Prospecting,847000,2027-06-02
+143,Charles,Wright,lisahill@icloud.com,(667) 894-2466,GA,Qualification,792000,2027-04-28
+144,Kimberly,Robinson,dsanchez@icloud.com,(401) 886-4499,NJ,Qualification,624500,2027-10-14
+145,Timothy,Rodriguez,joseph47@hotmail.com,(434) 528-6253,VA,Negotiation,730500,2027-02-27
+146,Matthew,Anderson,swhite@gmail.com,(490) 427-7336,WI,Proposal,277500,2027-12-01
+147,Joshua,Anderson,probinson@msn.com,(540) 727-4365,WA,Closed Won,510500,2027-11-23
+148,Daniel,Campbell,lisagonzalez@hotmail.com,(315) 840-8360,AL,Prospecting,455000,2027-10-11
+149,Jennifer,Moore,mary14@hotmail.com,(809) 996-6876,KY,Qualification,739500,2027-04-03
+150,Mark,Sanchez,esanchez@gmail.com,(956) 363-1330,MI,Proposal,594000,2027-09-28
+151,David,Gonzalez,dallen@live.com,(714) 278-6758,TX,Closed Won,385000,2027-04-04
+152,Linda,Mitchell,mcampbell@facebook.com,(637) 814-9628,NE,Qualification,495000,2027-02-06
+153,James,Adams,caroljohnson@outlook.com,(944) 709-1435,OK,Negotiation,907000,2027-08-11
+154,Kevin,Walker,jenniferlee@me.com,(460) 798-7894,RI,Prospecting,360500,2027-05-02
+155,Melissa,Lopez,kevin43@gmail.com,(305) 918-7250,ID,Negotiation,455500,2027-06-03
+156,Mark,Lee,wwilliams@outlook.com,(705) 671-2553,CO,Closed Won,288000,2027-01-17
+157,Mary,Moore,pclark@aol.com,(399) 589-7497,WA,Proposal,644500,2027-09-20
+158,John,Davis,jennifernelson@icloud.com,(966) 616-5219,NJ,Qualification,235000,2027-02-18
+159,Mary,Robinson,dcarter@gmail.com,(544) 988-1659,WA,Proposal,450500,2027-11-08
+160,Joseph,Jackson,james31@msn.com,(750) 763-9004,FL,Closed Won,140000,2027-06-26
+161,Christopher,Lewis,michelle.garcia@msn.com,(930) 678-9979,MS,Negotiation,419000,2027-02-28
+162,Richard,Sanchez,bking@facebook.com,(451) 948-9951,NM,Closed Won,686000,2027-02-27
+163,Donald,Martinez,droberts@me.com,(883) 363-9301,ME,Closed Won,527000,2027-01-22
+164,Ashley,Mitchell,george13@me.com,(768) 315-7665,KY,Proposal,742000,2027-05-01
+165,Michelle,Moore,richard51@gmail.com,(663) 423-6420,OH,Qualification,905500,2027-06-21
+166,Melissa,Taylor,matthewjackson@live.com,(448) 907-2850,NV,Proposal,662500,2027-06-10
+167,Paul,Martinez,dperez@hotmail.com,(554) 918-3631,MS,Closed Won,587000,2027-07-11
+168,Amanda,Green,dorothy.white@facebook.com,(699) 781-7428,DE,Qualification,927500,2027-04-22
+169,Deborah,Thompson,matthew17@yahoo.com,(708) 793-4128,FL,Prospecting,664000,2027-09-09
+170,Nancy,Carter,michaelking@me.com,(304) 339-7549,OR,Qualification,247000,2027-03-11
+171,Michelle,Gonzalez,robertmitchell@yahoo.com,(264) 690-6524,KY,Qualification,781500,2027-01-21
+172,Steven,Mitchell,timothyclark@icloud.com,(576) 350-9315,CA,Negotiation,933000,2027-05-25
+173,Donna,Clark,lisa.hill@live.com,(721) 779-9733,WI,Closed Won,64500,2027-08-21
+174,Thomas,Lewis,lwalker@gmail.com,(805) 794-5726,VT,Prospecting,605000,2027-01-21
+175,Michelle,Campbell,danielwright@yahoo.com,(612) 399-5963,NC,Qualification,772000,2027-12-22
+176,Mary,Lewis,kimberly.gonzalez@live.com,(907) 604-9979,WI,Prospecting,814500,2027-09-04
+177,Brian,Young,jessica.nguyen@aol.com,(970) 553-4974,ME,Closed Won,815500,2027-04-15
+178,Emily,Gonzalez,emily29@aol.com,(805) 616-3660,HI,Closed Won,424500,2027-09-26
+179,Anthony,Williams,sandra.campbell@icloud.com,(413) 256-8651,NE,Closed Won,448500,2027-01-20
+180,Susan,Rivera,sarah.lewis@live.com,(896) 816-6848,IN,Prospecting,797500,2027-03-19
+181,Nancy,Baker,emily.wilson@yahoo.com,(543) 774-9065,MA,Closed Won,653500,2027-12-13
+182,Joshua,Campbell,kevinthompson@me.com,(880) 991-3834,MI,Qualification,305000,2027-03-17
+183,Mary,Roberts,david15@outlook.com,(501) 811-8429,ME,Negotiation,613500,2027-12-21
+184,Donald,Lopez,phernandez@live.com,(629) 867-7751,NV,Negotiation,785500,2027-08-20
+185,Deborah,Adams,brianclark@msn.com,(973) 671-2173,CA,Prospecting,656500,2027-10-05
+186,Charles,Wright,kimberly34@live.com,(953) 987-9721,CO,Prospecting,412500,2027-11-12
+187,James,Walker,amanda10@hotmail.com,(684) 572-2191,IL,Proposal,544500,2027-03-12
+188,Michael,Jackson,thomasmitchell@facebook.com,(208) 750-3223,MN,Negotiation,847500,2027-05-11
+189,Amanda,Allen,kimberly56@gmail.com,(387) 690-7100,IA,Closed Won,316000,2027-09-28
+190,Donald,Rivera,william83@icloud.com,(639) 730-3426,OR,Prospecting,424000,2027-06-19
+191,Michael,Rodriguez,andrew.green@gmail.com,(751) 721-2901,NE,Closed Won,809500,2027-10-06
+192,Christopher,Ramirez,elizabeth.king@gmail.com,(264) 275-7363,SC,Proposal,69500,2027-05-08
+193,Joseph,Lopez,melissajackson@hotmail.com,(325) 293-5024,CT,Prospecting,415500,2027-03-22
+194,Betty,Clark,dorothy73@yahoo.com,(275) 267-6124,AK,Proposal,447000,2027-06-24
+195,Nancy,Anderson,patriciamartin@me.com,(755) 975-5021,MI,Closed Won,479500,2027-08-03
+196,William,Young,amanda.smith@icloud.com,(821) 383-7704,ME,Proposal,777500,2027-09-13
+197,Melissa,Davis,emitchell@hotmail.com,(380) 703-8184,NJ,Qualification,395500,2027-10-09
+198,Nancy,Perez,droberts@yahoo.com,(540) 575-4691,SC,Proposal,41000,2027-01-03
+199,Karen,Jones,pwhite@icloud.com,(900) 607-5169,MT,Closed Won,43500,2027-06-06
+200,Donald,Torres,dyoung@facebook.com,(734) 884-5257,SC,Qualification,418500,2027-05-07
+201,Andrew,Baker,brian43@gmail.com,(348) 312-3696,MI,Prospecting,252500,2027-12-25
+202,Thomas,Mitchell,karennelson@icloud.com,(611) 847-8156,MA,Negotiation,63500,2027-09-06
+203,Karen,Martin,roberttaylor@hotmail.com,(621) 495-3663,WA,Qualification,512500,2027-06-13
+204,William,Flores,patricia.lee@icloud.com,(499) 799-7791,CA,Qualification,428500,2027-02-08
+205,Andrew,Rodriguez,amiller@icloud.com,(812) 952-3603,RI,Qualification,463000,2027-12-22
+206,Robert,Lee,bsmith@icloud.com,(347) 952-2926,MS,Closed Won,931000,2027-09-18
+207,Dorothy,Lee,susan.lewis@msn.com,(435) 760-6160,AZ,Proposal,345000,2027-12-20
+208,Kimberly,Hernandez,patriciaanderson@yahoo.com,(970) 287-5660,WV,Negotiation,713500,2027-03-25
+209,Mark,Mitchell,carolwhite@yahoo.com,(804) 696-6528,NC,Negotiation,758000,2027-08-18
+210,Deborah,Williams,cmartin@facebook.com,(879) 751-9208,AL,Closed Won,203000,2027-10-04
+211,Margaret,Jones,tflores@outlook.com,(414) 431-8634,AR,Negotiation,630500,2027-09-20
+212,Michael,Moore,melissataylor@me.com,(784) 639-2274,AZ,Negotiation,195500,2027-04-20
+213,Linda,King,mark19@facebook.com,(979) 641-6690,NC,Proposal,381000,2027-07-10
+214,Kevin,Hill,charles75@outlook.com,(801) 267-4817,NV,Closed Won,505500,2027-04-01
+215,Melissa,Rivera,donaldwalker@live.com,(610) 743-7479,NC,Negotiation,378500,2027-10-04
+216,Richard,White,margaret84@live.com,(972) 828-2531,MD,Prospecting,145000,2027-11-24
+217,Dorothy,Hall,deborahflores@hotmail.com,(300) 723-3648,ME,Qualification,799500,2027-05-24
+218,Melissa,Rodriguez,mgarcia@me.com,(309) 763-7312,TN,Qualification,362000,2027-04-21
+219,Donna,Roberts,dorothy.clark@hotmail.com,(410) 699-2296,VT,Negotiation,547000,2027-09-28
+220,Sandra,Smith,george.lopez@msn.com,(928) 360-4234,IL,Qualification,714000,2027-12-27
+221,Andrew,Clark,andrewtaylor@outlook.com,(607) 458-2939,SD,Prospecting,503500,2027-05-26
+222,Mark,Harris,amanda.hill@hotmail.com,(489) 734-8952,ME,Negotiation,480500,2027-11-03
+223,Betty,Anderson,pharris@gmail.com,(725) 782-9014,PA,Closed Won,152500,2027-01-20
+224,Christopher,Harris,sandra61@hotmail.com,(333) 719-1050,PA,Proposal,580000,2027-03-25
+225,Daniel,Garcia,mark66@gmail.com,(512) 316-3715,SD,Negotiation,52000,2027-11-18
+226,William,Mitchell,michael.carter@icloud.com,(817) 984-9957,AK,Closed Won,762000,2027-07-07
+227,Timothy,Sanchez,paul.thompson@yahoo.com,(371) 758-6049,WY,Negotiation,421500,2027-10-10
+228,Joshua,Baker,robert57@aol.com,(988) 833-6890,NV,Prospecting,110000,2027-11-21
+229,Patricia,Garcia,bgarcia@aol.com,(380) 952-4324,MI,Negotiation,312500,2027-07-15
+230,Andrew,White,william99@hotmail.com,(588) 815-4933,SD,Negotiation,682000,2027-09-25
+231,Kenneth,Davis,jtaylor@live.com,(464) 713-1117,KS,Closed Won,340000,2027-12-12
+232,James,Green,susan.lopez@icloud.com,(219) 258-9407,MI,Prospecting,498000,2027-09-13
+233,Donald,Ramirez,sarah17@msn.com,(309) 358-1072,VT,Prospecting,176000,2027-01-11
+234,Barbara,Taylor,jessicaallen@msn.com,(644) 582-7603,OR,Negotiation,506000,2027-09-18
+235,Daniel,Anderson,deborah.gonzalez@me.com,(814) 318-8564,OK,Prospecting,885000,2027-12-07
+236,Carol,Roberts,amandajackson@yahoo.com,(430) 846-8124,VA,Proposal,496000,2027-02-01
+237,Linda,Garcia,carol34@icloud.com,(588) 964-7006,PA,Qualification,858500,2027-05-01
+238,Carol,Scott,sarah98@yahoo.com,(488) 437-2274,FL,Negotiation,417000,2027-08-01
+239,Donna,Lee,knguyen@yahoo.com,(899) 304-4396,MT,Prospecting,749000,2027-02-15
+240,Emily,Jackson,mark.smith@yahoo.com,(656) 661-3240,OH,Qualification,800500,2027-08-25
+241,Susan,Nelson,sjones@me.com,(322) 763-3406,MA,Prospecting,116000,2027-12-13
+242,Daniel,Hill,matthewroberts@outlook.com,(756) 757-7883,OH,Negotiation,372000,2027-08-25
+243,Sarah,Roberts,george.jones@live.com,(376) 739-2940,AR,Negotiation,726500,2027-03-24
+244,Thomas,Anderson,smartin@me.com,(760) 667-9880,AR,Negotiation,172000,2027-05-13
+245,Kevin,Smith,christopher.nguyen@outlook.com,(236) 498-2264,WA,Negotiation,538500,2027-05-15
+246,Emily,Nguyen,rgreen@facebook.com,(356) 873-9993,NC,Prospecting,347500,2027-11-18
+247,Carol,Rivera,ndavis@gmail.com,(297) 357-2942,MD,Proposal,235000,2027-10-26
+248,Mary,Baker,donna88@gmail.com,(633) 230-2068,FL,Proposal,131000,2027-07-26
+249,Emily,Johnson,thomas.martinez@aol.com,(611) 343-1620,KS,Prospecting,172000,2027-01-06
+250,Joshua,Campbell,jessica18@outlook.com,(609) 379-8126,NJ,Prospecting,518000,2027-06-02

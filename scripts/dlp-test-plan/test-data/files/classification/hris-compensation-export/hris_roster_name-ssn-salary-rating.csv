@@ -1,0 +1,181 @@
+Employee ID,Full Name,SSN,Date of Birth,Work Email,Job Title,Department,Base Salary,Bonus Target %,Performance Rating,Manager
+1,Robert Thomas,632-21-1656,4/6/1982,donnamoore@live.com,Account Executive,Sales,279000,35,Below,M. Sandoval
+2,Kevin Hall,320-63-5534,7/24/1969,andrewhill@gmail.com,Staff Engineer,Operations,132000,20,Outstanding,A. Delacroix
+3,Paul Lewis,321-76-0132,9/27/1958,mary.white@me.com,Analyst,Operations,101000,20,Strong,M. Sandoval
+4,Mary Mitchell,755-03-1146,8/22/1983,jessica.hill@icloud.com,Director,People,90000,25,Below,E. Whitlock
+5,Ashley Davis,496-15-0991,10/30/1951,asanchez@aol.com,Programme Manager,People,238000,10,Meets,E. Whitlock
+6,Anthony Gonzalez,164-48-2496,8/8/1979,kenneth34@aol.com,Controller,Sales,99000,20,Exceeds,E. Whitlock
+7,Jennifer Flores,235-29-8113,10/24/1983,george.clark@live.com,Analyst,Finance,78000,25,Outstanding,A. Delacroix
+8,Kevin Garcia,230-94-7362,11/16/1950,madams@facebook.com,Director,Engineering,224000,20,Meets,E. Whitlock
+9,Melissa Sanchez,357-22-0122,8/30/1972,kenneth10@gmail.com,Account Executive,Marketing,120000,35,Outstanding,A. Delacroix
+10,Kimberly Adams,715-11-0418,4/21/1962,anthonyrodriguez@me.com,Staff Engineer,Marketing,281000,35,Below,M. Sandoval
+11,Kevin Ramirez,616-95-4664,4/28/2002,betty28@facebook.com,Analyst,Engineering,78000,15,Exceeds,E. Whitlock
+12,Charles Wilson,033-13-7143,5/1/1974,robertadams@gmail.com,Staff Engineer,Marketing,155000,15,Meets,E. Whitlock
+13,Charles Wright,604-74-7064,1/18/1976,susan.torres@me.com,Account Executive,Finance,196000,35,Below,R. Okonkwo
+14,Susan Taylor,542-05-3535,6/13/1955,lindamiller@outlook.com,Staff Engineer,Sales,282000,25,Outstanding,R. Okonkwo
+15,Ashley Lee,895-60-1087,3/12/2001,pwhite@me.com,Programme Manager,Marketing,157000,35,Exceeds,A. Delacroix
+16,Jessica Martin,682-32-9529,2/24/1970,james.scott@icloud.com,Account Executive,Operations,292000,15,Outstanding,A. Delacroix
+17,Linda Campbell,687-49-6219,3/9/1977,klee@facebook.com,Controller,Sales,165000,25,Outstanding,E. Whitlock
+18,Kimberly Brown,099-98-6228,3/5/1985,dorothy.thompson@gmail.com,Recruiter,People,98000,25,Exceeds,A. Delacroix
+19,Emily Miller,096-87-0787,8/15/2005,michelle.mitchell@facebook.com,Analyst,Engineering,216000,25,Outstanding,A. Delacroix
+20,Michael Lewis,425-38-2335,4/23/1992,bgonzalez@icloud.com,Director,Finance,120000,10,Meets,M. Sandoval
+21,Robert Harris,238-94-3569,1/21/1972,phall@msn.com,Senior Engineer,People,273000,35,Exceeds,M. Sandoval
+22,Donald Jackson,883-18-8898,7/4/1958,matthewbrown@outlook.com,Programme Manager,Engineering,171000,10,Outstanding,A. Delacroix
+23,Paul Martin,530-77-0291,8/12/1965,mary30@me.com,Director,Marketing,270000,15,Strong,M. Sandoval
+24,James King,810-26-0965,4/5/1996,linda.nguyen@gmail.com,Recruiter,Operations,228000,20,Below,A. Delacroix
+25,Emily Flores,762-93-5333,5/20/1977,ashleyramirez@msn.com,Programme Manager,Marketing,106000,12,Meets,A. Delacroix
+26,Dorothy White,651-12-4894,8/28/1975,timothyhernandez@aol.com,Recruiter,Finance,223000,12,Strong,A. Delacroix
+27,John Hill,232-65-0736,5/19/1982,sarahbaker@aol.com,Account Executive,Finance,181000,15,Outstanding,P. Achebe
+28,Kenneth Johnson,427-39-3831,5/14/1950,byoung@live.com,Analyst,Sales,136000,12,Below,E. Whitlock
+29,George Ramirez,444-04-9668,11/20/1997,james37@aol.com,Staff Engineer,Finance,156000,35,Below,R. Okonkwo
+30,Matthew Lopez,007-95-2540,8/15/1999,gjohnson@facebook.com,Director,People,198000,25,Exceeds,P. Achebe
+31,Amanda Young,049-62-0595,4/19/1990,emily.lewis@yahoo.com,Analyst,Finance,144000,15,Meets,E. Whitlock
+32,Donna Williams,201-28-2396,8/21/1968,sharris@facebook.com,Controller,Engineering,123000,35,Outstanding,E. Whitlock
+33,Barbara Nguyen,312-30-5933,5/6/2001,sarah74@icloud.com,Account Executive,Finance,286000,10,Meets,E. Whitlock
+34,Donald Thompson,812-63-4015,12/20/1970,dcampbell@hotmail.com,Programme Manager,Engineering,83000,15,Strong,M. Sandoval
+35,Mary Ramirez,855-12-4765,3/26/1993,anthonyking@gmail.com,Programme Manager,Sales,95000,15,Meets,A. Delacroix
+36,George Rodriguez,358-72-4239,2/22/2003,joshuamoore@msn.com,Recruiter,Operations,198000,20,Meets,P. Achebe
+37,Patricia Wright,829-05-4864,12/26/1997,jennifer.adams@icloud.com,Senior Engineer,People,174000,15,Strong,M. Sandoval
+38,Steven Davis,439-92-6818,1/22/2003,ashley.clark@gmail.com,Account Executive,Sales,291000,20,Meets,E. Whitlock
+39,Timothy Johnson,777-19-5883,1/24/1954,dorothy51@facebook.com,Account Executive,Sales,101000,10,Meets,M. Sandoval
+40,Paul Torres,164-04-2202,3/6/1952,etorres@facebook.com,Programme Manager,Engineering,169000,25,Exceeds,E. Whitlock
+41,Timothy Baker,276-54-9383,1/31/1957,michael.baker@me.com,Programme Manager,Engineering,102000,10,Meets,R. Okonkwo
+42,William Taylor,113-06-1239,1/19/1995,markmoore@yahoo.com,Account Executive,Marketing,196000,25,Meets,E. Whitlock
+43,Elizabeth Moore,624-42-6708,12/10/1950,droberts@icloud.com,Director,Engineering,89000,35,Meets,E. Whitlock
+44,Richard White,364-70-7300,10/1/1947,nancynguyen@me.com,Staff Engineer,Finance,131000,25,Meets,M. Sandoval
+45,Melissa Mitchell,513-25-6029,12/7/1975,charlesdavis@live.com,Senior Engineer,Operations,184000,12,Outstanding,R. Okonkwo
+46,Paul Green,702-55-5422,6/28/1966,sarah44@hotmail.com,Staff Engineer,Operations,216000,25,Outstanding,E. Whitlock
+47,Melissa Green,660-56-9590,4/16/1973,danielgarcia@live.com,Programme Manager,Sales,219000,35,Meets,A. Delacroix
+48,Andrew Johnson,593-77-9577,8/18/1991,sarah.sanchez@facebook.com,Recruiter,Finance,174000,25,Strong,P. Achebe
+49,Joseph Wright,727-68-6917,7/23/1959,thomas39@yahoo.com,Programme Manager,Sales,229000,25,Meets,R. Okonkwo
+50,Kevin Miller,674-46-3048,1/6/2005,amandacampbell@hotmail.com,Senior Engineer,Engineering,138000,20,Outstanding,A. Delacroix
+51,Carol Carter,398-53-9532,7/25/2004,lhernandez@hotmail.com,Director,Finance,215000,10,Below,P. Achebe
+52,Michelle Perez,658-34-6687,5/4/1983,barbara.adams@live.com,Account Executive,Marketing,295000,10,Below,A. Delacroix
+53,Kevin Lee,270-24-4016,1/21/2005,melissa.davis@icloud.com,Staff Engineer,Finance,70000,35,Strong,A. Delacroix
+54,Linda Lee,608-27-8919,3/31/1997,jrodriguez@icloud.com,Controller,Operations,213000,15,Below,P. Achebe
+55,Elizabeth Thompson,547-22-4350,5/9/1955,carolcampbell@facebook.com,Senior Engineer,Marketing,99000,10,Outstanding,A. Delacroix
+56,Jessica Lewis,484-10-4956,3/8/1964,joshua.green@me.com,Director,People,79000,10,Meets,R. Okonkwo
+57,Carol Clark,002-36-4553,2/8/1977,anthony.lee@yahoo.com,Recruiter,Operations,144000,12,Meets,E. Whitlock
+58,Linda Torres,168-78-7366,2/26/1963,dorothyjackson@outlook.com,Account Executive,Sales,281000,20,Outstanding,M. Sandoval
+59,Susan Torres,459-88-9378,2/21/1996,cking@live.com,Director,Engineering,93000,35,Outstanding,P. Achebe
+60,Timothy Brown,185-95-8571,11/16/1980,christopher60@msn.com,Director,People,226000,35,Outstanding,E. Whitlock
+61,Nancy Brown,121-18-6484,4/5/1947,richardscott@hotmail.com,Staff Engineer,Operations,133000,10,Meets,R. Okonkwo
+62,Amanda Hill,783-91-5554,7/25/1983,lisadavis@aol.com,Account Executive,Sales,181000,25,Meets,R. Okonkwo
+63,David Baker,586-49-4567,5/4/1987,jennifer.williams@me.com,Senior Engineer,Marketing,245000,12,Meets,M. Sandoval
+64,Emily Lewis,835-23-7609,10/16/1983,barbara.king@hotmail.com,Account Executive,People,265000,25,Below,E. Whitlock
+65,Joshua Lopez,659-05-4245,11/24/1971,sarah.robinson@icloud.com,Controller,Sales,137000,15,Meets,E. Whitlock
+66,Anthony Nguyen,243-52-0938,2/9/1966,david.lopez@hotmail.com,Analyst,Finance,289000,12,Meets,R. Okonkwo
+67,Michael Rivera,883-25-4003,6/16/1992,margaret.adams@facebook.com,Controller,Engineering,253000,15,Outstanding,E. Whitlock
+68,Michelle Smith,541-71-0751,8/18/1991,kmartin@icloud.com,Senior Engineer,Operations,202000,35,Exceeds,A. Delacroix
+69,Mary Williams,357-42-3337,4/9/1981,amanda.ramirez@outlook.com,Senior Engineer,Finance,138000,15,Strong,P. Achebe
+70,Andrew Gonzalez,859-58-1403,3/20/1995,lisa39@yahoo.com,Account Executive,People,99000,20,Meets,P. Achebe
+71,Betty Taylor,296-78-5738,8/9/1969,paul.young@hotmail.com,Director,Engineering,93000,25,Below,E. Whitlock
+72,Thomas Sanchez,855-27-1981,11/15/1986,michael56@me.com,Senior Engineer,Marketing,291000,20,Exceeds,E. Whitlock
+73,Kevin Davis,466-30-3845,9/8/1983,josephjackson@me.com,Programme Manager,Engineering,130000,12,Meets,A. Delacroix
+74,Donald Thomas,505-77-2328,8/3/2005,timothy.moore@aol.com,Controller,Engineering,120000,15,Below,A. Delacroix
+75,Kimberly Nguyen,518-26-8030,7/1/1986,ehernandez@aol.com,Director,Marketing,71000,12,Exceeds,P. Achebe
+76,Margaret Flores,559-76-0843,5/10/1979,robert.lewis@me.com,Account Executive,Engineering,202000,10,Meets,E. Whitlock
+77,Jennifer Scott,108-56-0520,4/3/2005,dthompson@hotmail.com,Director,Finance,174000,20,Meets,R. Okonkwo
+78,Donald Walker,453-01-1891,10/20/1957,sarah.thompson@live.com,Senior Engineer,Engineering,87000,25,Meets,E. Whitlock
+79,Betty Jackson,615-70-1690,2/20/1975,ksanchez@icloud.com,Account Executive,Finance,233000,35,Meets,P. Achebe
+80,Emily Clark,367-71-8718,6/7/1953,marklewis@outlook.com,Analyst,Sales,115000,12,Exceeds,R. Okonkwo
+81,Donald Harris,775-08-1466,7/30/1980,william56@outlook.com,Recruiter,Sales,165000,10,Outstanding,M. Sandoval
+82,Matthew Hill,826-46-8534,8/30/1975,betty81@me.com,Staff Engineer,People,85000,25,Exceeds,P. Achebe
+83,Emily Roberts,305-66-5578,8/24/2000,charles.moore@hotmail.com,Director,Sales,143000,10,Strong,A. Delacroix
+84,Thomas Robinson,844-24-4926,3/21/1984,anthonyadams@hotmail.com,Controller,Operations,195000,20,Outstanding,R. Okonkwo
+85,Donna Flores,731-72-1419,6/13/1987,kimberly.williams@me.com,Programme Manager,Marketing,188000,15,Meets,M. Sandoval
+86,Anthony Brown,485-82-3105,12/5/1955,jessica65@msn.com,Director,Operations,112000,25,Meets,P. Achebe
+87,Kevin Thompson,534-51-0593,9/5/1959,kimberly.nelson@facebook.com,Senior Engineer,Finance,184000,25,Meets,E. Whitlock
+88,Kevin Rodriguez,175-14-2307,4/22/1976,paulhernandez@live.com,Staff Engineer,Finance,293000,15,Outstanding,M. Sandoval
+89,Margaret Wilson,113-40-7969,7/16/1990,dorothy64@aol.com,Senior Engineer,People,122000,15,Outstanding,P. Achebe
+90,Sandra Johnson,659-89-8342,10/8/1991,sandra.wilson@live.com,Account Executive,Engineering,101000,15,Meets,M. Sandoval
+91,Charles Thompson,556-13-9766,8/3/1974,jenniferjackson@aol.com,Programme Manager,Marketing,209000,10,Below,P. Achebe
+92,Elizabeth Flores,557-72-7917,5/23/1983,anthonygonzalez@me.com,Senior Engineer,Engineering,205000,12,Meets,R. Okonkwo
+93,Anthony Thompson,658-91-9320,5/14/1974,sarah14@outlook.com,Analyst,Sales,225000,20,Meets,P. Achebe
+94,Patricia Rodriguez,121-41-8578,7/2/1991,richard77@msn.com,Analyst,Engineering,285000,12,Meets,A. Delacroix
+95,Kenneth Harris,763-74-1130,3/5/1974,ashley.perez@facebook.com,Director,Operations,261000,15,Meets,R. Okonkwo
+96,Joshua Young,644-48-3482,4/17/1960,barbara21@outlook.com,Senior Engineer,Operations,200000,15,Meets,M. Sandoval
+97,Thomas White,429-60-6702,8/13/1982,rscott@me.com,Analyst,Finance,70000,20,Meets,A. Delacroix
+98,Donna Martinez,424-90-4926,9/24/1987,carolwhite@me.com,Recruiter,Marketing,295000,20,Strong,A. Delacroix
+99,Jennifer Green,098-12-7748,12/22/1980,msmith@icloud.com,Programme Manager,Marketing,199000,12,Meets,A. Delacroix
+100,Kevin Adams,118-90-3542,9/29/2002,jessicaanderson@msn.com,Director,Marketing,170000,15,Outstanding,A. Delacroix
+101,Amanda Lewis,020-60-6208,10/2/2001,christopherjohnson@live.com,Staff Engineer,People,187000,15,Meets,M. Sandoval
+102,Joseph Johnson,230-07-8985,2/28/1958,jessicaflores@hotmail.com,Account Executive,Marketing,159000,25,Meets,M. Sandoval
+103,Joshua Wilson,115-02-6838,10/28/1964,sarahtaylor@msn.com,Account Executive,Sales,187000,10,Exceeds,A. Delacroix
+104,Karen Davis,528-22-5597,1/11/1988,elizabeth86@yahoo.com,Analyst,Engineering,156000,35,Strong,M. Sandoval
+105,Paul Baker,802-70-7335,5/17/1995,joshua15@gmail.com,Account Executive,Operations,267000,12,Exceeds,E. Whitlock
+106,Mark Nelson,636-46-3260,7/6/1950,mhill@yahoo.com,Staff Engineer,Engineering,240000,12,Exceeds,A. Delacroix
+107,Barbara Torres,809-97-0938,6/25/1974,sandra.young@yahoo.com,Senior Engineer,Marketing,284000,15,Strong,E. Whitlock
+108,Paul White,363-17-5881,5/20/2004,jroberts@gmail.com,Senior Engineer,Marketing,197000,15,Exceeds,M. Sandoval
+109,Mark Hill,116-35-9570,7/28/2004,davidjohnson@outlook.com,Programme Manager,Finance,272000,12,Strong,M. Sandoval
+110,Sandra Scott,659-14-1374,11/6/1959,davidbrown@live.com,Recruiter,Engineering,213000,25,Below,E. Whitlock
+111,Jessica Moore,678-23-9881,9/8/1951,erodriguez@hotmail.com,Controller,Finance,260000,20,Exceeds,R. Okonkwo
+112,Amanda Miller,236-57-8337,5/16/1964,mhernandez@hotmail.com,Programme Manager,Sales,78000,10,Exceeds,P. Achebe
+113,David Moore,500-12-5567,4/1/2002,mary66@icloud.com,Account Executive,Finance,148000,20,Exceeds,A. Delacroix
+114,Joseph Torres,125-03-3213,1/1/1988,nmartin@msn.com,Recruiter,Marketing,106000,15,Strong,R. Okonkwo
+115,Ashley Taylor,759-96-2701,5/2/1999,anthonymiller@yahoo.com,Senior Engineer,Operations,238000,12,Meets,A. Delacroix
+116,Sarah Nguyen,557-18-4608,1/8/1946,johnallen@facebook.com,Staff Engineer,Sales,179000,35,Meets,P. Achebe
+117,Elizabeth Anderson,508-59-2504,2/19/1966,deborah56@yahoo.com,Analyst,Marketing,247000,10,Meets,A. Delacroix
+118,Sarah Martin,393-11-5412,4/8/1996,kimberlythomas@yahoo.com,Programme Manager,People,179000,15,Meets,E. Whitlock
+119,Nancy Lee,424-75-6552,12/21/1972,sarah.hall@yahoo.com,Analyst,Finance,150000,12,Meets,R. Okonkwo
+120,Dorothy Hall,553-85-6117,1/4/1992,sandragreen@me.com,Account Executive,Finance,167000,25,Meets,R. Okonkwo
+121,Jessica Adams,724-88-7007,12/1/1959,emily45@facebook.com,Account Executive,Sales,69000,25,Outstanding,E. Whitlock
+122,Charles Scott,724-04-1764,2/17/1968,charlesgarcia@aol.com,Analyst,Operations,291000,20,Meets,R. Okonkwo
+123,Susan Scott,260-92-1323,4/26/1965,donald.nelson@outlook.com,Staff Engineer,Engineering,187000,10,Strong,R. Okonkwo
+124,Kenneth Flores,118-32-9849,9/13/1979,deborah15@gmail.com,Analyst,Sales,282000,20,Exceeds,A. Delacroix
+125,Andrew Lewis,317-22-7630,4/8/1955,lisa74@live.com,Recruiter,Engineering,108000,15,Meets,M. Sandoval
+126,Charles Adams,889-65-0975,6/13/1999,mrivera@msn.com,Account Executive,Marketing,81000,35,Outstanding,M. Sandoval
+127,Emily Harris,125-50-7562,1/30/1979,jessica.mitchell@gmail.com,Controller,Finance,95000,12,Below,P. Achebe
+128,Joshua Jackson,346-49-5476,9/15/2000,richard35@live.com,Controller,People,271000,12,Meets,A. Delacroix
+129,Amanda Jackson,399-47-3870,6/29/1968,anthonyrodriguez@gmail.com,Controller,Sales,291000,25,Meets,P. Achebe
+130,Andrew Rodriguez,178-39-0601,11/12/1982,linda.martinez@icloud.com,Senior Engineer,People,202000,20,Exceeds,R. Okonkwo
+131,Dorothy Martinez,576-37-6983,6/21/1985,ljones@outlook.com,Analyst,People,114000,15,Meets,A. Delacroix
+132,Carol White,168-97-0073,11/17/1974,lisa.white@msn.com,Senior Engineer,People,266000,20,Strong,R. Okonkwo
+133,Anthony Lewis,136-22-4750,8/2/1992,mwilson@gmail.com,Account Executive,Finance,183000,35,Below,R. Okonkwo
+134,Carol Martinez,361-31-5912,2/27/1995,michellejackson@gmail.com,Director,People,238000,12,Outstanding,P. Achebe
+135,Nancy Hall,891-84-7896,3/8/2003,jlewis@live.com,Senior Engineer,Sales,253000,12,Meets,E. Whitlock
+136,Richard Sanchez,028-30-9430,7/25/1957,robertwhite@hotmail.com,Director,Operations,80000,12,Meets,E. Whitlock
+137,Carol Williams,015-23-7673,10/14/1980,george23@live.com,Programme Manager,Engineering,211000,25,Meets,E. Whitlock
+138,Steven Hernandez,049-10-5419,5/7/1972,dtorres@aol.com,Analyst,Engineering,223000,12,Below,E. Whitlock
+139,Sandra Anderson,427-16-6047,2/15/2001,mhall@facebook.com,Controller,Sales,129000,15,Strong,M. Sandoval
+140,Lisa Moore,699-21-8704,7/5/1993,nancyrobinson@icloud.com,Director,Finance,77000,12,Outstanding,M. Sandoval
+141,Thomas Hernandez,270-28-3241,7/27/2004,nancylopez@yahoo.com,Programme Manager,Engineering,197000,35,Meets,M. Sandoval
+142,Mark Thompson,279-30-2025,10/20/1980,kenneth.carter@yahoo.com,Programme Manager,Marketing,103000,12,Meets,M. Sandoval
+143,Kenneth Taylor,573-71-1853,5/20/1954,linda.robinson@msn.com,Staff Engineer,Operations,212000,10,Meets,A. Delacroix
+144,Sandra Sanchez,814-75-6201,2/7/1958,christopherjones@icloud.com,Senior Engineer,Finance,153000,15,Meets,M. Sandoval
+145,Deborah Roberts,001-66-1045,4/5/1962,amoore@me.com,Director,People,245000,25,Outstanding,E. Whitlock
+146,Michael Nguyen,858-28-9174,12/6/1946,barbara.lopez@live.com,Recruiter,People,161000,15,Exceeds,R. Okonkwo
+147,Linda Anderson,405-33-3262,1/1/1972,deborahharris@me.com,Senior Engineer,Engineering,79000,35,Meets,E. Whitlock
+148,Carol Scott,322-58-7218,1/17/1948,joshuaking@yahoo.com,Director,Operations,221000,12,Below,E. Whitlock
+149,Susan Rodriguez,218-54-2809,11/18/1953,daniel.martin@msn.com,Recruiter,Operations,177000,25,Meets,R. Okonkwo
+150,Deborah Roberts,329-37-5487,4/7/1953,charles.moore@hotmail.com,Controller,Finance,284000,15,Meets,M. Sandoval
+151,Karen Taylor,624-55-2709,1/20/1997,mark61@live.com,Programme Manager,Marketing,76000,12,Strong,M. Sandoval
+152,Robert Jackson,419-94-7685,2/3/1984,kenneth.nguyen@hotmail.com,Analyst,Engineering,218000,25,Strong,E. Whitlock
+153,John Williams,711-44-6846,12/2/1983,staylor@icloud.com,Account Executive,Operations,199000,20,Meets,E. Whitlock
+154,Matthew Jackson,768-83-4760,5/29/1957,karen54@me.com,Account Executive,People,142000,35,Outstanding,E. Whitlock
+155,Mark Nelson,526-32-0655,10/5/2003,paul.wilson@facebook.com,Account Executive,People,157000,12,Meets,A. Delacroix
+156,Ashley Walker,117-53-9179,6/26/2002,robertroberts@msn.com,Controller,People,268000,12,Exceeds,P. Achebe
+157,Kimberly Wilson,139-95-1287,4/21/2005,deborahyoung@yahoo.com,Programme Manager,Finance,284000,12,Meets,P. Achebe
+158,William Smith,487-42-8564,5/25/1980,betty.anderson@me.com,Senior Engineer,Finance,134000,25,Meets,R. Okonkwo
+159,Donald Baker,176-56-1260,1/29/1983,timothy80@me.com,Programme Manager,Operations,282000,35,Meets,A. Delacroix
+160,Emily Mitchell,380-33-6449,6/9/1950,jlee@yahoo.com,Recruiter,Operations,96000,25,Exceeds,M. Sandoval
+161,Betty Campbell,051-83-5923,8/20/1989,lindanguyen@live.com,Director,Operations,157000,10,Outstanding,P. Achebe
+162,Mark Miller,007-65-3018,11/12/1948,michael28@yahoo.com,Analyst,Engineering,220000,12,Strong,P. Achebe
+163,Melissa White,523-27-7617,8/14/1971,daniellopez@msn.com,Analyst,Operations,232000,20,Exceeds,M. Sandoval
+164,William Flores,335-15-4948,10/9/2000,sandrarodriguez@live.com,Controller,Finance,199000,10,Exceeds,A. Delacroix
+165,Matthew Flores,464-32-9581,11/12/1995,brian.jones@live.com,Senior Engineer,Engineering,252000,35,Outstanding,A. Delacroix
+166,Kimberly Williams,061-77-4601,5/20/1997,amanda68@msn.com,Account Executive,Engineering,229000,12,Below,M. Sandoval
+167,Deborah Lopez,899-94-9129,9/30/1985,ksanchez@yahoo.com,Director,Operations,129000,15,Strong,R. Okonkwo
+168,Michelle Lewis,598-40-7375,9/19/1999,alee@icloud.com,Director,Operations,261000,20,Meets,R. Okonkwo
+169,Dorothy Martinez,712-01-8354,6/30/1966,joseph.miller@yahoo.com,Account Executive,Operations,104000,15,Outstanding,E. Whitlock
+170,Barbara Carter,321-10-2723,4/25/1953,wanderson@hotmail.com,Senior Engineer,Sales,142000,20,Meets,R. Okonkwo
+171,Emily Martinez,234-57-5401,11/3/1999,kenneth.hill@me.com,Account Executive,People,118000,15,Outstanding,R. Okonkwo
+172,Carol Martinez,092-01-5840,4/22/1949,sandra96@me.com,Director,Sales,106000,35,Outstanding,R. Okonkwo
+173,Mark Green,324-90-6606,6/10/1962,melissa86@outlook.com,Programme Manager,Engineering,198000,10,Strong,A. Delacroix
+174,Paul Rodriguez,845-19-2570,5/2/1976,robert62@gmail.com,Recruiter,Finance,106000,12,Meets,A. Delacroix
+175,Ashley Robinson,715-57-3219,2/13/1979,amanda33@gmail.com,Recruiter,Sales,199000,25,Meets,R. Okonkwo
+176,David Lewis,744-89-3866,9/12/1968,jessica98@aol.com,Account Executive,Engineering,275000,15,Outstanding,R. Okonkwo
+177,Sandra Lewis,186-77-0327,12/24/1966,emily20@facebook.com,Controller,Marketing,97000,25,Below,E. Whitlock
+178,Michelle Roberts,092-33-0376,8/6/1984,mlee@facebook.com,Analyst,Marketing,74000,12,Exceeds,E. Whitlock
+179,Sandra Ramirez,619-54-1590,7/29/2002,jennifer.martinez@live.com,Staff Engineer,Sales,268000,35,Meets,M. Sandoval
+180,Timothy Baker,197-81-4428,11/27/1950,deborah52@gmail.com,Staff Engineer,Marketing,168000,12,Meets,A. Delacroix
