@@ -13,15 +13,19 @@ verify.py would report the wrong rows as new or removed.
   P-<G|M|C|B|P|N>NN  Policy, by channel category
   I-NN            Investigations
   U-NN            Usability
+
+The ID pattern lives in row_ids.py, shared with verify.py. It still matches E- (the
+Enforcement sheet, removed in v7), so a leftover reference to one of its rows is
+reported as dangling.
 """
 import os, re, sys, json, shutil, pathlib, importlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import content_class, content_policy, content_xp, content_use
+from row_ids import ID_RE
 
 FILES = ["content_class.py", "content_policy.py", "content_xp.py", "content_use.py", "build.py",
          "test-data/cases.json"]
-ID_RE = re.compile(r"\b(?:C|P|X|E|I|U)-[A-Z]?\d{2}[a-z]?\b")
 
 def build_map():
     """Map old base ID -> new base ID. Policy rows carry a ".<OS>" suffix; the suffix is

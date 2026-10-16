@@ -292,7 +292,7 @@ if scored_timing:
 
 # ---- 5. reference integrity -------------------------------------------------
 print("\nREFERENCE INTEGRITY")
-ID_RE = re.compile(r"\b((?:C|P|E|I|U)-[A-Z]?\d{2}[a-z]?)\b")
+from row_ids import ID_RE, PREFIXES
 ids = set()
 for ws in wb.worksheets:
     for r_ in range(1, ws.max_row + 1):
@@ -323,20 +323,54 @@ _here = os.path.dirname(os.path.abspath(__file__))
 _build_src = open(os.path.join(_here, "build.py")).read()
 cur_ver = int(re.search(r"^VERSION = (\d+)$", _build_src, re.M).group(1))
 cl = wb["Change Log"]
-cur_entries, cl_bad = 0, []
+import content_changelog
+# The entries hold literal IDs that renumber.py does not rewrite, so each cited ID must
+# still name the row CITED records - existing is not enough after a second renumber.
+row_names = {}
+for sh, (f_, l_, _) in extents.items():
+    for r_ in range(f_, l_ + 1):
+        row_names.setdefault(wb[sh].cell(row=r_, column=1).value.split(".")[0],
+                             wb[sh].cell(row=r_, column=3).value)
+cur_entries, cl_bad, cl_cites = 0, [], {}
 for r_ in range(3, cl.max_row + 1):
     if cl.cell(row=r_, column=1).value != cur_ver:
         continue
     cur_entries += 1
     for c_ in (3, 4, 5):
-        for ref in ID_RE.findall(str(cl.cell(row=r_, column=c_).value or "")):
+        text = str(cl.cell(row=r_, column=c_).value or "")
+        for m_ in ID_RE.finditer(text):
+            ref, at = m_.group(1), f"Change Log!{cl.cell(row=r_, column=c_).coordinate}"
+            # "C-A05 in v6" names an earlier version's row, which need not exist now.
+            old_ver = re.match(r" in v(\d+)\b", text[m_.end():])
+            if old_ver and int(old_ver.group(1)) != cur_ver:
+                continue
+            if at not in cl_cites.setdefault(ref, []):
+                cl_cites[ref].append(at)
             if ref not in ids:
-                cl_bad.append(f"Change Log!{cl.cell(row=r_, column=c_).coordinate} {ref}")
+                cl_bad.append(f"{at} {ref}")
+CITED = content_changelog.CITED
+unrecorded = {r: a for r, a in cl_cites.items() if r not in CITED}
+moved = {r: a for r, a in cl_cites.items() if r in CITED and row_names.get(r) != CITED[r]}
+uncited = sorted(set(CITED) - set(cl_cites))
 print(f"  Change Log: {cur_entries} entries for v{cur_ver}; {len(cl_bad)} naming a row that does not exist")
+print(f"  Change Log: {len(cl_cites)} IDs cited; {len(moved)} now naming a different row than CITED "
+      f"records, {len(unrecorded)} missing from CITED, {len(uncited)} in CITED but not cited")
 if cur_entries == 0:
     fail.append(f"Change Log has no entries for the current version v{cur_ver}")
 for b in cl_bad:
     fail.append(f"{b}: current-version change log entry names a row that does not exist")
+for ref, ats in moved.items():
+    went = [i for i, n in row_names.items() if n == CITED[ref]]
+    fail.append(f"{', '.join(ats)} cites {ref} for {CITED[ref]!r}, but {ref} is now "
+                f"{row_names.get(ref)!r}" + (f"; that row is now {went[0]}" if went else "")
+                + " - fix the entry and its CITED key by hand")
+for ref, ats in unrecorded.items():
+    fail.append(f"{', '.join(ats)} cites {ref}, which content_changelog.CITED does not record "
+                f"- add it with its row name, {row_names.get(ref)!r}, or if it means an earlier "
+                f"version's row, write it as '{ref} in v{cur_ver - 1}'")
+for ref in uncited:
+    fail.append(f"content_changelog.CITED records {ref}, which no v{cur_ver} entry cites - "
+                "remove it (empty CITED when VERSION goes up)")
 
 # build.py must point at rows through ref(), never a literal ID - a literal one survives a
 # renumber by landing on whatever row now has that number, which is how v6 shipped three
@@ -450,18 +484,35 @@ import content_changelog
 prev_ver, prev_rows = content_changelog.IDMAP_FROM
 full_ids = {wb[sh].cell(row=r_, column=1).value for sh, (f_, l_, _) in extents.items()
             for r_ in range(f_, l_ + 1)}
+# Row name as the ID map writes it: the name column, plus "(<OS>)" on Policy rows.
+def map_label(sh, r_):
+    name = wb[sh].cell(row=r_, column=3).value
+    return f"{name} ({wb[sh].cell(row=r_, column=4).value})" if sh == "2. Policy" else name
+labels = {wb[sh].cell(row=r_, column=1).value: map_label(sh, r_)
+          for sh, (f_, l_, _) in extents.items() for r_ in range(f_, l_ + 1)}
 cl_ = wb["Change Log"]
 hdr = next((r_ for r_ in range(1, cl_.max_row + 1) if cl_.cell(row=r_, column=1).value == f"v{prev_ver} ID"), None)
 if hdr is None:
     fail.append("Change Log has no ID map header")
 else:
-    olds, news, bad_map = [], [], []
+    olds, news, bad_map, named = [], [], [], 0
     r_ = hdr + 1
     while cl_.cell(row=r_, column=1).value:
         o, n_ = cl_.cell(row=r_, column=1).value, cl_.cell(row=r_, column=2).value
         olds.append(o); news.append(n_)
         if n_ != "Removed" and n_ not in full_ids:
             bad_map.append(f"row {r_}: v{cur_ver} ID {n_} does not exist")
+        # renumber.py does not rewrite content_changelog.py, so a second renumber in the
+        # same version leaves a new ID on whatever row now has that number. The recorded
+        # name catches it. A name may carry a trailing "(...)" note, as re-score rows do.
+        elif n_ != "Removed":
+            named += 1
+            rec, now = str(cl_.cell(row=r_, column=3).value or ""), labels[n_]
+            if rec != now and not (rec.startswith(now + " (") and rec.endswith(")")):
+                went = sorted((i for i, l in labels.items() if rec == l or rec.startswith(l + " (")),
+                              key=lambda i: labels[i] != rec)
+                bad_map.append(f"row {r_}: v{cur_ver} ID {n_} is {now!r}, but the map says "
+                               f"{rec!r}" + (f", which is now {went[0]}" if went else ""))
         if o != "New" and not re.fullmatch(r"(?:C-[ABCD]|P-[GMCBPN]|E-|I-|U-)\d{2}(?:\.(?:Windows|macOS|Linux))?", o):
             bad_map.append(f"row {r_}: v{prev_ver} ID {o!r} is malformed")
         r_ += 1
@@ -471,6 +522,7 @@ else:
     removed, added = news.count("Removed"), olds.count("New")
     total_now = sum(e[2] for e in extents.values())
     ok_sum = prev_rows - removed + added == total_now
+    print(f"  {named} current IDs checked against the row name the map records")
     print(f"  {len(olds)} rows: removed {removed}, new {added}, renumbered or re-score {len(olds) - removed - added}")
     print(f"  reconcile: v{prev_ver} {prev_rows} - {removed} + {added} = {prev_rows - removed + added}, "
           f"v{cur_ver} has {total_now}  {'OK' if ok_sum else 'MISMATCH'}")
@@ -493,7 +545,7 @@ td = os.path.join(here, "test-data")
 STAMP = "--stamp" in sys.argv
 # Row IDs in prose, file names or folder names. Not \b: `C-A10_ocr-on-images` has no
 # word boundary between the ID and the underscore.
-DOC_ID_RE = re.compile(r"(?<![A-Za-z0-9])((?:C|P|E|I|U)-[A-Z]?\d{2})(?![0-9])")
+DOC_ID_RE = re.compile(rf"(?<![A-Za-z0-9])((?:{PREFIXES})-[A-Z]?\d{{2}})(?![0-9])")
 
 
 def steps_sha(row, sheet_rows):
