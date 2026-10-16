@@ -16,7 +16,7 @@ Nothing else. No LibreOffice — see [Verification](#verification) for why that 
 
 ## Workflow
 
-Run all three, in this order, every time:
+Four steps, in this order, every time. The first three are scripts:
 
 ```bash
 python3 scripts/dlp-test-plan/renumber.py   # 1. fix IDs + cross-references
@@ -26,6 +26,16 @@ python3 scripts/dlp-test-plan/verify.py     # 3. check it
 
 The order is not optional. `renumber.py` rewrites the content modules in place; running
 `build.py` first bakes stale IDs into the workbook.
+
+**4. Review the test data.** If the change adds, removes, merges or rewords a row,
+review [`test-data/`](test-data/) against it before the version ships. See
+[TEST-DATA-REVIEW.md](TEST-DATA-REVIEW.md). IDs are reassigned on every build, so anything
+keyed by row ID silently points at the wrong test afterwards. `renumber.py` rewrites the
+IDs in `test-data/cases.json` along with everything else, so each case follows its row.
+`verify.py` enforces the mechanical part: it fails until `cases.json` maps every row by ID
+and name, until every row's steps match the hash recorded at the last review, and until
+`reviewed_for_version` matches `VERSION`. After the review, `verify.py --stamp` records
+both.
 
 ## Files
 
@@ -38,7 +48,10 @@ The order is not optional. `renumber.py` rewrites the content modules in place; 
 | `content_changelog.py` | Change Log sheet — one entry per change, newest version first. **Not** run through `renumber.py`: an entry keeps the row IDs it had in its version |
 | `build.py` | Layout, styling, dropdowns, conditional formatting, scoring formulas, chart |
 | `renumber.py` | Sequential IDs + cross-reference rewriting |
+| `row_ids.py` | The row-ID pattern `renumber.py` and `verify.py` share |
 | `verify.py` | Static checks (see below) |
+| `TEST-DATA-REVIEW.md` | The test data review required on every row change (workflow step 4) |
+| `test-data/` | The test files the plan refers to, `cases.json` mapping every row to them, and the generators that build them from the DLPTest MCP server |
 
 ## IDs
 
@@ -56,7 +69,9 @@ rows it displaces are never rewritten.
 `ref("name fragment", "P")`, resolved by name at build time, so a pointer cannot drift onto
 another row after a renumber, and a pointer to a cut row fails the build. `verify.py` rejects
 any literal ID in `build.py`. (v6 shipped three wrong glossary pointers this way.) **`renumber.py` refuses to run if a reference points at
-a row that no longer exists**, and names it. Fix the reference, then re-run.
+a row that no longer exists**, and names it. Fix the reference, then re-run. That
+includes a case in `test-data/cases.json` for a removed row: decide what its files are
+for and remove the case first (TEST-DATA-REVIEW.md R2).
 
 ## Verification
 
@@ -70,6 +85,10 @@ There is no LibreOffice on the machines this was written on, so the usual
 - every count formula is simulated in Python against seeded values
 - one scoring vocabulary workbook-wide (`Pass / Partial / Fail / N/A`)
 - no dangling `C-`/`P-`/`E-`/`I-`/`U-` reference in any cell or comment
+- every current ID in the Change Log's ID map still names the row the map records, so a
+  renumber within a version cannot silently move an entry onto another row
+- every row ID the current version's Change Log entries cite still names the row recorded for it
+  in `CITED` (`content_changelog.py`), for the same reason
 - the workbook's IDs match the content modules exactly, and every ID is well formed
 - the table stakes failures list is correct end to end: each sheet's hidden helper column points
   only at its own row and the cell above (a running list, so no `TEXTJOIN`), and after seeding Fails the

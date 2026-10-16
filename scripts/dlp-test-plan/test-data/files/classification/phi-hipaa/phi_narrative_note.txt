@@ -1,0 +1,15 @@
+PATIENT RECORD — Clark, Kimberly
+Date of Birth: 2/20/1981  |  MRN: MRN-60808162  |  Direct: (420) 662-2013
+Primary Dx: M54.5  —  Procedure Code: CPT-93000
+
+PATIENT RECORD — Thompson, Donna
+Date of Birth: 5/26/1978  |  MRN: MRN-62617378  |  Direct: (528) 461-2484
+Primary Dx: M17.11  —  Procedure Code: CPT-99204
+
+PATIENT RECORD — Roberts, Sandra
+Date of Birth: 12/5/1960  |  MRN: MRN-41865985  |  Direct: (811) 371-9213
+Primary Dx: E11.9  —  Procedure Code: CPT-99396
+
+PATIENT RECORD — Adams, Andrew
+Date of Birth: 2/12/1992  |  MRN: MRN-84299128  |  Direct: (343) 773-3887
+Primary Dx: Z00.00  —  Procedure Code: CPT-93000

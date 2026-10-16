@@ -1,0 +1,48 @@
+Modify the action rather than stop it
+
+Paste this whole block into an unsanctioned destination. Most of it is ordinary business
+prose that should arrive intact; only the identifiers should be removed.
+
+----------------------------- paste from here -----------------------------
+
+Team,
+
+Following up on yesterday's call about the Q4 migration. The short version is that we
+are on track for the 14th, with two caveats worth flagging before we commit publicly.
+
+First, the data mapping took longer than planned because the legacy export does not
+carry a stable key. We worked around it, but it means the reconciliation step is manual
+for the first cycle. Second, the vendor has asked for a named contact for escalations
+during the cutover weekend, which we have not yet agreed internally.
+
+The six accounts flagged for manual review during reconciliation are:
+
+    Amanda Nelson  SSN 117-92-4578  DOB 5/2/1998
+    Brian Ramirez  SSN 121-50-6390  DOB 11/1/1974
+    Kevin Martinez  SSN 035-94-6061  DOB 6/18/1992
+    Barbara Jones  SSN 547-70-3461  DOB 2/26/1979
+    Dorothy Sanchez  SSN 207-90-7536  DOB 8/28/1986
+    Margaret Hernandez  SSN 599-40-2441  DOB 3/7/1999
+
+Everything else reconciled automatically. I have asked Priya to own the escalation
+contact question and come back by Thursday, and I will circulate the revised runbook
+once the vendor confirms the maintenance window. No action needed from anyone else
+before then.
+
+Thanks,
+Dan
+
+CUSTOMER RECORD — Roberts, Joseph
+Date of Birth: 12/2/1946  |  Email: jroberts@hotmail.com
+
+CUSTOMER RECORD — Thomas, Elizabeth
+Date of Birth: 11/3/1999  |  Email: elizabeth.thomas@live.com
+
+CUSTOMER RECORD — Jones, Joseph
+Date of Birth: 6/4/1986  |  Email: jjones@yahoo.com
+
+------------------------------ to here ------------------------------
+
+  Pass      the identifiers are removed and the rest of the message arrives
+  Partial   the whole paste is blocked
+  Fail      the paste completes with the identifiers intact

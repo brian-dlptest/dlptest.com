@@ -1,0 +1,5 @@
+Applicant record
+
+SSN: 346-54-5041
+
+The label sits within 10 characters of the identifier.

@@ -100,16 +100,17 @@ const MEDICAL_SPECIALTIES = [
   "Pediatrics", "Psychiatry", "Pulmonology", "Radiology", "Urology",
 ] as const;
 
-// Valid UK NIN first-letter prefixes (D, F, I, Q, U, V not allowed for first; also certain combos excluded)
+// HMRC NI number prefix rules: D, F, I, Q, U and V are never the first letter; D, F, I,
+// O, Q, U and V are never the second; and BG, GB, KN, NK, NT, TN and ZZ are never issued.
 const UK_NIN_FIRST_LETTERS = [
   "A", "B", "C", "E", "G", "H", "J", "K", "L", "M",
   "N", "O", "P", "R", "S", "T", "W", "X", "Y", "Z",
 ] as const;
-// Second letter: C, I, K, M, O, V not allowed
 const UK_NIN_SECOND_LETTERS = [
-  "A", "B", "D", "E", "F", "G", "H", "J", "L", "N",
-  "P", "Q", "R", "S", "T", "U", "W", "X", "Y", "Z",
+  "A", "B", "C", "E", "G", "H", "J", "K", "L", "M",
+  "N", "P", "R", "S", "T", "W", "X", "Y", "Z",
 ] as const;
+const UK_NIN_BANNED_PREFIXES = new Set(["BG", "GB", "KN", "NK", "NT", "TN", "ZZ"]);
 
 const DEA_FIRST_LETTERS = ["B", "D", "F", "M", "P", "R"] as const;
 
@@ -290,7 +291,13 @@ function generateAccountNumber(rng: ScopedRandom): string {
 
 function generateUKNIN(rng: ScopedRandom, delim = " "): string {
   const l1 = rng.pick(UK_NIN_FIRST_LETTERS);
-  const l2 = rng.pick(UK_NIN_SECOND_LETTERS);
+  let l2: string = rng.pick(UK_NIN_SECOND_LETTERS);
+  if (UK_NIN_BANNED_PREFIXES.has(l1 + l2)) {
+    // Step to the next second letter rather than drawing again, so the random stream (and
+    // every other column of a seeded dataset) is unchanged. No banned pair maps to another.
+    const i = UK_NIN_SECOND_LETTERS.indexOf(l2 as (typeof UK_NIN_SECOND_LETTERS)[number]);
+    l2 = UK_NIN_SECOND_LETTERS[(i + 1) % UK_NIN_SECOND_LETTERS.length];
+  }
   const d1 = rng.int(10, 99).toString().padStart(2, "0");
   const d2 = rng.int(10, 99).toString().padStart(2, "0");
   const d3 = rng.int(10, 99).toString().padStart(2, "0");
@@ -335,15 +342,28 @@ function generateEUVATNumber(rng: ScopedRandom, country: typeof EU_COUNTRIES[num
   return `${country.vatPrefix}${digits}`;
 }
 
+// ISO 13616 check digits: move the country code and "00" to the end, read letters as
+// 10..35, and take 98 minus the remainder mod 97.
+function ibanCheckDigits(countryCode: string, bban: string): string {
+  let rem = 0;
+  for (const ch of bban + countryCode + "00") {
+    const value = ch >= "A" && ch <= "Z" ? String(ch.charCodeAt(0) - 55) : ch;
+    for (const d of value) rem = (rem * 10 + Number(d)) % 97;
+  }
+  return String(98 - rem).padStart(2, "0");
+}
+
 function generateIBAN(rng: ScopedRandom, countryCode: string): string {
-  const check = rng.int(10, 99).toString();
+  // The check digits used to be drawn at random, so almost no IBAN passed mod-97. The
+  // draw is kept so every other column of a seeded dataset is unchanged by the fix.
+  rng.int(10, 99);
   const formatMap: Record<string, number> = {
     DE: 18, FR: 23, IT: 23, ES: 20, NL: 14,
     BE: 12, PL: 24, SE: 20, AT: 16, PT: 21,
   };
   const len = formatMap[countryCode] ?? 18;
   const body = Array.from({ length: len }, () => rng.int(0, 9)).join("");
-  return `${countryCode}${check}${body}`;
+  return `${countryCode}${ibanCheckDigits(countryCode, body)}${body}`;
 }
 
 function generateNPI(rng: ScopedRandom): string {

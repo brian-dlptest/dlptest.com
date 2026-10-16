@@ -106,6 +106,15 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
       patient data to test a DLP tool.
     </p>
 
+    <p>
+      Every file the plan asks for is ready-made in the
+      <a href="https://github.com/brian-dlptest/dlptest.com/tree/main/scripts/dlp-test-plan/test-data">test-data folder</a>
+      of this site's public repository. Its <code>cases.json</code> lists the
+      files for each row by name. A few files cannot be stored there, such as
+      credential-shaped files and git repositories, and the folder's README
+      explains how to build them.
+    </p>
+
     <ul>
       <li><a href="/sample-data/">Sample Data</a>: ready-made tables of synthetic PII.</li>
       <li><a href="/generate/">Data Generator</a>: build a dataset to order, including Luhn-valid card numbers and international identifiers.</li>

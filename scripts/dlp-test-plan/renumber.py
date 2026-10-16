@@ -2,21 +2,30 @@
 """Canonical ID renumbering. Run after every content edit, BEFORE build.py.
 
 Rewrites every ID so it is sequential within its section, then rewrites every
-cross-reference in the content modules and in build.py to match. Fails loudly if
-any reference points at a row that no longer exists.
+cross-reference in the content modules, build.py and test-data/cases.json to match.
+Fails loudly if any reference points at a row that no longer exists.
+
+cases.json is renumbered with the rest so its cases keep following their rows. If it
+were left alone, inserting or removing one row would shift every ID below it, and
+verify.py would report the wrong rows as new or removed.
 
   C-<A|B|C|D>NN   Classification, by use case
   P-<G|M|C|B|P|N>NN  Policy, by channel category
   I-NN            Investigations
   U-NN            Usability
+
+The ID pattern lives in row_ids.py, shared with verify.py. It still matches E- (the
+Enforcement sheet, removed in v7), so a leftover reference to one of its rows is
+reported as dangling.
 """
 import os, re, sys, json, shutil, pathlib, importlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import content_class, content_policy, content_xp, content_use
+from row_ids import ID_RE
 
-FILES = ["content_class.py", "content_policy.py", "content_xp.py", "content_use.py", "build.py"]
-ID_RE = re.compile(r"\b(?:C|P|X|E|I|U)-[A-Z]?\d{2}[a-z]?\b")
+FILES = ["content_class.py", "content_policy.py", "content_xp.py", "content_use.py", "build.py",
+         "test-data/cases.json"]
 
 def build_map():
     """Map old base ID -> new base ID. Policy rows carry a ".<OS>" suffix; the suffix is
@@ -56,13 +65,18 @@ def main():
         print("DANGLING REFERENCES - fix these before renumbering:")
         for ref, fs in sorted(dangling.items()):
             print(f"  {ref}  in {', '.join(sorted(set(fs)))}")
+        if any(f == "test-data/cases.json" for fs in dangling.values() for f in fs):
+            print("A case in test-data/cases.json names a row that is gone. Decide what its "
+                  "files are for and remove the case first (TEST-DATA-REVIEW.md R2).")
         sys.exit(1)
 
     changed = {k: v for k, v in m.items() if k != v}
     # Substitute on the map's own keys rather than on ID_RE, so a placeholder that does
     # not match the canonical shape (a new row seeded as C-XX00) still gets rewritten.
-    # Longest first, so C-A1 never eats the front of C-A10.
-    key_re = re.compile("|".join(re.escape(k) for k in sorted(m, key=len, reverse=True)))
+    # Longest first, so C-A1 never eats the front of C-A10, and bounded so an ID-like run
+    # inside a longer token (a hash or an identifier in cases.json) is left alone.
+    key_re = re.compile("(?<![A-Za-z0-9])(?:%s)(?![0-9])"
+                        % "|".join(re.escape(k) for k in sorted(m, key=len, reverse=True)))
     for f in FILES:
         p = pathlib.Path(HERE) / f
         p.write_text(key_re.sub(lambda mo: m[mo.group(0)], p.read_text()))
