@@ -1,5 +1,5 @@
 {
-  "_about": "Test case file database for the Endpoint DLP Test Plan. One entry per workbook row. verify.py checks every row's id AND name against the content modules, so a renumber that moves a test to a new ID fails the build until this file is reviewed. See ../TEST-DATA-REVIEW.md. readme_requirements holds data that a Read Me instruction needs but no row does; verify.py checks the instruction still exists in build.py.",
+  "_about": "Test case file database for the Endpoint DLP Test Plan. One entry per workbook row. renumber.py rewrites the ids here with the rows. verify.py checks every case's id, name and steps_sha (a hash of the row's steps at the last review) against the content modules, so a row that changes fails the build until this file is reviewed; verify.py --stamp records the review. See ../TEST-DATA-REVIEW.md. readme_requirements holds data that a Read Me instruction needs but no row does; verify.py checks the instruction is still in the workbook's Read Me sheet.",
   "reviewed_for_version": 7,
   "cases": [
     {
@@ -9,7 +9,8 @@
       "files": [
         "files/classification/us-ssn-detection/ssns_25.csv",
         "files/classification/us-ssn-detection/ssns_25.docx"
-      ]
+      ],
+      "steps_sha": "c439c2e655c3"
     },
     {
       "id": "C-A02",
@@ -19,7 +20,8 @@
         "files/classification/credit-card-luhn/cards_luhn_invalid.csv",
         "files/classification/credit-card-luhn/cards_valid.csv",
         "files/classification/credit-card-luhn/negative_control_non-card-16digit.csv"
-      ]
+      ],
+      "steps_sha": "11d552fb5b3b"
     },
     {
       "id": "C-A03",
@@ -31,7 +33,8 @@
         "files/classification/phi-hipaa/phi_narrative_note.txt",
         "files/classification/phi-hipaa/phi_patient_encounter_summary.docx",
         "files/classification/phi-hipaa/providers_npi_dea.csv"
-      ]
+      ],
+      "steps_sha": "1ef777e8f9b2"
     },
     {
       "id": "C-A04",
@@ -45,7 +48,8 @@
         "files/classification/international-identifiers/passport.csv",
         "files/classification/international-identifiers/uk.csv",
         "files/classification/international-identifiers/uk_invalid-prefix_negative-control.csv"
-      ]
+      ],
+      "steps_sha": "6379156c7bfb"
     },
     {
       "id": "C-A05",
@@ -57,7 +61,8 @@
         "files/classification/severity-tiers/high_100-distinct-records.csv",
         "files/classification/severity-tiers/low_5-distinct-records.csv",
         "files/classification/severity-tiers/medium_25-distinct-records.csv"
-      ]
+      ],
+      "steps_sha": "207104f25198"
     },
     {
       "id": "C-A06",
@@ -68,7 +73,8 @@
         "files/classification/confidence-threshold-tuning/b_formatted-123-45-6789.txt",
         "files/classification/confidence-threshold-tuning/c_labeled-within-10-chars.txt",
         "files/classification/confidence-threshold-tuning/d_titled-social-security.docx"
-      ]
+      ],
+      "steps_sha": "5dbab4fede3c"
     },
     {
       "id": "C-A07",
@@ -78,7 +84,8 @@
         "files/classification/exact-data-match/edm_answer-key_DO-NOT-SEND.csv",
         "files/classification/exact-data-match/edm_source_index_10000-records.csv",
         "files/classification/exact-data-match/edm_test-upload_50in-50out.csv"
-      ]
+      ],
+      "steps_sha": "d7ee0cd6035b"
     },
     {
       "id": "C-A08",
@@ -105,7 +112,8 @@
         "files/classification/ai-classification-msa/positive/msa_08_meridian.docx",
         "files/classification/ai-classification-msa/positive/msa_09_cobourg.docx",
         "files/classification/ai-classification-msa/positive/msa_10_tamarind.docx"
-      ]
+      ],
+      "steps_sha": "51f8a6cf642b"
     },
     {
       "id": "C-A09",
@@ -117,7 +125,8 @@
         "files/classification/ocr-on-images/ssn_table_photo-quality.jpg",
         "files/classification/ocr-on-images/ssn_table_rotated.png",
         "files/classification/ocr-on-images/ssn_table_screenshot.png"
-      ]
+      ],
+      "steps_sha": "503aa2d603d7"
     },
     {
       "id": "C-A10",
@@ -130,7 +139,8 @@
         "files/classification/archives-and-nested-files/nested_three-levels.zip",
         "files/classification/archives-and-nested-files/nested_zip-in-zip.zip",
         "files/classification/archives-and-nested-files/password-protected.zip"
-      ]
+      ],
+      "steps_sha": "89dcced70561"
     },
     {
       "id": "C-B01",
@@ -139,7 +149,8 @@
       "files": [
         "generated/classification/secrets-and-credentials/secrets_live-looking.env",
         "generated/classification/secrets-and-credentials/secrets_obvious-placeholder_negative-ish.env"
-      ]
+      ],
+      "steps_sha": "a3639fed1c74"
     },
     {
       "id": "C-B02",
@@ -148,7 +159,8 @@
       "files": [
         "generated/classification/origin-based-lineage/from_internal-repo/auth_client.py",
         "generated/classification/origin-based-lineage/from_public-github/auth_client.py"
-      ]
+      ],
+      "steps_sha": "9d59efee7548"
     },
     {
       "id": "C-B03",
@@ -162,7 +174,8 @@
         "files/classification/lineage-obfuscation-chain/step3b_zipped-password-protected.zip",
         "files/classification/lineage-obfuscation-chain/step4_contents-copied-into-new-blank-file.py",
         "files/classification/lineage-obfuscation-chain/step5_pasted-section-into-chat-app.txt"
-      ]
+      ],
+      "steps_sha": "d8661966dcc7"
     },
     {
       "id": "C-B04",
@@ -172,7 +185,8 @@
         "files/classification/project-codenames/mercury_false-positive-control.docx",
         "files/classification/project-codenames/project-codename-dictionary_20-terms.csv",
         "files/classification/project-codenames/sample_doc_using_codenames.docx"
-      ]
+      ],
+      "steps_sha": "2d8eddcb8403"
     },
     {
       "id": "C-C01",
@@ -184,7 +198,8 @@
         "files/classification/earnings-and-board-material/draft_earnings-release.docx",
         "files/classification/earnings-and-board-material/routine_expense-report_negative-control.docx",
         "files/classification/earnings-and-board-material/three-statement-model.xlsx"
-      ]
+      ],
+      "steps_sha": "84ca8c864fa9"
     },
     {
       "id": "C-C02",
@@ -194,7 +209,8 @@
         "files/classification/time-boxed-mnpi/projected_fy27-revenue.xlsx",
         "files/classification/time-boxed-mnpi/published_fy25-results.xlsx"
       ],
-      "note": "Part 1 (effective-date window) uses any file here with a scheduled policy; the two workbooks serve part 2."
+      "note": "Part 1 (effective-date window) uses any file here with a scheduled policy; the two workbooks serve part 2.",
+      "steps_sha": "7f7e9e2220b4"
     },
     {
       "id": "C-C03",
@@ -205,7 +221,8 @@
         "files/classification/insider-list/insider-list_project-kingfisher.csv",
         "files/classification/insider-list/project-kingfisher_board-update.docx"
       ],
-      "note": "The two lists name who gets file access and who is on the insider list."
+      "note": "The two lists name who gets file access and who is on the insider list.",
+      "steps_sha": "353dc025de60"
     },
     {
       "id": "C-D01",
@@ -214,7 +231,8 @@
       "files": [
         "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv",
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
-      ]
+      ],
+      "steps_sha": "ca4f8bfba4b3"
     },
     {
       "id": "C-D02",
@@ -228,7 +246,8 @@
         "files/classification/saas-origin-lineage/servicenow_ticket-export.csv",
         "files/classification/saas-origin-lineage/workday_employee-export.csv"
       ],
-      "note": "Content and rename only. True origin lineage needs a real export from the real tenant; these files carry no download provenance."
+      "note": "Content and rename only. True origin lineage needs a real export from the real tenant; these files carry no download provenance.",
+      "steps_sha": "1876c01bcd93"
     },
     {
       "id": "C-D03",
@@ -237,7 +256,8 @@
       "files": [
         "files/classification/hris-compensation-export/hris_roster_name-ssn-salary-rating.csv",
         "files/classification/hris-compensation-export/hris_roster_name-ssn-salary-rating.xlsx"
-      ]
+      ],
+      "steps_sha": "875f46ea7a88"
     },
     {
       "id": "C-D04",
@@ -247,7 +267,8 @@
         "files/classification/direct-database-extracts/db_extract_cli-command.sh",
         "files/classification/direct-database-extracts/db_extract_cli-piped-output.txt",
         "files/classification/direct-database-extracts/db_extract_gui-export-results-to-file.csv"
-      ]
+      ],
+      "steps_sha": "664e42ef2f1a"
     },
     {
       "id": "P-G01.Windows",
@@ -257,7 +278,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
       ],
-      "note": "Paste, then attach the .csv."
+      "note": "Paste, then attach the .csv.",
+      "steps_sha": "1ecdb0aaa7a2"
     },
     {
       "id": "P-G01.macOS",
@@ -267,7 +289,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
       ],
-      "note": "Paste, then attach the .csv."
+      "note": "Paste, then attach the .csv.",
+      "steps_sha": "1ecdb0aaa7a2"
     },
     {
       "id": "P-G01.Linux",
@@ -277,7 +300,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
       ],
-      "note": "Paste, then attach the .csv."
+      "note": "Paste, then attach the .csv.",
+      "steps_sha": "1ecdb0aaa7a2"
     },
     {
       "id": "P-G02.Windows",
@@ -287,7 +311,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
       ],
-      "note": "Same paste and .csv as the web chat, through each desktop app."
+      "note": "Same paste and .csv as the web chat, through each desktop app.",
+      "steps_sha": "8302dcbf8ac7"
     },
     {
       "id": "P-G02.macOS",
@@ -297,7 +322,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_20-records_negative-control.csv"
       ],
-      "note": "Same paste and .csv as the web chat, through each desktop app."
+      "note": "Same paste and .csv as the web chat, through each desktop app.",
+      "steps_sha": "8302dcbf8ac7"
     },
     {
       "id": "P-G03.Windows",
@@ -307,7 +333,8 @@
         "generated/policy/git-repo-with-api-key/config.py",
         "generated/policy/git-repo-with-api-key/settlement.py"
       ],
-      "note": "Open both files with the assistant attached and accept a completion."
+      "note": "Open both files with the assistant attached and accept a completion.",
+      "steps_sha": "5cbc8b2f2370"
     },
     {
       "id": "P-G03.macOS",
@@ -317,7 +344,8 @@
         "generated/policy/git-repo-with-api-key/config.py",
         "generated/policy/git-repo-with-api-key/settlement.py"
       ],
-      "note": "Open both files with the assistant attached and accept a completion."
+      "note": "Open both files with the assistant attached and accept a completion.",
+      "steps_sha": "5cbc8b2f2370"
     },
     {
       "id": "P-G03.Linux",
@@ -327,28 +355,32 @@
         "generated/policy/git-repo-with-api-key/config.py",
         "generated/policy/git-repo-with-api-key/settlement.py"
       ],
-      "note": "Open both files with the assistant attached and accept a completion."
+      "note": "Open both files with the assistant attached and accept a completion.",
+      "steps_sha": "5cbc8b2f2370"
     },
     {
       "id": "P-G04.Windows",
       "sheet": "2. Policy",
       "name": "AI CLI tools and MCP servers reading local files",
       "files": [],
-      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file."
+      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file.",
+      "steps_sha": "a1c9ba435b92"
     },
     {
       "id": "P-G04.macOS",
       "sheet": "2. Policy",
       "name": "AI CLI tools and MCP servers reading local files",
       "files": [],
-      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file."
+      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file.",
+      "steps_sha": "a1c9ba435b92"
     },
     {
       "id": "P-G04.Linux",
       "sheet": "2. Policy",
       "name": "AI CLI tools and MCP servers reading local files",
       "files": [],
-      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file."
+      "no_file_reason": "Point the AI CLI / MCP filesystem server at files/classification/ and ask it to summarise a sensitive file.",
+      "steps_sha": "a1c9ba435b92"
     },
     {
       "id": "P-G05.Windows",
@@ -356,7 +388,8 @@
       "name": "Agentic browsers (Comet, Atlas, Dia) acting autonomously",
       "files": [
         "files/classification/phi-hipaa/phi_patient_encounter_summary.docx"
-      ]
+      ],
+      "steps_sha": "d93768d224f9"
     },
     {
       "id": "P-G05.macOS",
@@ -364,28 +397,32 @@
       "name": "Agentic browsers (Comet, Atlas, Dia) acting autonomously",
       "files": [
         "files/classification/phi-hipaa/phi_patient_encounter_summary.docx"
-      ]
+      ],
+      "steps_sha": "d93768d224f9"
     },
     {
       "id": "P-G06.Windows",
       "sheet": "2. Policy",
       "name": "Shadow AI discovery",
       "files": [],
-      "no_file_reason": "Two-week destination-discovery exercise; no payload."
+      "no_file_reason": "Two-week destination-discovery exercise; no payload.",
+      "steps_sha": "074913a6ad8d"
     },
     {
       "id": "P-G06.macOS",
       "sheet": "2. Policy",
       "name": "Shadow AI discovery",
       "files": [],
-      "no_file_reason": "Two-week destination-discovery exercise; no payload."
+      "no_file_reason": "Two-week destination-discovery exercise; no payload.",
+      "steps_sha": "074913a6ad8d"
     },
     {
       "id": "P-G06.Linux",
       "sheet": "2. Policy",
       "name": "Shadow AI discovery",
       "files": [],
-      "no_file_reason": "Two-week destination-discovery exercise; no payload."
+      "no_file_reason": "Two-week destination-discovery exercise; no payload.",
+      "steps_sha": "074913a6ad8d"
     },
     {
       "id": "P-G07.Windows",
@@ -395,7 +432,8 @@
         "files/classification/ocr-on-images/ssn_table_screenshot.png",
         "files/classification/ocr-on-images/ssn_table_photo-quality.jpg"
       ],
-      "note": "Record Block timing: text extraction from images is slow."
+      "note": "Record Block timing: text extraction from images is slow.",
+      "steps_sha": "0abd1823111c"
     },
     {
       "id": "P-G07.macOS",
@@ -405,7 +443,8 @@
         "files/classification/ocr-on-images/ssn_table_screenshot.png",
         "files/classification/ocr-on-images/ssn_table_photo-quality.jpg"
       ],
-      "note": "Record Block timing: text extraction from images is slow."
+      "note": "Record Block timing: text extraction from images is slow.",
+      "steps_sha": "0abd1823111c"
     },
     {
       "id": "P-G07.Linux",
@@ -415,7 +454,8 @@
         "files/classification/ocr-on-images/ssn_table_screenshot.png",
         "files/classification/ocr-on-images/ssn_table_photo-quality.jpg"
       ],
-      "note": "Record Block timing: text extraction from images is slow."
+      "note": "Record Block timing: text extraction from images is slow.",
+      "steps_sha": "0abd1823111c"
     },
     {
       "id": "P-M01.Windows",
@@ -425,7 +465,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Paste in the body, attach the .xlsx."
+      "note": "Paste in the body, attach the .xlsx.",
+      "steps_sha": "e4519e02493d"
     },
     {
       "id": "P-M01.macOS",
@@ -435,7 +476,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Paste in the body, attach the .xlsx."
+      "note": "Paste in the body, attach the .xlsx.",
+      "steps_sha": "e4519e02493d"
     },
     {
       "id": "P-M01.Linux",
@@ -445,7 +487,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Paste in the body, attach the .xlsx."
+      "note": "Paste in the body, attach the .xlsx.",
+      "steps_sha": "e4519e02493d"
     },
     {
       "id": "P-M02.Windows",
@@ -453,7 +496,8 @@
       "name": "Corporate mail client to an external recipient",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "eda9a87dddc7"
     },
     {
       "id": "P-M02.macOS",
@@ -461,7 +505,8 @@
       "name": "Corporate mail client to an external recipient",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "eda9a87dddc7"
     },
     {
       "id": "P-M02.Linux",
@@ -469,7 +514,8 @@
       "name": "Corporate mail client to an external recipient",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "eda9a87dddc7"
     },
     {
       "id": "P-M03.Windows",
@@ -479,7 +525,8 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "File and pasted block, in the browser and the desktop client."
+      "note": "File and pasted block, in the browser and the desktop client.",
+      "steps_sha": "ccb5daf43eff"
     },
     {
       "id": "P-M03.macOS",
@@ -489,7 +536,8 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "File and pasted block, in the browser and the desktop client."
+      "note": "File and pasted block, in the browser and the desktop client.",
+      "steps_sha": "ccb5daf43eff"
     },
     {
       "id": "P-M03.Linux",
@@ -499,7 +547,8 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "File and pasted block, in the browser and the desktop client."
+      "note": "File and pasted block, in the browser and the desktop client.",
+      "steps_sha": "ccb5daf43eff"
     },
     {
       "id": "P-M04.Windows",
@@ -508,7 +557,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "External channel, then an internal channel as the control."
+      "note": "External channel, then an internal channel as the control.",
+      "steps_sha": "618c26a9c48a"
     },
     {
       "id": "P-M04.macOS",
@@ -517,7 +567,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "External channel, then an internal channel as the control."
+      "note": "External channel, then an internal channel as the control.",
+      "steps_sha": "618c26a9c48a"
     },
     {
       "id": "P-M04.Linux",
@@ -526,7 +577,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "External channel, then an internal channel as the control."
+      "note": "External channel, then an internal channel as the control.",
+      "steps_sha": "618c26a9c48a"
     },
     {
       "id": "P-C01.Windows",
@@ -534,7 +586,8 @@
       "name": "Personal cloud storage - web upload",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "98a579a91a6b"
     },
     {
       "id": "P-C01.macOS",
@@ -542,7 +595,8 @@
       "name": "Personal cloud storage - web upload",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "98a579a91a6b"
     },
     {
       "id": "P-C01.Linux",
@@ -550,7 +604,8 @@
       "name": "Personal cloud storage - web upload",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "98a579a91a6b"
     },
     {
       "id": "P-C02.Windows",
@@ -559,7 +614,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Via the synced folder, no browser."
+      "note": "Via the synced folder, no browser.",
+      "steps_sha": "23535d3fd774"
     },
     {
       "id": "P-C02.macOS",
@@ -568,7 +624,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Via the synced folder, no browser."
+      "note": "Via the synced folder, no browser.",
+      "steps_sha": "23535d3fd774"
     },
     {
       "id": "P-C02.Linux",
@@ -577,7 +634,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Via the synced folder, no browser."
+      "note": "Via the synced folder, no browser.",
+      "steps_sha": "23535d3fd774"
     },
     {
       "id": "P-C03.Windows",
@@ -585,7 +643,8 @@
       "name": "Personal account inside a sanctioned service",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "f278a9bbb379"
     },
     {
       "id": "P-C03.macOS",
@@ -593,7 +652,8 @@
       "name": "Personal account inside a sanctioned service",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "f278a9bbb379"
     },
     {
       "id": "P-C03.Linux",
@@ -601,7 +661,8 @@
       "name": "Personal account inside a sanctioned service",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "f278a9bbb379"
     },
     {
       "id": "P-C04.Windows",
@@ -611,7 +672,8 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "The .docx to transfer sites, the paste block to paste sites."
+      "note": "The .docx to transfer sites, the paste block to paste sites.",
+      "steps_sha": "c6a1ad52d926"
     },
     {
       "id": "P-C04.macOS",
@@ -621,7 +683,8 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "The .docx to transfer sites, the paste block to paste sites."
+      "note": "The .docx to transfer sites, the paste block to paste sites.",
+      "steps_sha": "c6a1ad52d926"
     },
     {
       "id": "P-C04.Linux",
@@ -631,7 +694,8 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "The .docx to transfer sites, the paste block to paste sites."
+      "note": "The .docx to transfer sites, the paste block to paste sites.",
+      "steps_sha": "c6a1ad52d926"
     },
     {
       "id": "P-C05.Windows",
@@ -640,7 +704,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "ftp.dlptest.com, then over SFTP."
+      "note": "ftp.dlptest.com, then over SFTP.",
+      "steps_sha": "801f1a5984f4"
     },
     {
       "id": "P-C05.macOS",
@@ -649,7 +714,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "ftp.dlptest.com, then over SFTP."
+      "note": "ftp.dlptest.com, then over SFTP.",
+      "steps_sha": "801f1a5984f4"
     },
     {
       "id": "P-C05.Linux",
@@ -658,7 +724,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "ftp.dlptest.com, then over SFTP."
+      "note": "ftp.dlptest.com, then over SFTP.",
+      "steps_sha": "801f1a5984f4"
     },
     {
       "id": "P-C06.Windows",
@@ -668,7 +735,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
-      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload."
+      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload.",
+      "steps_sha": "114e0c230c29"
     },
     {
       "id": "P-C06.macOS",
@@ -678,7 +746,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
-      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload."
+      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload.",
+      "steps_sha": "114e0c230c29"
     },
     {
       "id": "P-C06.Linux",
@@ -688,7 +757,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
-      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload."
+      "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload.",
+      "steps_sha": "114e0c230c29"
     },
     {
       "id": "P-C07.Windows",
@@ -698,7 +768,8 @@
         "generated/policy/git-repo-with-api-key/config.py",
         "generated/policy/git-repo-with-api-key/settlement.py"
       ],
-      "note": "Push the generated repository to corporate, personal and unknown remotes."
+      "note": "Push the generated repository to corporate, personal and unknown remotes.",
+      "steps_sha": "8e1a5569f45b"
     },
     {
       "id": "P-C07.macOS",
@@ -708,7 +779,8 @@
         "generated/policy/git-repo-with-api-key/config.py",
         "generated/policy/git-repo-with-api-key/settlement.py"
       ],
-      "note": "Push the generated repository to corporate, personal and unknown remotes."
+      "note": "Push the generated repository to corporate, personal and unknown remotes.",
+      "steps_sha": "8e1a5569f45b"
     },
     {
       "id": "P-C07.Linux",
@@ -718,7 +790,8 @@
         "generated/policy/git-repo-with-api-key/config.py",
         "generated/policy/git-repo-with-api-key/settlement.py"
       ],
-      "note": "Push the generated repository to corporate, personal and unknown remotes."
+      "note": "Push the generated repository to corporate, personal and unknown remotes.",
+      "steps_sha": "8e1a5569f45b"
     },
     {
       "id": "P-B01.Windows",
@@ -727,7 +800,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx",
         "files/policy/thirty_ssns_paste-block.txt"
-      ]
+      ],
+      "steps_sha": "19918a3c97ba"
     },
     {
       "id": "P-B01.macOS",
@@ -736,7 +810,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx",
         "files/policy/thirty_ssns_paste-block.txt"
-      ]
+      ],
+      "steps_sha": "19918a3c97ba"
     },
     {
       "id": "P-B01.Linux",
@@ -745,7 +820,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx",
         "files/policy/thirty_ssns_paste-block.txt"
-      ]
+      ],
+      "steps_sha": "19918a3c97ba"
     },
     {
       "id": "P-B02.Windows",
@@ -753,7 +829,8 @@
       "name": "Private mode and personal browser profiles",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "1cf3f0c82360"
     },
     {
       "id": "P-B02.macOS",
@@ -761,7 +838,8 @@
       "name": "Private mode and personal browser profiles",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "1cf3f0c82360"
     },
     {
       "id": "P-B02.Linux",
@@ -769,7 +847,8 @@
       "name": "Private mode and personal browser profiles",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "1cf3f0c82360"
     },
     {
       "id": "P-P01.Windows",
@@ -778,7 +857,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Copy, then Save As from a network path directly to the drive."
+      "note": "Copy, then Save As from a network path directly to the drive.",
+      "steps_sha": "b39752674237"
     },
     {
       "id": "P-P01.macOS",
@@ -787,7 +867,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Copy, then Save As from a network path directly to the drive."
+      "note": "Copy, then Save As from a network path directly to the drive.",
+      "steps_sha": "b39752674237"
     },
     {
       "id": "P-P01.Linux",
@@ -796,7 +877,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Copy, then Save As from a network path directly to the drive."
+      "note": "Copy, then Save As from a network path directly to the drive.",
+      "steps_sha": "b39752674237"
     },
     {
       "id": "P-P02.Windows",
@@ -804,7 +886,8 @@
       "name": "MTP / PTP devices (phones, cameras)",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "bfd46d92d24c"
     },
     {
       "id": "P-P02.macOS",
@@ -812,7 +895,8 @@
       "name": "MTP / PTP devices (phones, cameras)",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "bfd46d92d24c"
     },
     {
       "id": "P-P02.Linux",
@@ -820,7 +904,8 @@
       "name": "MTP / PTP devices (phones, cameras)",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "bfd46d92d24c"
     },
     {
       "id": "P-P03.Windows",
@@ -828,7 +913,8 @@
       "name": "Bluetooth file transfer",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "f17db78ca3d7"
     },
     {
       "id": "P-P03.macOS",
@@ -836,7 +922,8 @@
       "name": "Bluetooth file transfer",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "f17db78ca3d7"
     },
     {
       "id": "P-P03.Linux",
@@ -844,7 +931,8 @@
       "name": "Bluetooth file transfer",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "f17db78ca3d7"
     },
     {
       "id": "P-P04.macOS",
@@ -852,7 +940,8 @@
       "name": "AirDrop (macOS)",
       "files": [
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "fb6e851581d3"
     },
     {
       "id": "P-P05.Windows",
@@ -860,7 +949,8 @@
       "name": "Printing - local, to file, and network queues",
       "files": [
         "files/policy/fifty_ssns_for_print-test.docx"
-      ]
+      ],
+      "steps_sha": "27316a847cf2"
     },
     {
       "id": "P-P05.macOS",
@@ -868,7 +958,8 @@
       "name": "Printing - local, to file, and network queues",
       "files": [
         "files/policy/fifty_ssns_for_print-test.docx"
-      ]
+      ],
+      "steps_sha": "27316a847cf2"
     },
     {
       "id": "P-P05.Linux",
@@ -876,7 +967,8 @@
       "name": "Printing - local, to file, and network queues",
       "files": [
         "files/policy/fifty_ssns_for_print-test.docx"
-      ]
+      ],
+      "steps_sha": "27316a847cf2"
     },
     {
       "id": "P-P06.Windows",
@@ -885,7 +977,8 @@
       "files": [
         "files/classification/ocr-on-images/ssn_table_highres.png"
       ],
-      "note": "Display full screen, capture, then upload the capture."
+      "note": "Display full screen, capture, then upload the capture.",
+      "steps_sha": "5bf4d8576492"
     },
     {
       "id": "P-P06.macOS",
@@ -894,7 +987,8 @@
       "files": [
         "files/classification/ocr-on-images/ssn_table_highres.png"
       ],
-      "note": "Display full screen, capture, then upload the capture."
+      "note": "Display full screen, capture, then upload the capture.",
+      "steps_sha": "5bf4d8576492"
     },
     {
       "id": "P-P06.Linux",
@@ -903,7 +997,8 @@
       "files": [
         "files/classification/ocr-on-images/ssn_table_highres.png"
       ],
-      "note": "Display full screen, capture, then upload the capture."
+      "note": "Display full screen, capture, then upload the capture.",
+      "steps_sha": "5bf4d8576492"
     },
     {
       "id": "P-P07.Windows",
@@ -911,7 +1006,8 @@
       "name": "Clipboard copy into a non-sanctioned app",
       "files": [
         "files/policy/thirty_ssns_paste-block.txt"
-      ]
+      ],
+      "steps_sha": "e38b8a8b2115"
     },
     {
       "id": "P-P07.macOS",
@@ -919,7 +1015,8 @@
       "name": "Clipboard copy into a non-sanctioned app",
       "files": [
         "files/policy/thirty_ssns_paste-block.txt"
-      ]
+      ],
+      "steps_sha": "e38b8a8b2115"
     },
     {
       "id": "P-P07.Linux",
@@ -927,28 +1024,32 @@
       "name": "Clipboard copy into a non-sanctioned app",
       "files": [
         "files/policy/thirty_ssns_paste-block.txt"
-      ]
+      ],
+      "steps_sha": "e38b8a8b2115"
     },
     {
       "id": "P-P08.Windows",
       "sheet": "2. Policy",
       "name": "Retyping / manual transcription",
       "files": [],
-      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk."
+      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk.",
+      "steps_sha": "7813d30b6577"
     },
     {
       "id": "P-P08.macOS",
       "sheet": "2. Policy",
       "name": "Retyping / manual transcription",
       "files": [],
-      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk."
+      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk.",
+      "steps_sha": "7813d30b6577"
     },
     {
       "id": "P-P08.Linux",
       "sheet": "2. Policy",
       "name": "Retyping / manual transcription",
       "files": [],
-      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk."
+      "no_file_reason": "Read-and-retype exercise; record as accepted residual risk.",
+      "steps_sha": "7813d30b6577"
     },
     {
       "id": "P-N01.Windows",
@@ -956,7 +1057,8 @@
       "name": "SMB / network share copy",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "136c46f205bf"
     },
     {
       "id": "P-N01.macOS",
@@ -964,7 +1066,8 @@
       "name": "SMB / network share copy",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "136c46f205bf"
     },
     {
       "id": "P-N01.Linux",
@@ -972,7 +1075,8 @@
       "name": "SMB / network share copy",
       "files": [
         "files/policy/sensitive_customer_data.xlsx"
-      ]
+      ],
+      "steps_sha": "136c46f205bf"
     },
     {
       "id": "P-N02.Windows",
@@ -982,7 +1086,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Paste block over the clipboard, .xlsx onto the redirected drive."
+      "note": "Paste block over the clipboard, .xlsx onto the redirected drive.",
+      "steps_sha": "f777e0ee2844"
     },
     {
       "id": "P-N02.macOS",
@@ -992,7 +1097,8 @@
         "files/policy/thirty_ssns_paste-block.txt",
         "files/policy/sensitive_customer_data.xlsx"
       ],
-      "note": "Paste block over the clipboard, .xlsx onto the redirected drive."
+      "note": "Paste block over the clipboard, .xlsx onto the redirected drive.",
+      "steps_sha": "f777e0ee2844"
     },
     {
       "id": "P-N03.Windows",
@@ -1001,7 +1107,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx",
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "778ad99bb629"
     },
     {
       "id": "P-N03.macOS",
@@ -1010,7 +1117,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx",
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "778ad99bb629"
     },
     {
       "id": "P-N03.Linux",
@@ -1019,7 +1127,8 @@
       "files": [
         "files/policy/sensitive_customer_data.xlsx",
         "files/policy/thirty_ssns.docx"
-      ]
+      ],
+      "steps_sha": "778ad99bb629"
     },
     {
       "id": "P-N04.Windows",
@@ -1028,7 +1137,8 @@
       "files": [
         "files/policy/offline_make-fresh-file.ps1"
       ],
-      "note": "Run offline_make-fresh-file.ps1 with networking off to create a never-evaluated file, then copy it to USB."
+      "note": "Run offline_make-fresh-file.ps1 with networking off to create a never-evaluated file, then copy it to USB.",
+      "steps_sha": "5b153eef3750"
     },
     {
       "id": "P-N04.macOS",
@@ -1037,7 +1147,8 @@
       "files": [
         "files/policy/offline_make-fresh-file.sh"
       ],
-      "note": "Run offline_make-fresh-file.sh with networking off to create a never-evaluated file, then copy it to USB."
+      "note": "Run offline_make-fresh-file.sh with networking off to create a never-evaluated file, then copy it to USB.",
+      "steps_sha": "5b153eef3750"
     },
     {
       "id": "P-N04.Linux",
@@ -1046,56 +1157,64 @@
       "files": [
         "files/policy/offline_make-fresh-file.sh"
       ],
-      "note": "Run offline_make-fresh-file.sh with networking off to create a never-evaluated file, then copy it to USB."
+      "note": "Run offline_make-fresh-file.sh with networking off to create a never-evaluated file, then copy it to USB.",
+      "steps_sha": "5b153eef3750"
     },
     {
       "id": "I-01",
       "sheet": "3. Investigations",
       "name": "The matched content is visible in the incident",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "bd93ad026324"
     },
     {
       "id": "I-02",
       "sheet": "3. Investigations",
       "name": "Forensic file capture",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "903e78c70611"
     },
     {
       "id": "I-03",
       "sheet": "3. Investigations",
       "name": "Screen recording or screenshot around the event",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "0c2845c824ec"
     },
     {
       "id": "I-04",
       "sheet": "3. Investigations",
       "name": "Full activity metadata on the event",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "6804cdc10d7c"
     },
     {
       "id": "I-05",
       "sheet": "3. Investigations",
       "name": "Destination detail, not just a category",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "fbd8032204b2"
     },
     {
       "id": "I-06",
       "sheet": "3. Investigations",
       "name": "Auto-assembled incident timeline",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "1a90a9e5a6e4"
     },
     {
       "id": "I-07",
       "sheet": "3. Investigations",
       "name": "Full data lineage from origin to egress",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "bddf28ca23e7"
     },
     {
       "id": "I-08",
@@ -1110,49 +1229,56 @@
         "files/classification/lineage-obfuscation-chain/step4_contents-copied-into-new-blank-file.py",
         "files/classification/lineage-obfuscation-chain/step5_pasted-section-into-chat-app.txt"
       ],
-      "note": "Steps 0-2, then step3b (password-protected), then upload."
+      "note": "Steps 0-2, then step3b (password-protected), then upload.",
+      "steps_sha": "6a8d027ad901"
     },
     {
       "id": "I-09",
       "sheet": "3. Investigations",
       "name": "Trace through AI tools and agents",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "f6ef4f667b5b"
     },
     {
       "id": "I-10",
       "sheet": "3. Investigations",
       "name": "Events before the policy existed",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "2c22afc0abf1"
     },
     {
       "id": "I-11",
       "sheet": "3. Investigations",
       "name": "Pivot from any point in an incident",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "037f269744c2"
     },
     {
       "id": "I-12",
       "sheet": "3. Investigations",
       "name": "Free-text and structured search across all telemetry",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "ccd39f0cff5e"
     },
     {
       "id": "I-13",
       "sheet": "3. Investigations",
       "name": "Natural-language investigation",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "f39aee150c98"
     },
     {
       "id": "I-14",
       "sheet": "3. Investigations",
       "name": "All user activity, not just DLP alerts",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "72adf283d21a"
     },
     {
       "id": "I-15",
@@ -1161,7 +1287,8 @@
       "files": [
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
-      "note": "The 100x export after two weeks of normal activity."
+      "note": "The 100x export after two weeks of normal activity.",
+      "steps_sha": "90508a8c2ff7"
     },
     {
       "id": "I-16",
@@ -1173,14 +1300,16 @@
         "files/policy/thirty_ssns.docx",
         "files/policy/thirty_ssns_paste-block.txt"
       ],
-      "note": "See RUNBOOK.md for the five-step sequence."
+      "note": "See RUNBOOK.md for the five-step sequence.",
+      "steps_sha": "f99f3eb4d192"
     },
     {
       "id": "I-17",
       "sheet": "3. Investigations",
       "name": "HR and identity context",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "9241f3986e1b"
     },
     {
       "id": "I-18",
@@ -1588,70 +1717,80 @@
         "files/investigations-usability/alert-grouping-400-files/customer_record_399.csv",
         "files/investigations-usability/alert-grouping-400-files/customer_record_400.csv"
       ],
-      "note": "Copy all 400 in one action."
+      "note": "Copy all 400 in one action.",
+      "steps_sha": "6bbc6ad0363f"
     },
     {
       "id": "I-19",
       "sheet": "3. Investigations",
       "name": "Case management with assignment and annotation",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "5c3fcc0f53dc"
     },
     {
       "id": "I-20",
       "sheet": "3. Investigations",
       "name": "Evidence export for HR and Legal",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "2160a3fac86a"
     },
     {
       "id": "I-21",
       "sheet": "3. Investigations",
       "name": "SIEM / SOAR integration",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "6ab4cf5de20d"
     },
     {
       "id": "I-22",
       "sheet": "3. Investigations",
       "name": "Auto-close of known-good activity",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "f39ab5be8f36"
     },
     {
       "id": "I-23",
       "sheet": "3. Investigations",
       "name": "Pseudonymised investigation by default",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "0832ef592bf8"
     },
     {
       "id": "I-24",
       "sheet": "3. Investigations",
       "name": "Role-based access to evidence",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "d2abc868b202"
     },
     {
       "id": "I-25",
       "sheet": "3. Investigations",
       "name": "Audit log of the investigators",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "b0896bcf55fd"
     },
     {
       "id": "I-26",
       "sheet": "3. Investigations",
       "name": "In-console response actions",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "4e3418b1f312"
     },
     {
       "id": "I-27",
       "sheet": "3. Investigations",
       "name": "Remote forensics without touching the device",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "859e97e8ef38"
     },
     {
       "id": "I-28",
@@ -1660,7 +1799,8 @@
       "files": [
         "files/investigations-usability/agent-session-task/TASK.md"
       ],
-      "note": "Ask for the inventory before running the task."
+      "note": "Ask for the inventory before running the task.",
+      "steps_sha": "4d6e01183c47"
     },
     {
       "id": "I-29",
@@ -1671,7 +1811,8 @@
         "files/investigations-usability/agent-session-task/workspace/data/customers_export.csv",
         "files/investigations-usability/agent-session-task/workspace/notes.md",
         "files/investigations-usability/agent-session-task/workspace/reconcile.py"
-      ]
+      ],
+      "steps_sha": "367e5d621f6b"
     },
     {
       "id": "I-30",
@@ -1680,7 +1821,8 @@
       "files": [
         "files/investigations-usability/agent-session-task/TASK.md"
       ],
-      "note": "Re-run the task with a personal account, then an API key."
+      "note": "Re-run the task with a personal account, then an API key.",
+      "steps_sha": "3db617d71bcd"
     },
     {
       "id": "I-31",
@@ -1689,7 +1831,8 @@
       "files": [
         "files/investigations-usability/agent-session-task/TASK.md"
       ],
-      "note": "Add an MCP server with filesystem access."
+      "note": "Add an MCP server with filesystem access.",
+      "steps_sha": "37c3e8bd7089"
     },
     {
       "id": "U-01",
@@ -1717,168 +1860,192 @@
         "files/classification/ai-classification-msa/positive/msa_09_cobourg.docx",
         "files/classification/ai-classification-msa/positive/msa_10_tamarind.docx"
       ],
-      "note": "Reuse the timing from the AI classification test."
+      "note": "Reuse the timing from the AI classification test.",
+      "steps_sha": "f926151aac35"
     },
     {
       "id": "U-02",
       "sheet": "4. Usability",
       "name": "Classification explained in plain language",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "37824088d1cb"
     },
     {
       "id": "U-03",
       "sheet": "4. Usability",
       "name": "Policy authored from a natural-language instruction",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "c17c24283024"
     },
     {
       "id": "U-04",
       "sheet": "4. Usability",
       "name": "Policy recommendations from observed behaviour",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "ee12eb403e3c"
     },
     {
       "id": "U-05",
       "sheet": "4. Usability",
       "name": "Simulation before enforcement",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "e0bbf15dd282"
     },
     {
       "id": "U-06",
       "sheet": "4. Usability",
       "name": "Justification as a control, not a log entry",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "674f12d6efe8"
     },
     {
       "id": "U-07",
       "sheet": "4. Usability",
       "name": "AI incident investigator",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "c6d83644096f"
     },
     {
       "id": "U-08",
       "sheet": "4. Usability",
       "name": "Intent inference, not just activity detection",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "a9e103dae255"
     },
     {
       "id": "U-09",
       "sheet": "4. Usability",
       "name": "Automated remediation with human-in-the-loop escalation",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "c8ab69365eee"
     },
     {
       "id": "U-10",
       "sheet": "4. Usability",
       "name": "Natural-language / MCP interface for the security team",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "0271a2547d35"
     },
     {
       "id": "U-11",
       "sheet": "4. Usability",
       "name": "AI-generated reporting for executives and auditors",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "cfec36829605"
     },
     {
       "id": "U-12",
       "sheet": "4. Usability",
       "name": "Mean time to triage an incident",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "c479b2e386c3"
     },
     {
       "id": "U-13",
       "sheet": "4. Usability",
       "name": "Policy version history and one-click rollback",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "9a1fa020a073"
     },
     {
       "id": "U-14",
       "sheet": "4. Usability",
       "name": "Staged rollout by group or device ring",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "af7385d5dbfa"
     },
     {
       "id": "U-15",
       "sheet": "4. Usability",
       "name": "Time to first meaningful detection",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "e24830760d94"
     },
     {
       "id": "U-16",
       "sheet": "4. Usability",
       "name": "Policies required to cover the use cases on this plan",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "8bfc1fb87b96"
     },
     {
       "id": "U-17",
       "sheet": "4. Usability",
       "name": "Role-based administration and separation of duties",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "23006252cbf2"
     },
     {
       "id": "U-18",
       "sheet": "4. Usability",
       "name": "Approval workflow for enforcement changes",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "0a15d03e1980"
     },
     {
       "id": "U-19",
       "sheet": "4. Usability",
       "name": "Policy tip clarity",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "0bac8868709d"
     },
     {
       "id": "U-20",
       "sheet": "4. Usability",
       "name": "Business justification capture on warn",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "04ba5e0bd667"
     },
     {
       "id": "U-21",
       "sheet": "4. Usability",
       "name": "False-positive reporting from the endpoint",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "2e90d393b9e0"
     },
     {
       "id": "U-22",
       "sheet": "4. Usability",
       "name": "Working redirect to the sanctioned alternative",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "c2e1e35e2e19"
     },
     {
       "id": "U-23",
       "sheet": "4. Usability",
       "name": "Request approval before proceeding",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "475c5785a2ee"
     },
     {
       "id": "U-24",
       "sheet": "4. Usability",
       "name": "Time-bound exceptions",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "cc60bab2b8c3"
     },
     {
       "id": "U-25",
@@ -1886,7 +2053,8 @@
       "name": "Modify the action rather than stop it",
       "files": [
         "files/investigations-usability/redaction-mixed-content.txt"
-      ]
+      ],
+      "steps_sha": "b1988b7059fe"
     },
     {
       "id": "U-26",
@@ -1923,14 +2091,16 @@
         "files/investigations-usability/intervention-fatigue-30-files/attempt_28.csv",
         "files/investigations-usability/intervention-fatigue-30-files/attempt_29.csv",
         "files/investigations-usability/intervention-fatigue-30-files/attempt_30.csv"
-      ]
+      ],
+      "steps_sha": "d4f85ee98484"
     },
     {
       "id": "U-27",
       "sheet": "4. Usability",
       "name": "Agent resource footprint",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "738e8e22de2a"
     },
     {
       "id": "U-28",
@@ -1938,28 +2108,32 @@
       "name": "User-visible latency on common actions",
       "files": [
         "files/investigations-usability/paste-latency-500-records.txt"
-      ]
+      ],
+      "steps_sha": "ffd7b724c8bf"
     },
     {
       "id": "U-29",
       "sheet": "4. Usability",
       "name": "Deployment method coverage",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "84f09a5dfac4"
     },
     {
       "id": "U-30",
       "sheet": "4. Usability",
       "name": "Tamper resistance and self-healing",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "50cd46b48ba4"
     },
     {
       "id": "U-31",
       "sheet": "4. Usability",
       "name": "Offline enforcement and event queueing",
       "files": [],
-      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration."
+      "no_file_reason": "Capability question, answered from incidents the earlier sheets produced or by vendor demonstration.",
+      "steps_sha": "2c6ad04f54a1"
     }
   ],
   "readme_requirements": [
