@@ -17,6 +17,7 @@ export const DOWNLOAD_KEYS: ReadonlySet<string> = new Set([
   "111-MB-Test.csv",
   "334-MB-Test-CSV.csv",
   "AIP_Test_Doc.docx",
+  // The FileZilla profiles are built from src/data/ftp.ts, not read from R2.
   "DLP_Test_FTP_FileZilla.xml",
   "DLP_Test_FTP_FileZilla_old.xml",
   "DLP-Test-State-Data.zip",
