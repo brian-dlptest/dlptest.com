@@ -21,9 +21,11 @@ export const FILEZILLA_PROFILE_KEYS: ReadonlySet<string> = new Set([
 ]);
 
 // FileZilla 3 Site Manager export format (File > Import).
-// - Protocol 6 is "Only use plain FTP (insecure)". The server offers no TLS,
-//   and protocol 0 ("use explicit FTP over TLS if available") stops on an
-//   insecure-connection prompt before the first upload.
+// - Protocol 6 is "Only use plain FTP (insecure)". Plain FTP leaves the file
+//   contents visible to network DLP, which is what most tests here need. The
+//   server does accept explicit FTPS (AUTH TLS) even though its FEAT reply
+//   does not list it, so protocol 0 ("use explicit FTP over TLS if
+//   available") would connect encrypted.
 // - PasvMode is passive because the server does not support active mode.
 // - The version stamp is deliberately old: FileZilla asks for confirmation
 //   before importing a file written by a newer release than itself.
