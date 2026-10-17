@@ -2,16 +2,18 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import CyberhavenAd from "@/components/CyberhavenAd.astro";
 import { ADS_ENABLED } from "@/lib/cyberhaven-ad";
+import {
+  FILEZILLA_PROFILE_HREF,
+  FILEZILLA_PROFILE_KEY,
+  FTP_HOST as ftpHost,
+  FTP_PASSWORD as ftpPassword,
+  FTP_RETENTION_MINUTES as retentionMinutes,
+  FTP_USER as ftpUser,
+} from "@/data/ftp";
 export const prerender = true;
 
-// The FTP test server lives on a separate host (ftp.dlptest.com) outside of
-// Cloudflare. The password is intentionally public — it is published on
-// this page so anyone can run tests. Rotate by updating this value and
-// pushing through the normal staging -> main flow.
-const ftpHost = "ftp.dlptest.com";
-const ftpUser = "dlpuser";
-const ftpPassword = "rNrKYTX9g7z3RgJRmxWuGHbeu";
-const retentionMinutes = 10;
+// Credentials live in src/data/ftp.ts, which also builds the FileZilla
+// profile, so rotate the password there.
 
 const s3Bucket = "dlptest-public-bucket";
 const s3Region = "us-west-2";
@@ -34,23 +36,24 @@ const s3Endpoint = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com`;
           <tr><th>User</th><td><code>{ftpUser}</code></td></tr>
           <tr><th>Password</th><td><code>{ftpPassword}</code></td></tr>
           <tr><th>Mode</th><td>Passive (active is not supported)</td></tr>
+          <tr><th>Encryption</th><td>Optional; explicit FTPS (<code>AUTH TLS</code>) is supported</td></tr>
           <tr><th>Retention</th><td>{retentionMinutes} minutes</td></tr>
         </tbody>
       </table>
 
       <p>
-        On Windows, use a client like
-        <a href="https://filezilla-project.org/">FileZilla</a>; the active FTP
-        transport built into <code>cmd.exe</code> does not support passive mode.
-        Import our pre-configured FileZilla profile:
-        <a href="/downloads/?file=DLP_Test_FTP_FileZilla.xml">DLP_Test_FTP_FileZilla.xml</a>.
+        On Windows, use a client like <a href="https://filezilla-project.org/">FileZilla</a>;
+        the active FTP transport built into <code>cmd.exe</code> does not support
+        passive mode. Import our pre-configured FileZilla profile: <a href={FILEZILLA_PROFILE_HREF}>{FILEZILLA_PROFILE_KEY}</a>.
+        It uses plain FTP so network DLP can inspect the file contents. To test
+        an encrypted transfer, set the site's encryption to <em>Require explicit FTP over TLS</em>.
       </p>
 
       <h3>IP block list</h3>
       <p class="muted">
         To limit hosting costs from automated upload abuse, an IP block list is
-        enforced. If you believe your address has been blocked in error, use the
-        <a href="/contact/">contact page</a>.
+        enforced. If you believe your address has been blocked in error, use
+        the <a href="/contact/">contact page</a>.
       </p>
 
       <hr />

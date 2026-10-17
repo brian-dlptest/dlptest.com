@@ -36,10 +36,10 @@ KEYS=(
   "111-MB-Test.csv"
   "334-MB-Test-CSV.csv"
   "AIP_Test_Doc.docx"
-  "DLP_Test_FTP_FileZilla.xml"
-  "DLP_Test_FTP_FileZilla_old.xml"
   "DLP-Test-State-Data.zip"
 )
+# The DLP_Test_FTP_FileZilla*.xml keys are not uploaded: the downloads route
+# builds that profile from src/data/ftp.ts.
 
 # Content types must match src/lib/downloads.ts so the bucket-provided
 # metadata is correct even if a caller bypasses the middleware fallback.

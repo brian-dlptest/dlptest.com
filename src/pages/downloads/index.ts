@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 
-import { DOWNLOAD_KEYS, serveR2Object } from "@/lib/downloads";
+import { FILEZILLA_PROFILE_KEYS, FILEZILLA_PROFILE_XML } from "@/data/ftp";
+import { DOWNLOAD_KEYS, contentTypeFor, serveR2Object } from "@/lib/downloads";
 
 // R2-backed file downloads, served at /downloads/?file=<key>.
 //
@@ -17,6 +18,20 @@ const handler: APIRoute = async ({ url, request }) => {
   const file = url.searchParams.get("file") ?? "";
   if (!file || !DOWNLOAD_KEYS.has(file)) {
     return new Response("Not found", { status: 404 });
+  }
+  // The FileZilla profile is built from the credentials on /ftp-test/ rather
+  // than read from R2, so a password rotation ships with the page. Cached only
+  // briefly, since the same URL changes content on every rotation.
+  if (FILEZILLA_PROFILE_KEYS.has(file)) {
+    const body = new TextEncoder().encode(FILEZILLA_PROFILE_XML);
+    return new Response(request.method === "HEAD" ? null : body, {
+      headers: {
+        "content-type": contentTypeFor(file),
+        "content-length": String(body.byteLength),
+        "content-disposition": `attachment; filename="${file}"`,
+        "cache-control": "public, max-age=300",
+      },
+    });
   }
   if (!env.DOWNLOADS) {
     return new Response("Downloads are not configured", { status: 503 });
