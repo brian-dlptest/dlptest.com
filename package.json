@@ -19,14 +19,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
-    "@astrojs/cloudflare": "^14.3.3",
-    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/cloudflare": "^14.4.2",
+    "@astrojs/markdown-remark": "^7.3.4",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.3.8",
-    "docx": "^9.9.0",
+    "docx": "^9.14.0",
     "pcre2-wasm": "^10.49.2",
     "pdf-lib": "^1.17.1",
-    "re2js": "^2.8.6",
+    "re2js": "^2.9.0",
     "rehype-external-links": "^3.0.0",
     "xlsx": "^0.18.5"
   },
