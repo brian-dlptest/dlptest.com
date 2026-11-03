@@ -1,6 +1,6 @@
 {
   "_about": "Test case file database for the Endpoint DLP Test Plan. One entry per workbook row. renumber.py rewrites the ids here with the rows. verify.py checks every case's id, name and steps_sha (a hash of the row's steps at the last review) against the content modules, so a row that changes fails the build until this file is reviewed; verify.py --stamp records the review. See ../TEST-DATA-REVIEW.md. readme_requirements holds data that a Read Me instruction needs but no row does; verify.py checks the instruction is still in the workbook's Read Me sheet.",
-  "reviewed_for_version": 7,
+  "reviewed_for_version": 8,
   "cases": [
     {
       "id": "C-A01",
@@ -736,7 +736,7 @@
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
       "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload.",
-      "steps_sha": "114e0c230c29"
+      "steps_sha": "5ef1e2b1ff5c"
     },
     {
       "id": "P-C06.macOS",
@@ -747,7 +747,7 @@
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
       "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload.",
-      "steps_sha": "114e0c230c29"
+      "steps_sha": "5ef1e2b1ff5c"
     },
     {
       "id": "P-C06.Linux",
@@ -758,7 +758,7 @@
         "files/classification/bulk-crm-export/crm_export_50000-records.csv"
       ],
       "note": "Paste block as the POST body (browser, then curl); the 50,000-record CSV for the chunked S3 upload.",
-      "steps_sha": "114e0c230c29"
+      "steps_sha": "5ef1e2b1ff5c"
     },
     {
       "id": "P-C07.Windows",
