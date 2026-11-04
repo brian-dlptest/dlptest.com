@@ -61,6 +61,10 @@ are protected even if a request reaches the origin directly.
 > Do **not** put `/api/news/candidates/` behind Access — the discovery job
 > authenticates with `NEWS_INGEST_SECRET`, not an Access login.
 
+The Save button posts to `/admin/news/save/`, which `/admin/*` already covers. A
+new `/api/news/` route wouldn't be covered until it's added to this list, so new
+review actions belong under `/admin/`.
+
 ## Run it
 
 - Scheduled daily at 15:00 UTC, or trigger manually: Actions → "News discovery" →
