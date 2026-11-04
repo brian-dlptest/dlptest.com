@@ -32,9 +32,8 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
     </p>
 
     <p>
-      It names no DLP product. Every row is written as a capability to test
-      rather than a feature to look for, so it applies equally to any endpoint
-      DLP tool.
+      It doesn't name any DLP product. Every row is a capability to test, not a
+      feature to look for, so it works with any endpoint DLP tool.
     </p>
 
     <p class="download-row">
@@ -58,13 +57,13 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
     </div>
 
     <p>
-      A <strong>Read Me</strong> sheet explains how to fill the workbook in and
-      includes a glossary, and a <strong>Scoring Summary</strong> rolls
-      everything up with formulas by sheet, by operating system and by
-      maturity tier, and lists every table stakes row that failed, so the
-      totals update as you work. A <strong>Change Log</strong> sheet records
-      what changed in each version and why, with a map of every row ID that
-      changed, so a scored workbook from the previous version can be ported.
+      A <strong>Read Me</strong> sheet explains how to fill in the workbook and
+      includes a glossary. A <strong>Scoring Summary</strong> rolls everything up
+      with formulas by sheet, by operating system, and by maturity tier, and lists
+      every table stakes row that failed, so the totals update as you work. A
+      <strong>Change Log</strong> sheet records what changed in each version and
+      why, with a map of every row ID that changed, so you can port a scored
+      workbook from the previous version.
     </p>
 
     <h2>How the scoring works</h2>
@@ -92,9 +91,9 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
 
     <table class="legend-table">
       <tbody>
-        <tr><th>Table stakes</th><td>The basics. Coverage below 70% means a product cannot cover them, whatever its differentiator score. Individual failures belong in your findings rather than averaged into a percentage.</td></tr>
+        <tr><th>Table stakes</th><td>The basics. Coverage below 70% means a product can't cover them, whatever its differentiator score. Put individual failures in your findings. Don't average them into a percentage.</td></tr>
         <tr><th>Advanced</th><td>Where mature products separate from adequate ones.</td></tr>
-        <tr><th>Differentiator</th><td>Few products do this well. A low score is information, not a verdict.</td></tr>
+        <tr><th>Differentiator</th><td>Few products do this well, so a low score doesn't mean much on its own.</td></tr>
       </tbody>
     </table>
 
@@ -107,12 +106,11 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
     </p>
 
     <p>
-      Every file the plan asks for is ready-made in the
-      <a href="https://github.com/brian-dlptest/dlptest.com/tree/main/scripts/dlp-test-plan/test-data">test-data folder</a>
+      Every file the plan asks for is ready-made in the <a href="https://github.com/brian-dlptest/dlptest.com/tree/main/scripts/dlp-test-plan/test-data">test-data folder</a>
       of this site's public repository. Its <code>cases.json</code> lists the
-      files for each row by name. A few files cannot be stored there, such as
-      credential-shaped files and git repositories, and the folder's README
-      explains how to build them.
+      files for each row by name. A few files can't be stored there, like
+      credential-shaped files and git repositories. The folder's README explains
+      how to build them.
     </p>
 
     <ul>
@@ -126,10 +124,9 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
     <h2>Feedback</h2>
 
     <p>
-      This plan is a work in progress and suggestions are welcome: a channel we
-      have missed, a test that does not survive contact with a real product, or
-      a tier you would score differently. Get in touch through the
-      <a href="/contact/">contact page</a>.
+      This plan is a work in progress and I'd like your suggestions: a channel I
+      missed, a test that doesn't work against a real product, or a tier you'd
+      score differently. Please use the <a href="/contact/">contact page</a> to reach me.
     </p>
   </CyberhavenAdSlot>
 </BaseLayout>

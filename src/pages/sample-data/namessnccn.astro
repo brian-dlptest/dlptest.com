@@ -6,11 +6,11 @@ import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleData, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + SSN + CCN" description="Test PII/PCI data: fabricated names, Social Security Numbers, and credit card numbers for DLP testing.">
+<BaseLayout title="Sample Data — Names + SSN + CCN" description="Fake PII and PCI test data: names, Social Security Numbers, and credit card numbers for DLP testing.">
   <h1>Name + SSN + Credit Card Number</h1>
   <p>
-    Fabricated PII/PCI test rows. Useful for verifying that your DLP detects
-    composite patterns (e.g. an SSN alongside a credit card number).
+    Fake PII and PCI test rows. Use these to check if your DLP catches
+    combinations, like an SSN in the same row as a credit card number.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">

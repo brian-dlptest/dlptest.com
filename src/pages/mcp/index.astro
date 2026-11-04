@@ -64,7 +64,7 @@ const genericConfig = `{
   }
 }`;
 
-const initExample = `# 1. initialize — protocol handshake
+const initExample = `# 1. initialize: protocol handshake
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -78,12 +78,12 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
-const listExample = `# 2. tools/list — discover available tools
+const listExample = `# 2. tools/list: discover available tools
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'`;
 
-const callExample = `# 3. tools/call — invoke a tool (response-side DLP test)
+const callExample = `# 3. tools/call: invoke a tool (response-side DLP test)
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -96,7 +96,7 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
-const echoExample = `# echo_sensitive_data — PII travels in the *request* arguments
+const echoExample = `# echo_sensitive_data: PII travels in the *request* arguments
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -112,7 +112,7 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
-const promptContextExample = `# generate_prompt_context — simulate RAG / system-prompt PII
+const promptContextExample = `# generate_prompt_context: simulate RAG / system-prompt PII
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -125,12 +125,12 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
-const probeExample = `# probe_request — verify DLP is on the right network leg
+const probeExample = `# probe_request: verify DLP is on the right network leg
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"probe_request","arguments":{}}}'`;
 
-const listPatternsExample = `# list_dlp_patterns — browse the curated DLP regex library
+const listPatternsExample = `# list_dlp_patterns: browse the curated DLP regex library
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -143,7 +143,7 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
-const regexTestExample = `# regex_test — match a pattern against text (RE2 engine by default)
+const regexTestExample = `# regex_test: match a pattern against text (RE2 engine by default)
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -161,7 +161,7 @@ curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
     }
   }'`;
 
-const regexGenExample = `# regex_generate_matches — synthesize strings that match a pattern
+const regexGenExample = `# regex_generate_matches: synthesize strings that match a pattern
 curl -sS -X POST "https://mcp.dlptest.com/api/mcp/" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -189,19 +189,18 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
 ---
 <BaseLayout
   title="MCP Server Test"
-  description="A public MCP (Model Context Protocol) server that returns synthetic PII, PCI, and PHI data. Use it to test whether your DLP, CASB, or endpoint agent can inspect agentic tool traffic — including prompt-side data and unapproved external MCP connections."
+  description="A public MCP (Model Context Protocol) server that returns fake PII, PCI, and PHI data. Use it to test if your DLP, CASB, or endpoint agent can inspect AI agent traffic, including prompt-side data and connections to unapproved MCP servers."
 >
   <h1>MCP Server Test</h1>
   <p>
-    <strong><code>https://mcp.dlptest.com/api/mcp/</code></strong> is a public
-    <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-    server that exposes the same synthetic PII, PCI, and PHI generators that power this site —
-    but over the MCP wire protocol instead of a web page. Point any MCP-capable agent at it
-    and the tool calls will flow over real HTTP that your DLP can inspect.
+    <strong><code>https://mcp.dlptest.com/api/mcp/</code></strong> is a public <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
+    server. It has the same fake PII, PCI, and PHI generators as this site, but over MCP
+    instead of a web page. Point any MCP-capable agent at it and the tool calls run over real
+    HTTP that your DLP can inspect.
   </p>
   <p class="muted small">
-    Data is entirely synthetic. Nothing sent to this endpoint is stored, logged, or forwarded.
-    The endpoint is also reachable at <code>https://dlptest.com/api/mcp/</code> as a fallback.
+    All of the data is fake. Nothing sent to this endpoint is stored, logged, or forwarded.
+    The endpoint also answers at <code>https://dlptest.com/api/mcp/</code> as a fallback.
   </p>
 
   <CyberhavenAd unit="leaderboard" />
@@ -237,52 +236,52 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
       <details class="accordion">
         <summary>Claude Code <span class="badge">CLI</span></summary>
         <div class="accordion-body">
-          <p class="step">Step 1 — Run the CLI command (adds to your user config):</p>
+          <p class="step">Step 1:Run the CLI command (adds to your user config):</p>
           <pre><code>{claudeCodeCliExample}</code></pre>
-          <p class="step">Step 2 — Or add JSON directly to <code>.claude/settings.json</code> (project) or <code>~/.claude.json</code> (global):</p>
+          <p class="step">Step 2:Or add JSON directly to <code>.claude/settings.json</code> (project) or <code>~/.claude.json</code> (global):</p>
           <pre><code>{claudeCodeJsonExample}</code></pre>
-          <p class="step">Step 3 — Verify: ask your agent <em>"List the tools on the dlptest MCP server."</em></p>
+          <p class="step">Step 3:Verify: ask your agent <em>"List the tools on the dlptest MCP server."</em></p>
         </div>
       </details>
 
       <details class="accordion">
         <summary>Claude Desktop / Anthropic Agent</summary>
         <div class="accordion-body">
-          <p class="step">Step 1 — Open <code>claude_desktop_config.json</code>:</p>
+          <p class="step">Step 1:Open <code>claude_desktop_config.json</code>:</p>
           <ul>
             <li>macOS: <code>~/Library/Application Support/Claude/</code></li>
             <li>Windows: <code>%APPDATA%\Claude\</code></li>
           </ul>
-          <p class="step">Step 2 — Add the server entry:</p>
+          <p class="step">Step 2:Add the server entry:</p>
           <pre><code>{claudeDesktopConfig}</code></pre>
-          <p class="step">Step 3 — Restart Claude Desktop and verify the dlptest tools appear.</p>
+          <p class="step">Step 3:Restart Claude Desktop and verify the dlptest tools appear.</p>
         </div>
       </details>
 
       <details class="accordion">
         <summary>Cursor</summary>
         <div class="accordion-body">
-          <p class="step">Step 1 — Create or edit <code>.cursor/mcp.json</code> in your project root (or <code>~/.cursor/mcp.json</code> for global access):</p>
+          <p class="step">Step 1:Create or edit <code>.cursor/mcp.json</code> in your project root (or <code>~/.cursor/mcp.json</code> for global access):</p>
           <pre><code>{cursorConfig}</code></pre>
-          <p class="step">Step 2 — Reload Cursor. The dlptest tools should appear in the MCP panel.</p>
+          <p class="step">Step 2:Reload Cursor. The dlptest tools should appear in the MCP panel.</p>
         </div>
       </details>
 
       <details class="accordion">
         <summary>Windsurf</summary>
         <div class="accordion-body">
-          <p class="step">Step 1 — Edit <code>~/.codeium/windsurf/mcp_config.json</code>. Windsurf uses SSE transport, so the URL ends in <code>/sse</code>:</p>
+          <p class="step">Step 1:Edit <code>~/.codeium/windsurf/mcp_config.json</code>. Windsurf uses SSE transport, so the URL ends in <code>/sse</code>:</p>
           <pre><code>{windsurfConfig}</code></pre>
-          <p class="step">Step 2 — Reload Windsurf and confirm the server is listed under MCP Servers.</p>
+          <p class="step">Step 2:Reload Windsurf and confirm the server is listed under MCP Servers.</p>
         </div>
       </details>
 
       <details class="accordion">
         <summary>VS Code <span class="badge">GitHub Copilot</span></summary>
         <div class="accordion-body">
-          <p class="step">Step 1 — Create <code>.vscode/mcp.json</code> in your project root:</p>
+          <p class="step">Step 1:Create <code>.vscode/mcp.json</code> in your project root:</p>
           <pre><code>{vsCodeConfig}</code></pre>
-          <p class="step">Step 2 — Open the Copilot chat panel. The dlptest tools should appear in the tool list.</p>
+          <p class="step">Step 2:Open the Copilot chat panel. The dlptest tools should appear in the tool list.</p>
         </div>
       </details>
 
@@ -303,7 +302,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
   <details class="accordion" open>
     <summary>Try it with curl</summary>
     <div class="accordion-body">
-      <p>These three requests cover the full MCP handshake — from protocol init through a tool call.</p>
+      <p>These three requests cover the full MCP handshake, from protocol init through a tool call.</p>
       <pre><code>{initExample}</code></pre>
       <pre><code>{listExample}</code></pre>
       <pre><code>{callExample}</code></pre>
@@ -314,27 +313,28 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
     <summary>Test prompt-side DLP</summary>
     <div class="accordion-body">
       <p>
-        Most DLP products only inspect the <em>response</em> body. But in a real agent pipeline,
-        sensitive content can also flow <em>outward</em> in the tool-call arguments — for example,
-        a user pastes a document containing real SSNs and that text gets forwarded as a tool argument.
+        Most DLP products only inspect the <em>response</em> body. In a real agent pipeline,
+        sensitive data can also go <em>out</em> in the tool-call arguments. Think about a user who
+        pastes a document with real SSNs, and that text gets forwarded as a tool argument.
       </p>
-      <h4><code>echo_sensitive_data</code> — outbound argument inspection</h4>
+      <h4><code>echo_sensitive_data</code>: outbound argument inspection</h4>
       <p>
-        Accepts any text as a <code>payload</code> argument and echoes it back unchanged.
-        PII travels in the <em>outbound</em> request — a DLP product that only inspects responses will miss it.
+        Takes any text as a <code>payload</code> argument and echoes it back unchanged. The PII
+        goes out in the <em>outbound</em> request, so a DLP product that only inspects responses
+        will miss it.
       </p>
       <pre><code>{echoExample}</code></pre>
-      <h4><code>generate_prompt_context</code> — RAG / system-prompt simulation</h4>
+      <h4><code>generate_prompt_context</code>: RAG / system-prompt simulation</h4>
       <p>
-        Returns prose paragraphs with PII embedded inline, mimicking how sensitive data arrives via
-        RAG retrieval or an injected system prompt. Scenarios: <code>medical-record</code>,
+        Returns paragraphs with PII in the text, the way sensitive data shows up from RAG
+        retrieval or an injected system prompt. Scenarios: <code>medical-record</code>,
         <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.
       </p>
       <pre><code>{promptContextExample}</code></pre>
-      <h4><code>probe_request</code> — verify interception point</h4>
+      <h4><code>probe_request</code>: verify interception point</h4>
       <p>
-        Returns the User-Agent, client IP, and timestamp seen by the server.
-        Use it to confirm your proxy or endpoint agent is on the expected network leg.
+        Returns the User-Agent, client IP, and timestamp the server saw. Use it to confirm your
+        proxy or endpoint agent is where you think it is on the network.
       </p>
       <pre><code>{probeExample}</code></pre>
     </div>
@@ -345,23 +345,23 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
     <div class="accordion-body">
       <p>
         <code>regex_test</code> matches a pattern against text and returns every match with its
-        capture groups and offsets. It mirrors the interactive
-        <a href="/regex/">Regex Test</a> page. Pick the <code>engine</code>: <code>re2</code>
-        (default — linear-time and ReDoS-safe) or <code>ecmascript</code>.
+        capture groups and offsets. It does the same thing as the <a href="/regex/">Regex Test</a> page.
+        Pick the <code>engine</code>: <code>re2</code> (the default, linear-time and ReDoS-safe)
+        or <code>ecmascript</code>.
       </p>
       <pre><code>{regexTestExample}</code></pre>
       <p>
-        <code>regex_generate_matches</code> goes the other way — it synthesizes synthetic strings
-        that <em>match</em> a pattern, turning a DLP rule into ready-made test data. Every result is
-        verified to actually match; unsupported patterns return an error rather than a wrong answer.
+        <code>regex_generate_matches</code> goes the other way. It creates strings that
+        <em>match</em> a pattern, so a DLP rule turns into ready-made test data. Every result is
+        checked to make sure it actually matches, and patterns it can't handle return an error.
       </p>
       <pre><code>{regexGenExample}</code></pre>
       <p>
-        <code>list_dlp_patterns</code> returns a curated library of DLP-relevant regular
-        expressions — SSN, credit card, IBAN, MRN, API keys, network identifiers, and
-        international government IDs — each with a sample string it matches. The same library
-        powers the <a href="/regex/">Regex Test</a> page. Filter by <code>category</code> or a
-        free-text <code>search</code>; choose <code>json</code> or <code>csv</code> output.
+        <code>list_dlp_patterns</code> returns a library of DLP regular expressions: SSN, credit
+        card, IBAN, MRN, API keys, network identifiers, and international government IDs, each
+        with a sample string it matches. It's the same library as the <a href="/regex/">Regex Test</a> page.
+        Filter by <code>category</code> or a free-text <code>search</code>, and choose
+        <code>json</code> or <code>csv</code> output.
       </p>
       <pre><code>{listPatternsExample}</code></pre>
     </div>
@@ -385,10 +385,10 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
       <p>After running a few tool calls, check whether your product:</p>
       <ul>
         <li>Caught synthetic SSNs, CCNs, or IBANs in the <strong>response</strong> body.</li>
-        <li>Caught PII in the <strong>request</strong> body (tool-call arguments) — use <code>echo_sensitive_data</code> to test this specifically.</li>
-        <li>Saw PII arriving as prose context, not tabular data — use <code>generate_prompt_context</code>.</li>
+        <li>Caught PII in the <strong>request</strong> body (tool-call arguments). Use <code>echo_sensitive_data</code> to test this.</li>
+        <li>Saw PII that shows up in paragraphs of text and not in a table. Use <code>generate_prompt_context</code>.</li>
         <li>Logged a connection to <code>mcp.dlptest.com</code> as an outbound MCP server contact.</li>
-        <li>Surfaced the <code>tools/list</code> handshake — a keyword-rich signal for pattern scanners.</li>
+        <li>Surfaced the <code>tools/list</code> handshake, which is full of keywords that pattern scanners can pick up.</li>
         <li>Flagged the initial connection to an unapproved external MCP endpoint (CASB / network policy).</li>
       </ul>
     </div>
@@ -425,7 +425,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
             <td><code>generate_custom</code></td>
             <td>
               Arbitrary fields. Takes a <code>fields</code> array of
-              <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code> —
+              <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code>, with the
               same types as the <a href="/generate/">/generate/</a> page.
             </td>
           </tr>
@@ -448,7 +448,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
           </tr>
           <tr>
             <td><code>generate_prompt_context</code></td>
-            <td>Returns prose paragraphs with inline PII simulating RAG retrieval or system-prompt injection. Scenarios: <code>medical-record</code>, <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.</td>
+            <td>Returns paragraphs with PII in the text, like RAG retrieval or system-prompt injection. Scenarios: <code>medical-record</code>, <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.</td>
           </tr>
           <tr>
             <td><code>probe_request</code></td>
@@ -478,18 +478,18 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
           <tr>
             <td><code>regex_generate_matches</code></td>
             <td>
-              Synthesizes synthetic strings that match a <code>pattern</code> (the reverse of
-              <code>regex_test</code>) — turns a DLP rule into test data. Self-verifying; returns an
-              error for unsupported patterns rather than a wrong answer.
+              Creates strings that match a <code>pattern</code> (the reverse of
+              <code>regex_test</code>), which turns a DLP rule into test data. It checks its own
+              results and returns an error for patterns it can't handle.
             </td>
           </tr>
           <tr>
             <td><code>list_dlp_patterns</code></td>
             <td>
-              Returns the curated DLP regex library (id, name, category, ECMAScript
-              <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that also
-              backs the <a href="/regex/">Regex Test</a> page. Optional <code>category</code> and
-              <code>search</code> filters; <code>json</code> or <code>csv</code> output.
+              Returns the DLP regex library (id, name, category, ECMAScript
+              <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that the <a href="/regex/">Regex Test</a>
+              page also uses. Optional <code>category</code> and
+              <code>search</code> filters, with <code>json</code> or <code>csv</code> output.
             </td>
           </tr>
         </tbody>
@@ -504,9 +504,9 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
     <summary>Background: Why this exists &amp; sanctioned vs unsanctioned servers</summary>
     <div class="accordion-body">
       <p>
-        DLP, CASB, and endpoint vendors increasingly claim they can inspect "agentic" or "AI tool"
-        traffic. The most common transport for that traffic today is MCP — JSON-RPC 2.0 over HTTP.
-        There are three distinct vectors to test:
+        More and more DLP, CASB, and endpoint vendors claim they can inspect "agentic" or "AI tool"
+        traffic. What does that mean? Today it mostly means MCP, which is JSON-RPC 2.0 over HTTP.
+        There are three things to test:
       </p>
       <ul>
         <li><strong>Network / SSL inspection.</strong> Does your proxy decrypt and scan a <code>tools/call</code> response containing hundreds of fake SSNs?</li>
@@ -514,23 +514,22 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
         <li><strong>CASB / browser extension.</strong> Does anything flag a connection to an unfamiliar external MCP server during the initial handshake?</li>
       </ul>
       <p>
-        This endpoint is intentionally public and unauthenticated — it represents an <em>unsanctioned</em>
-        external server. A sanctioned internal MCP server, by contrast, requires an
-        <code>Authorization: Bearer &lt;token&gt;</code> header and is reachable only from the corporate
-        network or via VPN. The presence of an auth token flowing to an external endpoint is itself a DLP
-        signal worth alerting on.
+        This endpoint is public and has no login on purpose. It stands in for an <em>unsanctioned</em>
+        external server. A sanctioned internal MCP server would require an
+        <code>Authorization: Bearer &lt;token&gt;</code> header and only be reachable from the corporate
+        network or over VPN. An auth token going to an external endpoint is something you should
+        alert on.
       </p>
       <p>What your CASB or network DLP should detect when an agent connects here:</p>
       <ul>
         <li>An outbound connection to <code>mcp.dlptest.com</code> (or any <code>mcp.*</code> domain not in the approved list).</li>
-        <li>A <code>tools/list</code> response — the fingerprint of an MCP handshake — from an unknown host.</li>
+        <li>A <code>tools/list</code> response, the fingerprint of an MCP handshake, from an unknown host.</li>
         <li>Any <code>Authorization</code> token leaving the network to an unapproved destination.</li>
       </ul>
       <p>
-        The endpoint speaks the
-        <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a>
-        transport in stateless mode. Each request is a self-contained <code>POST</code>; no session IDs
-        are issued and no <code>GET</code> stream is held open.
+        The endpoint uses the <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a>
+        transport in stateless mode. Each request is its own <code>POST</code>. No session IDs are
+        issued and no <code>GET</code> stream is held open.
       </p>
     </div>
   </details>
