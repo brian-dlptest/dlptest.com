@@ -22,20 +22,20 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
 ---
 <BaseLayout
   title="HTTP POST Test"
-  description="Submit text and files with the HTTP POST method over plain, unencrypted HTTP to a safe endpoint that discards the body. Use it to verify network-based DLP, taps, and passive monitors that can't decrypt TLS."
+  description="Send text and files over plain, unencrypted HTTP to a page that throws them away. Use it to test network DLP, taps, and passive monitors that can't decrypt TLS."
 >
   <h1>HTTP POST Test</h1>
   <p class="intro">
-    Use the forms below to send a test message or upload a file to dlptest.com using the
-    HTTP POST method over plain, unencrypted HTTP — no TLS. Load this page and submit the
-    form over <code>http://</code> and the request stays cleartext on the wire, which is
-    what you want when testing a network tap, passive Network Monitor, or any control that
-    inspects traffic without decrypting it. The server accepts the request and discards the
-    body. No data is logged, stored, or forwarded.
+    Use the forms below to send a test message or upload a file to dlptest.com with an HTTP
+    POST over plain, unencrypted HTTP. Load this page and submit the form over
+    <code>http://</code> and the request stays in cleartext, which is what you want when
+    testing a network tap, a passive Network Monitor, or anything else that inspects traffic
+    without decrypting it. The server reads the request and throws away the body. Nothing is
+    logged, stored, or forwarded.
   </p>
   <p>
-    Need to test a control that decrypts TLS instead (an SSL-inspecting proxy, ICAP
-    integration, or SSE/SASE agent)? Use the <a href="/https-post/">HTTPS POST test</a>.
+    Testing something that decrypts TLS instead, like an SSL-inspecting proxy, an ICAP
+    integration, or an SSE/SASE agent? Use the <a href="/https-post/">HTTPS POST test</a>.
   </p>
 
   <PostTestForm />
@@ -44,78 +44,76 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
 
   <h2>Test with curl or scripts</h2>
   <p>
-    The accept-and-discard endpoint is <code>/api/http-post/</code>. You can POST any
-    body (form data, JSON, raw bytes, multipart). Responses are JSON with an
-    <code>ok</code> field (<code>true</code> when the body was accepted). GET on the same URL returns a short JSON hint.
-    Cross-origin use from automation or in-browser fetch from another origin is allowed
-    via permissive CORS on this route only.
+    The endpoint is <code>/api/http-post/</code>. You can POST any body (form data, JSON, raw
+    bytes, multipart). You get JSON back with an <code>ok</code> field, which is
+    <code>true</code> when the body was accepted. A GET on the same URL returns a short JSON
+    hint. This route allows cross-origin requests, so you can call it from automation or
+    from a browser on another site. It's the only route that does.
   </p>
   <p>Examples (use your own hostname for staging or production):</p>
   <pre><code>{curlExamples}</code></pre>
   <h2>Keeping your browser on http://</h2>
   <p>
-    This site does not enforce HSTS, so it never instructs a browser to upgrade to HTTPS.
-    However, some browsers upgrade <code>http://</code> on their own — even when you type
-    the scheme explicitly — because the site also answers on HTTPS. What to expect:
+    This site doesn't enforce HSTS, so it never tells a browser to upgrade to HTTPS. Some
+    browsers upgrade <code>http://</code> on their own anyway, even when you type it in,
+    because the site also answers on HTTPS. Here's what to expect:
   </p>
   <ul>
     <li>
-      <strong>Chrome / Edge:</strong> an explicitly typed <code>http://</code> URL loads
-      in cleartext by default (the address bar shows "Not Secure" — that's your
-      confirmation). Bare domains typed without a scheme may be auto-tried over HTTPS
-      first, so include the <code>http://</code> prefix.
+      <strong>Chrome / Edge:</strong> a URL you type with <code>http://</code> loads in
+      cleartext by default. The address bar shows "Not Secure", which is your confirmation.
+      If you type the domain without <code>http://</code> it may try HTTPS first, so include
+      the prefix.
     </li>
     <li>
-      <strong>Brave:</strong> upgrades even explicit <code>http://</code> URLs by default
-      (Shields' "Use secure connections"), including in private windows. To test cleartext,
-      click the Brave Shields lion icon on this page and turn off
+      <strong>Brave:</strong> upgrades <code>http://</code> URLs by default, even when you
+      type them, and even in private windows (Shields' "Use secure connections"). To test
+      cleartext, click the Brave Shields lion icon on this page and turn off
       <em>Use secure connections</em> for this site, or change the global default at
       <code>brave://settings/shields</code>.
     </li>
     <li>
-      <strong>Firefox:</strong> private windows use HTTPS-First by default, and it only
-      falls back to HTTP when the HTTPS attempt fails — which it won't here. Use a normal
-      window, or add an exception if HTTPS-Only Mode is enabled at
-      <code>about:preferences#privacy</code>.
+      <strong>Firefox:</strong> private windows use HTTPS-First by default and only fall back
+      to HTTP when HTTPS fails, which it won't here. Use a normal window, or add an exception
+      if HTTPS-Only Mode is on at <code>about:preferences#privacy</code>.
     </li>
     <li>
-      <strong>Safari:</strong> upgrades automatically when it knows a site supports HTTPS
-      and offers no per-site override — use another browser, curl, or a script for
-      cleartext testing.
+      <strong>Safari:</strong> upgrades automatically when it knows a site supports HTTPS,
+      and there's no per-site override. Use another browser, curl, or a script for cleartext
+      testing.
     </li>
   </ul>
   <p class="muted small">
-    If your browser cached an HSTS policy for this domain from before mid-2026 (when this
-    site sent one), one HTTPS visit now clears it automatically (we send
-    <code>max-age=0</code>), or delete it manually at
-    <code>chrome://net-internals/#hsts</code> under "Delete domain security policies".
-    Whichever browser you use, confirm the request was really cleartext on the wire with a
-    packet capture or your inspection tool's own logs — an address bar reading
-    <code>http://</code> plus "Not Secure" is a good sign, but the wire is the truth.
+    If your browser cached an HSTS policy for this domain from before mid-2026, when this
+    site sent one, one HTTPS visit now clears it (the site sends <code>max-age=0</code>). You
+    can also delete it at <code>chrome://net-internals/#hsts</code> under "Delete domain
+    security policies". Whichever browser you use, confirm the request was really cleartext
+    with a packet capture or your inspection tool's logs. An address bar showing
+    <code>http://</code> and "Not Secure" is a good sign, but the capture is what proves it.
   </p>
 
   <h2>What is an HTTP POST?</h2>
   <p>
-    HTTP POST is a request method in the HTTP protocol. A POST asks a server to accept an
-    entity in the request body. Forms in browsers, REST APIs, and file uploads typically use
-    POST when they send data that is not idempotent or that does not fit cleanly in the URL.
+    An HTTP POST is a request method supported by the HTTP protocol. By design, the POST
+    request method requests that a web server accept the data enclosed in the body of the
+    request message, most likely for storing it. It is often used when uploading a file or
+    when submitting a completed web form. More info can be found on good old <a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods">Wikipedia</a>.
   </p>
   <h3>Why test over plain HTTP</h3>
   <p>
-    Most modern traffic is encrypted, and it's tempting to treat a TLS-decrypting control as
-    equivalent to one that inspects cleartext. In practice they're different controls with
-    different failure modes, and auditors and regulators often expect continuous testing to
-    exercise both — especially for controls (network taps, passive Network Monitors, some
-    legacy proxies) that were never designed to decrypt TLS at all. This page gives you a
-    stable, safe target for that specific test.
+    Most traffic is encrypted now, so it's tempting to treat something that decrypts TLS the
+    same as something that inspects cleartext. They're different controls and they fail in
+    different ways. Some of them, like network taps, passive Network Monitors, and some older
+    proxies, were never built to decrypt TLS at all. Auditors and regulators often expect you
+    to keep testing both, and this page gives you a safe target for it.
   </p>
   <h3>How dlptest.com uses POST</h3>
   <p>
-    This site does not store or process your test payloads. The Worker reads the request
-    body so the bytes traverse the network fully (so inspection appliances can see them),
-    then discards them. That makes POST here a safe pattern for validating Data Loss
-    Prevention rules, ICAP integrations, and network-based inspection, without sending real
-    customer data to a third party that would retain it.
+    Here at dlptest.com we don't store any info from the HTTP POST, but most websites will
+    store your data. The Worker reads the request body so the bytes make it across the
+    network, where your inspection tools can see them, and then throws them away. That means
+    you can test DLP rules, ICAP integrations, and network inspection without sending real
+    customer data to a third party that would keep it.
   </p>
 
   <style>

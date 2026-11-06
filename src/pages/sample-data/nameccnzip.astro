@@ -6,12 +6,11 @@ import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleNameCcnZip, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + CCN + ZIP" description="Test PCI data: fabricated names, credit card numbers, ZIP codes, and expiration dates for DLP testing.">
+<BaseLayout title="Sample Data — Names + CCN + ZIP" description="Fake PCI test data: names, credit card numbers, ZIP codes, and expiration dates for DLP testing.">
   <h1>Name + Credit Card Number + ZIP + Expiration</h1>
   <p>
-    Fabricated PCI test rows including Visa, Mastercard, American Express,
-    Discover, and JCB number formats. Useful for testing PCI-DSS detection
-    rules.
+    Fake PCI test rows with Visa, Mastercard, American Express, Discover, and
+    JCB number formats. Use these to test your PCI-DSS detection rules.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">

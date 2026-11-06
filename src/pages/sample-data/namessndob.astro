@@ -6,11 +6,11 @@ import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleNameSsnDob, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + SSN + DOB" description="Test PII data: fabricated names, Social Security Numbers, and dates of birth for DLP testing.">
+<BaseLayout title="Sample Data — Names + SSN + DOB" description="Fake PII test data: names, Social Security Numbers, and dates of birth for DLP testing.">
   <h1>Name + SSN + Date of Birth</h1>
   <p>
-    Fabricated PII test rows. Useful for verifying that your DLP detects
-    composite patterns (e.g. an SSN within a row of a known birth date).
+    Fake PII test rows. Use these to check if your DLP catches combinations,
+    like an SSN in the same row as a birth date.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">

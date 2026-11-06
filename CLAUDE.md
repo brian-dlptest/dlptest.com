@@ -28,6 +28,14 @@ When the user says "commit and push" without specifying a branch, assume the fea
 
 ---
 
+## Writing style
+
+The site should sound like Brian wrote it. Read [`VOICE.md`](VOICE.md) before writing or editing any copy.
+
+Don't invent his opinions or experience. If a page needs his take, ask him. He'd rather talk it through than type it, so write from what he says.
+
+---
+
 ## Endpoint DLP Test Plan — test data review is part of every change
 
 The workbook at `/endpoint-dlp-test-plan/` is generated from `scripts/dlp-test-plan/`. **Never hand-edit the .xlsx.**

@@ -1,20 +1,20 @@
 ---
-title: "Orion Security Raises $32 Million Series A for Autonomous Data Loss Prevention"
+title: "Orion Security raises $32 million Series A for autonomous DLP"
 slug: "orion-security-raises-32-million-series-a-autonomous-dlp"
 pubDate: 2026-02-03T12:00:00+00:00
 categories: ["News", "data protection", "DLP", "Endpoint DLP", "Insider Risk Management", "DSPM"]
-excerpt: "Orion Security announced a $32 million Series A led by Norwest Venture Partners with participation from IBM and existing backers — roughly nine months after a $6 million seed…"
+excerpt: "Orion Security raised a $32 million Series A led by Norwest Venture Partners with IBM and existing backers participating, roughly nine months after a $6 million seed."
 sourceUrl: "https://www.orionsec.io/blog/orion-closes-32-million-in-funding-building-dlp-beyond-policies"
 ---
 
-**Orion Security** raised **$32 million** in Series A financing led by **Norwest Venture Partners**, with **IBM** joining alongside earlier investors **PICO Venture Partners** and **Lama Partners**. The round lifts Orion's disclosed funding to approximately **$38 million** total — remarkable velocity against a March 2025 seed closure window referenced across contemporaneous reporting.
+**Orion Security** raised **$32 million** in Series A financing led by **Norwest Venture Partners**, with **IBM** joining earlier investors **PICO Venture Partners** and **Lama Partners**. That brings disclosed funding to about **$38 million**, which is pretty fast given reporting at the time puts its seed in March 2025.
 
-Orion pitches **context-aware autonomous DLP** intended to evolve beyond brittle regex-policy catalogs toward ML-assisted reasoning aligned with modern SaaS collaboration norms — positioning deliberately antagonistic toward incremental tweaks atop legacy incident-queue workflows enterprises historically tolerated because switching costs dwarfed usability gripes.
+Orion pitches **context-aware autonomous DLP**. It wants to replace brittle regex policy catalogs with ML-assisted reasoning that fits how people actually collaborate in SaaS. It's going right at the legacy incident queues that enterprises have put up with because switching was so painful.
 
-### Customer Evidence Signal
+### Customers
 
-Coverage cites marquee enterprise logos (**American Express Global Business Travel**, **Elastic**, **LinkedIn**) alongside aggressive revenue milestones claimed months post-incorporation — if reproducible during diligence-heavy POC cycles, Orion validates appetite for AI-era rebuilds rather than rip-and-replace abstention common prior hybrid-remote normalization.
+Coverage cites big enterprise logos (**American Express Global Business Travel**, **Elastic**, **LinkedIn**) and aggressive revenue milestones claimed months after incorporation. If that holds up in a real POC, it's a good sign that buyers want a rebuild for the AI era.
 
-### Competitive Landscape
+### Competition
 
-Funding arrives sandwiched between DSPM rollup headlines (**Cyera**, **Veeam / Securiti**) and resurgent insider-risk narratives (**Above**, behavioral analytics refreshes). Orion must articulate crisp wedges — autonomous enrichment versus SSE-adjacent CASB telemetry versus endpoint-heavy incumbent DLP — because procurement committees rarely approve overlapping budgets absent differentiated blocking efficacy proofs during controlled purple-team bake-offs.
+This comes between DSPM rollup headlines (**Cyera**, **Veeam / Securiti**) and renewed interest in insider risk (**Above**, behavioral analytics refreshes). So what does Orion do that's different? Autonomous enrichment, SSE-adjacent CASB telemetry, and endpoint-heavy incumbent DLP are all competing for budget, and procurement teams rarely approve overlapping budgets unless a product proves it blocks better in a controlled bake-off.

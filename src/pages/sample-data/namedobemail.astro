@@ -6,12 +6,12 @@ import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleNameDobEmail, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + DOB + Email" description="Test PII data: fabricated names, dates of birth, and email addresses for DLP testing.">
+<BaseLayout title="Sample Data — Names + DOB + Email" description="Fake PII test data: names, dates of birth, and email addresses for DLP testing.">
   <h1>Name + Date of Birth + Email</h1>
   <p>
-    Fabricated PII test rows spanning common consumer email providers
-    (gmail, hotmail, yahoo, aol, facebook). Useful for verifying detection
-    of name-DOB-email composites.
+    Fake PII test rows using common consumer email providers (gmail, hotmail,
+    yahoo, aol, facebook). Use these to check if your DLP catches a name, date
+    of birth, and email together.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab">

@@ -1,26 +1,24 @@
 ---
-title: "Cyera Expands AI Security With Browser Shield, Data Lineage, and Cyera MCP"
+title: "Cyera adds Browser Shield, data lineage, and Cyera MCP"
 slug: "cyera-expands-ai-security-with-browser-shield-data-lineage-and-mcp"
 pubDate: 2026-03-24T12:00:00+00:00
 categories: ["News", "Data Discovery", "data protection", "Data Security Posture Management", "DSPM", "DLP"]
-excerpt: "Cyera announced Browser Shield for AI, automated sensitive-data lineage tuned for agent workflows, and Cyera MCP — a bridge for organizations building custom data-security agents…"
+excerpt: "Cyera announced Browser Shield for AI, sensitive data lineage for agent workflows, and Cyera MCP, which helps organizations build their own data security agents."
 sourceUrl: "https://www.businesswire.com/news/home/20260324283752/en/Cyera-Closes-Major-Gaps-in-Securing-Enterprise-AI"
 ---
 
-**Cyera** outlined three complementary expansions aimed squarely at **enterprise adoption of autonomous AI tooling**:
+**Cyera** announced three additions aimed at **enterprises adopting autonomous AI tools**:
 
 #### Browser Shield for AI
 
-Cyera describes **Browser Shield for AI** as delivering near-real-time visibility into employee interactions with public generative AI surfaces — extending governance narratives beyond sanctioned SaaS connectors into browser-mediated leakage paths competitors struggle to instrument uniformly across BYOD scenarios.
+Cyera says **Browser Shield for AI** gives near-real-time visibility into how employees use public generative AI tools. That takes it beyond sanctioned SaaS connectors and into data leaking through the browser, which is hard to cover consistently on BYOD devices.
 
-#### Data Lineage for Agent Workflows
+#### Data lineage for agent workflows
 
-The lineage capability emphasizes tracing **how sensitive files propagate through automated chains** — especially relevant where retrieval-augmented pipelines blur classical “data at rest” versus “data in motion” boundaries DSPM catalogs historically modeled imperfectly.
+The lineage feature traces **how sensitive files move through automated chains**. That matters because retrieval-augmented pipelines blur "data at rest" and "data in motion," and DSPM catalogs have never modeled that very well.
 
 #### Cyera MCP
 
-**Cyera MCP** surfaces Model Context Protocol connectivity — signaling Cyera's intent to participate in emerging ecosystems where security automation composes alongside developer-centric AI orchestration layers rather than exclusively via proprietary vendor portals.
+**Cyera MCP** adds Model Context Protocol connectivity, so security automation can work alongside developers' AI tools and not only through Cyera's own portal.
 
-### Commentary
-
-Cyera already occupies headline funding gravity across DSPM conversations; packaging browser instrumentation plus MCP interoperability reads like an integration maturity play toward buyers demanding **neutral fabric layers** spanning heterogeneous AI stacks rather than single-vendor copilot monocultures.
+Cyera already gets a lot of attention for its funding. Adding browser coverage and MCP looks like a push toward buyers who want something that works across different AI stacks and not just one vendor's copilot.

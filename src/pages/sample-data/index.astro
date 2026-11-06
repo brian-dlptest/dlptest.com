@@ -61,13 +61,14 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
 ---
 <BaseLayout
   title="Sample Data Library"
-  description="Fabricated PII and PCI test data for DLP testing — download as CSV, XLSX, PDF, or DOCX, or grab identity document images for OCR testing."
+  description="Fake PII and PCI test data for DLP testing. Download it as CSV, XLSX, PDF, or DOCX, or grab identity document images for OCR testing."
 >
   <h1>Sample Data Library</h1>
   <p>
-    Click any card to copy or download fabricated test data. All values are synthetic — safe to use
-    as DLP detection targets. Identity document images are publicly available samples suitable for
-    OCR and image-based DLP testing.
+    DLP Test has a few different types of test data. Click any card to copy or download it.
+    This is just test data and may not trigger due to different checks your system may be
+    running. The identity document images are publicly available samples you can use for OCR
+    and image-based DLP testing.
   </p>
 
   <CyberhavenAdSlot page="sample-data">
@@ -168,7 +169,7 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
 
     <!-- Dataset mode -->
     <div id="modal-dataset" class="modal-body" hidden>
-      <p class="modal-hint muted small">All values are fabricated test data — not real PII.</p>
+      <p class="modal-hint muted small">All of this is fake test data, not real PII.</p>
       <div class="modal-actions">
         <button id="btn-copy" class="action-btn" type="button">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>

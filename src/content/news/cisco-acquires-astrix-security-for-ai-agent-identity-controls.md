@@ -1,22 +1,22 @@
 ---
-title: "Cisco Acquires Astrix Security for AI Agent Identity Controls"
+title: "Cisco acquires Astrix Security for AI agent identity controls"
 slug: "cisco-acquires-astrix-security-for-ai-agent-identity-controls"
 pubDate: 2026-06-08T12:00:00+00:00
 categories: ["News", "data protection", "AI Security", "Identity Security"]
-excerpt: "Cisco completed its acquisition of Astrix Security, an Israeli non-human identity security startup, in a deal Calcalist reports at roughly $400 million as agent credentials become a new data-access risk."
+excerpt: "Cisco completed its acquisition of Astrix Security, an Israeli non-human identity startup. Calcalist reports the price at roughly $400 million."
 sourceUrl: "https://www.calcalistech.com/ctechnews/article/dy5obf581"
 ---
 
-**Cisco** completed its acquisition of **Astrix Security**, the Israeli non-human identity security startup focused on software agents, service accounts, API keys, OAuth tokens, and other machine credentials. **Calcalist** reports the final purchase price at roughly **$400 million**.
+**Cisco** completed its acquisition of **Astrix Security**, the Israeli non-human identity startup focused on software agents, service accounts, API keys, OAuth tokens, and other machine credentials. **Calcalist** reports the final price at roughly **$400 million**.
 
-The DLP-adjacent angle is not classic content inspection. It is access control for the identities that increasingly touch sensitive data before a human user ever sees it. Astrix built around discovering non-human identities, finding excessive permissions, and remediating risky access before those identities become a path to data leakage or broader compromise.
+This isn't classic content inspection. It's access control for the identities that touch sensitive data, often before a person ever sees it. Astrix finds non-human identities, spots excessive permissions, and fixes risky access before it turns into a data leak or a bigger compromise.
 
-### Why Data Security Teams Should Care
+### Why data security teams should care
 
-AI agents often inherit broad permissions through service accounts, API keys, and OAuth grants. If those credentials are over-scoped, stale, or invisible to security teams, an agent can reach sensitive systems even when user-facing DLP policy looks clean.
+AI agents often inherit broad permissions through service accounts, API keys, and OAuth grants. If those credentials are over-scoped, stale, or invisible to security, an agent can reach sensitive systems even when your user-facing DLP policy looks clean.
 
-Cisco says Astrix will be integrated into **Cisco Identity Intelligence** and Zero Trust products such as **Duo** and **Secure Access**. For buyers, the practical question is whether identity telemetry can connect agent behavior, data access, and enforcement quickly enough to reduce the blind spots that sit between IAM, SSE, and DLP.
+Cisco says Astrix will be integrated into **Cisco Identity Intelligence** and Zero Trust products like **Duo** and **Secure Access**. The question for buyers is if identity data can connect agent behavior, data access, and enforcement quickly enough to close the gaps between IAM, SSE, and DLP.
 
-### What To Validate
+### What to check
 
-This is not a replacement for DLP or DSPM. It is a control plane that may make those programs more enforceable when non-human identities are involved. Teams evaluating agent-security stacks should ask how Astrix identifies agent-owned credentials, how privilege cleanup is automated, and whether suspicious agent access can trigger downstream investigation or blocking workflows.
+This doesn't replace DLP or DSPM, but it may make them easier to enforce when non-human identities are involved. If you're evaluating agent security, ask how Astrix identifies credentials owned by agents, how privilege cleanup gets automated, and if suspicious agent access can trigger an investigation or a block.

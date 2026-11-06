@@ -3,13 +3,13 @@ title: "CloudRise, a premier Data Security consulting services company, announce
 slug: "cloudrise-a-premier-data-security-consulting-services-company-announced-acquisition-by-exclusive-networks"
 pubDate: 2024-11-22T17:53:09+00:00
 categories: ["News", "Data Security", "DLP", "DSPM", "Managed Services", "SASE"]
-excerpt: "Exclusive Networks, a global cybersecurity leader, has acquired Cloudrise, a provider of Managed Services (MS) and Professional Services (PS) specializing in Security Access Service Edge (SASE), Data Security Posture…"
+excerpt: "Exclusive Networks acquired Cloudrise, a managed and professional services provider focused on SASE, DSPM, and CNAPP. Cloudrise keeps its own brand and works with vendors like Netskope, BigID, and Cyera."
 heroImage: "https://dlptest.com/wp-content/uploads/1732210199159.jpeg"
 sourceUrl: "https://dlptest.com/cloudrise-a-premier-data-security-consulting-services-company-announced-acquisition-by-exclusive-networks/"
 ---
 
-Exclusive Networks, a global cybersecurity leader, has acquired Cloudrise, a provider of Managed Services (MS) and Professional Services (PS) specializing in Security Access Service Edge (SASE), Data Security Posture Management (DSPM), and Cloud Native Application Protection Platform (CNAPP) solutions. This acquisition strengthens Exclusive Networks’ service capabilities, particularly in the U.S., and broadens its global reach. Cloudrise, founded in 2019 and based in Grand Junction, Colorado, brings expertise in working with cybersecurity vendors like Netskope, BigID, and Cyera.
+Exclusive Networks has acquired Cloudrise, a provider of Managed Services (MS) and Professional Services (PS) for Security Access Service Edge (SASE), Data Security Posture Management (DSPM), and Cloud Native Application Protection Platform (CNAPP). Cloudrise was founded in 2019, is based in Grand Junction, Colorado, and works with vendors like Netskope, BigID, and Cyera. The deal adds to Exclusive Networks' services, especially in the U.S.
 
-Cloudrise will continue to operate under its own brand within the Exclusive Networks ecosystem, delivering its services to a wider audience. This move supports Exclusive Networks’ strategy to enhance its position in the rapidly growing cybersecurity sectors of SASE and DSPM. The acquisition allows Cloudrise to leverage Exclusive Networks’ global infrastructure while offering its services to a broader market.
+Cloudrise will keep operating under its own brand within Exclusive Networks and can now use its global infrastructure to reach a bigger market. For Exclusive Networks, this is about SASE and DSPM, two of the faster growing parts of cybersecurity.
 
-Jesper Trolle, CEO of Exclusive Networks, highlighted that the acquisition would significantly strengthen their global service capabilities, especially in high-growth security segments. Cloudrise’s leadership, including CEO Rob Eggebrecht, expressed excitement about joining Exclusive Networks, emphasizing the opportunity to expand their reseller network and deliver world-class cybersecurity solutions globally.
+Jesper Trolle, CEO of Exclusive Networks, said the acquisition significantly strengthens their global service capabilities. Cloudrise CEO Rob Eggebrecht pointed to the chance to expand their reseller network and deliver cybersecurity services globally.

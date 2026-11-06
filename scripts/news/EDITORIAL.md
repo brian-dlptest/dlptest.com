@@ -22,8 +22,8 @@ Posts in `src/content/news/` are **practitioner notes for DLP/DSPM buyers**, not
 
 - Frontmatter per `src/content.config.ts`: `title`, `slug`, `pubDate` (ISO with offset), `categories`, `excerpt` (~200–280 chars), `sourceUrl` (**canonical external URL**, not dlptest.com)
 - Categories: always include **`News`** plus lowercase topical tags used elsewhere: `data protection`, `DLP`, `DSPM`, `Endpoint DLP`, `Insider Risk Management`, `Data Security Posture Management`, etc.
-- Body: short synthesis; **bold** company names on first mention; optional `###` subheads; no press-release paste
-- Voice: informed practitioner (see `cyera-is-acquiring-trail-security`, `orion-security-raises-32-million-series-a-autonomous-dlp`) — may ask what a deal means for DLP channels
+- Body: two or three short paragraphs; **bold** company names on first mention; no press-release paste
+- Voice: follow `VOICE.md` at the repo root. What happened and the numbers first, then what the company is known for. It's fine to ask what a deal means for DLP channels. No first person in drafts: only Brian adds "I" when he reviews a post.
 - **One story per file**; slug is kebab-case matching filename
 
 ## Examples

@@ -16,7 +16,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
 ---
 <BaseLayout
   title="Regex Test"
-  description="A regular-expression workbench for DLP rule authoring. Test patterns against sample text with live match highlighting, capture groups, substitution, and a token-by-token explanation, across the ECMAScript, RE2, and PCRE engines. Includes a searchable library of common DLP patterns."
+  description="Test regular expressions for DLP rules with live match highlighting, capture groups, substitution, and a token-by-token explanation. Works with ECMAScript, RE2, and PCRE, and includes a searchable library of common DLP patterns."
 >
   <h1>Regex Test</h1>
   <p>
@@ -25,7 +25,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     explanation. Switch engines to check how a pattern behaves under <strong>ECMAScript</strong>
     (JavaScript), <strong>RE2</strong> (the linear-time engine used by Go and many DLP products),
     or <strong>PCRE</strong>. Browse the built-in library of common DLP patterns below. Everything
-    runs in your browser — nothing is sent anywhere.
+    runs in your browser. Nothing gets sent anywhere.
   </p>
 
   <CyberhavenAd unit="leaderboard" />
@@ -120,7 +120,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
         autocomplete="off"
         autocorrect="off"
         aria-label="Replacement string"
-        placeholder="replacement — use $1, $2 for groups"
+        placeholder="replacement, use $1, $2 for groups"
       />
       <p class="replace-hint" id="replace-hint"></p>
       <label class="field-label" for="replace-output">Result</label>
