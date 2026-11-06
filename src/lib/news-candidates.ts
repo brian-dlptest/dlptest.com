@@ -1,5 +1,7 @@
 import { env } from "cloudflare:workers";
 
+import { editsHash, normalizeEdits, type CandidateEdits, type EditError } from "./news-content";
+
 // Data-access layer for the News Review Queue (D1 table `news_candidates`).
 // Every query uses D1 prepared statements with bound parameters — never string
 // interpolation — so candidate-supplied values can't alter the SQL.
@@ -148,6 +150,56 @@ export async function getCandidate(id: number): Promise<CandidateRow | null> {
     .bind(id)
     .first<RawRow>();
   return row ? mapRow(row) : null;
+}
+
+/**
+ * Overwrite the reviewer-editable text of a `pending` candidate. Rediscovering
+ * the same story can't clobber this: insertCandidate ignores known slugs.
+ * Returns true when the row was actually updated.
+ */
+export async function updateCandidateText(id: number, edits: CandidateEdits): Promise<boolean> {
+  const result = await db()
+    .prepare(
+      `UPDATE news_candidates
+          SET title = ?, excerpt = ?, body = ?
+        WHERE id = ? AND status = 'pending'`,
+    )
+    .bind(edits.title, edits.excerpt, edits.body, id)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
+export type ApplyEditsResult =
+  | { ok: true; candidate: CandidateRow; strippedHtml: boolean }
+  | { ok: false; error: EditError | "stale_edit" | "already_reviewed" };
+
+/**
+ * Clean and store submitted text, returning the candidate as it now stands. A
+ * submission whose `base` no longer matches the stored text came from an
+ * out-of-date tab and is refused, unless its text is already what's stored (a
+ * double-click, say), which is a harmless no-op.
+ */
+export async function applyEdits(
+  candidate: CandidateRow,
+  fields: { title?: unknown; excerpt?: unknown; body?: unknown; base?: unknown },
+): Promise<ApplyEditsResult> {
+  const normalized = normalizeEdits(fields);
+  if (!normalized.ok) return normalized;
+  const { edits, strippedHtml } = normalized;
+
+  const unchanged =
+    edits.title === candidate.title &&
+    edits.excerpt === candidate.excerpt &&
+    edits.body === candidate.body;
+  if (!unchanged) {
+    if (typeof fields.base === "string" && fields.base !== (await editsHash(candidate))) {
+      return { ok: false, error: "stale_edit" };
+    }
+    if (!(await updateCandidateText(candidate.id, edits))) {
+      return { ok: false, error: "already_reviewed" };
+    }
+  }
+  return { ok: true, candidate: { ...candidate, ...edits }, strippedHtml };
 }
 
 /**

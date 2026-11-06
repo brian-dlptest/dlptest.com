@@ -73,7 +73,8 @@ It executes [`scripts/news/discover.mjs`](scripts/news/discover.mjs):
    as `pending`. The endpoint sends one digest email when new stories arrive.
 
 **Nothing is published automatically.** Review at **`/admin/news`** (behind Cloudflare
-Access): *Publish* commits the rendered Markdown to both `main` and `staging`; *Delete*
+Access): the title, excerpt and Markdown body are editable. *Save* stores your edits in
+the queue; *Publish* commits what's in the boxes to both `main` and `staging`; *Delete*
 marks it `rejected`. Published and rejected slugs are both retained so discovery never
 resurfaces the same story.
 

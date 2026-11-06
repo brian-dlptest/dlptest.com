@@ -2,11 +2,18 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { verifyAccess } from "@/lib/access";
 import { listByStatus, type CandidateRow } from "@/lib/news-candidates";
+import {
+  editsHash,
+  MAX_BODY_LENGTH,
+  MAX_EXCERPT_LENGTH,
+  MAX_TITLE_LENGTH,
+} from "@/lib/news-content";
 
 // Review queue — the single pane for triaging discovered news. Server-rendered
 // and gated by Cloudflare Access (verified again here at the origin). Each
-// pending candidate renders with a full preview and Publish / Delete buttons;
-// Publish commits straight to the live site, Delete drops it for good.
+// pending candidate renders as an edit form with Save / Publish / Delete buttons;
+// Save stores the text, Publish commits what's in the form straight to the live
+// site, Delete drops it for good.
 export const prerender = false;
 
 const access = await verifyAccess(Astro.request);
@@ -28,7 +35,23 @@ try {
 const params = Astro.url.searchParams;
 const published = params.get("published");
 const rejected = params.get("rejected");
+const saved = params.get("saved");
+const stripped = params.has("stripped");
 const errorCode = params.get("error");
+
+// A failed save redirects back here without the typed text, so these say how to
+// get it back. Other codes show as-is.
+const ERROR_HELP: Record<string, string> = {
+  stale_edit:
+    "This candidate changed after this page loaded, so nothing was saved. Use your browser's Back button to copy your text, then reload.",
+  invalid_title: "The title can't be empty. Use your browser's Back button to get your text back.",
+  invalid_body: "The body can't be empty. Use your browser's Back button to get your text back.",
+  excerpt_too_long: `The excerpt is over ${MAX_EXCERPT_LENGTH} characters. Use your browser's Back button to get your text back.`,
+};
+
+const hashes = new Map(
+  await Promise.all(candidates.map(async (c) => [c.id, await editsHash(c)] as const)),
+);
 
 function fmtDate(iso: string): string {
   const d = new Date(iso);
@@ -39,14 +62,20 @@ function fmtDate(iso: string): string {
 <BaseLayout title="News Review Queue" description="Internal review queue for discovered news.">
   <h1>News Review Queue</h1>
   <p class="muted">
-    Stories discovered by the daily Claude pass. Publish commits the post to the
-    live site; Delete removes it from the queue for good.
+    Stories discovered by the daily Claude pass. Change anything in the boxes:
+    Save keeps your edits in the queue, and Publish commits what's in the boxes to
+    the live site. Delete removes the story from the queue for good.
     {access.email && <span> Signed in as {access.email}.</span>}
   </p>
 
   {published && <div class="flash flash--ok">Published <strong>{published}</strong> to the live site.</div>}
   {rejected && <div class="flash flash--ok">Deleted <strong>{rejected}</strong>.</div>}
-  {errorCode && <div class="flash flash--err">Action failed: <code>{errorCode}</code></div>}
+  {errorCode && (
+    <div class="flash flash--err">
+      Action failed: <code>{errorCode}</code>
+      {ERROR_HELP[errorCode] && <span> {ERROR_HELP[errorCode]}</span>}
+    </div>
+  )}
   {loadError && <div class="flash flash--err">{loadError}</div>}
 
   {!loadError && candidates.length === 0 && (
@@ -55,7 +84,12 @@ function fmtDate(iso: string): string {
 
   <ul class="queue">
     {candidates.map((c) => (
-      <li class="card">
+      <li class="card" id={`candidate-${c.id}`} data-candidate>
+        {saved === c.slug && (
+          stripped
+            ? <div class="flash flash--err">Saved, not published. HTML tags were removed from the body, so check the text below before publishing.</div>
+            : <div class="flash flash--ok">Saved.</div>
+        )}
         <header>
           <h2>{c.title}</h2>
           <div class="meta">
@@ -77,18 +111,26 @@ function fmtDate(iso: string): string {
           {c.categories.map((cat) => <span class="tag">{cat}</span>)}
         </div>
 
-        <p class="excerpt">{c.excerpt}</p>
-
-        <details>
-          <summary>Preview the full post ({c.slug}.md)</summary>
-          <pre class="body">{c.body}</pre>
-        </details>
+        <form id={`candidate-${c.id}-form`} class="edit" method="POST" action="/admin/news/save/" data-edit-form>
+          <input type="hidden" name="id" value={c.id} />
+          <input type="hidden" name="base" value={hashes.get(c.id)} />
+          <label>
+            Title
+            <input type="text" name="title" value={c.title} required maxlength={MAX_TITLE_LENGTH} />
+          </label>
+          <label>
+            Excerpt
+            <textarea name="excerpt" rows="3" maxlength={MAX_EXCERPT_LENGTH}>{c.excerpt}</textarea>
+          </label>
+          <label>
+            Body ({c.slug}.md, Markdown)
+            <textarea name="body" class="body" rows="18" required maxlength={MAX_BODY_LENGTH}>{c.body}</textarea>
+          </label>
+        </form>
 
         <div class="actions">
-          <form method="POST" action="/api/news/publish/">
-            <input type="hidden" name="id" value={c.id} />
-            <button type="submit" class="btn btn--publish">Publish</button>
-          </form>
+          <button type="submit" form={`candidate-${c.id}-form`} class="btn btn--save">Save</button>
+          <button type="submit" form={`candidate-${c.id}-form`} formaction="/api/news/publish/" class="btn btn--publish">Publish</button>
           <form method="POST" action="/api/news/reject/" onsubmit="return confirm('Delete this candidate? This cannot be undone.')">
             <input type="hidden" name="id" value={c.id} />
             <button type="submit" class="btn btn--delete">Delete</button>
@@ -99,45 +141,56 @@ function fmtDate(iso: string): string {
   </ul>
 </BaseLayout>
 
+<script>
+  // Any form on this page reloads it, so acting on one card would silently drop
+  // unsaved typing in another. Warn before that happens.
+  const dirty = new Set<Element>();
+  document.querySelectorAll("[data-edit-form]").forEach((form) => {
+    form.addEventListener("input", () => dirty.add(form));
+  });
+  // Submitting a card's own forms resolves that card's edits.
+  document.addEventListener("submit", (event) => {
+    if (event.defaultPrevented) return;
+    const card = (event.target as Element).closest("[data-candidate]");
+    const form = card?.querySelector("[data-edit-form]");
+    if (form) dirty.delete(form);
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (dirty.size > 0) event.preventDefault();
+  });
+</script>
+
 <style>
-  .muted { color: #666; }
+  .muted { color: var(--text-dim); }
   .flash {
     padding: 0.6rem 0.9rem;
     border-radius: 6px;
     margin: 0.75rem 0;
     font-size: 0.95rem;
+    color: #1a1a1a;
   }
   .flash--ok { background: #e7f6ec; border: 1px solid #b6e0c4; }
   .flash--err { background: #fdecec; border: 1px solid #f3b6b6; }
-  .empty { color: #666; font-size: 1.1rem; padding: 2rem 0; }
+  .empty { color: var(--text-dim); font-size: 1.1rem; padding: 2rem 0; }
   .queue { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1.25rem; }
   .card {
-    border: 1px solid #e2e2e2;
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 1.1rem 1.25rem;
-    background: #fff;
+    background: var(--surface);
+    /* Saving lands on #candidate-N; keep its notice clear of the sticky header. */
+    scroll-margin-top: 5rem;
   }
   .card h2 { margin: 0 0 0.25rem; font-size: 1.2rem; }
-  .meta { color: #777; font-size: 0.85rem; display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+  .meta { color: var(--text-dim); font-size: 0.85rem; display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
   .why { margin: 0.6rem 0; font-size: 0.95rem; }
   .tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.5rem 0; }
   .tag { background: #eef2ff; color: #3340a0; border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.75rem; }
-  .excerpt { color: #333; }
-  details { margin: 0.5rem 0 0.9rem; }
-  summary { cursor: pointer; color: #3340a0; font-size: 0.9rem; }
-  .body {
-    background: #f7f7f9;
-    border: 1px solid #e2e2e2;
-    border-radius: 6px;
-    padding: 0.8rem;
-    margin-top: 0.6rem;
-    max-height: 22rem;
-    overflow: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-size: 0.85rem;
-  }
-  .actions { display: flex; gap: 0.6rem; }
+  .edit { display: grid; gap: 0.75rem; margin: 0.75rem 0 0.9rem; }
+  .edit label { display: grid; gap: 0.25rem; font-size: 0.9rem; font-weight: 600; }
+  .edit input, .edit textarea { font-weight: 400; }
+  .edit .body { font-family: var(--font-mono, monospace); font-size: 0.85rem; }
+  .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
   .actions form { margin: 0; }
   .btn {
     border: none;
@@ -146,6 +199,7 @@ function fmtDate(iso: string): string {
     font-size: 0.95rem;
     cursor: pointer;
   }
+  .btn--save { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
   .btn--publish { background: #0b5fff; color: #fff; }
   .btn--delete { background: #fff; color: #b42318; border: 1px solid #e3a0a0; }
 </style>
