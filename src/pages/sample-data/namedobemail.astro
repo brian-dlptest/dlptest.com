@@ -44,7 +44,7 @@ export const prerender = true;
   <h3>Sample DOB &amp; Email files</h3>
   <ul class="download-list">
     {downloadFiles.filter((f) => f.group === "dobemail").map((f) => (
-      <li><a href={`/${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+      <li><a href={`/downloads/?file=${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
     ))}
   </ul>
   </CyberhavenAdSlot>
