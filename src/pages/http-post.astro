@@ -27,8 +27,7 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
   <h1>HTTP POST Test</h1>
   <p class="intro">
     Use the forms below to send a test message or upload a file to dlptest.com with an HTTP
-    POST over plain, unencrypted HTTP. Load this page and submit the form over
-    <code>http://</code> and the request stays in cleartext, which is what you want when
+    POST over plain, unencrypted HTTP. Load this page and submit the form over <code>http://</code> and the request stays in cleartext, which is what you want when
     testing a network tap, a passive Network Monitor, or anything else that inspects traffic
     without decrypting it. The server reads the request and throws away the body. Nothing is
     logged, stored, or forwarded.
@@ -45,8 +44,7 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
   <h2>Test with curl or scripts</h2>
   <p>
     The endpoint is <code>/api/http-post/</code>. You can POST any body (form data, JSON, raw
-    bytes, multipart). You get JSON back with an <code>ok</code> field, which is
-    <code>true</code> when the body was accepted. A GET on the same URL returns a short JSON
+    bytes, multipart). You get JSON back with an <code>ok</code> field, which is <code>true</code> when the body was accepted. A GET on the same URL returns a short JSON
     hint. This route allows cross-origin requests, so you can call it from automation or
     from a browser on another site. It's the only route that does.
   </p>
@@ -68,9 +66,7 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
     <li>
       <strong>Brave:</strong> upgrades <code>http://</code> URLs by default, even when you
       type them, and even in private windows (Shields' "Use secure connections"). To test
-      cleartext, click the Brave Shields lion icon on this page and turn off
-      <em>Use secure connections</em> for this site, or change the global default at
-      <code>brave://settings/shields</code>.
+      cleartext, click the Brave Shields lion icon on this page and turn off <em>Use secure connections</em> for this site, or change the global default at <code>brave://settings/shields</code>.
     </li>
     <li>
       <strong>Firefox:</strong> private windows use HTTPS-First by default and only fall back
@@ -88,8 +84,7 @@ curl -sS -X POST "http://dlptest.com/api/http-post/" \\
     site sent one, one HTTPS visit now clears it (the site sends <code>max-age=0</code>). You
     can also delete it at <code>chrome://net-internals/#hsts</code> under "Delete domain
     security policies". Whichever browser you use, confirm the request was really cleartext
-    with a packet capture or your inspection tool's logs. An address bar showing
-    <code>http://</code> and "Not Secure" is a good sign, but the capture is what proves it.
+    with a packet capture or your inspection tool's logs. An address bar showing <code>http://</code> and "Not Secure" is a good sign, but the capture is what proves it.
   </p>
 
   <h2>What is an HTTP POST?</h2>

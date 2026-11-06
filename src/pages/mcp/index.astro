@@ -193,8 +193,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
 >
   <h1>MCP Server Test</h1>
   <p>
-    <strong><code>https://mcp.dlptest.com/api/mcp/</code></strong> is a public <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a>
-    server. It has the same fake PII, PCI, and PHI generators as this site, but over MCP
+    <strong><code>https://mcp.dlptest.com/api/mcp/</code></strong> is a public <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol</a> server. It has the same fake PII, PCI, and PHI generators as this site, but over MCP
     instead of a web page. Point any MCP-capable agent at it and the tool calls run over real
     HTTP that your DLP can inspect.
   </p>
@@ -327,8 +326,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
       <h4><code>generate_prompt_context</code>: RAG / system-prompt simulation</h4>
       <p>
         Returns paragraphs with PII in the text, the way sensitive data shows up from RAG
-        retrieval or an injected system prompt. Scenarios: <code>medical-record</code>,
-        <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.
+        retrieval or an injected system prompt. Scenarios: <code>medical-record</code>, <code>financial-statement</code>, <code>hr-file</code>, <code>customer-list</code>.
       </p>
       <pre><code>{promptContextExample}</code></pre>
       <h4><code>probe_request</code>: verify interception point</h4>
@@ -351,8 +349,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
       </p>
       <pre><code>{regexTestExample}</code></pre>
       <p>
-        <code>regex_generate_matches</code> goes the other way. It creates strings that
-        <em>match</em> a pattern, so a DLP rule turns into ready-made test data. Every result is
+        <code>regex_generate_matches</code> goes the other way. It creates strings that <em>match</em> a pattern, so a DLP rule turns into ready-made test data. Every result is
         checked to make sure it actually matches, and patterns it can't handle return an error.
       </p>
       <pre><code>{regexGenExample}</code></pre>
@@ -360,8 +357,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
         <code>list_dlp_patterns</code> returns a library of DLP regular expressions: SSN, credit
         card, IBAN, MRN, API keys, network identifiers, and international government IDs, each
         with a sample string it matches. It's the same library as the <a href="/regex/">Regex Test</a> page.
-        Filter by <code>category</code> or a free-text <code>search</code>, and choose
-        <code>json</code> or <code>csv</code> output.
+        Filter by <code>category</code> or a free-text <code>search</code>, and choose <code>json</code> or <code>csv</code> output.
       </p>
       <pre><code>{listPatternsExample}</code></pre>
     </div>
@@ -397,8 +393,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
   <!-- ── TOOLS AVAILABLE ───────────────────────────────────── -->
   <h2>Tools Available</h2>
   <p class="muted small">
-    Data-generation tools accept <code>count</code> (1–500, default 50) and
-    <code>format</code> (<code>"json"</code> or <code>"csv"</code>, default <code>"json"</code>).
+    Data-generation tools accept <code>count</code> (1–500, default 50) and <code>format</code> (<code>"json"</code> or <code>"csv"</code>, default <code>"json"</code>).
   </p>
 
   <details class="accordion" open>
@@ -424,8 +419,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
           <tr>
             <td><code>generate_custom</code></td>
             <td>
-              Arbitrary fields. Takes a <code>fields</code> array of
-              <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code>, with the
+              Arbitrary fields. Takes a <code>fields</code> array of <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code>, with the
               same types as the <a href="/generate/">/generate/</a> page.
             </td>
           </tr>
@@ -478,18 +472,14 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
           <tr>
             <td><code>regex_generate_matches</code></td>
             <td>
-              Creates strings that match a <code>pattern</code> (the reverse of
-              <code>regex_test</code>), which turns a DLP rule into test data. It checks its own
+              Creates strings that match a <code>pattern</code> (the reverse of <code>regex_test</code>), which turns a DLP rule into test data. It checks its own
               results and returns an error for patterns it can't handle.
             </td>
           </tr>
           <tr>
             <td><code>list_dlp_patterns</code></td>
             <td>
-              Returns the DLP regex library (id, name, category, ECMAScript
-              <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that the <a href="/regex/">Regex Test</a>
-              page also uses. Optional <code>category</code> and
-              <code>search</code> filters, with <code>json</code> or <code>csv</code> output.
+              Returns the DLP regex library (id, name, category, ECMAScript <code>pattern</code>, <code>flags</code>, and a sample <code>example</code>) that the <a href="/regex/">Regex Test</a> page also uses. Optional <code>category</code> and <code>search</code> filters, with <code>json</code> or <code>csv</code> output.
             </td>
           </tr>
         </tbody>
@@ -514,9 +504,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
         <li><strong>CASB / browser extension.</strong> Does anything flag a connection to an unfamiliar external MCP server during the initial handshake?</li>
       </ul>
       <p>
-        This endpoint is public and has no login on purpose. It stands in for an <em>unsanctioned</em>
-        external server. A sanctioned internal MCP server would require an
-        <code>Authorization: Bearer &lt;token&gt;</code> header and only be reachable from the corporate
+        This endpoint is public and has no login on purpose. It stands in for an <em>unsanctioned</em> external server. A sanctioned internal MCP server would require an <code>Authorization: Bearer &lt;token&gt;</code> header and only be reachable from the corporate
         network or over VPN. An auth token going to an external endpoint is something you should
         alert on.
       </p>
@@ -527,8 +515,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
         <li>Any <code>Authorization</code> token leaving the network to an unapproved destination.</li>
       </ul>
       <p>
-        The endpoint uses the <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a>
-        transport in stateless mode. Each request is its own <code>POST</code>. No session IDs are
+        The endpoint uses the <a href="https://modelcontextprotocol.io/specification/2025-06-18/basic/transports" target="_blank" rel="noopener noreferrer">Streamable HTTP</a> transport in stateless mode. Each request is its own <code>POST</code>. No session IDs are
         issued and no <code>GET</code> stream is held open.
       </p>
     </div>
