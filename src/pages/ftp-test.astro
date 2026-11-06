@@ -19,15 +19,15 @@ const s3Bucket = "dlptest-public-bucket";
 const s3Region = "us-west-2";
 const s3Endpoint = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com`;
 ---
-<BaseLayout title="FTP & S3 Test" description="Public FTP and S3 endpoints for testing DLP. Upload files without authentication; they are automatically deleted after a short retention period.">
+<BaseLayout title="FTP & S3 Test" description="Public FTP and S3 sites for testing DLP. Upload your test files and they get deleted automatically.">
   <div class:list={["ftp-layout", { "ftp-layout--with-ad": ADS_ENABLED }]}>
     <div class="ftp-content">
       <h1>FTP &amp; S3 Test</h1>
 
       <h2>FTP</h2>
       <p>
-        Public FTP test server for uploading DLP test files. Uploaded files are
-        deleted after about {retentionMinutes} minutes.
+        Our public FTP test site info is below. Use it to upload test DLP files.
+        Files are deleted after about {retentionMinutes} minutes.
       </p>
 
       <table class="ftp-credentials-table">
@@ -42,27 +42,27 @@ const s3Endpoint = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com`;
       </table>
 
       <p>
-        On Windows, use a client like <a href="https://filezilla-project.org/">FileZilla</a>;
-        the active FTP transport built into <code>cmd.exe</code> does not support
-        passive mode. Import our pre-configured FileZilla profile: <a href={FILEZILLA_PROFILE_HREF}>{FILEZILLA_PROFILE_KEY}</a>.
-        It uses plain FTP so network DLP can inspect the file contents. To test
-        an encrypted transfer, set the site's encryption to <em>Require explicit FTP over TLS</em>.
+        On Windows, use a client like <a href="https://filezilla-project.org/">FileZilla</a>,
+        since the FTP client built into <code>cmd.exe</code> doesn't support
+        passive mode. Here's a FileZilla profile you can import: <a href={FILEZILLA_PROFILE_HREF}>{FILEZILLA_PROFILE_KEY}</a>.
+        It uses plain FTP so network DLP can see the file contents. To test an
+        encrypted transfer, set the site's encryption to <em>Require explicit FTP over TLS</em>.
       </p>
 
       <h3>IP block list</h3>
       <p class="muted">
-        To limit hosting costs from automated upload abuse, an IP block list is
-        enforced. If you believe your address has been blocked in error, use
-        the <a href="/contact/">contact page</a>.
+        Due to scripts uploading excess data and increasing costs to host the FTP
+        server, an IP block list has been added. If you feel that I am blocking an
+        IP incorrectly, please use the <a href="/contact/">contact page</a> to reach me.
       </p>
 
       <hr />
 
       <h2>S3</h2>
       <p>
-        Public S3 bucket for testing cloud-storage DLP policies. No authentication
-        required — upload any file with an HTTP <code>PUT</code>. Objects are
-        automatically deleted after 24–48 hours via a lifecycle rule.
+        This is a public S3 bucket for testing cloud storage DLP policies. You
+        don't need to log in. Just upload a file with an HTTP <code>PUT</code>.
+        Files are deleted after 24 to 48 hours.
       </p>
 
       <table class="ftp-credentials-table">

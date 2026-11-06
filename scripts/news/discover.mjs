@@ -285,7 +285,7 @@ End with a section headed "Considered but skipped" listing, one line each, every
 }
 
 /** Phase 2 — turn the research text into structured candidate posts. */
-async function extract(client, { report, cutoffIso }) {
+async function extract(client, { report, cutoffIso, voice }) {
   if (!report || /no (qualifying|stories|story)/i.test(report) && report.length < 400) {
     return [];
   }
@@ -323,7 +323,7 @@ async function extract(client, { report, cutoffIso }) {
     messages: [
       {
         role: "user",
-        content: `Cutoff (exclusive): ${cutoffIso}. Convert the research briefing below into structured candidate posts. Always include "News" in categories plus relevant lowercase topical tags (DLP, DSPM, Endpoint DLP, Insider Risk Management, data protection). The body should read like an informed practitioner note, not a press-release paste. Ignore the "Considered but skipped" section — those are not candidates. If the briefing concludes nothing qualified, return an empty candidates array.\n\n----- RESEARCH -----\n${report}`,
+        content: `Cutoff (exclusive): ${cutoffIso}. Convert the research briefing below into structured candidate posts. Always include "News" in categories plus relevant lowercase topical tags (DLP, DSPM, Endpoint DLP, Insider Risk Management, data protection). Write the title, excerpt, and body in the voice described in the guide below, as a plain draft that puts the facts first. Never use first person (I, me, my, we, our), because Brian adds that himself when he reviews a draft. Keep the facts and numbers from the briefing and don't add any that aren't in it. Ignore the "Considered but skipped" section — those are not candidates. If the briefing concludes nothing qualified, return an empty candidates array.\n\n----- VOICE.md -----\n${voice}\n\n----- RESEARCH -----\n${report}`,
       },
     ],
   });
@@ -404,6 +404,7 @@ async function main() {
   const newsDir = join(REPO_ROOT, process.env.NEWS_DIR?.trim() || "src/content/news");
 
   const editorial = readFileSync(join(SCRIPT_DIR, "EDITORIAL.md"), "utf8");
+  const voice = readFileSync(join(REPO_ROOT, "VOICE.md"), "utf8");
   const { cutoff, basis: cutoffBasis } = computeCutoff(newsDir);
   const cutoffIso = cutoff.toISOString();
   const today = new Date().toISOString().slice(0, 10);
@@ -432,7 +433,7 @@ async function main() {
   console.log(`Research length: ${report.length} chars`);
 
   console.log("Extracting structured candidates...");
-  const candidates = await extract(client, { report, cutoffIso });
+  const candidates = await extract(client, { report, cutoffIso, voice });
   console.log(`Candidates drafted: ${candidates.length}`);
 
   // Dump the research verbatim on every run. Empty runs need it to tell a quiet

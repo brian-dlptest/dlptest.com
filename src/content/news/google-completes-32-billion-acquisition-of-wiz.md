@@ -1,20 +1,20 @@
 ---
-title: "Google Completes $32 Billion Acquisition of Wiz"
+title: "Google completes $32 billion acquisition of Wiz"
 slug: "google-completes-32-billion-acquisition-of-wiz"
 pubDate: 2026-03-11T12:00:00+00:00
 categories: ["News", "data protection", "Data Security Posture Management", "DSPM", "Cloud Security"]
-excerpt: "Google closed its approximately $32 billion all-cash acquisition of cloud security vendor Wiz on March 11, 2026 — marking Google's largest acquisition to date. Wiz will continue…"
+excerpt: "Google closed its roughly $32 billion all-cash acquisition of cloud security vendor Wiz on March 11, 2026, the largest acquisition in Google's history. Wiz keeps its brand and multi-cloud support."
 sourceUrl: "https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/wiz-acquisition"
 ---
 
-**Google** announced completion of its acquisition of **Wiz**, the cloud-native security platform known for visibility-first posture management across multi-cloud estates. According to Google's announcement and contemporaneous reporting, the transaction valued Wiz at roughly **$32 billion** on an all-cash basis — Google's largest acquisition ever.
+**Google** completed its acquisition of **Wiz**, the cloud security platform known for posture management across multiple clouds. Google's announcement and reporting at the time put the deal at roughly **$32 billion**, all cash, which is Google's largest acquisition ever.
 
-Under the arrangement communicated publicly, **Wiz retains its brand** and continues multi-cloud support across major hyperscalers, not limited to Google Cloud — an important concession given Wiz's historic positioning as vendor-neutral CNAPP/DSPM-adjacent telemetry.
+**Wiz keeps its brand** and continues to support the major cloud providers, not just Google Cloud. That's an important concession, since Wiz has always pitched itself as vendor-neutral.
 
-### Strategic Angle
+### What it means for Google
 
-For Google Cloud, Wiz plugs a perceived gap versus rivals who've aggressively bundled posture, workload protection, and AI-era governance narratives. For practitioners, the dominant question is whether **pricing independence**, **integration velocity**, and **roadmap neutrality** survive contact with platform incentives across quarters — especially where AWS and Azure remain strategic workload anchors.
+For Google Cloud, Wiz fills a gap against rivals who have been bundling posture, workload protection, and AI governance. The question for customers is if pricing, integrations, and a neutral roadmap hold up now that Google owns it, especially if AWS and Azure are still where your workloads run.
 
-### Data Security Lens
+### The data security angle
 
-Even though Wiz is not marketed purely as “DSPM,” its discovery-classification-remediation arc overlaps materially with enterprises reconciling inventory-led DSPM purchases against workload-centric CNAPP deployments. Consolidation here pressures remaining standalone DSPM vendors to articulate sharper wedge stories — agent governance, lineage-centric DSPM, or vertical compliance bundles — rather than generic cloud posture dashboards alone.
+Wiz isn't marketed purely as DSPM, but its discovery, classification, and remediation overlap a lot with what DSPM does. A deal this size puts pressure on the remaining standalone DSPM vendors to stand out with things like agent governance, lineage, or vertical compliance, because generic cloud posture dashboards won't be enough.

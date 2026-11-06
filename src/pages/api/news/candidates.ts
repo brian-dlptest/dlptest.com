@@ -7,6 +7,7 @@ import {
   SLUG_PATTERN,
   type DraftCandidate,
 } from "@/lib/news-candidates";
+import { MAX_BODY_LENGTH, MAX_EXCERPT_LENGTH, MAX_TITLE_LENGTH } from "@/lib/news-content";
 import { sendNewsDigest } from "@/lib/news-digest";
 
 export const prerender = false;
@@ -124,7 +125,7 @@ function validate(c: IncomingCandidate): ValidationResult {
     return { ok: false, reason: "invalid_slug" };
   }
   const title = str(c.title);
-  if (!title || title.length > 300) return { ok: false, reason: "invalid_title" };
+  if (!title || title.length > MAX_TITLE_LENGTH) return { ok: false, reason: "invalid_title" };
 
   const pubDate = str(c.pubDate);
   if (!pubDate || Number.isNaN(Date.parse(pubDate))) {
@@ -132,10 +133,10 @@ function validate(c: IncomingCandidate): ValidationResult {
   }
 
   const body = str(c.body);
-  if (!body || body.length > 20000) return { ok: false, reason: "invalid_body" };
+  if (!body || body.length > MAX_BODY_LENGTH) return { ok: false, reason: "invalid_body" };
 
   const excerpt = str(c.excerpt) ?? "";
-  if (excerpt.length > 600) return { ok: false, reason: "excerpt_too_long" };
+  if (excerpt.length > MAX_EXCERPT_LENGTH) return { ok: false, reason: "excerpt_too_long" };
 
   let categories: string[] = [];
   if (Array.isArray(c.categories)) {

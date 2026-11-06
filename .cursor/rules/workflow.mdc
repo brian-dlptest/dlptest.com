@@ -34,6 +34,10 @@ Releases (`staging` → `main`) are opened by a human, not by the agent, unless 
 
 When the user says "commit and push" without specifying a branch, assume the feature-branch workflow above — don't push to `staging` directly.
 
+## Writing style
+
+The site should sound like Brian wrote it. Read `VOICE.md` before writing or editing any copy. Don't invent his opinions or experience. If a page needs his take, ask him.
+
 ## Keep this file in sync
 
-The same rules live in `CLAUDE.md` under the "Workflow" section. If you change one, change the other.
+The same rules live in `CLAUDE.md` under the "Workflow" and "Writing style" sections. If you change one, change the other.

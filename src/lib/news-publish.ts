@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 
 import { SLUG_PATTERN, type CandidateRow } from "./news-candidates";
+import { renderMarkdown } from "./news-content";
 
 // Publishing = committing a generated Markdown post to git on both deploy
 // branches, which the normal CI deploy ships to staging.dlptest.com and
@@ -16,43 +17,6 @@ const PUBLISH_BRANCHES = ["main", "staging"];
 export type PublishResult =
   | { ok: true; branches: string[] }
   | { ok: false; reason: "not_configured" | "exists" | "commit_failed"; message: string };
-
-/** Double-quote a YAML scalar, escaping backslashes and quotes. */
-function yamlString(value: string): string {
-  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-}
-
-/**
- * Strip HTML tags from the Markdown body so a malicious candidate (e.g. one that
- * slipped past ingest) can't inject <script> or event handlers into the live,
- * build-rendered page. Leaves prose punctuation like "a < b" intact (only
- * tag-shaped `</?tag ...>` sequences are removed).
- */
-export function sanitizeBody(body: string): string {
-  return body
-    .replace(/<\s*script[\s\S]*?<\s*\/\s*script\s*>/gi, "")
-    .replace(/<\s*style[\s\S]*?<\s*\/\s*style\s*>/gi, "")
-    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
-    .trim();
-}
-
-/** Build the full `.md` file contents (frontmatter + body) for a candidate. */
-export function renderMarkdown(candidate: CandidateRow): string {
-  const lines = ["---"];
-  lines.push(`title: ${yamlString(candidate.title)}`);
-  lines.push(`slug: ${yamlString(candidate.slug)}`);
-  // pubDate is an unquoted ISO instant, matching existing posts.
-  lines.push(`pubDate: ${candidate.pubDate}`);
-  const cats = candidate.categories.map((c) => yamlString(c)).join(", ");
-  lines.push(`categories: [${cats}]`);
-  lines.push(`excerpt: ${yamlString(candidate.excerpt)}`);
-  if (candidate.sourceUrl) lines.push(`sourceUrl: ${yamlString(candidate.sourceUrl)}`);
-  if (candidate.heroImage) lines.push(`heroImage: ${yamlString(candidate.heroImage)}`);
-  lines.push("---", "");
-  lines.push(sanitizeBody(candidate.body));
-  lines.push("");
-  return lines.join("\n");
-}
 
 function ghHeaders(token: string): HeadersInit {
   return {

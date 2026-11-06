@@ -50,7 +50,7 @@ def ref(fragment, sheet):
 
 # Shown on the Read Me sheet. Keep in step with TEST_PLAN_VERSION in src/data/test-plan.ts,
 # which cache-busts the download URL.
-VERSION = 7
+VERSION = 8
 
 FONT = "Arial"
 NAVY = "0B1220"

@@ -27,8 +27,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 >
   <h1>Data Generator</h1>
   <p>
-    Add fields, choose their types, and generate synthetic test data for DLP testing.
-    All values are fabricated. Use a seed to reproduce the exact same dataset.
+    Add fields, choose their types, and generate test data for DLP testing. All of the
+    values are fake. Use a seed if you want the exact same data back next time.
   </p>
 
   <CyberhavenAdSlot page="sample-data-tab" />
@@ -37,7 +37,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   <div class="preset-wrap">
     <span class="preset-label">Quick Start</span>
     <select id="preset-select" class="preset-select">
-      <option value="">— Choose a template —</option>
+      <option value="">Choose a template</option>
       <optgroup label="US PII / PCI">
         <option value="pii-dob-ccn">Name + DOB + Credit Card + Card Type (PII/PCI)</option>
         <option value="pii-ssn-ccn">Name + SSN + Credit Card (PII/PCI)</option>
@@ -46,20 +46,20 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
       </optgroup>
       <optgroup label="US Specialized">
-        <option value="hipaa">HIPAA — Name + MRN + ICD-10 + CPT</option>
-        <option value="banking">Banking — Name + Routing + Account</option>
-        <option value="npi-provider">Healthcare Provider — NPI + DEA Number</option>
-        <option value="driver-license">Driver's License — Name + DL + State</option>
+        <option value="hipaa">HIPAA: Name + MRN + ICD-10 + CPT</option>
+        <option value="banking">Banking: Name + Routing + Account</option>
+        <option value="npi-provider">Healthcare Provider: NPI + DEA Number</option>
+        <option value="driver-license">Driver's License: Name + DL + State</option>
       </optgroup>
       <optgroup label="International">
-        <option value="uk-identity">UK — Name + NI Number + NHS Number</option>
-        <option value="canada-sin">Canada — Name + SIN + Province</option>
-        <option value="passport">International — Name + Passport Number</option>
-        <option value="eu-vat">EU — Name + VAT Number + IBAN</option>
+        <option value="uk-identity">UK: Name + NI Number + NHS Number</option>
+        <option value="canada-sin">Canada: Name + SIN + Province</option>
+        <option value="passport">International: Name + Passport Number</option>
+        <option value="eu-vat">EU: Name + VAT Number + IBAN</option>
       </optgroup>
       <optgroup label="Credentials / Secrets">
-        <option value="api-keys">API Keys — AWS, GitHub, Slack, Stripe, Google, OpenAI</option>
-        <option value="credentials">Credentials — Name + Username + Email + Password</option>
+        <option value="api-keys">API Keys: AWS, GitHub, Slack, Stripe, Google, OpenAI</option>
+        <option value="credentials">Credentials: Name + Username + Email + Password</option>
       </optgroup>
     </select>
   </div>
@@ -141,7 +141,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       </label>
 
       <label class="control-group">
-        <span class="control-label">Seed <span class="muted">(optional — leave blank for random)</span></span>
+        <span class="control-label">Seed <span class="muted">(optional, leave blank for random)</span></span>
         <input type="number" name="seed" id="seed-input" placeholder="e.g. 42" />
       </label>
     </div>

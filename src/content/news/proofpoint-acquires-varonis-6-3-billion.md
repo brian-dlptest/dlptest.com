@@ -1,16 +1,16 @@
 ---
-title: "Proofpoint to Acquire Varonis for $6.3 Billion in Largest Cybersecurity Deal of 2026"
+title: "Proofpoint to acquire Varonis for $6.3 billion"
 slug: "proofpoint-acquires-varonis-6-3-billion"
 pubDate: 2026-10-16T13:00:00.000Z
 categories: ["News", "DSPM", "DLP", "data protection", "Insider Risk Management"]
-excerpt: "Proofpoint has signed a $6.3B all-cash deal to acquire Varonis, paying a 52% premium over pre-rumor pricing. The merger fuses human-risk telemetry with identity-and-access data graphs, reshaping the DSPM/DLP competitive landscape for 2027."
+excerpt: "Proofpoint is buying Varonis in an all-cash deal worth about $6.3 billion, a 52% premium over the price before rumors of a sale came out. It's the largest cybersecurity acquisition announced so far in 2026 and should close in the first half of 2027."
 sourceUrl: "https://www.securityweek.com/proofpoint-inks-6-3-billion-all-cash-deal-to-acquire-varonis/"
 ---
 
-**Proofpoint** has agreed to acquire **Varonis** in an all-cash transaction valued at approximately $6.3 billion, the companies announced this week — the largest cybersecurity acquisition confirmed so far in 2026. This moves the earlier "talks" speculation into a signed, priced, and dated deal.
+**Proofpoint** is buying **Varonis** in an all-cash deal worth about $6.3 billion. It's the largest cybersecurity acquisition announced so far in 2026. Back in September this was [still just talks](/proofpoint-varonis-acquisition-talks/). Now there's a signed deal with a price.
 
-The economics are notable for how rich the exit is: Varonis shareholders will receive $49.75 per share in cash, a 52% premium over the $32.71 close on June 22, 2026, the last full trading day before deal speculation surfaced. Financing comes via Thoma Bravo, which owns Proofpoint, providing committed equity alongside secured debt commitments, with Ontario Teachers' Pension Plan also investing in Proofpoint. The two companies will continue operating independently until close, expected in the first half of 2027, at which point Varonis goes private.
+Varonis shareholders get $49.75 a share. That's a 52% premium over the $32.71 close on June 22, the last full trading day before rumors of a sale came out. Thoma Bravo, which owns Proofpoint, is providing the equity and has lined up debt financing, and Ontario Teachers' Pension Plan is also investing in Proofpoint. The two companies stay independent until the deal closes, which they expect in the first half of 2027. Varonis then goes private.
 
-For data security buyers, the strategic logic is straightforward: Proofpoint brings visibility into who is being targeted (email, human-risk, insider threat telemetry), while Varonis brings visibility into what each identity can actually reach (data access graphs, DSPM, permissions sprawl across SaaS and on-prem repositories). Analyst commentary has framed this as a natural pairing of "targeting" and "blast radius" data — and the cross-sell math is lopsided in Proofpoint's favor, since roughly half of Varonis's existing accounts already run Proofpoint, meaning most of the upside flows into Proofpoint's considerably larger install base rather than the reverse.
+So why Varonis? Proofpoint can see who is being targeted through its email, human risk, and insider threat products. Varonis can see what each identity can reach through its data access, DSPM, and permissions data across SaaS and on-prem. Roughly half of Varonis's accounts already run Proofpoint, so most of the upside is selling Varonis into Proofpoint's much larger customer base.
 
-For DLP and DSPM-watching practitioners, this is a consolidation signal worth tracking closely: it follows a string of platform-building moves across the sector this year and suggests data-centric security vendors are racing to bundle identity, access, and content inspection into single platforms rather than compete as point products.
+In 2024 I wrote that [the data protection platform race was on](/the-data-protection-platform-race-is-on/). This is a big move in that race.

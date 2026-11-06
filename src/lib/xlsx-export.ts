@@ -19,9 +19,12 @@ const EXCEL_APP_PROPS =
   "<Application>Microsoft Excel</Application><DocSecurity>0</DocSecurity><ScaleCrop>false</ScaleCrop>";
 const EXCEL_APP_VERSION = "<AppVersion>16.0300</AppVersion>";
 
+// `cfb` is only for Node scripts: under plain Node ESM `XLSX.CFB` is undefined,
+// so they pass the CommonJS module's CFB (see build-sample-tab-downloads.ts).
 export function buildExcelLikeXlsx(
   columns: string[],
   rows: Record<string, unknown>[],
+  cfb: typeof XLSX.CFB = XLSX.CFB,
 ): Uint8Array {
   // Sanitize header and cell values to prevent CSV/XLSX formula injection
   // when the user names a field starting with `=`, `+`, `-`, `@`, etc.
@@ -60,7 +63,7 @@ export function buildExcelLikeXlsx(
     }) as ArrayBuffer,
   );
   try {
-    return patchAppProps(written);
+    return patchAppProps(written, cfb);
   } catch (error) {
     // The patch is cosmetic, so it must never fail the export.
     console.warn("[xlsx-export] app.xml patch failed; serving the unpatched workbook:", error);
@@ -71,8 +74,8 @@ export function buildExcelLikeXlsx(
 // Rewrite docProps/app.xml to report Excel as the authoring application.
 // Returns the workbook unchanged if the part can't be found; the caller also
 // falls back to it if re-reading or re-writing the zip throws.
-function patchAppProps(xlsx: Uint8Array): Uint8Array {
-  const zip = XLSX.CFB.read(xlsx, { type: "array" });
+function patchAppProps(xlsx: Uint8Array, cfb: typeof XLSX.CFB): Uint8Array {
+  const zip = cfb.read(xlsx, { type: "array" });
   const idx = (zip.FullPaths as string[]).findIndex((p) => p.endsWith("docProps/app.xml"));
   if (idx < 0) return xlsx;
 
@@ -86,6 +89,6 @@ function patchAppProps(xlsx: Uint8Array): Uint8Array {
   entry.content = new TextEncoder().encode(patched);
   entry.size = entry.content.length;
   return new Uint8Array(
-    XLSX.CFB.write(zip, { type: "array", fileType: "zip", compression: true }),
+    cfb.write(zip, { type: "array", fileType: "zip", compression: true }),
   );
 }
