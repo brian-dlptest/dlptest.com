@@ -9,6 +9,9 @@
 # (version, date, rows, change, why)
 
 CHANGELOG = [
+ (8, "2026-11-03", "P-C06 (all OS)",
+  "The curl step now posts to dlptest.com/api/http-post/ over both http:// and https://. The browser step still uses the forms on dlptest.com/http-post/ and dlptest.com/https-post/.",
+  "Those two URLs are the form pages. A direct POST to either one returns HTTP 405, so the curl step in v7 failed whether or not the tool acted. Re-score this row rather than copying the v7 result."),
  (7, "2026-10-09", "P-G01 (all OS)",
   "Image upload removed from the GenAI web chat test. It now covers paste and .csv upload.",
   "The row was testing two capabilities at once. Pulling text out of images is slow, so blocking on it is a separate and much harder capability, and it was pulling down a Table stakes row."),
@@ -77,33 +80,7 @@ CHANGELOG = [
 # that ID is not checked and is not recorded here. Empty this when VERSION goes up: older
 # entries keep the IDs they had and are not checked.
 CITED = {
- "P-G01": "GenAI web chat - paste and file upload",
- "P-G07": "GenAI image upload",
- "P-P01": "USB mass storage write",
- "C-A07": "Exact Data Match (EDM)",
- "C-C03": "Insider-list / need-to-know scoping",
- "I-15": "Behavioural baseline and deviation",
- "I-17": "HR and identity context",
- "U-04": "Policy recommendations from observed behaviour",
- "U-07": "AI incident investigator",
- "U-08": "Intent inference, not just activity detection",
- "U-17": "Role-based administration and separation of duties",
- "U-18": "Approval workflow for enforcement changes",
- "U-05": "Simulation before enforcement",
- "U-06": "Justification as a control, not a log entry",
- "U-22": "Working redirect to the sanctioned alternative",
- "U-26": "Intervention fatigue",
- "I-28": "AI agent and tool inventory",
- "I-31": "Agent tool chain: MCP servers and sub-agents",
- "C-A05": "Severity tiers by match count",
- "C-A06": "Confidence level / threshold tuning",
- "P-G02": "GenAI desktop apps (ChatGPT, Claude, Copilot)",
- "P-G04": "AI CLI tools and MCP servers reading local files",
- "C-C02": "Time-boxed sensitivity: pre- vs post-publication",
- "C-D03": "HRIS export with compensation data",
- "C-D04": "Direct database extracts",
- "I-10": "Events before the policy existed",
- "C-B01": "Secrets and credentials in code",
+ "P-C06": "HTTP and HTTPS POST to an arbitrary endpoint",
 }
 
 # ID map from the previous version, so a scored workbook can be ported by lookup:
@@ -116,41 +93,9 @@ CITED = {
 # which is what a renumber within the version does, since renumber.py leaves this file
 # alone. Fix the ID by hand; the failure says where the row went. Write the name as the
 # sheet does, with "(<OS>)" on Policy rows; a trailing "(...)" note is allowed after it.
-IDMAP_FROM = (6, 168)
+IDMAP_FROM = (7, 174)
 IDMAP = [
- ("C-A05", "Removed", "Unique vs total match counting (merged into Severity tiers by match count)"),
- ("C-A06", "C-A05", "Severity tiers by match count"),
- ("C-A07", "C-A06", "Confidence level / threshold tuning"),
- ("C-A08", "C-A07", "Exact Data Match (EDM)"),
- ("C-A09", "C-A08", "AI Classification of a business-specific document type"),
- ("C-A10", "C-A09", "OCR on images"),
- ("C-A11", "C-A10", "Archives and nested files"),
- ("New", "P-G07.Windows", "GenAI image upload (Windows)"),
- ("New", "P-G07.macOS", "GenAI image upload (macOS)"),
- ("New", "P-G07.Linux", "GenAI image upload (Linux)"),
- ("E-01", "Removed", "Exact Data Match (EDM)"),
- ("E-02", "Removed", "AI Classification (LLM document-type labels)"),
- ("E-03", "Removed", "AI classification with a cached verdict"),
- ("E-04", "Removed", "Data lineage / origin"),
- ("E-05", "Removed", "Behavioural / intent (UEBA)"),
- ("E-06", "Removed", "Agentic / autonomous AI decisioning"),
- ("New", "I-28", "AI agent and tool inventory"),
- ("New", "I-29", "Structured capture of agent sessions"),
- ("New", "I-30", "Agent, person and account attribution"),
- ("New", "I-31", "Agent tool chain: MCP servers and sub-agents"),
- ("U-06", "U-06", "Justification as a control, not a log entry (reworded and broadened from 'AI review of user override justifications'; re-score, do not copy the v6 result)"),
- ("U-18", "U-19", "Policy tip clarity"),
- ("U-19", "U-20", "Business justification capture on warn"),
- ("U-20", "U-21", "False-positive reporting from the endpoint"),
- ("U-21", "U-27", "Agent resource footprint"),
- ("U-22", "U-28", "User-visible latency on common actions"),
- ("U-23", "U-29", "Deployment method coverage"),
- ("U-24", "U-30", "Tamper resistance and self-healing"),
- ("U-25", "U-31", "Offline enforcement and event queueing"),
- ("New", "U-18", "Approval workflow for enforcement changes"),
- ("New", "U-22", "Working redirect to the sanctioned alternative"),
- ("New", "U-23", "Request approval before proceeding"),
- ("New", "U-24", "Time-bound exceptions"),
- ("New", "U-25", "Modify the action rather than stop it"),
- ("New", "U-26", "Intervention fatigue"),
+ ("P-C06.Windows", "P-C06.Windows", "HTTP and HTTPS POST to an arbitrary endpoint (Windows) (curl step now targets /api/http-post/; re-score, do not copy the v7 result)"),
+ ("P-C06.macOS", "P-C06.macOS", "HTTP and HTTPS POST to an arbitrary endpoint (macOS) (curl step now targets /api/http-post/; re-score, do not copy the v7 result)"),
+ ("P-C06.Linux", "P-C06.Linux", "HTTP and HTTPS POST to an arbitrary endpoint (Linux) (curl step now targets /api/http-post/; re-score, do not copy the v7 result)"),
 ]

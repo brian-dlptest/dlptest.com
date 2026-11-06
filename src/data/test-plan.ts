@@ -10,12 +10,12 @@ export const TEST_PLAN_KEY = "DLPTest-com_Endpoint_DLP_Use_Case_Test_Plan.xlsx";
 // Bumped whenever a new build is uploaded over the same R2 key. The downloads
 // route sends `cache-control: immutable, max-age=31536000`, so without a
 // changing query string browsers keep serving the copy they already have.
-export const TEST_PLAN_VERSION = 7;
+export const TEST_PLAN_VERSION = 8;
 
 export const TEST_PLAN_HREF =
   `/downloads/?file=${TEST_PLAN_KEY}&v=${TEST_PLAN_VERSION}`;
 
-export const TEST_PLAN_UPDATED = "2026-10-09";
+export const TEST_PLAN_UPDATED = "2026-11-03";
 export const TEST_PLAN_ROWS = 174;
 
 export type TestPlanSheet = {
