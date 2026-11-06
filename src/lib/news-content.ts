@@ -75,18 +75,35 @@ function yamlString(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
+// Whole <script> and <style> blocks go, content included. A closing tag runs to
+// the next `>`, because browsers also end the element on `</script foo>`.
+const SCRIPT_BLOCK = /<script\b[\s\S]*?<\/script[^>]*>/gi;
+const STYLE_BLOCK = /<style\b[\s\S]*?<\/style[^>]*>/gi;
+const TAG = /<\/?[a-zA-Z][^>]*>/g;
+// What is left of a tag after stripping: `<` before a letter, `/`, `!` or `?`.
+const TAG_START = /<(?=[a-zA-Z/!?])/g;
+
 /**
  * Strip HTML tags from the Markdown body so a malicious candidate (e.g. one that
  * slipped past ingest) can't inject <script> or event handlers into the live,
- * build-rendered page. Leaves prose punctuation like "a < b" intact (only
- * tag-shaped `</?tag ...>` sequences are removed).
+ * build-rendered page. Leaves prose punctuation like "a < b" intact.
+ *
+ * Stripping repeats until nothing changes, because removing one tag can join
+ * the text around it into another: `<<b>img onerror=...>` becomes `<img ...>`.
+ * Anything still shaped like the start of a tag afterwards, such as an
+ * unterminated `<script` or a `<!--`, is escaped so Markdown shows it as text.
+ * The result contains no tag start, so running it again changes nothing.
  */
 export function sanitizeBody(body: string): string {
-  return body
-    .replace(/<\s*script[\s\S]*?<\s*\/\s*script\s*>/gi, "")
-    .replace(/<\s*style[\s\S]*?<\s*\/\s*style\s*>/gi, "")
-    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
-    .trim();
+  let out = body;
+  let previous: string;
+  do {
+    previous = out;
+    out = out.replace(SCRIPT_BLOCK, "");
+    out = out.replace(STYLE_BLOCK, "");
+    out = out.replace(TAG, "");
+  } while (out !== previous);
+  return out.replace(TAG_START, "&lt;").trim();
 }
 
 /** Build the full `.md` file contents (frontmatter + body) for a candidate. */
