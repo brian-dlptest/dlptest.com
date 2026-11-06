@@ -112,6 +112,36 @@ check(
   false,
 );
 
+// Inputs a single stripping pass got wrong (CodeQL js/incomplete-multi-character-sanitization
+// and js/bad-tag-filter on the release PR).
+const clean = (body) => normalizeEdits({ title: "T", body }).edits?.body ?? null;
+const hasTagStart = (s) => /<[a-zA-Z/!?]/.test(s);
+check("a tag rebuilt by removing an inner tag is stripped", clean("a <<b>img src=x onerror=alert(1)> b"), "a  b");
+check("nested script pieces don't reassemble", hasTagStart(clean("x <<script>script>alert(1)<</script>/script> y")), false);
+check("a script block closed by </script junk> is removed whole", clean("x <script>alert(1)</script\t\n bar>after"), "x after");
+check("a style block closed by </STYLE > is removed whole", clean("x <STYLE>p{}</STYLE >after"), "x after");
+check("an unterminated <script is escaped, not left as a tag", clean("t <script src=//evil.example/x.js"), "t &lt;script src=//evil.example/x.js");
+check("an HTML comment is escaped", clean("a <!-- hidden --> b"), "a &lt;!-- hidden --> b");
+check("prose comparisons are untouched", clean("1 < 2, 3 > 2, a <= b"), "1 < 2, 3 > 2, a <= b");
+
+// Fuzz: whatever goes in, nothing tag-shaped comes out, and sanitizing twice
+// changes nothing (publish runs sanitizeBody again on an already-clean body).
+const parts = ["<", ">", "/", "!", "?", "script", "style", "img", "b", " ", "\n", "x", "onerror=", "--", "\t", "SCRIPT"];
+let seed = 7;
+const rand = (n) => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) % n);
+let leaks = 0;
+let unstable = 0;
+for (let i = 0; i < 5000; i++) {
+  let s = "a";
+  for (let j = rand(24); j >= 0; j--) s += parts[rand(parts.length)];
+  const once = normalizeEdits({ title: "T", body: s }).edits?.body;
+  if (once === undefined) continue;
+  if (hasTagStart(once)) leaks += 1;
+  if (normalizeEdits({ title: "T", body: once }).edits?.body !== once) unstable += 1;
+}
+check("fuzz: 5000 bodies leave no tag start", leaks, 0);
+check("fuzz: sanitizing a clean body changes nothing", unstable, 0);
+
 // Limits and required fields.
 const error = (fields) => normalizeEdits(fields).error ?? null;
 check("empty title refused", error({ title: "", body: "b" }), "invalid_title");
