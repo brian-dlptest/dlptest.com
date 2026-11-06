@@ -201,7 +201,7 @@ export const sampleNameDobEmail: NameDobEmailRow[] = [
 ];
 
 export interface DownloadFile {
-  /** Filename as it will be served at both /<key> and /downloads/<key> */
+  /** R2 object key, served at /downloads/?file=<key>. The old root path /<key> 301s to /sample-data/. */
   key: string;
   label: string;
   group: "sample" | "office" | "csv" | "ftp" | "state" | "ssndob" | "ccnzip" | "dobemail";
@@ -225,18 +225,20 @@ export const downloadFiles: DownloadFile[] = [
   { key: "AIP_Test_Doc.docx", label: "AIP (Azure Info Protection) test document", group: "office", approxBytes: 30_000 },
   { key: "DLP_Test_FTP_FileZilla.xml", label: "FileZilla FTP profile", group: "ftp", approxBytes: 2_000 },
   { key: "DLP-Test-State-Data.zip", label: "State PII/PCI/Bank/PHI bundle (via dev2prog/DLP)", group: "state", approxBytes: 50_000_000 },
-  { key: "sample-ssndob.csv",  label: "Sample SSN & DOB (CSV)",  group: "ssndob",   approxBytes: 4_750 },
-  { key: "sample-ssndob.xls",  label: "Sample SSN & DOB (XLS)",  group: "ssndob",   approxBytes: 34_304 },
-  { key: "sample-ssndob.xlsx", label: "Sample SSN & DOB (XLSX)", group: "ssndob",   approxBytes: 14_184 },
-  { key: "sample-ssndob.pdf",  label: "Sample SSN & DOB (PDF)",  group: "ssndob",   approxBytes: 54_902 },
-  { key: "sample-ccnzip.csv",  label: "Sample CCN & ZIP (CSV)",  group: "ccnzip",   approxBytes: 4_750 },
-  { key: "sample-ccnzip.xls",  label: "Sample CCN & ZIP (XLS)",  group: "ccnzip",   approxBytes: 34_304 },
-  { key: "sample-ccnzip.xlsx", label: "Sample CCN & ZIP (XLSX)", group: "ccnzip",   approxBytes: 14_184 },
-  { key: "sample-ccnzip.pdf",  label: "Sample CCN & ZIP (PDF)",  group: "ccnzip",   approxBytes: 54_902 },
-  { key: "sample-dobemail.csv",  label: "Sample DOB & Email (CSV)",  group: "dobemail", approxBytes: 4_750 },
-  { key: "sample-dobemail.xls",  label: "Sample DOB & Email (XLS)",  group: "dobemail", approxBytes: 34_304 },
-  { key: "sample-dobemail.xlsx", label: "Sample DOB & Email (XLSX)", group: "dobemail", approxBytes: 14_184 },
-  { key: "sample-dobemail.pdf",  label: "Sample DOB & Email (PDF)",  group: "dobemail", approxBytes: 54_902 },
+  // The ssndob, ccnzip and dobemail files are built from the tables above by
+  // scripts/build-sample-tab-downloads.ts.
+  { key: "sample-ssndob.csv",  label: "Sample SSN & DOB (CSV)",  group: "ssndob",   approxBytes: 1_143 },
+  { key: "sample-ssndob.xls",  label: "Sample SSN & DOB (XLS)",  group: "ssndob",   approxBytes: 7_168 },
+  { key: "sample-ssndob.xlsx", label: "Sample SSN & DOB (XLSX)", group: "ssndob",   approxBytes: 11_931 },
+  { key: "sample-ssndob.pdf",  label: "Sample SSN & DOB (PDF)",  group: "ssndob",   approxBytes: 3_785 },
+  { key: "sample-ccnzip.csv",  label: "Sample CCN & ZIP (CSV)",  group: "ccnzip",   approxBytes: 2_524 },
+  { key: "sample-ccnzip.xls",  label: "Sample CCN & ZIP (XLS)",  group: "ccnzip",   approxBytes: 11_776 },
+  { key: "sample-ccnzip.xlsx", label: "Sample CCN & ZIP (XLSX)", group: "ccnzip",   approxBytes: 14_943 },
+  { key: "sample-ccnzip.pdf",  label: "Sample CCN & ZIP (PDF)",  group: "ccnzip",   approxBytes: 8_148 },
+  { key: "sample-dobemail.csv",  label: "Sample DOB & Email (CSV)",  group: "dobemail", approxBytes: 2_464 },
+  { key: "sample-dobemail.xls",  label: "Sample DOB & Email (XLS)",  group: "dobemail", approxBytes: 10_752 },
+  { key: "sample-dobemail.xlsx", label: "Sample DOB & Email (XLSX)", group: "dobemail", approxBytes: 14_047 },
+  { key: "sample-dobemail.pdf",  label: "Sample DOB & Email (PDF)",  group: "dobemail", approxBytes: 6_439 },
 ];
 
 export function humanSize(bytes: number): string {
