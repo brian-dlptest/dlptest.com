@@ -75,11 +75,12 @@ function yamlString(value: string): string {
   return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
-// Whole <script> and <style> blocks go, content included. A closing tag runs to
-// the next `>`, because browsers also end the element on `</script foo>`.
-const SCRIPT_BLOCK = /<script\b[\s\S]*?<\/script[^>]*>/gi;
-const STYLE_BLOCK = /<style\b[\s\S]*?<\/style[^>]*>/gi;
-const TAG = /<\/?[a-zA-Z][^>]*>/g;
+// Whole <script> and <style> blocks go, content included, then any other tag.
+// A closing tag runs to the next `>`, because browsers also end the element on
+// `</script foo>`. It is one pattern so that a single replace call can run to a
+// fixed point (see sanitizeBody); CodeQL only treats a replace as repeated when
+// its own result feeds back into it.
+const TAGS = /<script\b[\s\S]*?<\/script[^>]*>|<style\b[\s\S]*?<\/style[^>]*>|<\/?[a-zA-Z][^>]*>/gi;
 // What is left of a tag after stripping: `<` before a letter, `/`, `!` or `?`.
 const TAG_START = /<(?=[a-zA-Z/!?])/g;
 
@@ -99,9 +100,7 @@ export function sanitizeBody(body: string): string {
   let previous: string;
   do {
     previous = out;
-    out = out.replace(SCRIPT_BLOCK, "");
-    out = out.replace(STYLE_BLOCK, "");
-    out = out.replace(TAG, "");
+    out = out.replace(TAGS, "");
   } while (out !== previous);
   return out.replace(TAG_START, "&lt;").trim();
 }
