@@ -5,6 +5,17 @@
 // src/pages/api/page-view.ts and src/lib/page-views.ts.
 ---
 <script>
+  // GA left _ga/_ga_<id> cookies on .dlptest.com that last up to two years
+  // (two properties: G-3HZY4B1201 and an older G-KWT2NTPPPL). Expire them so
+  // returning visitors end up with no cookies from this site. Remove this
+  // block once they've had time to age out (late 2028).
+  for (const name of document.cookie.split(";").map((c) => c.split("=")[0].trim())) {
+    if (!/^(_ga|_ga_\w+|_gid|_gat\w*)$/.test(name)) continue;
+    for (const domain of ["", `; domain=${location.hostname}`, "; domain=.dlptest.com"]) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+    }
+  }
+
   if (!location.pathname.startsWith("/admin")) {
     let referrer = "";
     try {
