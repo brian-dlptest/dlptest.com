@@ -1283,13 +1283,13 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
 .guide-body th, .guide-body td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; }
 .guide-body th { background: var(--bg-elev); font-weight: 600; }
 
-/* ============ CYBERHAVEN ADS ============ */
+/* ============ SPONSOR ADS ============ */
 
-.cyberhaven-ad {
+.sponsor-ad {
   margin: 2rem 0;
   text-align: center;
 }
-.cyberhaven-ad-label {
+.sponsor-ad-label {
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -1297,15 +1297,15 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
   text-transform: uppercase;
   color: var(--text-dim);
 }
-.cyberhaven-ad-link {
+.sponsor-ad-link {
   display: inline-block;
   line-height: 0;
 }
-.cyberhaven-ad-link:hover {
+.sponsor-ad-link:hover {
   text-decoration: none;
   opacity: 0.92;
 }
-.cyberhaven-ad img {
+.sponsor-ad img {
   display: block;
   max-width: 100%;
   height: auto;
@@ -1317,32 +1317,32 @@ ul.download-list li:hover { background: rgba(79, 163, 255, 0.04); }
   margin: 2.5rem 0 0;
 }
 
-.cyberhaven-ad-layout--sidebar {
+.sponsor-ad-layout--sidebar {
   display: grid;
   gap: 1.5rem 2rem;
   align-items: start;
 }
 @media (min-width: 900px) {
-  .cyberhaven-ad-layout--sidebar {
+  .sponsor-ad-layout--sidebar {
     grid-template-columns: minmax(0, 1fr) auto;
   }
-  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--skyscraper {
+  .sponsor-ad-layout--sidebar .sponsor-ad--skyscraper {
     margin: 0;
     position: sticky;
     top: 1rem;
   }
-  /* Skyscraper is the desktop sidebar; hide the mobile leaderboard. */
-  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--leaderboard {
+  /* Skyscraper is the desktop sidebar; hide the mobile billboard. */
+  .sponsor-ad-layout--sidebar .sponsor-ad--billboard {
     display: none;
   }
 }
 @media (max-width: 899px) {
   /* A 160x600 skyscraper stretched full-width looks bad on narrow screens;
-     swap it for the 970x250 leaderboard, which scales down gracefully. */
-  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--skyscraper {
+     swap it for the 970x250 billboard, which scales down gracefully. */
+  .sponsor-ad-layout--sidebar .sponsor-ad--skyscraper {
     display: none;
   }
-  .cyberhaven-ad-layout--sidebar .cyberhaven-ad--leaderboard {
+  .sponsor-ad-layout--sidebar .sponsor-ad--billboard {
     order: -1;
     margin-bottom: 0;
   }

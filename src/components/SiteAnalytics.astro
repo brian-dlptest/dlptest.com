@@ -24,7 +24,7 @@ const { enabled } = Astro.props;
     </script>
     <script>
       import {
-        trackCyberhavenAdClick,
+        trackSponsorAdClick,
         trackFileDownload,
       } from "@/lib/analytics";
       import { downloadKeyFromHref } from "@/lib/download-links";
@@ -32,9 +32,9 @@ const { enabled } = Astro.props;
       function onDocumentClick(event: MouseEvent) {
         const target = event.target as Element;
 
-        const ad = target.closest<HTMLAnchorElement>('[data-track="cyberhaven_ad_click"]');
+        const ad = target.closest<HTMLAnchorElement>('[data-track="sponsor_ad_click"]');
         if (ad) {
-          trackCyberhavenAdClick(ad.dataset.adUnit ?? "unknown");
+          trackSponsorAdClick(ad.dataset.sponsor ?? "unknown", ad.dataset.adUnit ?? "unknown");
           return;
         }
 

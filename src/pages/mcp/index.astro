@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import SponsorAd from "@/components/SponsorAd.astro";
 export const prerender = true;
 
 const claudeCodeCliExample = `# Add via the Claude Code CLI (one-time setup)
@@ -202,7 +202,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
     The endpoint also answers at <code>https://dlptest.com/api/mcp/</code> as a fallback.
   </p>
 
-  <CyberhavenAd unit="leaderboard" />
+  <SponsorAd unit="billboard" />
 
   <!-- ── SETUP ─────────────────────────────────────────────── -->
   <h2>Setup</h2>
@@ -487,7 +487,7 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
     </div>
   </details>
 
-  <CyberhavenAd unit="medium-rectangle" />
+  <SponsorAd unit="billboard" />
 
   <!-- ── BACKGROUND ────────────────────────────────────────── -->
   <details class="accordion accordion--section">

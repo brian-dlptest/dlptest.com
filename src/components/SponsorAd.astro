@@ -1,0 +1,39 @@
+---
+import { ADS_ENABLED, SPONSOR, SPONSOR_ADS, type SponsorAdUnit } from "@/lib/sponsor-ad";
+
+interface Props {
+  unit: SponsorAdUnit;
+  /** Eager-load above-the-fold units (billboard on key pages). */
+  priority?: boolean;
+  /** Show an "Advertisement" label above the unit. */
+  showDisclosure?: boolean;
+}
+
+const { unit, priority = false, showDisclosure = true } = Astro.props;
+const ad = SPONSOR_ADS[unit];
+---
+{ADS_ENABLED && (
+<aside class:list={["sponsor-ad", `sponsor-ad--${unit}`]} aria-label="Advertisement">
+  {showDisclosure && <p class="sponsor-ad-label">Advertisement</p>}
+  <a
+    class="sponsor-ad-link"
+    href={SPONSOR.href}
+    target="_blank"
+    rel="sponsored noopener noreferrer"
+    data-track="sponsor_ad_click"
+    data-sponsor={SPONSOR.id}
+    data-ad-unit={unit}
+  >
+    <img
+      src={ad.src}
+      srcset={ad.srcset}
+      sizes={ad.sizes}
+      alt={ad.alt}
+      width={ad.width}
+      height={ad.height}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+    />
+  </a>
+</aside>
+)}

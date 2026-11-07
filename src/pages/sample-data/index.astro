@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
+import SponsorAdSlot from "@/components/SponsorAdSlot.astro";
 import { sampleData, sampleNameSsnDob, sampleNameCcnZip, sampleNameDobEmail } from "@/data/sample-data";
 import { libraryCategories } from "@/data/library-files";
 export const prerender = true;
@@ -71,7 +71,7 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
     and image-based DLP testing.
   </p>
 
-  <CyberhavenAdSlot page="sample-data">
+  <SponsorAdSlot page="sample-data">
 
   <section class="lib-section">
     <h2 class="section-heading">PII / PCI Test Datasets</h2>
@@ -207,7 +207,7 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
     </div>
   </dialog>
 
-  </CyberhavenAdSlot>
+  </SponsorAdSlot>
 </BaseLayout>
 
 <style>

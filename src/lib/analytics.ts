@@ -2,7 +2,7 @@
  * Google Tag Manager / GA4 helpers.
  *
  * Production WordPress used GTM container GTM-T4T9GLJ; GA4 receives custom
- * events (e.g. `cyberhaven_ad_click`) from tags configured in that container.
+ * events (e.g. `sponsor_ad_click`) from tags configured in that container.
  *
  * Cloudflare options (not used here):
  * - Web Analytics: page views only, no custom click events.
@@ -16,10 +16,15 @@ export function pushDataLayer(payload: Record<string, unknown>): void {
   window.dataLayer.push(payload);
 }
 
-/** Matches the legacy GA4 event name for sponsored Cyberhaven units. */
-export function trackCyberhavenAdClick(adUnit: string): void {
+/**
+ * Click on a sponsored display unit. Sponsor-neutral so the GTM trigger
+ * survives a change of sponsor; GTM must listen for this Custom Event (the old
+ * "Cyberhaven Ad Clicks" tag matched on the click URL containing cyberhaven.com).
+ */
+export function trackSponsorAdClick(sponsor: string, adUnit: string): void {
   pushDataLayer({
-    event: "cyberhaven_ad_click",
+    event: "sponsor_ad_click",
+    sponsor,
     ad_unit: adUnit,
     page_path: window.location.pathname,
   });

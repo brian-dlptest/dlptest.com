@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import SponsorAd from "@/components/SponsorAd.astro";
 import PostTestForm from "@/components/PostTestForm.astro";
 export const prerender = true;
 
@@ -37,7 +37,7 @@ curl -sS -X POST "https://dlptest.com/api/http-post/" \\
 
   <PostTestForm />
 
-  <CyberhavenAd unit="leaderboard" />
+  <SponsorAd unit="billboard" />
 
   <h2>Test with curl or scripts</h2>
   <p>
