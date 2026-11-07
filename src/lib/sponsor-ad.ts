@@ -20,6 +20,8 @@ export const ADS_ENABLED = true;
 export const SPONSOR = {
   id: "ent",
   name: "Ent",
+  /** Groups impressions/clicks in /admin/sponsors/. Change it with the creative. */
+  campaign: "beyond-edr-webinar-2026-11",
   href: "https://ent-ai.zoom.us/webinar/register/WN_UvjKz6kFQWKO9lfvdclrNw?utm_source=dlptest&utm_medium=display&utm_campaign=webinar-fy26q4-november-beyond-edr",
 } as const;
 

@@ -1,0 +1,252 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { verifyAccess } from "@/lib/access";
+import { SPONSOR } from "@/lib/sponsor-ad";
+import { loadSponsorReport, type BreakdownRow, type SponsorReport } from "@/lib/sponsor-metrics";
+
+// Sponsor ad report: viewable impressions and clicks from our own cookieless
+// log (D1 SPONSOR_DB, written by /api/sponsor-event/). Server-rendered and
+// gated by Cloudflare Access like the other /admin pages. Shows the
+// environment it's served from, so staging only shows staging test traffic.
+export const prerender = false;
+
+const access = await verifyAccess(Astro.request);
+if (!access.ok) {
+  return new Response(`Forbidden: ${access.reason}`, { status: access.status });
+}
+
+const envName = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(Astro.url.hostname)
+  ? "development"
+  : env.ENVIRONMENT || "production";
+
+const daysParam = Number(Astro.url.searchParams.get("days"));
+const days = [7, 30, 90].includes(daysParam) ? daysParam : 0; // 0 = everything
+const sinceDay = days
+  ? new Date(Date.now() - (days - 1) * 86_400_000).toISOString().slice(0, 10)
+  : null;
+const windows = [
+  { d: 7, label: "7d" },
+  { d: 30, label: "30d" },
+  { d: 90, label: "90d" },
+  { d: 0, label: "All" },
+];
+
+let report: SponsorReport | null = null;
+let loadError: string | null = null;
+try {
+  report = await loadSponsorReport({ envName, sponsor: SPONSOR.id, sinceDay });
+} catch (error) {
+  console.error("[admin/sponsors] failed to load report:", error);
+  loadError = error instanceof Error ? error.message : "Could not load the report.";
+}
+
+const nf = new Intl.NumberFormat("en-US");
+function ctr(clicks: number, impressions: number): string {
+  return impressions ? `${((clicks / impressions) * 100).toFixed(2)}%` : "–";
+}
+function place(r: { city: string | null; region: string | null; country: string | null }): string {
+  return [r.city, r.region, r.country].filter(Boolean).join(", ") || "(unknown)";
+}
+
+const dailyMax = report ? Math.max(1, ...report.daily.map((d) => d.impressions)) : 1;
+
+const sections: { title: string; hint?: string; rows: BreakdownRow[]; mono?: boolean; none?: string }[] =
+  report
+    ? [
+        { title: "Units", rows: report.byUnit },
+        { title: "Pages", rows: report.byPage, mono: true },
+        {
+          title: "Networks",
+          hint: "Who owns the IP the visitor came from (ASN). Corporate traffic behind an SSE proxy shows up as the proxy vendor.",
+          rows: report.byNetwork,
+        },
+        { title: "Countries", rows: report.byCountry },
+        { title: "Devices", rows: report.byDevice },
+        { title: "Operating systems", rows: report.byOs },
+        { title: "Browsers", rows: report.byBrowser },
+        {
+          title: "Referrers",
+          hint: "The site that sent the visitor to the page the ad was on.",
+          rows: report.byReferrer,
+          mono: true,
+          none: "(none)",
+        },
+        { title: "Campaigns", rows: report.byCampaign, mono: true },
+      ]
+    : [];
+---
+<BaseLayout title="Sponsor ads" description="Internal sponsor ad report.">
+  <h1>Sponsor ads</h1>
+  <p class="muted">
+    {SPONSOR.name}, current campaign <code>{SPONSOR.campaign}</code>, on <strong>{envName}</strong>.{" "}
+    {access.email && <span>Signed in as {access.email}.</span>}
+  </p>
+
+  <div class="windows">
+    {windows.map((w) => (
+      <a class={`pill ${w.d === days ? "pill--on" : ""}`} href={w.d ? `?days=${w.d}` : "?"}>{w.label}</a>
+    ))}
+  </div>
+
+  {loadError && <div class="flash flash--err">Could not load the report: <code>{loadError}</code></div>}
+
+  {report && (
+    <>
+      <div class="cards">
+        <div class="card">
+          <div class="k">Viewable impressions</div>
+          <div class="v">{nf.format(report.impressions)}</div>
+          <div class="sub">{report.firstDay ? `${report.firstDay} to ${report.lastDay}` : "no data yet"}</div>
+        </div>
+        <div class="card">
+          <div class="k">Clicks</div>
+          <div class="v">{nf.format(report.clicks)}</div>
+          <div class="sub">CTR {ctr(report.clicks, report.impressions)}</div>
+        </div>
+        <div class="card">
+          <div class="k">Unique viewers</div>
+          <div class="v">{nf.format(report.dailyUniqueViewers)}</div>
+          <div class="sub">summed per day</div>
+        </div>
+        <div class="card">
+          <div class="k">Unique clickers</div>
+          <div class="v">{nf.format(report.dailyUniqueClickers)}</div>
+          <div class="sub">summed per day</div>
+        </div>
+      </div>
+
+      {report.daily.length > 0 && (
+        <section>
+          <h2>Impressions per day</h2>
+          <div class="spark">
+            {report.daily.map((d) => (
+              <div
+                class="bar"
+                style={`height:${Math.max(2, Math.round((d.impressions / dailyMax) * 100))}%`}
+                title={`${d.day} · ${nf.format(d.impressions)} impressions · ${nf.format(d.clicks)} clicks`}
+              />
+            ))}
+          </div>
+          <details class="daily">
+            <summary>Daily numbers</summary>
+            <table>
+              <thead><tr><th>Day (UTC)</th><th class="num">Impressions</th><th class="num">Clicks</th><th class="num">CTR</th></tr></thead>
+              <tbody>
+                {[...report.daily].reverse().map((d) => (
+                  <tr>
+                    <td class="mono">{d.day}</td>
+                    <td class="num">{nf.format(d.impressions)}</td>
+                    <td class="num">{nf.format(d.clicks)}</td>
+                    <td class="num">{ctr(d.clicks, d.impressions)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+        </section>
+      )}
+
+      <div class="grid">
+        {sections.map((s) => (
+          <section>
+            <h2>{s.title}</h2>
+            {s.hint && <p class="hint">{s.hint}</p>}
+            {s.rows.length === 0 ? (
+              <p class="hint">No data yet.</p>
+            ) : (
+              <table>
+                <thead><tr><th></th><th class="num">Impr.</th><th class="num">Clicks</th><th class="num">CTR</th></tr></thead>
+                <tbody>
+                  {s.rows.map((r) => (
+                    <tr>
+                      <td class={s.mono ? "mono" : ""}>{s.none && r.key === "(unknown)" ? s.none : r.key}</td>
+                      <td class="num">{nf.format(r.impressions)}</td>
+                      <td class="num">{nf.format(r.clicks)}</td>
+                      <td class="num">{ctr(r.clicks, r.impressions)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+        ))}
+      </div>
+
+      <section class="clicks">
+        <h2>Recent clicks</h2>
+        {report.recentClicks.length === 0 ? (
+          <p class="hint">No clicks yet.</p>
+        ) : (
+          <div class="scroll">
+            <table class="wide">
+              <thead>
+                <tr><th>Time (UTC)</th><th>Page</th><th>Unit</th><th>Location</th><th>Network</th><th>Device</th><th>Referrer</th></tr>
+              </thead>
+              <tbody>
+                {report.recentClicks.map((c) => (
+                  <tr>
+                    <td class="mono">{c.ts.slice(0, 16).replace("T", " ")}</td>
+                    <td class="mono">{c.page}</td>
+                    <td>{c.unit}</td>
+                    <td>{place(c)}</td>
+                    <td>{c.as_org ?? "(unknown)"}{c.asn ? <span class="muted"> AS{c.asn}</span> : null}</td>
+                    <td>{[c.device, c.os, c.browser].filter(Boolean).join(" · ")}</td>
+                    <td class="mono">{c.referrer ?? "(none)"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <p class="gen">
+        A viewable impression is at least half the ad on screen for one continuous
+        second (the MRC display standard), counted once per ad per page view. Clicks
+        include middle-clicks. Bots are filtered by user agent. No cookies are used and
+        no IP addresses are stored. Unique counts come from a hash that resets every UTC
+        day, so a person who visits on three days counts three times. Generated
+        {" "}{new Date().toISOString().slice(0, 16).replace("T", " ")} UTC.
+      </p>
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  .muted { color: var(--text-dim); }
+  .windows { display: flex; gap: 0.4rem; margin: 0.75rem 0 1.25rem; }
+  .pill {
+    border: 1px solid var(--border); border-radius: 999px; padding: 0.2rem 0.8rem;
+    font-size: 0.85rem; color: var(--accent); text-decoration: none;
+  }
+  .pill--on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .flash { padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); margin: 0.75rem 0; font-size: 0.95rem; border: 1px solid var(--border); }
+  .flash--err { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); border-color: var(--danger); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin: 1rem 0 1.5rem; }
+  .card { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1.1rem; background: var(--surface); }
+  .card .k { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .card .v { color: var(--text); font-size: 1.8rem; font-weight: 600; line-height: 1.2; }
+  .card .sub { color: var(--text-dim); font-size: 0.8rem; }
+  .spark { display: flex; align-items: flex-end; gap: 2px; height: 120px; padding: 0.5rem 0; }
+  .spark .bar { flex: 1; min-width: 2px; max-width: 40px; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.8; }
+  .spark .bar:hover { opacity: 1; background: var(--accent-hover); }
+  .daily { margin: 0.5rem 0 0; }
+  .daily summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+  .daily table { max-width: 32rem; margin-top: 0.5rem; }
+  .hint, .gen { color: var(--text-dim); font-size: 0.8rem; }
+  .hint { margin: 0 0 0.5rem; }
+  .gen { margin-top: 1.5rem; max-width: 72ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+  .grid > section { min-width: 0; }
+  .clicks { margin-top: 2rem; }
+  .scroll { overflow-x: auto; }
+  section h2 { font-size: 1.05rem; margin: 0 0 0.5rem; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text); table-layout: fixed; }
+  table.wide { table-layout: auto; min-width: 760px; }
+  th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--text-dim); font-weight: 600; }
+  th.num, td.num { text-align: right; white-space: nowrap; width: 4.5rem; }
+  .mono { font-family: var(--font-mono); font-size: 0.8rem; overflow-wrap: anywhere; word-break: break-word; }
+</style>

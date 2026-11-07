@@ -11,6 +11,8 @@ declare namespace Cloudflare {
     DOWNLOADS: R2Bucket;
     /** D1 database backing the News Review Queue (news_candidates table). */
     NEWS_DB: D1Database;
+    /** D1 database for sponsor ad impressions + clicks (sponsor_events table). */
+    SPONSOR_DB: D1Database;
     /** Shared bearer secret the Claude discovery job uses to POST candidates (secret). */
     NEWS_INGEST_SECRET: string;
     /** Inbox for /api/contact/ submissions. */
