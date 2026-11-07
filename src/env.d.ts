@@ -11,6 +11,10 @@ declare namespace Cloudflare {
     DOWNLOADS: R2Bucket;
     /** D1 database backing the News Review Queue (news_candidates table). */
     NEWS_DB: D1Database;
+    /** D1 database for sponsor ad impressions + clicks (sponsor_events table). */
+    SPONSOR_DB: D1Database;
+    /** D1 database for first-party page views (page_views table), replacing GA. */
+    ANALYTICS_DB: D1Database;
     /** Shared bearer secret the Claude discovery job uses to POST candidates (secret). */
     NEWS_INGEST_SECRET: string;
     /** Inbox for /api/contact/ submissions. */
@@ -43,12 +47,6 @@ declare namespace Cloudflare {
     CF_ZONE_ID: string;
     /** Cloudflare API token with Zone → Analytics → Read, for /admin/traffic (secret). */
     CF_ANALYTICS_TOKEN: string;
-    /** GA4 numeric property ID — powers the GA panel on /admin/traffic (secret). */
-    GA4_PROPERTY_ID: string;
-    /** Google service-account client email for the GA Data API (secret). */
-    GA_SA_CLIENT_EMAIL: string;
-    /** Google service-account private key (PKCS8 PEM) for the GA Data API (secret). */
-    GA_SA_PRIVATE_KEY: string;
   }
 }
 
@@ -56,7 +54,3 @@ declare namespace Cloudflare {
 // Cloudflare adapter's `handle(request, env, ctx)` signature). Mirror the
 // same shape there for consistency.
 interface Env extends Cloudflare.Env {}
-
-interface Window {
-  dataLayer?: Record<string, unknown>[];
-}

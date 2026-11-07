@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
+import SponsorAdSlot from "@/components/SponsorAdSlot.astro";
 import {
   TEST_PLAN_HREF,
   TEST_PLAN_ROWS,
@@ -21,7 +21,7 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
   title="Endpoint DLP Test Plan"
   description={`A free, vendor-neutral endpoint DLP test plan: ${TEST_PLAN_ROWS} test cases across classification, policy, investigations and usability, as a scored Excel workbook.`}
 >
-  <CyberhavenAdSlot page="sample-data-tab">
+  <SponsorAdSlot page="sample-data-tab">
     <h1>Endpoint DLP Test Plan</h1>
 
     <p>
@@ -125,7 +125,7 @@ const updated = new Date(TEST_PLAN_UPDATED).toLocaleDateString("en-US", {
       missed, a test that doesn't work against a real product, or a tier you'd
       score differently. Please use the <a href="/contact/">contact page</a> to reach me.
     </p>
-  </CyberhavenAdSlot>
+  </SponsorAdSlot>
 </BaseLayout>
 
 <style>

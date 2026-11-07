@@ -1,0 +1,33 @@
+---
+import SponsorAd from "@/components/SponsorAd.astro";
+import { ADS_ENABLED, SPONSOR_PAGE_ADS, type SponsorAdPage, type SponsorAdUnit } from "@/lib/sponsor-ad";
+
+interface Props {
+  page: SponsorAdPage;
+}
+
+const { page } = Astro.props;
+// With ads off there are no units, so the sidebar grid is skipped and only the
+// page content renders — no empty second column.
+const units: readonly SponsorAdUnit[] = ADS_ENABLED ? SPONSOR_PAGE_ADS[page] : [];
+const hasSidebar = units.includes("skyscraper");
+const inlineUnits = units.filter((u) => u !== "skyscraper");
+---
+{hasSidebar ? (
+  <div class="sponsor-ad-layout sponsor-ad-layout--sidebar">
+    <div class="sponsor-ad-main">
+      <slot />
+    </div>
+    {/* Skyscraper sidebar on desktop; a billboard replaces it on narrow
+        viewports, where a 160x600 unit stretched full-width looks bad. CSS
+        toggles which one is visible at the 900px breakpoint. */}
+    <SponsorAd unit="skyscraper" />
+    <SponsorAd unit="billboard" />
+  </div>
+) : (
+  <slot />
+)}
+
+{inlineUnits.map((unit) => (
+  <SponsorAd unit={unit} priority={unit === "billboard"} />
+))}

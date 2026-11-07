@@ -1,0 +1,138 @@
+---
+import { ADS_ENABLED, SPONSOR, SPONSOR_ADS, type SponsorAdUnit } from "@/lib/sponsor-ad";
+
+interface Props {
+  unit: SponsorAdUnit;
+  /** Eager-load above-the-fold units (billboard on key pages). */
+  priority?: boolean;
+  /** Show an "Advertisement" label above the unit. */
+  showDisclosure?: boolean;
+}
+
+const { unit, priority = false, showDisclosure = true } = Astro.props;
+const ad = SPONSOR_ADS[unit];
+---
+{ADS_ENABLED && (
+<aside class:list={["sponsor-ad", `sponsor-ad--${unit}`]} aria-label="Advertisement">
+  {showDisclosure && <p class="sponsor-ad-label">Advertisement</p>}
+  <a
+    class="sponsor-ad-link"
+    href={SPONSOR.href}
+    target="_blank"
+    rel="sponsored noopener noreferrer"
+    data-track="sponsor_ad_click"
+    data-sponsor={SPONSOR.id}
+    data-campaign={SPONSOR.campaign}
+    data-ad-unit={unit}
+  >
+    <img
+      src={ad.src}
+      srcset={ad.srcset}
+      sizes={ad.sizes}
+      alt={ad.alt}
+      width={ad.width}
+      height={ad.height}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+    />
+  </a>
+</aside>
+)}
+
+<script>
+  // Cookieless sponsor measurement. One request per viewable impression (at
+  // least half the unit on screen for one continuous second, the MRC display
+  // standard) and one per click, to a first-party endpoint. Nothing is stored
+  // in the browser. Server side: src/lib/sponsor-metrics.ts.
+  const ENDPOINT = "/api/sponsor-event/";
+  const VIEW_MS = 1000;
+  const links = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>('a[data-track="sponsor_ad_click"]'),
+  );
+
+  function send(type: "impression" | "click", link: HTMLAnchorElement) {
+    let referrer = "";
+    try {
+      referrer = document.referrer ? new URL(document.referrer).hostname : "";
+    } catch {
+      // Unparseable referrer: record it as direct.
+    }
+    const body = JSON.stringify({
+      type,
+      sponsor: link.dataset.sponsor,
+      campaign: link.dataset.campaign,
+      unit: link.dataset.adUnit,
+      page: location.pathname,
+      referrer,
+    });
+    // keepalive lets a click's request finish even if the page goes away;
+    // credentials: "omit" keeps any cookie off the request.
+    fetch(ENDPOINT, {
+      method: "POST",
+      body,
+      headers: { "Content-Type": "text/plain" },
+      keepalive: true,
+      credentials: "omit",
+    }).catch(() => {});
+  }
+
+  const seen = new WeakSet<Element>();
+  const timers = new Map<Element, number>();
+
+  function stopTimer(el: Element) {
+    clearTimeout(timers.get(el));
+    timers.delete(el);
+  }
+
+  const observer =
+    "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              const link = entry.target as HTMLAnchorElement;
+              if (seen.has(link)) continue;
+              const inView =
+                entry.isIntersecting &&
+                entry.intersectionRatio >= 0.5 &&
+                document.visibilityState === "visible";
+              if (!inView) {
+                stopTimer(link);
+              } else if (!timers.has(link)) {
+                timers.set(
+                  link,
+                  window.setTimeout(() => {
+                    timers.delete(link);
+                    if (document.visibilityState !== "visible") return;
+                    seen.add(link);
+                    observer?.unobserve(link);
+                    send("impression", link);
+                  }, VIEW_MS),
+                );
+              }
+            }
+          },
+          { threshold: [0, 0.5] },
+        )
+      : null;
+
+  for (const link of links) {
+    observer?.observe(link);
+    link.addEventListener("click", () => send("click", link));
+    // Middle-click opens the ad in a new tab without a click event.
+    link.addEventListener("auxclick", (e) => {
+      if (e.button === 1) send("click", link);
+    });
+  }
+
+  // A background tab isn't viewing the ad. Restart the clock when it's back:
+  // re-observing makes the observer report the current state again.
+  document.addEventListener("visibilitychange", () => {
+    for (const el of [...timers.keys()]) stopTimer(el);
+    if (document.visibilityState !== "visible" || !observer) return;
+    for (const link of links) {
+      if (seen.has(link)) continue;
+      observer.unobserve(link);
+      observer.observe(link);
+    }
+  });
+</script>

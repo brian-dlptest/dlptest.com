@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAdSlot from "@/components/CyberhavenAdSlot.astro";
+import SponsorAdSlot from "@/components/SponsorAdSlot.astro";
 import SampleDataNav from "@/components/SampleDataNav.astro";
 import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleNameCcnZip, downloadFiles, humanSize } from "@/data/sample-data";
@@ -13,7 +13,7 @@ export const prerender = true;
     JCB number formats. Use these to test your PCI-DSS detection rules.
   </p>
 
-  <CyberhavenAdSlot page="sample-data-tab">
+  <SponsorAdSlot page="sample-data-tab">
   <SampleDataNav active="ccnzip" />
 
   <div class="table-scroll" data-copy-table>
@@ -48,5 +48,5 @@ export const prerender = true;
       <li><a href={`/downloads/?file=${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
     ))}
   </ul>
-  </CyberhavenAdSlot>
+  </SponsorAdSlot>
 </BaseLayout>

@@ -6,7 +6,9 @@ import {
   AnalyticsConfigError,
   type TrafficSummary,
 } from "@/lib/cf-analytics";
-import { fetchGaSummary, GaConfigError, type GaSummary } from "@/lib/ga-analytics";
+import { env } from "cloudflare:workers";
+import { loadVisitorSummary, type CountRow, type VisitorSummary } from "@/lib/page-views";
+import { envNameFor } from "@/lib/visitor";
 
 // Traffic dashboard — a single pane to answer "how much traffic are we getting,
 // and is anything hammering us?". Server-rendered and gated by Cloudflare Access
@@ -24,13 +26,13 @@ if (!access.ok) {
 const hoursParam = Number(Astro.url.searchParams.get("hours"));
 const windowHours = [1, 6, 24, 168].includes(hoursParam) ? hoursParam : 24;
 
-// GA has its own window (in days): Cloudflare maxes at 7d, but GA is where we
-// look for longer-term user trends. Defaults to 90d.
-const gaDaysParam = Number(Astro.url.searchParams.get("gadays"));
-const gaDays = [7, 28, 90].includes(gaDaysParam) ? gaDaysParam : 90;
+// Visitors have their own window (in days): Cloudflare maxes at 7d, but our
+// page-view log is where we look for longer-term trends. Defaults to 28d.
+const vDaysParam = Number(Astro.url.searchParams.get("vdays"));
+const vDays = [7, 28, 90].includes(vDaysParam) ? vDaysParam : 28;
 
 // Build a relative URL that flips one query param but preserves the others, so
-// the Cloudflare and GA window pills don't clobber each other's selection.
+// the Cloudflare and visitor window pills don't clobber each other's selection.
 function withParam(key: string, value: string | number): string {
   const p = new URLSearchParams(Astro.url.search);
   p.set(key, String(value));
@@ -57,52 +59,57 @@ try {
   }
 }
 
-// Google Analytics, shown next to the Cloudflare numbers for an apples-to-apples
-// read. GA failures are isolated from the Cloudflare panel — one source being
-// down or unconfigured must not blank the other.
-let ga: GaSummary | null = null;
-let gaError: string | null = null;
-let gaNotConfigured = false;
+// First-party page views (cookieless; replaced Google Analytics in 2026-11),
+// shown next to the Cloudflare numbers. Failures are isolated from the
+// Cloudflare panel: one source being down must not blank the other.
+const envName = envNameFor(Astro.url, env.ENVIRONMENT);
+let visitors: VisitorSummary | null = null;
+let visitorsError: string | null = null;
 try {
-  ga = await fetchGaSummary(gaDays);
+  visitors = await loadVisitorSummary(envName, vDays);
 } catch (error) {
-  if (error instanceof GaConfigError) {
-    gaNotConfigured = true;
-    gaError = error.message;
-  } else {
-    console.error("[admin/traffic] failed to load GA:", error);
-    gaError = error instanceof Error ? error.message : "Could not load GA.";
-  }
+  console.error("[admin/traffic] failed to load page views:", error);
+  visitorsError = error instanceof Error ? error.message : "Could not load page views.";
 }
 
-// Trend signal: average daily users over the most recent N days vs the first N
-// days of the window. Direct answer to "are we losing users?". N scales with the
-// window (a week for 90d) but never exceeds half the series.
-const gaWindows = [
+// Trend signal: average daily visitors over the most recent N complete days vs
+// the first N days of the window. Direct answer to "are we losing visitors?".
+// N scales with the window (two weeks for 90d) but never exceeds half the series.
+const vWindows = [
   { d: 7, label: "7d" },
   { d: 28, label: "28d" },
   { d: 90, label: "90d" },
 ];
-let usersTrendPct: number | null = null;
+const today = new Date().toISOString().slice(0, 10);
+let visitorsTrendPct: number | null = null;
 let trendN = 0;
-if (ga && ga.daily.length >= 8) {
-  const d = ga.daily;
-  trendN = Math.min(ga.days >= 60 ? 14 : 7, Math.floor(d.length / 2));
-  const avg = (rows: typeof d) => rows.reduce((s, x) => s + x.users, 0) / rows.length;
-  const baseAvg = avg(d.slice(0, trendN));
-  const recentAvg = avg(d.slice(-trendN));
-  if (baseAvg > 0) usersTrendPct = Math.round(((recentAvg - baseAvg) / baseAvg) * 100);
+if (visitors) {
+  const d = visitors.daily.filter((x) => x.day < today);
+  if (d.length >= 8) {
+    trendN = Math.min(visitors.days >= 60 ? 14 : 7, Math.floor(d.length / 2));
+    const avg = (rows: typeof d) => rows.reduce((sum, x) => sum + x.visitors, 0) / rows.length;
+    const baseAvg = avg(d.slice(0, trendN));
+    const recentAvg = avg(d.slice(-trendN));
+    if (baseAvg > 0) visitorsTrendPct = Math.round(((recentAvg - baseAvg) / baseAvg) * 100);
+  }
 }
-const gaUsersMax = ga ? Math.max(1, ...ga.daily.map((x) => x.users)) : 1;
+const visitorsMax = visitors ? Math.max(1, ...visitors.daily.map((x) => x.visitors)) : 1;
 // Print the numbers on the chart when few enough bars fit. The 7d window always
-// qualifies; wider windows fall back to the dense hover-only sparkline. A young
-// property also lands here, since GA only returns days that actually have data.
-const showDayLabels = ga ? ga.daily.length > 0 && ga.daily.length <= 14 : false;
-function fmtGaDate(yyyymmdd: string): string {
-  return yyyymmdd.length === 8
-    ? `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`
-    : yyyymmdd;
-}
+// qualifies; wider windows fall back to the dense hover-only sparkline.
+const showDayLabels = visitors ? visitors.daily.length > 0 && visitors.daily.length <= 14 : false;
+const visitorTables: { title: string; hint?: string; rows: CountRow[]; mono?: boolean }[] = visitors
+  ? [
+      { title: "Top pages", rows: visitors.topPages, mono: true },
+      { title: "Referrers", hint: "Other sites that sent visitors here.", rows: visitors.referrers, mono: true },
+      {
+        title: "Networks",
+        hint: "Who owns the visitor's IP (ASN). Corporate traffic behind an SSE proxy shows as the proxy vendor.",
+        rows: visitors.networks,
+      },
+      { title: "Countries", rows: visitors.countries },
+      { title: "Devices", rows: visitors.devices },
+    ]
+  : [];
 
 const nf = new Intl.NumberFormat("en-US");
 function fmtBytes(n: number): string {
@@ -265,69 +272,66 @@ const windows: { h: number; label: string }[] = [
     </>
   )}
 
-  <section class="ga">
-    <h2>Google Analytics <span class="tag">consented human visitors</span></h2>
+  <section class="visitors">
+    <h2>Visitors <span class="tag">first-party, no cookies</span></h2>
     <p class="hint">
-      Different lens than the Cloudflare numbers above: GA counts only visitors who
-      ran the analytics tag and consented — bots, automated DLP-test traffic, and
-      asset/sub-resource requests are excluded, so these sit well below the edge
-      request counts. Windows end yesterday (today is partial).
+      Counted by our own page-view beacon on <strong>{envName}</strong>. Only browsers that
+      ran the page's script count, and bot user agents are dropped, so these sit well below
+      the edge request counts above. Visitors are counted per day (the hash resets every UTC
+      day), so one person on three days counts three times. Today is partial.
     </p>
 
     <div class="windows">
-      {gaWindows.map((w) => (
-        <a class={`pill ${w.d === gaDays ? "pill--on" : ""}`} href={withParam("gadays", w.d)}>{w.label}</a>
+      {vWindows.map((w) => (
+        <a class={`pill ${w.d === vDays ? "pill--on" : ""}`} href={withParam("vdays", w.d)}>{w.label}</a>
       ))}
     </div>
 
-    {gaNotConfigured && (
-      <div class="flash flash--warn"><strong>GA not configured.</strong> {gaError}</div>
-    )}
-    {gaError && !gaNotConfigured && (
-      <div class="flash flash--err">Could not load GA: <code>{gaError}</code></div>
+    {visitorsError && (
+      <div class="flash flash--err">Could not load page views: <code>{visitorsError}</code></div>
     )}
 
-    {ga && (
+    {visitors && (
       <>
         <div class="cards">
           <div class="card">
             <div class="k">Page views</div>
-            <div class="v">{nf.format(ga.pageViews)}</div>
-            <div class="sub">last {ga.days}d</div>
+            <div class="v">{nf.format(visitors.pageViews)}</div>
+            <div class="sub">last {visitors.days}d</div>
           </div>
           <div class="card">
-            <div class="k">Users</div>
-            <div class="v">{nf.format(ga.totalUsers)}</div>
-            <div class="sub">{nf.format(ga.newUsers)} new</div>
+            <div class="k">Visitors</div>
+            <div class="v">{nf.format(visitors.dailyVisitors)}</div>
+            <div class="sub">summed per day</div>
           </div>
           <div class="card">
-            <div class="k">Sessions</div>
-            <div class="v">{nf.format(ga.sessions)}</div>
-            <div class="sub">last {ga.days}d</div>
+            <div class="k">Visits</div>
+            <div class="v">{nf.format(visitors.visits)}</div>
+            <div class="sub">arrived from outside the site</div>
           </div>
-          {usersTrendPct !== null && (
-            <div class={`card ${usersTrendPct < -5 ? "card--alert" : ""}`}>
-              <div class="k">Users trend</div>
-              <div class="v">{usersTrendPct > 0 ? "▲" : usersTrendPct < 0 ? "▼" : "■"} {Math.abs(usersTrendPct)}%</div>
+          {visitorsTrendPct !== null && (
+            <div class={`card ${visitorsTrendPct < -5 ? "card--alert" : ""}`}>
+              <div class="k">Visitors trend</div>
+              <div class="v">{visitorsTrendPct > 0 ? "▲" : visitorsTrendPct < 0 ? "▼" : "■"} {Math.abs(visitorsTrendPct)}%</div>
               <div class="sub">last {trendN}d avg vs first {trendN}d</div>
             </div>
           )}
         </div>
 
-        {ga.daily.length > 0 && (
+        {visitors.daily.length > 0 && (
           <section>
-            <h2>Users per day</h2>
+            <h2>Visitors per day</h2>
             <div class:list={["spark", { "spark--labeled": showDayLabels }]}>
-              {ga.daily.map((d) => {
-                const h = Math.max(2, Math.round((d.users / gaUsersMax) * 100));
-                const tip = `${fmtGaDate(d.date)} · ${nf.format(d.users)} users · ${nf.format(d.views)} views`;
+              {visitors.daily.map((d) => {
+                const h = Math.max(2, Math.round((d.visitors / visitorsMax) * 100));
+                const tip = `${d.day} · ${nf.format(d.visitors)} visitors · ${nf.format(d.views)} views`;
                 return showDayLabels ? (
                   <div class="col" title={tip}>
                     <div class="col__track">
                       <div class="bar" style={`height:${h}%`} />
-                      <span class="col__val" style={`bottom:calc(${h}% + 0.25rem)`}>{nf.format(d.users)}</span>
+                      <span class="col__val" style={`bottom:calc(${h}% + 0.25rem)`}>{nf.format(d.visitors)}</span>
                     </div>
-                    <span class="col__day">{fmtGaDate(d.date).slice(5)}</span>
+                    <span class="col__day">{d.day.slice(5)}</span>
                   </div>
                 ) : (
                   <div class="bar" style={`height:${h}%`} title={tip} />
@@ -335,45 +339,37 @@ const windows: { h: number; label: string }[] = [
               })}
             </div>
             <p class="hint">
-              Daily unique users over the last {ga.days} days (ending yesterday).
               {showDayLabels
-                ? " Each bar is labelled with its user count; hover for views too."
-                : " Hover a bar for the date + counts."}
-              {" "}A sustained downward slope = losing users.
+                ? "Each bar is labelled with its visitor count; hover for views too."
+                : "Hover a bar for the date and counts."}
+              {" "}A sustained downward slope means losing visitors.
             </p>
           </section>
         )}
 
         <div class="grid">
-          <section>
-            <h2>Top pages (GA)</h2>
-            <table>
-              <thead><tr><th>Path</th><th class="num">Views</th></tr></thead>
-              <tbody>
-                {ga.topPages.map((r) => (
-                  <tr>
-                    <td class="mono">{shorten(r.path)}</td>
-                    <td class="num">{nf.format(r.views)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          <section>
-            <h2>Top events (GA)</h2>
-            <table>
-              <thead><tr><th>Event</th><th class="num">Count</th></tr></thead>
-              <tbody>
-                {ga.topEvents.map((r) => (
-                  <tr>
-                    <td class="mono">{r.name}</td>
-                    <td class="num">{nf.format(r.count)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+          {visitorTables.map((t) => (
+            <section>
+              <h2>{t.title}</h2>
+              {t.hint && <p class="hint">{t.hint}</p>}
+              {t.rows.length === 0 ? (
+                <p class="hint">No data yet.</p>
+              ) : (
+                <table>
+                  <thead><tr><th></th><th class="num">Visitors</th><th class="num">Views</th></tr></thead>
+                  <tbody>
+                    {t.rows.map((r) => (
+                      <tr>
+                        <td class={t.mono ? "mono" : ""}>{t.mono ? shorten(r.key) : r.key}</td>
+                        <td class="num">{nf.format(r.visitors)}</td>
+                        <td class="num">{nf.format(r.views)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          ))}
         </div>
       </>
     )}
@@ -417,9 +413,9 @@ const windows: { h: number; label: string }[] = [
   .spark--labeled .col__day { font-size: 0.7rem; color: var(--text-dim); line-height: 1; white-space: nowrap; }
   .hint, .gen { color: var(--text-dim); font-size: 0.8rem; }
   .gen { margin-top: 1.5rem; }
-  .ga { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-  .ga > h2 { font-size: 1.2rem; margin: 0 0 0.25rem; color: var(--text); display: flex; align-items: center; gap: 0.6rem; }
-  .ga .tag {
+  .visitors { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+  .visitors > h2 { font-size: 1.2rem; margin: 0 0 0.25rem; color: var(--text); display: flex; align-items: center; gap: 0.6rem; }
+  .visitors .tag {
     font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
     color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0.1rem 0.5rem;
   }

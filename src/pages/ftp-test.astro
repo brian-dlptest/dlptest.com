@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAd from "@/components/CyberhavenAd.astro";
-import { ADS_ENABLED } from "@/lib/cyberhaven-ad";
+import SponsorAd from "@/components/SponsorAd.astro";
+import { ADS_ENABLED } from "@/lib/sponsor-ad";
 import {
   FILEZILLA_PROFILE_HREF,
   FILEZILLA_PROFILE_KEY,
@@ -91,7 +91,7 @@ s3 = boto3.client("s3", region_name="{s3Region}", config=Config(signature_versio
 s3.upload_file("testfile.txt", "{s3Bucket}", "testfile.txt")</code></pre>
     </div>
 
-    <CyberhavenAd unit="skyscraper" />
+    <SponsorAd unit="skyscraper" />
   </div>
 </BaseLayout>
 
@@ -124,7 +124,7 @@ s3.upload_file("testfile.txt", "{s3Bucket}", "testfile.txt")</code></pre>
     font-weight: 600;
   }
 
-  .ftp-layout .cyberhaven-ad {
+  .ftp-layout .sponsor-ad {
     margin: 0;
   }
 
@@ -137,7 +137,7 @@ s3.upload_file("testfile.txt", "{s3Bucket}", "testfile.txt")</code></pre>
   }
 
   @media (max-width: 899px) {
-    .ftp-layout .cyberhaven-ad {
+    .ftp-layout .sponsor-ad {
       justify-self: center;
     }
   }

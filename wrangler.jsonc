@@ -47,6 +47,20 @@
       "binding": "NEWS_DB",
       "database_name": "dlptest-news",
       "database_id": "da42b130-710b-4023-99b9-b01070a3a675"
+    },
+    {
+      // Sponsor ad impressions + clicks (migrations/0002_sponsor_events.sql).
+      // Shared with staging; rows carry an `env` column.
+      "binding": "SPONSOR_DB",
+      "database_name": "dlptest-sponsor",
+      "database_id": "1ae4de9b-6f3d-4180-b9f4-4e32de67055a"
+    },
+    {
+      // First-party page views (migrations/0003_page_views.sql), replacing
+      // Google Analytics. Shared with staging; rows carry an `env` column.
+      "binding": "ANALYTICS_DB",
+      "database_name": "dlptest-analytics",
+      "database_id": "ef94b38a-1db5-4e09-a81d-6d0a5a3f57e4"
     }
   ],
   "env": {
@@ -75,6 +89,16 @@
           "binding": "NEWS_DB",
           "database_name": "dlptest-news",
           "database_id": "da42b130-710b-4023-99b9-b01070a3a675"
+        },
+        {
+          "binding": "SPONSOR_DB",
+          "database_name": "dlptest-sponsor",
+          "database_id": "1ae4de9b-6f3d-4180-b9f4-4e32de67055a"
+        },
+        {
+          "binding": "ANALYTICS_DB",
+          "database_name": "dlptest-analytics",
+          "database_id": "ef94b38a-1db5-4e09-a81d-6d0a5a3f57e4"
         }
       ]
     }
