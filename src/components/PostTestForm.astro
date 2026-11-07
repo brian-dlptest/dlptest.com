@@ -265,11 +265,6 @@ const maxBytes = 100 * 1024 * 1024;
 </style>
 
 <script>
-  import {
-    trackHttpPostAttachmentSubmitClick,
-    trackHttpPostTextSubmitClick,
-  } from "@/lib/analytics";
-
   function formatFileSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -419,8 +414,6 @@ const maxBytes = 100 * 1024 * 1024;
         return;
       }
 
-      trackHttpPostAttachmentSubmitClick();
-
       const fd = new FormData();
       if (honeypot) fd.append("website", honeypot.value);
       for (const file of pending) {
@@ -484,7 +477,6 @@ const maxBytes = 100 * 1024 * 1024;
         }
         return;
       }
-      trackHttpPostTextSubmitClick();
 
       try {
         const res = await fetch(form.action, { method: "POST", body: fd });

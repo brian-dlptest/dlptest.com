@@ -2,7 +2,8 @@ import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 
 import { ADS_ENABLED } from "@/lib/sponsor-ad";
-import { classifyUserAgent, parseSponsorEvent, recordSponsorEvent } from "@/lib/sponsor-metrics";
+import { parseSponsorEvent, recordSponsorEvent } from "@/lib/sponsor-metrics";
+import { classifyUserAgent, envNameFor, isSameOriginBrowserRequest } from "@/lib/visitor";
 
 // Beacon target for sponsored ad units: one POST per viewable impression or
 // click, sent by the script in SponsorAd.astro. Always answers 204 (beacons
@@ -16,13 +17,9 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
   const done = new Response(null, { status: 204, headers: { "Cache-Control": "no-store" } });
   if (!ADS_ENABLED) return done;
 
-  // Browsers mark a same-origin beacon with Sec-Fetch-Site and Origin. Anything
-  // else is a script posting directly, not a person looking at the page.
-  const url = new URL(request.url);
-  const fetchSite = request.headers.get("Sec-Fetch-Site");
-  const origin = request.headers.get("Origin");
-  if (fetchSite ? fetchSite !== "same-origin" : origin !== url.origin) return done;
-  if (origin && origin !== url.origin) return done;
+  // Anything that isn't a browser on one of our pages is a script posting
+  // directly, not a person looking at the ad.
+  if (!isSameOriginBrowserRequest(request)) return done;
 
   const ua = request.headers.get("User-Agent") ?? "";
   if (classifyUserAgent(ua).bot) return done;
@@ -45,9 +42,7 @@ export const POST: APIRoute = async ({ request, clientAddress, locals }) => {
     // Not available in some dev setups; the hash still works without it.
   }
 
-  const envName = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(url.hostname)
-    ? "development"
-    : env.ENVIRONMENT || "production";
+  const envName = envNameFor(new URL(request.url), env.ENVIRONMENT);
 
   const write = recordSponsorEvent(event, {
     envName,
