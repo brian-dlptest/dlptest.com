@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import CyberhavenAd from "@/components/CyberhavenAd.astro";
+import SponsorAd from "@/components/SponsorAd.astro";
 import { DLP_PATTERNS, DLP_CATEGORIES } from "@/lib/regex/dlp-patterns";
 export const prerender = true;
 
@@ -27,7 +27,7 @@ const FLAGS: { flag: string; label: string; title: string }[] = [
     runs in your browser. Nothing gets sent anywhere.
   </p>
 
-  <CyberhavenAd unit="leaderboard" />
+  <SponsorAd unit="billboard" />
 
   <div class="regex-workbench">
     <!-- Engine + share toolbar -->
