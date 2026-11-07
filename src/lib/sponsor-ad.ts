@@ -9,7 +9,9 @@
  * To run the next campaign: put its creatives in public/ads/<sponsor>/, update
  * SPONSOR and SPONSOR_ADS below, and keep this true. The two unit sizes are the
  * spec to hand a sponsor: a 970x250 billboard and a 160x600 skyscraper, each
- * with a 2x file (1940x500, 320x1200).
+ * with a 2x file (1940x500, 320x1200). Name files without "@" (e.g.
+ * 970x250-2x.webp): Cloudflare's static assets 307-redirect "@" to "%40",
+ * which costs every image an extra round trip.
  */
 export const ADS_ENABLED = true;
 
@@ -44,7 +46,7 @@ const ALT =
 export const SPONSOR_ADS: Record<SponsorAdUnit, SponsorCreative> = {
   billboard: {
     src: "/ads/ent/970x250.webp",
-    srcset: "/ads/ent/970x250.webp 970w, /ads/ent/970x250@2x.webp 1940w",
+    srcset: "/ads/ent/970x250.webp 970w, /ads/ent/970x250-2x.webp 1940w",
     sizes: "(min-width: 1010px) 970px, 100vw",
     width: 970,
     height: 250,
@@ -53,7 +55,7 @@ export const SPONSOR_ADS: Record<SponsorAdUnit, SponsorCreative> = {
   skyscraper: {
     // Only the 2x file ships: it's a 72 KB WebP, smaller than the 1x JPEG/PNG
     // the sponsor also sent, and sharp on every screen.
-    src: "/ads/ent/160x600@2x.webp",
+    src: "/ads/ent/160x600-2x.webp",
     width: 160,
     height: 600,
     alt: ALT,
