@@ -5,15 +5,33 @@
 // src/pages/api/page-view.ts and src/lib/page-views.ts.
 ---
 <script>
-  // GA left _ga/_ga_<id> cookies on .dlptest.com that last up to two years
-  // (two properties: G-3HZY4B1201 and an older G-KWT2NTPPPL). Expire them so
-  // returning visitors end up with no cookies from this site. Remove this
-  // block once they've had time to age out (late 2028).
+  // Clear what the old site left in returning visitors' browsers, so they end
+  // up with no cookies from dlptest.com. Remove this block in late 2028, once
+  // the longest-lived of these (GA's two years) have aged out.
+  // - GA: _ga/_ga_<id> on .dlptest.com (properties G-3HZY4B1201 and an older
+  //   G-KWT2NTPPPL), removed 2026-11.
+  // - WordPress (until the 2026-06-21 Astro cutover): core's wp-settings-*,
+  //   wordpress_test_cookie, wp_lang and comment_author_* (a commenter's name,
+  //   email and URL), plus the WP Dark Mode plugin's wp-dark-mode-*.
+  //   wordpress_logged_in_* is HttpOnly, so script can't see or clear it.
+  // Only these names are touched; nothing else is read or kept.
+  const LEGACY_COOKIE =
+    /^(_ga|_ga_\w+|_gid|_gat\w*|wp-settings-[\w-]+|wp-dark-mode-[\w-]+|wordpress_test_cookie|wp_lang|comment_author_[\w-]+)$/;
   for (const name of document.cookie.split(";").map((c) => c.split("=")[0].trim())) {
-    if (!/^(_ga|_ga_\w+|_gid|_gat\w*)$/.test(name)) continue;
+    if (!LEGACY_COOKIE.test(name)) continue;
     for (const domain of ["", `; domain=${location.hostname}`, "; domain=.dlptest.com"]) {
       document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
     }
+  }
+  // WordPress also left localStorage keys (block-editor preferences, WP Dark
+  // Mode, an AI plugin). Not sent anywhere, but they're ours to clean up.
+  // The site's own "dlptest-theme" preference doesn't match and stays.
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (/^(wp[-_]|WP_)|_wp_/.test(key)) localStorage.removeItem(key);
+    }
+  } catch {
+    // Storage blocked (private mode, site data disabled): nothing to clean.
   }
 
   if (!location.pathname.startsWith("/admin")) {
