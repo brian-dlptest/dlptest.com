@@ -33,22 +33,25 @@ export const prerender = true;
       (IP address, user agent, URL, timestamp) on our behalf.
     </li>
     <li>
-      Sponsored ads are images hosted on this site. When at least half of an ad
-      is on your screen for one second, or when you click it, your browser tells
-      our server which ad it was, the page it was on, and the site that referred
-      you. Our server adds what Cloudflare reports about the request: your
-      approximate location (country, region, and city), the network your IP
-      address belongs to, and your device type, operating system, and browser.
-      This uses no cookies, and we don't store your IP address. To count unique
+      We count page views ourselves, without cookies. When a page loads, your
+      browser tells our server the page's path (never the query string) and the
+      site that referred you. Our server adds what Cloudflare reports about the
+      request: your approximate location (country, region, and city), the
+      network your IP address belongs to, and your device type, operating
+      system, and browser. We don't store your IP address. To count unique
       visitors, we keep a one-way hash of your IP address and browser that
-      changes every day. We may share summaries of this data, such as counts by
-      page, country, or network, with the advertiser.
+      changes every day, so it can't be used to follow you from one day to the
+      next.
     </li>
     <li>
-      We use Google Analytics (via Google Tag Manager) to understand aggregate
-      site usage. This sets cookies and shares standard analytics data, such as
-      your IP address and the pages you view, with Google. You can block it with
-      your browser settings or an ad/tracker blocker.
+      Sponsored ads are images hosted on this site. When at least half of an ad
+      is on your screen for one second, or when you click it, we record the
+      same details along with which ad it was. We may share summaries of this
+      data, such as counts by page, country, or network, with the advertiser.
+    </li>
+    <li>
+      We don't use Google Analytics or any other third-party analytics or ad
+      tracking.
     </li>
   </ul>
 </BaseLayout>

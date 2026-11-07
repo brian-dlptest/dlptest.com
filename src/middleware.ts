@@ -15,7 +15,6 @@ const NO_INDEX_HEADER =
 // Security headers applied to every response that exits the Worker.
 //
 // CSP allowances are narrow on purpose. Browser-loaded externals:
-//   * Google Tag Manager (+ the GA endpoints it chains to) — analytics.
 //   * Cloudflare Turnstile (challenges.cloudflare.com) — the feedback modal's
 //     CAPTCHA. The modal lives in BaseLayout, so it renders on every page;
 //     its api.js (script-src) and challenge iframe (frame-src) must be allowed.
@@ -28,8 +27,8 @@ const NO_INDEX_HEADER =
 // does not run for static asset responses).
 //
 // 'unsafe-inline' is required for both script and style:
-//   * script — the head-of-document theme bootstrap, GTM bootstrap, and
-//     Astro's hydration shims are all inline.
+//   * script — the head-of-document theme bootstrap and Astro's hydration
+//     shims are inline.
 //   * style  — every Astro component generates scoped <style> blocks.
 // Switching to nonces is the right long-term tightening; we'd need to plumb
 // a per-request nonce through Astro and inject it into every script/style
@@ -46,18 +45,15 @@ const CSP_DIRECTIVES = [
   // 'wasm-unsafe-eval' lets the browser instantiate the WASM-backed PCRE engine
   // on the /regex/ page (lazy-loaded, base64-inlined — no remote fetch). It only
   // permits WebAssembly compilation, not JS eval(). Keep in sync with _headers.
-  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.googletagmanager.com https://challenges.cloudflare.com",
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://stats.g.doubleclick.net",
+  "img-src 'self' data:",
   "font-src 'self' data:",
-  // GA4 does not post to a single host. gtag sends /g/collect to whichever of
-  // these the container picks, and a CSP wildcard never matches the apex it is
-  // built from — `*.analytics.google.com` covers region1.* but NOT
-  // analytics.google.com itself, so the apex must be listed separately.
-  // Dropping any of these silently blackholes ALL measurement (page_view and
-  // every custom event share this one transport, distinguished only by `en=`).
-  "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://stats.g.doubleclick.net https://www.google.com",
-  "frame-src https://www.googletagmanager.com https://challenges.cloudflare.com",
+  // No third-party analytics: page views and sponsor ad events go to our own
+  // /api/ endpoints ('self'). Google Analytics/GTM were removed 2026-11 so the
+  // site sets no cookies; don't add their hosts back.
+  "connect-src 'self'",
+  "frame-src https://challenges.cloudflare.com",
   // NO upgrade-insecure-requests: /http-post/ exists to send genuinely
   // cleartext POSTs, and that directive would make browsers silently upgrade
   // the form submission to HTTPS even when the page was loaded over http://.

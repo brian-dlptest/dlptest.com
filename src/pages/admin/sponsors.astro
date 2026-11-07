@@ -5,6 +5,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { verifyAccess } from "@/lib/access";
 import { SPONSOR } from "@/lib/sponsor-ad";
 import { loadSponsorReport, type BreakdownRow, type SponsorReport } from "@/lib/sponsor-metrics";
+import { envNameFor } from "@/lib/visitor";
 
 // Sponsor ad report: viewable impressions and clicks from our own cookieless
 // log (D1 SPONSOR_DB, written by /api/sponsor-event/). Server-rendered and
@@ -17,9 +18,7 @@ if (!access.ok) {
   return new Response(`Forbidden: ${access.reason}`, { status: access.status });
 }
 
-const envName = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(Astro.url.hostname)
-  ? "development"
-  : env.ENVIRONMENT || "production";
+const envName = envNameFor(Astro.url, env.ENVIRONMENT);
 
 const daysParam = Number(Astro.url.searchParams.get("days"));
 const days = [7, 30, 90].includes(daysParam) ? daysParam : 0; // 0 = everything

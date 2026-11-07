@@ -5,7 +5,6 @@ import SiteHeader, { type HeaderNavItem } from "@/components/SiteHeader.astro";
 import SubscribeModal from "@/components/SubscribeModal.astro";
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import FeedbackModal from "@/components/FeedbackModal.astro";
-import { GTM_CONTAINER_ID } from "@/lib/analytics";
 import { env } from "cloudflare:workers";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 
@@ -46,8 +45,6 @@ const fullTitle =
 // staging build correctly shows the banner and emits noindex tags.
 const isStaging = env.ENVIRONMENT === "staging";
 const shouldNoindex = noindex || isStaging;
-/** GTM/GA4 only on production so staging traffic does not pollute reports. */
-const analyticsEnabled = env.ENVIRONMENT === "production";
 const canonical = new URL(Astro.url.pathname, "https://dlptest.com").toString();
 const ogImageUrl = new URL(ogImage, "https://dlptest.com").toString();
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
@@ -202,20 +199,9 @@ const headerNav: HeaderNavItem[] = nav.map((item) =>
         } catch (e) {}
       })();
     </script>
-    <SiteAnalytics enabled={analyticsEnabled} />
+    <SiteAnalytics />
   </head>
   <body>
-    {analyticsEnabled && (
-      <noscript>
-        <iframe
-          src={`https://www.googletagmanager.com/ns.html?id=${GTM_CONTAINER_ID}`}
-          height="0"
-          width="0"
-          style="display:none;visibility:hidden"
-          title="Google Tag Manager"
-        />
-      </noscript>
-    )}
     {isStaging && (
       <div class="staging-banner">
         STAGING — content is not indexed and may differ from production.
