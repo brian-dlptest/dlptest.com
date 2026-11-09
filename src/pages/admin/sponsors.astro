@@ -99,21 +99,21 @@ const sections: { title: string; hint?: string; rows: BreakdownRow[]; mono?: boo
           <div class="v">{nf.format(report.impressions)}</div>
           <div class="sub">{report.firstDay ? `${report.firstDay} to ${report.lastDay}` : "no data yet"}</div>
         </div>
-        <div class="card">
+        <a class="card card--link" href="#recent-clicks">
           <div class="k">Clicks</div>
           <div class="v">{nf.format(report.clicks)}</div>
-          <div class="sub">CTR {ctr(report.clicks, report.impressions)}</div>
-        </div>
+          <div class="sub">CTR {ctr(report.clicks, report.impressions)} · see clicks ↓</div>
+        </a>
         <div class="card">
           <div class="k">Unique viewers</div>
           <div class="v">{nf.format(report.dailyUniqueViewers)}</div>
           <div class="sub">summed per day</div>
         </div>
-        <div class="card">
+        <a class="card card--link" href="#recent-clicks">
           <div class="k">Unique clickers</div>
           <div class="v">{nf.format(report.dailyUniqueClickers)}</div>
-          <div class="sub">summed per day</div>
-        </div>
+          <div class="sub">summed per day · see clicks ↓</div>
+        </a>
       </div>
 
       {report.daily.length > 0 && (
@@ -173,7 +173,7 @@ const sections: { title: string; hint?: string; rows: BreakdownRow[]; mono?: boo
         ))}
       </div>
 
-      <section class="clicks">
+      <section class="clicks" id="recent-clicks">
         <h2>Recent clicks</h2>
         {report.recentClicks.length === 0 ? (
           <p class="hint">No clicks yet.</p>
@@ -228,6 +228,15 @@ const sections: { title: string; hint?: string; rows: BreakdownRow[]; mono?: boo
   .card .k { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; }
   .card .v { color: var(--text); font-size: 1.8rem; font-weight: 600; line-height: 1.2; }
   .card .sub { color: var(--text-dim); font-size: 0.8rem; }
+  /* Click cards jump to the Recent clicks table. */
+  .card--link { display: block; color: inherit; text-decoration: none; transition: border-color 0.15s ease; }
+  .card--link:hover, .card--link:focus-visible { border-color: var(--accent); text-decoration: none; }
+  .card--link .sub { color: var(--accent); }
+  /* Land below the sticky site header, not under it. */
+  #recent-clicks { scroll-margin-top: 6rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html) { scroll-behavior: smooth; }
+  }
   .spark { display: flex; align-items: flex-end; gap: 2px; height: 120px; padding: 0.5rem 0; }
   .spark .bar { flex: 1; min-width: 2px; max-width: 40px; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.8; }
   .spark .bar:hover { opacity: 1; background: var(--accent-hover); }
