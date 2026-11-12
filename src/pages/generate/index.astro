@@ -158,6 +158,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
           <li><button type="button" data-format="pdf"  role="menuitem">PDF</button></li>
         </ul>
       </div>
+      <button type="button" id="copy-all-btn" class="btn-secondary" hidden>Copy all</button>
     </div>
   </form>
 
@@ -397,6 +398,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     opacity: 0.6;
     cursor: wait;
   }
+  .btn-secondary[hidden] { display: none; }
+  .btn-secondary.copied {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
 
   /* ── Brand picker ─────────────────────────────────────────────────────────── */
   .brand-picker {
@@ -458,33 +464,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   }
 
   .table-scroll { overflow-x: auto; }
-
-  :global(.copy-col) {
-    width: 1%;
-    white-space: nowrap;
-    text-align: center;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
-  :global(.copy-btn) {
-    font-size: 0.72rem;
-    padding: 0.18rem 0.5rem;
-    background: var(--bg-elev);
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-    line-height: 1.4;
-  }
-  :global(.copy-btn:hover) {
-    color: var(--text);
-    border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
-  }
-  :global(.copy-btn.copied) {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
 
   #results-table {
     min-width: 100%;
@@ -944,6 +923,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   const seedEcho = document.getElementById("seed-echo") as HTMLParagraphElement;
   const exportBtn = document.getElementById("export-btn") as HTMLButtonElement;
   const exportMenu = document.getElementById("export-menu") as HTMLUListElement;
+  const copyAllBtn = document.getElementById("copy-all-btn") as HTMLButtonElement;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -977,6 +957,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     generateBtn.disabled = true;
     statusEl.textContent = "Generating…";
     resultsDiv.hidden = true;
+    copyAllBtn.hidden = true;
 
     try {
       const body: Record<string, unknown> = { fields, count };
@@ -999,6 +980,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       renderTable(result);
       seedEcho.textContent = `Generated with seed ${result.seed} — paste this seed to reproduce the exact dataset.`;
       resultsDiv.hidden = false;
+      copyAllBtn.hidden = false;
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
@@ -1007,29 +989,32 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     }
   });
 
-  function makeCopyBtn(label: string, getText: () => string): HTMLButtonElement {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "copy-btn";
-    btn.textContent = label;
-    btn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(getText());
-        btn.textContent = "Copied!";
-        btn.classList.add("copied");
-        setTimeout(() => { btn.textContent = label; btn.classList.remove("copied"); }, 1500);
-      } catch {
-        btn.textContent = "Error";
-        setTimeout(() => { btn.textContent = label; }, 1500);
-      }
-    });
-    return btn;
-  }
+  // "Copy all" sits next to Export rather than in the table header: wide
+  // datasets (API keys) pushed a header-cell button off-screen to the right,
+  // behind a horizontal scrollbar at the bottom of the table (issue #296).
+  // It copies the rendered table as tab-separated rows, so a paste into a
+  // spreadsheet lands one value per cell.
+  copyAllBtn.addEventListener("click", async () => {
+    const label = "Copy all";
+    const text = [...resultsTbody.querySelectorAll<HTMLElement>("tr")]
+      .map((tr) =>
+        [...tr.querySelectorAll<HTMLElement>("td")]
+          .map((c) => c.textContent?.trim() ?? "").join("\t")
+      ).join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      copyAllBtn.textContent = "Copied!";
+      copyAllBtn.classList.add("copied");
+      setTimeout(() => { copyAllBtn.textContent = label; copyAllBtn.classList.remove("copied"); }, 1500);
+    } catch {
+      copyAllBtn.textContent = "Error";
+      setTimeout(() => { copyAllBtn.textContent = label; }, 1500);
+    }
+  });
 
   function renderTable(result: GenerateResult) {
     const colWidth = `${Math.max(8, Math.floor(100 / result.columns.length))}%`;
 
-    // Header row + "Copy all" button
     const headerRow = document.createElement("tr");
     for (const col of result.columns) {
       const th = document.createElement("th");
@@ -1038,20 +1023,9 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       th.style.width = colWidth;
       headerRow.appendChild(th);
     }
-    const copyAllTh = document.createElement("th");
-    copyAllTh.className = "copy-col";
-    copyAllTh.appendChild(makeCopyBtn("Copy all", () =>
-      [...resultsTbody.querySelectorAll<HTMLElement>("tr")]
-        .map((tr) =>
-          [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
-            .map((c) => c.textContent?.trim() ?? "").join("\t")
-        ).join("\n")
-    ));
-    headerRow.appendChild(copyAllTh);
     resultsThead.innerHTML = "";
     resultsThead.appendChild(headerRow);
 
-    // Body rows + per-row "Copy" button
     resultsTbody.innerHTML = "";
     for (const row of result.rows) {
       const tr = document.createElement("tr");
