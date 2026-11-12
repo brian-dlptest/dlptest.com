@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SponsorAdSlot from "@/components/SponsorAdSlot.astro";
-import { sampleData, sampleNameSsnDob, sampleNameCcnZip, sampleNameDobEmail } from "@/data/sample-data";
+import { sampleData, sampleNameSsnDob, sampleNameCcnZip, sampleNameDobEmail, sampleNamePhoneSsn } from "@/data/sample-data";
 import { libraryCategories } from "@/data/library-files";
 export const prerender = true;
 
@@ -37,6 +37,14 @@ const datasetCards = [
     subpage: "/sample-data/namedobemail/",
     columns: ["First Name", "Last Name", "Date of Birth", "Email"],
     rows: sampleNameDobEmail.map((r) => [r.first, r.last, r.dob, r.email]),
+  },
+  {
+    id: "pii-phone-ssn",
+    label: "Name + Phone + SSN",
+    description: "Phone Number + Social Security",
+    subpage: "/sample-data/namephonessn/",
+    columns: ["Name", "Phone Number", "SSN"],
+    rows: sampleNamePhoneSsn.map((r) => [r.name, r.phone, r.ssn]),
   },
 ];
 

@@ -40,8 +40,9 @@ KEYS=(
 )
 # The DLP_Test_FTP_FileZilla*.xml keys are not uploaded: the downloads route
 # builds that profile from src/data/ftp.ts.
-# The sample-ssndob.*, sample-ccnzip.* and sample-dobemail.* keys are not in
-# the WordPress backup: scripts/build-sample-tab-downloads.ts builds and uploads them.
+# The sample-ssndob.*, sample-ccnzip.*, sample-dobemail.* and sample-phonessn.*
+# keys are not in the WordPress backup: scripts/build-sample-tab-downloads.ts
+# builds and uploads them.
 
 # Content types must match src/lib/downloads.ts so the bucket-provided
 # metadata is correct even if a caller bypasses the middleware fallback.
