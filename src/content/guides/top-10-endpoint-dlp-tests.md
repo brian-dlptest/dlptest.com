@@ -10,18 +10,18 @@ categories: ["DLP", "Endpoint DLP", "Guide"]
 
 We've published a free, vendor-neutral [Endpoint DLP Test Plan](/endpoint-dlp-test-plan/): 174 test cases in a scored Excel workbook, with ready-made synthetic test files. Doing all of it properly takes weeks, because parts of it need a two-week pilot. If you only have an hour, run these ten.
 
-| # | Test | Minutes | A failure means |
-|---|---|---|---|
-| 1 | Personal cloud upload in the browser | 3 | The deployment isn't working. Stop and fix it. |
-| 2 | Paste and attach in a GenAI chat | 5 | People can hand your data to a chatbot |
-| 3 | USB: copy, then Save As | 5 | One of the two write paths is open |
-| 4 | Leave the browser: sync folder and curl | 6 | Coverage stops at the browser |
-| 5 | Install an unmanaged browser | 5 | Installing Brave gets around your policy |
-| 6 | Wrap it in an archive | 6 | Zipping a file gets around your policy |
-| 7 | Numbers that only look like cards | 5 | Expect false positives at scale |
-| 8 | Get off the corporate network | 8 | Enforcement depends on the network path |
-| 9 | Try to turn the agent off | 5 | A local admin can switch off your DLP |
-| 10 | Read the incidents cold | 7 | You have alerts you can't act on |
+| # | Test | Minutes |
+|---|---|---|
+| 1 | **Personal cloud upload in the browser.** Upload the spreadsheet to a personal Dropbox or Google Drive. If this fails, stop and fix the deployment. | 3 |
+| 2 | **Paste and attach in a GenAI chat.** Paste 30 SSNs into ChatGPT, Claude, Gemini or Copilot, then attach a CSV. | 5 |
+| 3 | **USB: copy, then Save As.** Copy the spreadsheet to a USB drive, then Save As straight to the drive from a network share. | 5 |
+| 4 | **Leave the browser: sync folder and curl.** Drop the spreadsheet in a synced folder, then post the SSNs with curl. | 6 |
+| 5 | **Install an unmanaged browser.** Repeat the cloud upload and the chatbot paste in Brave. | 5 |
+| 6 | **Wrap it in an archive.** Upload the same 25 SSNs in a zip, nested zips, a password-protected zip, a 7z and a tar.gz. | 6 |
+| 7 | **Numbers that only look like cards.** Upload valid card numbers, near-misses and order numbers. Only the valid ones should match. | 5 |
+| 8 | **Get off the corporate network.** Upload over a consumer VPN, then copy to USB while tethered to your phone. | 8 |
+| 9 | **Try to turn the agent off.** As a local admin, stop the service, kill the process and uninstall it. | 5 |
+| 10 | **Read the incidents cold.** Check that every test made an incident, then time how long it takes you to understand one. | 7 |
 
 That's 55 minutes, which leaves five for notes.
 
