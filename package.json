@@ -18,7 +18,7 @@
     "r2:create": "wrangler r2 bucket create dlptest-downloads"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.133.0",
+    "@anthropic-ai/sdk": "^1.6.0",
     "@astrojs/cloudflare": "^14.4.6",
     "@astrojs/markdown-remark": "^7.3.6",
     "@astrojs/sitemap": "^3.7.4",
