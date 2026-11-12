@@ -419,8 +419,9 @@ const localConfig = `// Local instance (npm run dev → http://localhost:4321)
           <tr>
             <td><code>generate_custom</code></td>
             <td>
-              Arbitrary fields. Takes a <code>fields</code> array of <code>{`{ name, type, blankPct?, delimiter?, cardBrands? }`}</code>, with the
-              same types as the <a href="/generate/">/generate/</a> page.
+              Arbitrary fields. Takes a <code>fields</code> array of <code>{`{ name, type, blankPct?, nearMissPct?, pattern?, delimiter?, cardBrands? }`}</code>, with the
+              same types as the <a href="/generate/">/generate/</a> page. Set <code>nearMissPct</code> to mix in values your DLP shouldn't flag,
+              and the JSON comes back with a <code>nearMisses</code> answer key. The <code>custom-regex</code> type needs a <code>pattern</code>.
             </td>
           </tr>
         </tbody>

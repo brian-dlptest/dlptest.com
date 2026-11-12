@@ -6,7 +6,7 @@ import {
   FIELD_TYPE_DEFS,
 } from "@/lib/data-generator";
 import type { GenerateResult } from "@/lib/data-generator";
-import { MAX_CUSTOM_PATTERN_LENGTH, makeMatchGenerator } from "@/lib/regex/generate-match";
+import { makeMatchGenerator } from "@/lib/regex/generate-match";
 import type { CustomField, FieldTypeKey, CardTypeName } from "@/lib/data-generator";
 import { buildExcelLikeXlsx } from "@/lib/xlsx-export";
 import {
@@ -66,10 +66,9 @@ export const POST: APIRoute = async ({ request }) => {
     const blankPct = percent(field["blankPct"]);
     const nearMissPct = percent(field["nearMissPct"]);
     const rawPattern = field["pattern"];
-    const pattern =
-      type === "custom-regex" && typeof rawPattern === "string"
-        ? rawPattern.slice(0, MAX_CUSTOM_PATTERN_LENGTH)
-        : undefined;
+    // Not truncated here: makeMatchGenerator rejects an over-long pattern with a clear
+    // message, where a silently shortened one would generate from a different regex.
+    const pattern = type === "custom-regex" && typeof rawPattern === "string" ? rawPattern : undefined;
     const rawDelim = field["delimiter"];
     const delimiter = typeof rawDelim === "string" ? rawDelim.slice(0, 5) : undefined;
     const rawBrands = field["cardBrands"];

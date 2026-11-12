@@ -220,9 +220,13 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   /* ── Builder table ─────────────────────────────────────────────────────────── */
   .builder-wrap {
     margin: 1.5rem 0 0;
+    /* The builder is wider than a phone. Scroll it here, or it stretches the whole page. */
+    overflow-x: auto;
   }
   .builder-table {
     width: 100%;
+    /* Below this the name and type boxes shrink to a few characters. */
+    min-width: 44rem;
     border-collapse: collapse;
     table-layout: auto;
   }
@@ -802,6 +806,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     return typeof err["message"] === "string" ? err["message"] : String(err["error"] ?? fallback);
   }
 
+  /**
+   * The dataset for the fields as they are now: the one on screen if nothing has
+   * changed since it was generated, otherwise a new one, which is shown before it
+   * is returned. Generate and every export go through here, so the table, the
+   * exported file and the answer key are always the same dataset.
+   */
   async function fetchCurrentData(): Promise<GenerateResult> {
     if (lastResult) return lastResult;
     const res = await fetch("/api/generate-custom/", {
@@ -814,7 +824,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       throw new Error(apiError(err, res.statusText));
     }
     const result = (await res.json()) as GenerateResult;
-    lastResult = result;
+    showResult(result);
     return result;
   }
 
@@ -995,6 +1005,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       } else {
         tbody.insertBefore(dragSrc, this);
       }
+      lastResult = null; // column order changed
     }
   }
   function onDragEnd(this: HTMLTableRowElement) {
@@ -1022,43 +1033,32 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   // so the answer key always matches what's on screen.
   let shownResult: GenerateResult | null = null;
 
+  function showResult(result: GenerateResult) {
+    lastResult = result;
+    renderTable(result);
+    seedEcho.textContent = `Generated with seed ${result.seed}. Paste this seed to get the exact same dataset back.`;
+    const nearMissCount = result.nearMisses?.length ?? 0;
+    nearMissNote.hidden = nearMissCount === 0;
+    nearMissCountEl.textContent = nearMissCount === 1 ? "1 value" : `${nearMissCount} values`;
+    resultsDiv.hidden = false;
+    copyAllBtn.hidden = false;
+    answerKeyBtn.hidden = !result.nearMisses;
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    // Same payload the exports send, so Export always matches the table.
-    const body = collectFieldsPayload();
-
     generateBtn.disabled = true;
     statusEl.textContent = "Generating…";
     resultsDiv.hidden = true;
     copyAllBtn.hidden = true;
     answerKeyBtn.hidden = true;
+    lastResult = null; // Generate always makes a new dataset
 
     try {
-      const res = await fetch("/api/generate-custom/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
-        statusEl.textContent = `Error: ${apiError(err, res.statusText)}`;
-        return;
-      }
-
-      const result = (await res.json()) as GenerateResult;
-      lastResult = result;
-      renderTable(result);
-      seedEcho.textContent = `Generated with seed ${result.seed}. Paste this seed to get the exact same dataset back.`;
-      const nearMissCount = result.nearMisses?.length ?? 0;
-      nearMissNote.hidden = nearMissCount === 0;
-      nearMissCountEl.textContent = nearMissCount === 1 ? "1 value" : `${nearMissCount} values`;
-      resultsDiv.hidden = false;
-      copyAllBtn.hidden = false;
-      answerKeyBtn.hidden = !result.nearMisses;
+      await fetchCurrentData();
       statusEl.textContent = "";
     } catch (err) {
-      statusEl.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      statusEl.textContent = `Error: ${err instanceof Error ? err.message : "unknown error"}`;
     } finally {
       generateBtn.disabled = false;
     }
@@ -1187,81 +1187,40 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const format = btn.dataset["format"]!;
     exportMenu.hidden = true;
 
-    // CSV and JSON: generate client-side when data is already cached
-    if (format === "csv") {
-      if (lastResult) {
-        downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
-        return;
-      }
-      exportBtn.disabled = true;
-      statusEl.textContent = "Generating…";
-      try {
-        const result = await fetchCurrentData();
-        downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
-        statusEl.textContent = "";
-      } catch (err) {
-        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
-      } finally {
-        exportBtn.disabled = false;
-      }
-      return;
-    }
-
-    if (format === "json") {
-      if (lastResult) {
-        downloadBlob(
-          JSON.stringify(lastResult.rows, null, 2),
-          `dlptest-custom-seed${lastResult.seed}.json`,
-          "application/json"
-        );
-        return;
-      }
-      exportBtn.disabled = true;
-      statusEl.textContent = "Generating…";
-      try {
-        const result = await fetchCurrentData();
-        downloadBlob(
-          JSON.stringify(result.rows, null, 2),
-          `dlptest-custom-seed${result.seed}.json`,
-          "application/json"
-        );
-        statusEl.textContent = "";
-      } catch (err) {
-        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
-      } finally {
-        exportBtn.disabled = false;
-      }
-      return;
-    }
-
-    // XLSX, DOCX, PDF: server-side generation
     exportBtn.disabled = true;
     statusEl.textContent = "Generating…";
     try {
-      const payload = collectFieldsPayload();
-      // Use cached seed so the download matches what's shown in the table
-      if (lastResult) payload["seed"] = lastResult.seed;
-      payload["format"] = format;
+      // Shows the dataset first if the fields changed since the last Generate (or
+      // nothing was generated yet), so the file always matches the table and the
+      // answer key.
+      const result = await fetchCurrentData();
+      const filename = `dlptest-custom-seed${result.seed}.${format}`;
 
-      const res = await fetch("/api/generate-custom/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
-        statusEl.textContent = `Download failed: ${apiError(err, res.statusText)}`;
-        return;
+      if (format === "csv") {
+        downloadBlob(clientCsv(result), filename, "text/csv");
+      } else if (format === "json") {
+        downloadBlob(JSON.stringify(result.rows, null, 2), filename, "application/json");
+      } else {
+        // XLSX, DOCX, PDF are built server-side, from the same fields and seed.
+        const payload = collectFieldsPayload();
+        payload["seed"] = result.seed;
+        payload["format"] = format;
+        const res = await fetch("/api/generate-custom/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({})) as Record<string, unknown>;
+          throw new Error(apiError(err, res.statusText));
+        }
+        const mimeMap: Record<string, string> = {
+          xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          pdf:  "application/pdf",
+        };
+        downloadBlob(await res.arrayBuffer(), filename, mimeMap[format]!);
       }
-      const seed = lastResult?.seed ?? "";
-      const ext = format;
-      const buf = await res.arrayBuffer();
-      const mimeMap: Record<string, string> = {
-        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        pdf:  "application/pdf",
-      };
-      downloadBlob(buf, `dlptest-custom-seed${seed}.${ext}`, mimeMap[format]!);
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;

@@ -287,10 +287,9 @@ const customTool: ToolDefinition = {
       const blankPct = percent(field["blankPct"]);
       const nearMissPct = percent(field["nearMissPct"]);
       const rawPattern = field["pattern"];
+      // Not truncated: an over-long pattern is rejected with a clear message.
       const pattern =
-        type === "custom-regex" && typeof rawPattern === "string"
-          ? rawPattern.slice(0, MAX_CUSTOM_PATTERN_LENGTH)
-          : undefined;
+        type === "custom-regex" && typeof rawPattern === "string" ? rawPattern : undefined;
       const rawDelim = field["delimiter"];
       const delimiter =
         typeof rawDelim === "string" ? rawDelim.slice(0, 5) : undefined;

@@ -113,9 +113,13 @@ function parse(pattern: string): Node {
           // named capture group — skip the name header
           const m = /^\?P?<[A-Za-z_]\w*>|^\?'[A-Za-z_]\w*'/.exec(pattern.slice(i))!;
           i += m[0].length;
-        } else {
+        } else if (/^\?<?[=!]/.test(pattern.slice(i))) {
           // lookahead/lookbehind — cannot reverse-generate reliably
           throw new Unsupported(`look-around is not supported (\`${tag}…\`)`);
+        } else if (/^\?[a-zA-Z-]+[:)]/.test(pattern.slice(i))) {
+          throw new Unsupported(`inline flags are not supported (\`(${tag}…\`)`);
+        } else {
+          throw new Unsupported(`this group syntax is not supported (\`(${tag}…\`)`);
         }
       }
       const inner = parseAlt();
@@ -178,12 +182,20 @@ function parse(pattern: string): Node {
 }
 
 // ─── Generator ────────────────────────────────────────────────────────────────
-function generate(node: Node, rng: () => number): string {
+// Every node visit spends from a budget, so generation always ends. The length cap
+// alone doesn't stop a pattern like (){300000000}: it repeats an empty group, the
+// output never grows, and the loop used to run to the full count (over a minute of
+// CPU for a 13-character pattern sent to the public MCP tool).
+const MAX_STEPS = 20_000;
+interface Budget { left: number }
+
+function generate(node: Node, rng: () => number, budget: Budget = { left: MAX_STEPS }): string {
+  if (--budget.left < 0) throw new Unsupported("the pattern repeats too many times to generate from");
   switch (node.t) {
     case "seq":
-      return node.items.map((n) => generate(n, rng)).join("");
+      return node.items.map((n) => generate(n, rng, budget)).join("");
     case "alt":
-      return generate(pick(node.opts, rng), rng);
+      return generate(pick(node.opts, rng), rng, budget);
     case "lit":
       return node.ch;
     case "any":
@@ -215,7 +227,7 @@ function generate(node: Node, rng: () => number): string {
       let count = lo === 0 ? (rng() < 0.5 ? 1 : 0) : lo;
       if (upper > count) count = lo + Math.floor(rng() * (Math.min(upper, lo + 3) - lo + 1));
       let out = "";
-      for (let k = 0; k < count && out.length < MAX_LENGTH; k++) out += generate(node.node, rng);
+      for (let k = 0; k < count && out.length < MAX_LENGTH; k++) out += generate(node.node, rng, budget);
       return out;
     }
   }
@@ -254,10 +266,13 @@ export function makeMatchGenerator(pattern: string): MatchGenerator {
   const compiled = runMatch("re2", pattern, "", "", { maxMatches: 1 });
   if (!compiled.ok) return { ok: false, error: compiled.error ?? "pattern doesn't compile" };
 
+  // Anchored, so the pattern has to account for the whole value. "The first match spans
+  // the string" isn't the same test: for a|ab the first match in "ab" is "a", and for a
+  // lazy \d{2,5}? it's the first two digits, so those values were thrown away.
+  const anchored = `^(?:${pattern})$`;
   const matchesWhole = (s: string): boolean => {
-    const r = runMatch("re2", pattern, "", s, { maxMatches: 1, maxInputLength: CUSTOM_VALUE_MAX_LENGTH });
-    const m = r.ok ? r.matches[0] : undefined;
-    return m !== undefined && m.start === 0 && m.end === s.length;
+    const r = runMatch("re2", anchored, "", s, { maxMatches: 1, maxInputLength: CUSTOM_VALUE_MAX_LENGTH });
+    return r.ok && r.matches.length > 0;
   };
 
   const next = (rand: () => number): string | null => {
@@ -318,7 +333,8 @@ export function generateMatchingStrings(
       let s: string;
       try {
         s = generate(ast, makeRng(0x9e3779b9 ^ (attempt + 1)));
-      } catch {
+      } catch (e) {
+        unsupported = e instanceof Error ? e.message : String(e);
         break;
       }
       if (s.length > MAX_LENGTH) continue;
