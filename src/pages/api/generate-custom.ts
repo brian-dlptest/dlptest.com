@@ -1,9 +1,12 @@
 import type { APIRoute } from "astro";
 import {
+  CustomFieldError,
   generateCustom,
   rowsToCsv,
   FIELD_TYPE_DEFS,
 } from "@/lib/data-generator";
+import type { GenerateResult } from "@/lib/data-generator";
+import { MAX_CUSTOM_PATTERN_LENGTH, makeMatchGenerator } from "@/lib/regex/generate-match";
 import type { CustomField, FieldTypeKey, CardTypeName } from "@/lib/data-generator";
 import { buildExcelLikeXlsx } from "@/lib/xlsx-export";
 import {
@@ -25,6 +28,10 @@ const VALID_FORMATS = new Set(["csv", "json", "xlsx", "docx", "pdf"]);
 const MAX_COUNT = 500;
 const DEFAULT_COUNT = 50;
 const MAX_FIELDS = 20;
+
+function percent(raw: unknown): number {
+  return typeof raw === "number" && Number.isFinite(raw) ? Math.max(0, Math.min(100, raw)) : 0;
+}
 
 export const POST: APIRoute = async ({ request }) => {
   let body: Record<string, unknown>;
@@ -56,11 +63,13 @@ export const POST: APIRoute = async ({ request }) => {
     if (typeof type !== "string" || !VALID_TYPES.has(type as FieldTypeKey)) {
       return Response.json({ ok: false, error: "invalid_field_type" }, { status: 400 });
     }
-    const rawBlank = field["blankPct"];
-    const blankPct =
-      typeof rawBlank === "number" && Number.isFinite(rawBlank)
-        ? Math.max(0, Math.min(100, rawBlank))
-        : 0;
+    const blankPct = percent(field["blankPct"]);
+    const nearMissPct = percent(field["nearMissPct"]);
+    const rawPattern = field["pattern"];
+    const pattern =
+      type === "custom-regex" && typeof rawPattern === "string"
+        ? rawPattern.slice(0, MAX_CUSTOM_PATTERN_LENGTH)
+        : undefined;
     const rawDelim = field["delimiter"];
     const delimiter = typeof rawDelim === "string" ? rawDelim.slice(0, 5) : undefined;
     const rawBrands = field["cardBrands"];
@@ -69,7 +78,15 @@ export const POST: APIRoute = async ({ request }) => {
           .filter((b): b is string => typeof b === "string")
           .filter((b): b is CardTypeName => VALID_BRANDS.has(b as CardTypeName))
       : undefined;
-    fields.push({ name, type: type as FieldTypeKey, blankPct, ...(delimiter !== undefined && { delimiter }), cardBrands: cardBrands?.length ? cardBrands : undefined });
+    fields.push({
+      name,
+      type: type as FieldTypeKey,
+      blankPct,
+      ...(nearMissPct > 0 && { nearMissPct }),
+      ...(pattern !== undefined && { pattern }),
+      ...(delimiter !== undefined && { delimiter }),
+      cardBrands: cardBrands?.length ? cardBrands : undefined,
+    });
   }
 
   const rawCount =
@@ -91,7 +108,15 @@ export const POST: APIRoute = async ({ request }) => {
       ? rawFormat
       : "json";
 
-  const result = generateCustom(fields, count, seed);
+  let result: GenerateResult;
+  try {
+    result = generateCustom(fields, count, seed, { regex: makeMatchGenerator });
+  } catch (e) {
+    if (e instanceof CustomFieldError) {
+      return Response.json({ ok: false, error: "invalid_field", message: e.message }, { status: 400 });
+    }
+    throw e;
+  }
   const filename = `dlptest-custom-seed${seed}`;
 
   if (format === "csv") {

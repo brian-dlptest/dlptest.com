@@ -8,6 +8,7 @@
 
 import {
   FIELD_TYPE_DEFS,
+  NEAR_MISS_TYPES,
   generateCustom,
   generateDataset,
   rowsToCsv,
@@ -28,7 +29,11 @@ import {
   type DlpPattern,
 } from "@/lib/regex/dlp-patterns";
 import { runMatch, type RegexEngine } from "@/lib/regex/engines";
-import { generateMatchingStrings } from "@/lib/regex/generate-match";
+import {
+  MAX_CUSTOM_PATTERN_LENGTH,
+  generateMatchingStrings,
+  makeMatchGenerator,
+} from "@/lib/regex/generate-match";
 
 export interface ToolDefinition {
   name: string;
@@ -67,7 +72,12 @@ function randomSeed(): number {
 function formatResult(result: GenerateResult, format: "json" | "csv"): string {
   if (format === "csv") return rowsToCsv(result);
   return JSON.stringify(
-    { dataset: result.dataset, columns: result.columns, rows: result.rows },
+    {
+      dataset: result.dataset,
+      columns: result.columns,
+      rows: result.rows,
+      ...(result.nearMisses && { nearMisses: result.nearMisses }),
+    },
     null,
     2,
   );
@@ -181,7 +191,7 @@ const presetTools: ToolDefinition[] = [
 const customTool: ToolDefinition = {
   name: "generate_custom",
   description:
-    "Build a custom synthetic dataset from an arbitrary list of fields. Each field has a `name` (column header) and a `type` drawn from the full library used by the /generate/ page (SSN, credit-card, DOB, email, phone, MRN, NPI, DEA, IBAN, UK NI, NHS, Canadian SIN, EU VAT, passport, driver's license, IPv4, etc.). Supports optional per-field `blankPct` (0–100), `delimiter`, and `cardBrands` filter. Returns 1–500 rows of synthetic test data — never real PII.",
+    "Build a custom synthetic dataset from an arbitrary list of fields. Each field has a `name` (column header) and a `type` drawn from the full library used by the /generate/ page (SSN, credit-card, DOB, email, phone, MRN, NPI, DEA, IBAN, UK NI, NHS, Canadian SIN, EU VAT, passport, driver's license, IPv4, etc.). Supports optional per-field `blankPct` (0–100), `nearMissPct` (0–100: values that keep the format but fail a validation rule DLP engines check, such as an SSN with group 00 or a card number that fails Luhn; JSON output then includes a `nearMisses` answer key), `delimiter`, and `cardBrands` filter. Type `custom-regex` takes a `pattern` and generates values that fully match it. Returns 1–500 rows of synthetic test data — never real PII.",
   inputSchema: {
     type: "object",
     required: ["fields"],
@@ -211,6 +221,18 @@ const customTool: ToolDefinition = {
               maximum: 100,
               default: 0,
               description: "Probability (0–100) that this field is blank in any given row.",
+            },
+            nearMissPct: {
+              type: "number",
+              minimum: 0,
+              maximum: 100,
+              default: 0,
+              description: `Probability (0–100) that a non-blank value is a near miss: right format, but fails a validation rule, so a well-tuned DLP policy should not flag it. Supported types: ${NEAR_MISS_TYPES.join(", ")}.`,
+            },
+            pattern: {
+              type: "string",
+              maxLength: MAX_CUSTOM_PATTERN_LENGTH,
+              description: "Required for type `custom-regex`: the regex every generated value must fully match (literals, classes, groups, alternation, bounded quantifiers; no look-around or backreferences).",
             },
             delimiter: {
               type: "string",
@@ -260,11 +282,15 @@ const customTool: ToolDefinition = {
           `invalid field type: ${String(type)}. Valid types: ${Object.keys(FIELD_TYPE_DEFS).join(", ")}`,
         );
       }
-      const rawBlank = field["blankPct"];
-      const blankPct =
-        typeof rawBlank === "number" && Number.isFinite(rawBlank)
-          ? Math.max(0, Math.min(100, rawBlank))
-          : 0;
+      const percent = (raw: unknown) =>
+        typeof raw === "number" && Number.isFinite(raw) ? Math.max(0, Math.min(100, raw)) : 0;
+      const blankPct = percent(field["blankPct"]);
+      const nearMissPct = percent(field["nearMissPct"]);
+      const rawPattern = field["pattern"];
+      const pattern =
+        type === "custom-regex" && typeof rawPattern === "string"
+          ? rawPattern.slice(0, MAX_CUSTOM_PATTERN_LENGTH)
+          : undefined;
       const rawDelim = field["delimiter"];
       const delimiter =
         typeof rawDelim === "string" ? rawDelim.slice(0, 5) : undefined;
@@ -280,6 +306,8 @@ const customTool: ToolDefinition = {
         name,
         type: type as FieldTypeKey,
         blankPct,
+        ...(nearMissPct > 0 && { nearMissPct }),
+        ...(pattern !== undefined && { pattern }),
         ...(delimiter !== undefined && { delimiter }),
         cardBrands: cardBrands?.length ? cardBrands : undefined,
       });
@@ -287,7 +315,7 @@ const customTool: ToolDefinition = {
 
     const count = clampCount(args["count"]);
     const format = pickFormat(args["format"]);
-    const result = generateCustom(fields, count, randomSeed());
+    const result = generateCustom(fields, count, randomSeed(), { regex: makeMatchGenerator });
     return formatResult(result, format);
   },
 };
