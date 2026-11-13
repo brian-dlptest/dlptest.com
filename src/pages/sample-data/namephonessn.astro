@@ -1,0 +1,48 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SponsorAdSlot from "@/components/SponsorAdSlot.astro";
+import SampleDataNav from "@/components/SampleDataNav.astro";
+import CopyRowScript from "@/components/CopyRowScript.astro";
+import { sampleNamePhoneSsn, downloadFiles, humanSize } from "@/data/sample-data";
+export const prerender = true;
+---
+<BaseLayout title="Sample Data — Names + Phone + SSN" description="Fake PII test data: names, phone numbers, and Social Security Numbers for DLP testing.">
+  <h1>Name + Phone Number + SSN</h1>
+  <p>
+    Fake PII test rows. Use these to check if your DLP catches combinations,
+    like an SSN in the same row as a phone number.
+  </p>
+
+  <SponsorAdSlot page="sample-data-tab">
+  <SampleDataNav active="phonessn" />
+
+  <div class="table-scroll" data-copy-table>
+    <table>
+      <thead>
+        <tr>
+          <th>First and Last Name</th>
+          <th>Phone Number</th>
+          <th>SSN</th>
+        </tr>
+      </thead>
+      <tbody>
+        {sampleNamePhoneSsn.map((row) => (
+          <tr>
+            <td>{row.name}</td>
+            <td><code>{row.phone}</code></td>
+            <td><code>{row.ssn}</code></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <CopyRowScript />
+  <h2>Sample files</h2>
+  <h3>Sample Phone &amp; SSN files</h3>
+  <ul class="download-list">
+    {downloadFiles.filter((f) => f.group === "phonessn").map((f) => (
+      <li><a href={`/downloads/?file=${f.key}`}>{f.label}</a> <span class="muted small">({humanSize(f.approxBytes)})</span></li>
+    ))}
+  </ul>
+  </SponsorAdSlot>
+</BaseLayout>

@@ -8,6 +8,7 @@ import {
 } from "@/lib/cf-analytics";
 import { env } from "cloudflare:workers";
 import { loadVisitorSummary, type CountRow, type VisitorSummary } from "@/lib/page-views";
+import { loadMcpSummary, type McpCountRow, type McpSummary } from "@/lib/mcp-calls";
 import { envNameFor } from "@/lib/visitor";
 
 // Traffic dashboard — a single pane to answer "how much traffic are we getting,
@@ -71,6 +72,43 @@ try {
   console.error("[admin/traffic] failed to load page views:", error);
   visitorsError = error instanceof Error ? error.message : "Could not load page views.";
 }
+
+// MCP server calls (src/lib/mcp-calls.ts), same window as Visitors. Isolated like
+// the other sources: if this fails, the rest of the page still renders.
+let mcp: McpSummary | null = null;
+let mcpError: string | null = null;
+try {
+  mcp = await loadMcpSummary(envName, vDays);
+} catch (error) {
+  console.error("[admin/traffic] failed to load MCP calls:", error);
+  mcpError = error instanceof Error ? error.message : "Could not load MCP calls.";
+}
+const mcpMax = mcp ? Math.max(1, ...mcp.daily.map((x) => x.toolCalls)) : 1;
+const mcpTables: { title: string; hint?: string; rows: McpCountRow[]; mono?: boolean; count: string }[] = mcp
+  ? [
+      { title: "Tools", rows: mcp.tools, mono: true, count: "Calls" },
+      {
+        title: "Clients",
+        hint: "The name a client sends when it connects (initialize). Most connect once per session.",
+        rows: mcp.clients,
+        count: "Connects",
+      },
+      {
+        title: "User agents",
+        hint: "First product in the User-Agent header, all methods.",
+        rows: mcp.agents,
+        mono: true,
+        count: "Requests",
+      },
+      {
+        title: "Networks",
+        hint: "Who owns the caller's IP (ASN). Hosted AI assistants call from their provider's cloud.",
+        rows: mcp.networks,
+        count: "Requests",
+      },
+      { title: "Countries", rows: mcp.countries, count: "Requests" },
+    ]
+  : [];
 
 // Trend signal: average daily visitors over the most recent N complete days vs
 // the first N days of the window. Direct answer to "are we losing visitors?".
@@ -363,6 +401,97 @@ const windows: { h: number; label: string }[] = [
                         <td class={t.mono ? "mono" : ""}>{t.mono ? shorten(r.key) : r.key}</td>
                         <td class="num">{nf.format(r.visitors)}</td>
                         <td class="num">{nf.format(r.views)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </section>
+          ))}
+        </div>
+      </>
+    )}
+  </section>
+
+  <section class="visitors">
+    <h2>MCP server <span class="tag">first-party</span></h2>
+    <p class="hint">
+      Requests to the MCP server at <code>mcp.dlptest.com</code> and <code>/api/mcp/</code> on <strong>{envName}</strong>,
+      same window as Visitors. Arguments and results aren't stored,
+      only which tool was called and whether it worked. Callers are counted per day, like
+      visitors. Today is partial.
+    </p>
+
+    {mcpError && (
+      <div class="flash flash--err">Could not load MCP calls: <code>{mcpError}</code></div>
+    )}
+
+    {mcp && (
+      <>
+        <div class="cards">
+          <div class="card">
+            <div class="k">Tool calls</div>
+            <div class="v">{nf.format(mcp.toolCalls)}</div>
+            <div class="sub">last {mcp.days}d</div>
+          </div>
+          <div class="card">
+            <div class="k">Callers</div>
+            <div class="v">{nf.format(mcp.dailyCallers)}</div>
+            <div class="sub">summed per day</div>
+          </div>
+          <div class="card">
+            <div class="k">Connects</div>
+            <div class="v">{nf.format(mcp.connections)}</div>
+            <div class="sub">initialize requests</div>
+          </div>
+          <div class={`card ${mcp.toolCalls > 0 && mcp.toolErrors / mcp.toolCalls > 0.2 ? "card--alert" : ""}`}>
+            <div class="k">Tool errors</div>
+            <div class="v">{mcp.toolCalls ? `${Math.round((mcp.toolErrors / mcp.toolCalls) * 100)}%` : "–"}</div>
+            <div class="sub">{nf.format(mcp.toolErrors)} calls returned an error</div>
+          </div>
+        </div>
+
+        {mcp.daily.length > 0 && (
+          <section>
+            <h2>Tool calls per day</h2>
+            <div class:list={["spark", { "spark--labeled": mcp.daily.length <= 14 }]}>
+              {mcp.daily.map((d) => {
+                const h = Math.max(2, Math.round((d.toolCalls / mcpMax) * 100));
+                const tip = `${d.day} · ${nf.format(d.toolCalls)} tool calls · ${nf.format(d.callers)} callers`;
+                return mcp!.daily.length <= 14 ? (
+                  <div class="col" title={tip}>
+                    <div class="col__track">
+                      <div class="bar" style={`height:${h}%`} />
+                      <span class="col__val" style={`bottom:calc(${h}% + 0.25rem)`}>{nf.format(d.toolCalls)}</span>
+                    </div>
+                    <span class="col__day">{d.day.slice(5)}</span>
+                  </div>
+                ) : (
+                  <div class="bar" style={`height:${h}%`} title={tip} />
+                );
+              })}
+            </div>
+            <p class="hint">Hover a bar for the date and counts. Only days with at least one request show up.</p>
+          </section>
+        )}
+
+        <div class="grid">
+          {mcpTables.map((t) => (
+            <section>
+              <h2>{t.title}</h2>
+              {t.hint && <p class="hint">{t.hint}</p>}
+              {t.rows.length === 0 ? (
+                <p class="hint">No data yet.</p>
+              ) : (
+                <table>
+                  <thead><tr><th></th><th class="num">{t.count}</th><th class="num">Callers</th><th class="num">Errors</th></tr></thead>
+                  <tbody>
+                    {t.rows.map((r) => (
+                      <tr>
+                        <td class={t.mono ? "mono" : ""}>{t.mono ? shorten(r.key) : r.key}</td>
+                        <td class="num">{nf.format(r.calls)}</td>
+                        <td class="num">{nf.format(r.callers)}</td>
+                        <td class="num">{r.errors ? nf.format(r.errors) : ""}</td>
                       </tr>
                     ))}
                   </tbody>

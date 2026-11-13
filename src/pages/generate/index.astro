@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SponsorAdSlot from "@/components/SponsorAdSlot.astro";
-import { FIELD_TYPE_DEFS, DELIMITER_DEFAULTS } from "@/lib/data-generator";
+import { FIELD_TYPE_DEFS, DELIMITER_DEFAULTS, NEAR_MISS_TYPES } from "@/lib/data-generator";
 import type { FieldTypeKey } from "@/lib/data-generator";
 
 // Build grouped options for the type <select>
@@ -10,7 +10,7 @@ for (const [key, def] of Object.entries(FIELD_TYPE_DEFS) as [FieldTypeKey, { lab
   if (!groups[def.group]) groups[def.group] = [];
   groups[def.group].push({ key, label: def.label });
 }
-const GROUP_ORDER = ["Basic", "Network / Tech", "Credentials / Secrets", "US PII / PCI", "US Specialized", "International"];
+const GROUP_ORDER = ["Basic", "Network / Tech", "Credentials / Secrets", "US PII / PCI", "US Specialized", "International", "Custom"];
 
 const defaultFields: { name: string; type: FieldTypeKey }[] = [
   { name: "id",         type: "row-number" },
@@ -29,6 +29,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   <p>
     Add fields, choose their types, and generate test data for DLP testing. All of the
     values are fake. Use a seed if you want the exact same data back next time.
+    Set a Near-miss % to mix in values your DLP shouldn't flag.
   </p>
 
   <SponsorAdSlot page="sample-data-tab" />
@@ -44,6 +45,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         <option value="pii-ssn-dob">Name + SSN + Date of Birth (PII)</option>
         <option value="pci-ccn-zip">Name + Credit Card + ZIP (PCI)</option>
         <option value="pii-dob-email">Name + Date of Birth + Email (PII)</option>
+        <option value="pii-phone-ssn">Name + Phone + SSN (PII)</option>
       </optgroup>
       <optgroup label="US Specialized">
         <option value="hipaa">HIPAA: Name + MRN + ICD-10 + CPT</option>
@@ -74,6 +76,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
           <th class="col-type">Type</th>
           <th class="col-options">Options</th>
           <th class="col-blank">Blank %</th>
+          <th class="col-nearmiss"><abbr title="Percent of values that look real but fail a check, like a bad checksum. Your DLP shouldn't flag these.">Near-miss %</abbr></th>
           <th class="col-actions"></th>
         </tr>
       </thead>
@@ -104,6 +107,9 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
                   none
                 </label>
               </span>
+              <span class="regex-group">
+                <input type="text" class="regex-input" maxlength="200" spellcheck="false" placeholder="e.g. EMP-\d{6}" aria-label="Regex pattern" />
+              </span>
               <div class="brand-picker" hidden>
                 <span class="brand-picker-label">brands:</span>
                 <label class="brand-label"><input type="checkbox" class="brand-check" value="Visa" checked /> Visa</label>
@@ -120,6 +126,13 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
                   <span class="pct-sign">%</span>
                 </div>
               </div>
+            </td>
+            <td class="col-nearmiss">
+              <div class="blank-input-row nearmiss-input-row">
+                <input type="number" class="nearmiss-pct-input" value="0" min="0" max="100" aria-label="Near-miss percent" />
+                <span class="pct-sign">%</span>
+              </div>
+              <span class="nearmiss-na muted" title="No validation rule for this type, so it has no near miss">—</span>
             </td>
             <td class="col-remove">
               <button type="button" class="btn-remove" aria-label="Remove field">✕</button>
@@ -158,6 +171,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
           <li><button type="button" data-format="pdf"  role="menuitem">PDF</button></li>
         </ul>
       </div>
+      <button type="button" id="copy-all-btn" class="btn-secondary" hidden>Copy all</button>
+      <button type="button" id="answer-key-btn" class="btn-secondary" hidden>Answer key (CSV)</button>
     </div>
   </form>
 
@@ -165,6 +180,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   <div id="generate-results" hidden>
     <p id="seed-echo" class="muted small"></p>
+    <p id="nearmiss-note" class="muted small" hidden>
+      <span id="nearmiss-count"></span> are near misses, <span class="nearmiss-legend">highlighted like this</span>.
+      They look real but fail a check, so your DLP shouldn't flag them. Hover one to see why.
+      The answer key lists them in a separate file.
+    </p>
     <div class="table-scroll">
       <table id="results-table">
         <thead id="results-head"></thead>
@@ -201,9 +221,13 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   /* ── Builder table ─────────────────────────────────────────────────────────── */
   .builder-wrap {
     margin: 1.5rem 0 0;
+    /* The builder is wider than a phone. Scroll it here, or it stretches the whole page. */
+    overflow-x: auto;
   }
   .builder-table {
     width: 100%;
+    /* Below this the name and type boxes shrink to a few characters. */
+    min-width: 44rem;
     border-collapse: collapse;
     table-layout: auto;
   }
@@ -220,6 +244,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   .builder-table thead th.col-type { width: 34%; }
   .builder-table thead th.col-options { width: 1px; white-space: nowrap; }
   .builder-table thead th.col-blank { width: 5.5rem; white-space: nowrap; }
+  .builder-table thead th.col-nearmiss { width: 6.5rem; white-space: nowrap; }
+  .builder-table thead th abbr { text-decoration: underline dotted; cursor: help; }
   .builder-table thead th.col-actions { width: 1px; }
 
   .builder-row td {
@@ -335,6 +361,48 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     font-size: 0.85rem;
     color: var(--muted, #888);
   }
+  .nearmiss-pct-input {
+    width: 4rem;
+    padding: 0.38rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.92rem;
+    text-align: right;
+  }
+  /* Which of the two shows is set by .has-nearmiss on the row. */
+  .nearmiss-input-row { display: none; }
+  .nearmiss-na { padding-left: 0.6rem; }
+  .builder-row.has-nearmiss .nearmiss-input-row { display: flex; }
+  .builder-row.has-nearmiss .nearmiss-na { display: none; }
+
+  .regex-group { display: none; }
+  .builder-row.is-regex .regex-group { display: block; }
+  .regex-input {
+    width: 14rem;
+    padding: 0.3rem 0.45rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: monospace;
+  }
+
+  /* Near-miss cells in the results table (JS-created, so :global). */
+  :global(#results-table td.near-miss) {
+    background: color-mix(in srgb, var(--accent, #7c5cbf) 12%, transparent);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: help;
+  }
+  .nearmiss-legend {
+    display: inline-block;
+    padding: 0 0.35rem;
+    background: color-mix(in srgb, var(--accent, #7c5cbf) 12%, transparent);
+    text-decoration: underline dotted;
+  }
 
   .btn-remove {
     padding: 0.3rem 0.55rem;
@@ -396,6 +464,11 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   .btn-secondary:disabled {
     opacity: 0.6;
     cursor: wait;
+  }
+  .btn-secondary[hidden] { display: none; }
+  .btn-secondary.copied {
+    color: var(--accent);
+    border-color: var(--accent);
   }
 
   /* ── Brand picker ─────────────────────────────────────────────────────────── */
@@ -459,33 +532,6 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 
   .table-scroll { overflow-x: auto; }
 
-  :global(.copy-col) {
-    width: 1%;
-    white-space: nowrap;
-    text-align: center;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
-  :global(.copy-btn) {
-    font-size: 0.72rem;
-    padding: 0.18rem 0.5rem;
-    background: var(--bg-elev);
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-    line-height: 1.4;
-  }
-  :global(.copy-btn:hover) {
-    color: var(--text);
-    border-color: color-mix(in srgb, var(--border) 50%, var(--accent));
-  }
-  :global(.copy-btn.copied) {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
   #results-table {
     min-width: 100%;
     width: max-content;
@@ -497,6 +543,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
      (Using define:vars on the <script> below would mark it is:inline and skip Astro's
      TypeScript transpilation, breaking the whole script — see PR fixing the dead buttons.) -->
 <script type="application/json" id="delim-defaults" set:html={JSON.stringify(DELIMITER_DEFAULTS)}></script>
+<script type="application/json" id="nearmiss-types" set:html={JSON.stringify(NEAR_MISS_TYPES)}></script>
 
 <script>
   // ── Type registry (mirrors FIELD_TYPE_DEFS keys, used for default name suggestions) ──
@@ -536,6 +583,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     "account-number":  "account_number",
     "npi":             "npi",
     "dea-number":      "dea_number",
+    "custom-regex":    "custom_id",
     "specialty":       "specialty",
     "us-state":        "state",
     "dl-number":       "dl_number",
@@ -586,6 +634,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       { type: "last-name",  name: "last_name" },
       { type: "dob",        name: "date_of_birth" },
       { type: "email",      name: "email" },
+    ],
+    "pii-phone-ssn": [
+      { type: "first-name", name: "first_name" },
+      { type: "last-name",  name: "last_name" },
+      { type: "phone",      name: "phone" },
+      { type: "ssn",        name: "ssn" },
     ],
     "hipaa": [
       { type: "first-name", name: "first_name" },
@@ -672,6 +726,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     firstTypeSelect.dispatchEvent(new Event("change")); // syncs delimiter + brand picker
     firstRow.querySelector<HTMLInputElement>(".field-name-input")!.value = fields[0].name;
     firstRow.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+    firstRow.querySelector<HTMLInputElement>(".nearmiss-pct-input")!.value = "0";
+    firstRow.querySelector<HTMLInputElement>(".regex-input")!.value = "";
     // Remove all rows after the first
     rows.slice(1).forEach((r) => r.remove());
     // Append remaining preset fields as new rows
@@ -701,12 +757,19 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   ]);
 
   type DatasetRow = Record<string, string>;
+  interface NearMiss { row: number; field: string; value: string; reason: string }
   interface GenerateResult {
     rows: DatasetRow[];
     columns: string[];
     seed: number;
     count: number;
+    nearMisses?: NearMiss[];
   }
+
+  // Types that support a Near-miss %, from NEAR_MISS_TYPES in data-generator.ts.
+  const NEAR_MISS_TYPES = new Set<string>(
+    JSON.parse(document.getElementById("nearmiss-types")?.textContent || "[]"),
+  );
 
   let lastResult: GenerateResult | null = null;
 
@@ -729,6 +792,9 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         type,
         blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
       };
+      const nearMissPct = parseInt(row.querySelector<HTMLInputElement>(".nearmiss-pct-input")!.value || "0", 10) || 0;
+      if (NEAR_MISS_TYPES.has(type) && nearMissPct > 0) fieldObj["nearMissPct"] = nearMissPct;
+      if (type === "custom-regex") fieldObj["pattern"] = row.querySelector<HTMLInputElement>(".regex-input")!.value;
       if (noneCheck.checked) {
         fieldObj["delimiter"] = "";
       } else if (delimInput.value) {
@@ -742,6 +808,17 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     return payload;
   }
 
+  /** The API's error as a sentence: a field's own message when there is one. */
+  function apiError(err: Record<string, unknown>, fallback: string): string {
+    return typeof err["message"] === "string" ? err["message"] : String(err["error"] ?? fallback);
+  }
+
+  /**
+   * The dataset for the fields as they are now: the one on screen if nothing has
+   * changed since it was generated, otherwise a new one, which is shown before it
+   * is returned. Generate and every export go through here, so the table, the
+   * exported file and the answer key are always the same dataset.
+   */
   async function fetchCurrentData(): Promise<GenerateResult> {
     if (lastResult) return lastResult;
     const res = await fetch("/api/generate-custom/", {
@@ -751,10 +828,10 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({})) as Record<string, unknown>;
-      throw new Error(String(err["error"] ?? res.statusText));
+      throw new Error(apiError(err, res.statusText));
     }
     const result = (await res.json()) as GenerateResult;
-    lastResult = result;
+    showResult(result);
     return result;
   }
 
@@ -787,6 +864,8 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     tr.querySelector<HTMLInputElement>(".field-name-input")!.value = name ?? DEFAULT_NAMES[type] ?? type;
     tr.querySelector<HTMLSelectElement>(".field-type-select")!.value = type;
     tr.querySelector<HTMLInputElement>(".blank-pct-input")!.value = "0";
+    tr.querySelector<HTMLInputElement>(".nearmiss-pct-input")!.value = "0";
+    tr.querySelector<HTMLInputElement>(".regex-input")!.value = "";
     tr.querySelector<HTMLDivElement>(".blank-bar-fill")!.style.width = "0%";
     tr.querySelector<HTMLInputElement>(".delim-input")!.value = "";
     (tr.querySelector<HTMLInputElement>(".delim-none-check")!).checked = false;
@@ -848,6 +927,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       brandPicker.hidden = !BRAND_PICKER_TYPES.has(typeSelect.value);
     }
 
+    // Near-miss % only for types that have one; the pattern box only for Custom Regex.
+    function syncTypeOptions() {
+      tr.classList.toggle("has-nearmiss", NEAR_MISS_TYPES.has(typeSelect.value));
+      tr.classList.toggle("is-regex", typeSelect.value === "custom-regex");
+    }
+
     noneCheck.addEventListener("change", () => {
       if (noneCheck.checked) {
         delimInput.value = "";
@@ -865,10 +950,12 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       if (suggested && currentIsDefault) nameInput.value = suggested;
       updateDelimVisibility();
       syncBrandPicker();
+      syncTypeOptions();
     });
 
     updateDelimVisibility();
     syncBrandPicker();
+    syncTypeOptions();
 
     // Drag-and-drop
     tr.addEventListener("dragstart", onDragStart);
@@ -925,6 +1012,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       } else {
         tbody.insertBefore(dragSrc, this);
       }
+      lastResult = null; // column order changed
     }
   }
   function onDragEnd(this: HTMLTableRowElement) {
@@ -944,92 +1032,75 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
   const seedEcho = document.getElementById("seed-echo") as HTMLParagraphElement;
   const exportBtn = document.getElementById("export-btn") as HTMLButtonElement;
   const exportMenu = document.getElementById("export-menu") as HTMLUListElement;
+  const copyAllBtn = document.getElementById("copy-all-btn") as HTMLButtonElement;
+  const answerKeyBtn = document.getElementById("answer-key-btn") as HTMLButtonElement;
+  const nearMissNote = document.getElementById("nearmiss-note") as HTMLParagraphElement;
+  const nearMissCountEl = document.getElementById("nearmiss-count") as HTMLSpanElement;
+  // The result the table shows. lastResult is cleared on any edit; this isn't,
+  // so the answer key always matches what's on screen.
+  let shownResult: GenerateResult | null = null;
+
+  function showResult(result: GenerateResult) {
+    lastResult = result;
+    renderTable(result);
+    seedEcho.textContent = `Generated with seed ${result.seed}. Paste this seed to get the exact same dataset back.`;
+    const nearMissCount = result.nearMisses?.length ?? 0;
+    nearMissNote.hidden = nearMissCount === 0;
+    nearMissCountEl.textContent = nearMissCount === 1 ? "1 value" : `${nearMissCount} values`;
+    resultsDiv.hidden = false;
+    copyAllBtn.hidden = false;
+    answerKeyBtn.hidden = !result.nearMisses;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const formData = new FormData(form);
-    const count = Math.max(1, Math.min(500, parseInt(formData.get("count") as string, 10) || 50));
-    const rawSeed = (formData.get("seed") as string).trim();
-    const seed = rawSeed !== "" ? parseInt(rawSeed, 10) : undefined;
-
-    const fields = getRows().map((row) => {
-      const type       = row.querySelector<HTMLSelectElement>(".field-type-select")!.value;
-      const noneCheck  = row.querySelector<HTMLInputElement>(".delim-none-check")!;
-      const delimInput = row.querySelector<HTMLInputElement>(".delim-input")!;
-      const brandPicker = row.querySelector<HTMLElement>(".brand-picker");
-      const cardBrands = brandPicker && !brandPicker.hidden
-        ? Array.from(row.querySelectorAll<HTMLInputElement>(".brand-check:checked")).map((cb) => cb.value)
-        : undefined;
-      const fieldObj: Record<string, unknown> = {
-        name:     row.querySelector<HTMLInputElement>(".field-name-input")!.value.trim() || "field",
-        type,
-        blankPct: parseInt(row.querySelector<HTMLInputElement>(".blank-pct-input")!.value || "0", 10) || 0,
-      };
-      if (noneCheck.checked) {
-        fieldObj["delimiter"] = "";
-      } else if (delimInput.value) {
-        fieldObj["delimiter"] = delimInput.value;
-      }
-      if (cardBrands && cardBrands.length > 0) fieldObj["cardBrands"] = cardBrands;
-      return fieldObj;
-    });
-
     generateBtn.disabled = true;
     statusEl.textContent = "Generating…";
     resultsDiv.hidden = true;
+    copyAllBtn.hidden = true;
+    answerKeyBtn.hidden = true;
+    lastResult = null; // Generate always makes a new dataset
 
     try {
-      const body: Record<string, unknown> = { fields, count };
-      if (seed !== undefined && !isNaN(seed)) body["seed"] = seed;
-
-      const res = await fetch("/api/generate-custom/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
-        statusEl.textContent = `Error: ${String(err["error"] ?? res.statusText)}`;
-        return;
-      }
-
-      const result = (await res.json()) as GenerateResult;
-      lastResult = result;
-      renderTable(result);
-      seedEcho.textContent = `Generated with seed ${result.seed} — paste this seed to reproduce the exact dataset.`;
-      resultsDiv.hidden = false;
+      await fetchCurrentData();
       statusEl.textContent = "";
     } catch (err) {
-      statusEl.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+      statusEl.textContent = `Error: ${err instanceof Error ? err.message : "unknown error"}`;
     } finally {
       generateBtn.disabled = false;
     }
   });
 
-  function makeCopyBtn(label: string, getText: () => string): HTMLButtonElement {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "copy-btn";
-    btn.textContent = label;
-    btn.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(getText());
-        btn.textContent = "Copied!";
-        btn.classList.add("copied");
-        setTimeout(() => { btn.textContent = label; btn.classList.remove("copied"); }, 1500);
-      } catch {
-        btn.textContent = "Error";
-        setTimeout(() => { btn.textContent = label; }, 1500);
-      }
-    });
-    return btn;
-  }
+  // "Copy all" sits next to Export rather than in the table header: wide
+  // datasets (API keys) pushed a header-cell button off-screen to the right,
+  // behind a horizontal scrollbar at the bottom of the table (issue #296).
+  // It copies the rendered table as tab-separated rows, so a paste into a
+  // spreadsheet lands one value per cell.
+  copyAllBtn.addEventListener("click", async () => {
+    const label = "Copy all";
+    const text = [...resultsTbody.querySelectorAll<HTMLElement>("tr")]
+      .map((tr) =>
+        [...tr.querySelectorAll<HTMLElement>("td")]
+          .map((c) => c.textContent?.trim() ?? "").join("\t")
+      ).join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      copyAllBtn.textContent = "Copied!";
+      copyAllBtn.classList.add("copied");
+      setTimeout(() => { copyAllBtn.textContent = label; copyAllBtn.classList.remove("copied"); }, 1500);
+    } catch {
+      copyAllBtn.textContent = "Error";
+      setTimeout(() => { copyAllBtn.textContent = label; }, 1500);
+    }
+  });
 
   function renderTable(result: GenerateResult) {
+    shownResult = result;
     const colWidth = `${Math.max(8, Math.floor(100 / result.columns.length))}%`;
+    const nearMissReason = new Map<string, string>(
+      (result.nearMisses ?? []).map((m) => [`${m.row}|${m.field}`, m.reason]),
+    );
 
-    // Header row + "Copy all" button
     const headerRow = document.createElement("tr");
     for (const col of result.columns) {
       const th = document.createElement("th");
@@ -1038,26 +1109,20 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       th.style.width = colWidth;
       headerRow.appendChild(th);
     }
-    const copyAllTh = document.createElement("th");
-    copyAllTh.className = "copy-col";
-    copyAllTh.appendChild(makeCopyBtn("Copy all", () =>
-      [...resultsTbody.querySelectorAll<HTMLElement>("tr")]
-        .map((tr) =>
-          [...tr.querySelectorAll<HTMLElement>("td:not(.copy-col)")]
-            .map((c) => c.textContent?.trim() ?? "").join("\t")
-        ).join("\n")
-    ));
-    headerRow.appendChild(copyAllTh);
     resultsThead.innerHTML = "";
     resultsThead.appendChild(headerRow);
 
-    // Body rows + per-row "Copy" button
     resultsTbody.innerHTML = "";
-    for (const row of result.rows) {
+    result.rows.forEach((row, i) => {
       const tr = document.createElement("tr");
       for (const col of result.columns) {
         const td = document.createElement("td");
         const value = String(row[col] ?? "");
+        const reason = nearMissReason.get(`${i + 1}|${col}`);
+        if (reason) {
+          td.classList.add("near-miss");
+          td.title = `Near miss: ${reason}`;
+        }
         if (CODE_COLUMNS.has(col)) {
           const code = document.createElement("code");
           code.textContent = value;
@@ -1068,8 +1133,25 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
         tr.appendChild(td);
       }
       resultsTbody.appendChild(tr);
-    }
+    });
   }
+
+  // Answer key: one line per near-miss cell. A separate file, so the labels
+  // never end up in the data someone scans with their DLP.
+  answerKeyBtn.addEventListener("click", () => {
+    if (!shownResult?.nearMisses) return;
+    // Quote every cell, and stop a field name like "=1+1" running as a formula.
+    const cell = (v: string | number) => {
+      const s = String(v);
+      const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+      return `"${safe.replace(/"/g, '""')}"`;
+    };
+    const lines = [
+      ["row", "field", "value", "expected", "reason"].map(cell).join(","),
+      ...shownResult.nearMisses.map((m) => [m.row, m.field, m.value, "no match", m.reason].map(cell).join(",")),
+    ];
+    downloadBlob(lines.join("\r\n") + "\r\n", `dlptest-answer-key-seed${shownResult.seed}.csv`, "text/csv");
+  });
 
   function clientCsv(result: GenerateResult): string {
     function escape(v: string): string {
@@ -1112,81 +1194,40 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
     const format = btn.dataset["format"]!;
     exportMenu.hidden = true;
 
-    // CSV and JSON: generate client-side when data is already cached
-    if (format === "csv") {
-      if (lastResult) {
-        downloadBlob(clientCsv(lastResult), `dlptest-custom-seed${lastResult.seed}.csv`, "text/csv");
-        return;
-      }
-      exportBtn.disabled = true;
-      statusEl.textContent = "Generating…";
-      try {
-        const result = await fetchCurrentData();
-        downloadBlob(clientCsv(result), `dlptest-custom-seed${result.seed}.csv`, "text/csv");
-        statusEl.textContent = "";
-      } catch (err) {
-        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
-      } finally {
-        exportBtn.disabled = false;
-      }
-      return;
-    }
-
-    if (format === "json") {
-      if (lastResult) {
-        downloadBlob(
-          JSON.stringify(lastResult.rows, null, 2),
-          `dlptest-custom-seed${lastResult.seed}.json`,
-          "application/json"
-        );
-        return;
-      }
-      exportBtn.disabled = true;
-      statusEl.textContent = "Generating…";
-      try {
-        const result = await fetchCurrentData();
-        downloadBlob(
-          JSON.stringify(result.rows, null, 2),
-          `dlptest-custom-seed${result.seed}.json`,
-          "application/json"
-        );
-        statusEl.textContent = "";
-      } catch (err) {
-        statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;
-      } finally {
-        exportBtn.disabled = false;
-      }
-      return;
-    }
-
-    // XLSX, DOCX, PDF: server-side generation
     exportBtn.disabled = true;
     statusEl.textContent = "Generating…";
     try {
-      const payload = collectFieldsPayload();
-      // Use cached seed so the download matches what's shown in the table
-      if (lastResult) payload["seed"] = lastResult.seed;
-      payload["format"] = format;
+      // Shows the dataset first if the fields changed since the last Generate (or
+      // nothing was generated yet), so the file always matches the table and the
+      // answer key.
+      const result = await fetchCurrentData();
+      const filename = `dlptest-custom-seed${result.seed}.${format}`;
 
-      const res = await fetch("/api/generate-custom/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({})) as Record<string, unknown>;
-        statusEl.textContent = `Download failed: ${String(err["error"] ?? res.statusText)}`;
-        return;
+      if (format === "csv") {
+        downloadBlob(clientCsv(result), filename, "text/csv");
+      } else if (format === "json") {
+        downloadBlob(JSON.stringify(result.rows, null, 2), filename, "application/json");
+      } else {
+        // XLSX, DOCX, PDF are built server-side, from the same fields and seed.
+        const payload = collectFieldsPayload();
+        payload["seed"] = result.seed;
+        payload["format"] = format;
+        const res = await fetch("/api/generate-custom/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({})) as Record<string, unknown>;
+          throw new Error(apiError(err, res.statusText));
+        }
+        const mimeMap: Record<string, string> = {
+          xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          pdf:  "application/pdf",
+        };
+        downloadBlob(await res.arrayBuffer(), filename, mimeMap[format]!);
       }
-      const seed = lastResult?.seed ?? "";
-      const ext = format;
-      const buf = await res.arrayBuffer();
-      const mimeMap: Record<string, string> = {
-        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        pdf:  "application/pdf",
-      };
-      downloadBlob(buf, `dlptest-custom-seed${seed}.${ext}`, mimeMap[format]!);
       statusEl.textContent = "";
     } catch (err) {
       statusEl.textContent = `Download failed: ${err instanceof Error ? err.message : "unknown error"}`;

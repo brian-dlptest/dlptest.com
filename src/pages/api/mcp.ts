@@ -1,6 +1,10 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
+
+import { describeCall, recordMcpCalls, type McpCall } from "@/lib/mcp-calls";
 import { handleRpc } from "@/lib/mcp/server";
 import { ERR, rpcError } from "@/lib/mcp/protocol";
+import { envNameFor } from "@/lib/visitor";
 
 // MCP server endpoint. Implements the Streamable HTTP transport (MCP spec
 // rev 2025-03-26 / 2025-06-18) in *stateless* mode:
@@ -59,7 +63,8 @@ export const GET: APIRoute = async () =>
     405,
   );
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async (context) => {
+  const { request } = context;
   const contentType = (request.headers.get("content-type") || "").toLowerCase();
   if (!contentType.includes("application/json")) {
     return jsonResponse(
@@ -111,9 +116,15 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const responses = requests
-    .map((req) => handleRpc(req, request))
+  const answered = requests.map((req) => ({ req, res: handleRpc(req, request) }));
+  const responses = answered
+    .map((a) => a.res)
     .filter((r): r is NonNullable<typeof r> => r !== null);
+
+  recordCalls(
+    answered.map((a) => describeCall(a.req, a.res)).filter((c): c is McpCall => c !== null),
+    context,
+  );
 
   if (responses.length === 0) {
     // All entries were notifications. Per JSON-RPC 2.0 there is no response
@@ -123,3 +134,29 @@ export const POST: APIRoute = async ({ request }) => {
 
   return jsonResponse(isBatch ? responses : responses[0]);
 };
+
+// Which tools get called, for /admin/traffic (src/lib/mcp-calls.ts). Written after
+// the response goes out, and a failed write is only logged: analytics must never
+// slow down or break a tool call.
+function recordCalls(calls: McpCall[], context: Parameters<APIRoute>[0]): void {
+  if (calls.length === 0) return;
+  const { request, locals } = context;
+  let ip = "";
+  try {
+    // A getter that throws where the adapter can't supply it, so read it here.
+    ip = context.clientAddress;
+  } catch {
+    // The hash still works without it.
+  }
+  const write = recordMcpCalls(calls, {
+    envName: envNameFor(new URL(request.url), env.ENVIRONMENT),
+    ip,
+    ua: request.headers.get("User-Agent") ?? "",
+    cf: request.cf as IncomingRequestCfProperties | undefined,
+  }).catch((error) => {
+    console.error("[mcp] call log insert failed:", error);
+  });
+  const waitUntil = locals.cfContext?.waitUntil?.bind(locals.cfContext);
+  if (waitUntil) waitUntil(write);
+  else void write;
+}

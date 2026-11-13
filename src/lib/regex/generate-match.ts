@@ -8,9 +8,11 @@
 //   2. Otherwise, a bounded generic generator handles a safe ECMAScript subset
 //      (literals, ., \d\w\s and friends, character classes, groups, alternation,
 //      and bounded quantifiers). Backreferences and look-around are rejected.
-//   3. Every produced string is verified against the pattern (ECMAScript engine)
-//      before being returned. If verification fails, we return an honest error
-//      rather than a wrong answer.
+//   3. Every produced string is verified against the pattern with RE2 before
+//      being returned. If verification fails, we return an honest error rather
+//      than a wrong answer. RE2, not JavaScript's RegExp, because this runs on the
+//      server with a caller's pattern, and RegExp can backtrack exponentially:
+//      (a|aa){40}\x62 hung the public MCP tool. RE2 runs in linear time.
 
 import { DLP_PATTERNS } from "./dlp-patterns";
 import { runMatch } from "./engines";
@@ -113,9 +115,13 @@ function parse(pattern: string): Node {
           // named capture group — skip the name header
           const m = /^\?P?<[A-Za-z_]\w*>|^\?'[A-Za-z_]\w*'/.exec(pattern.slice(i))!;
           i += m[0].length;
-        } else {
+        } else if (/^\?<?[=!]/.test(pattern.slice(i))) {
           // lookahead/lookbehind — cannot reverse-generate reliably
           throw new Unsupported(`look-around is not supported (\`${tag}…\`)`);
+        } else if (/^\?[a-zA-Z-]+[:)]/.test(pattern.slice(i))) {
+          throw new Unsupported(`inline flags are not supported (\`(${tag}…\`)`);
+        } else {
+          throw new Unsupported(`this group syntax is not supported (\`(${tag}…\`)`);
         }
       }
       const inner = parseAlt();
@@ -178,12 +184,20 @@ function parse(pattern: string): Node {
 }
 
 // ─── Generator ────────────────────────────────────────────────────────────────
-function generate(node: Node, rng: () => number): string {
+// Every node visit spends from a budget, so generation always ends. The length cap
+// alone doesn't stop a pattern like (){300000000}: it repeats an empty group, the
+// output never grows, and the loop used to run to the full count (over a minute of
+// CPU for a 13-character pattern sent to the public MCP tool).
+const MAX_STEPS = 20_000;
+interface Budget { left: number }
+
+function generate(node: Node, rng: () => number, budget: Budget = { left: MAX_STEPS }): string {
+  if (--budget.left < 0) throw new Unsupported("the pattern repeats too many times to generate from");
   switch (node.t) {
     case "seq":
-      return node.items.map((n) => generate(n, rng)).join("");
+      return node.items.map((n) => generate(n, rng, budget)).join("");
     case "alt":
-      return generate(pick(node.opts, rng), rng);
+      return generate(pick(node.opts, rng), rng, budget);
     case "lit":
       return node.ch;
     case "any":
@@ -215,10 +229,76 @@ function generate(node: Node, rng: () => number): string {
       let count = lo === 0 ? (rng() < 0.5 ? 1 : 0) : lo;
       if (upper > count) count = lo + Math.floor(rng() * (Math.min(upper, lo + 3) - lo + 1));
       let out = "";
-      for (let k = 0; k < count && out.length < MAX_LENGTH; k++) out += generate(node.node, rng);
+      for (let k = 0; k < count && out.length < MAX_LENGTH; k++) out += generate(node.node, rng, budget);
       return out;
     }
   }
+}
+
+// ─── Seeded per-value generator (the /generate/ page's Custom Regex field) ────
+//
+// generateMatchingStrings() always uses the same internal seeds, so it returns
+// the same samples every time. The data generator needs one value per row from
+// its own seeded stream instead, so a seed reproduces the dataset.
+//
+// Values are verified with RE2, not ECMAScript: this runs in the Worker on a
+// visitor's pattern, and RE2 runs in linear time, so a pathological pattern
+// can't hang the request. A value counts only if the pattern matches all of it.
+
+export const MAX_CUSTOM_PATTERN_LENGTH = 200;
+const CUSTOM_VALUE_MAX_LENGTH = 200;
+const CUSTOM_ATTEMPTS = 20;
+
+export type MatchGenerator =
+  | { ok: true; next: (rand: () => number) => string | null }
+  | { ok: false; error: string };
+
+export function makeMatchGenerator(pattern: string): MatchGenerator {
+  if (!pattern) return { ok: false, error: "enter a regex pattern" };
+  if (pattern.length > MAX_CUSTOM_PATTERN_LENGTH) {
+    return { ok: false, error: `pattern is longer than ${MAX_CUSTOM_PATTERN_LENGTH} characters` };
+  }
+  // Our parser first: its messages ("look-around is not supported") read better than RE2's.
+  let ast: Node;
+  try {
+    ast = parse(pattern);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+  const compiled = runMatch("re2", pattern, "", "", { maxMatches: 1 });
+  if (!compiled.ok) return { ok: false, error: compiled.error ?? "pattern doesn't compile" };
+
+  // Anchored, so the pattern has to account for the whole value. "The first match spans
+  // the string" isn't the same test: for a|ab the first match in "ab" is "a", and for a
+  // lazy \d{2,5}? it's the first two digits, so those values were thrown away.
+  const anchored = `^(?:${pattern})$`;
+  const matchesWhole = (s: string): boolean => {
+    const r = runMatch("re2", anchored, "", s, { maxMatches: 1, maxInputLength: CUSTOM_VALUE_MAX_LENGTH });
+    return r.ok && r.matches.length > 0;
+  };
+
+  const next = (rand: () => number): string | null => {
+    for (let attempt = 0; attempt < CUSTOM_ATTEMPTS; attempt++) {
+      let s: string;
+      try {
+        s = generate(ast, rand);
+      } catch {
+        return null;
+      }
+      if (s.length > 0 && s.length <= CUSTOM_VALUE_MAX_LENGTH && matchesWhole(s)) return s;
+    }
+    return null;
+  };
+
+  // Prove the pattern can produce a value before anyone builds a dataset on it.
+  // A throwaway stream, so the caller's seeded stream is untouched.
+  if (next(makeRng(1)) === null) {
+    return {
+      ok: false,
+      error: `couldn't generate a value that fully matches this pattern (keep it to literals, classes like [A-Z] or \\d, groups, | and {n,m}; values are capped at ${CUSTOM_VALUE_MAX_LENGTH} characters)`,
+    };
+  }
+  return { ok: true, next };
 }
 
 export function generateMatchingStrings(
@@ -236,7 +316,7 @@ export function generateMatchingStrings(
   const verify = (s: string): boolean => {
     // A non-anchored pattern can match a substring; require the WHOLE generated
     // string to be produced by the pattern by checking it matches.
-    const r = runMatch("ecmascript", pattern, flags.replace(/g/g, ""), s, { maxMatches: 1 });
+    const r = runMatch("re2", pattern, flags.replace(/g/g, ""), s, { maxMatches: 1 });
     return r.ok && r.matches.length > 0;
   };
 
@@ -255,7 +335,8 @@ export function generateMatchingStrings(
       let s: string;
       try {
         s = generate(ast, makeRng(0x9e3779b9 ^ (attempt + 1)));
-      } catch {
+      } catch (e) {
+        unsupported = e instanceof Error ? e.message : String(e);
         break;
       }
       if (s.length > MAX_LENGTH) continue;
