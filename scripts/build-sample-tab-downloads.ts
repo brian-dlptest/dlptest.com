@@ -1,9 +1,11 @@
 // Builds the CSV / XLS / XLSX / PDF downloads for the Name + SSN + DOB,
-// Name + CCN + ZIP and Name + DOB + Email tabs under /sample-data/. Each file
+// Name + CCN + ZIP, Name + DOB + Email and Name + Phone + SSN tabs under
+// /sample-data/. Each file
 // holds exactly the rows and column headings its tab shows, from
 // src/data/sample-data.ts, so a download matches the table above its link.
 //
-// The keys come from `downloadFiles` (groups ssndob, ccnzip, dobemail), and
+// The keys come from `downloadFiles` (groups ssndob, ccnzip, dobemail,
+// phonessn), and
 // /downloads/?file=<key> serves them from the R2 bucket `dlptest-downloads`.
 // The Name + SSN + CCN files (sample-data.*) are the legacy WordPress files
 // that scripts/upload-r2.sh uploads, not these.
@@ -11,6 +13,10 @@
 // Usage (from the repo root, so the @/ paths in tsconfig.json resolve):
 //   npx --yes tsx scripts/build-sample-tab-downloads.ts <out-dir>
 //   npx --yes tsx scripts/build-sample-tab-downloads.ts <out-dir> --upload
+//   npx --yes tsx scripts/build-sample-tab-downloads.ts <out-dir> --only phonessn --upload
+//
+// --only <group> builds (and uploads) just that tab's files. Use it when adding
+// a tab, so the upload doesn't rewrite files that are already live.
 //
 // --upload puts each file to R2 with wrangler. Staging and production share
 // the bucket, so an upload goes live on both at once. It needs `wrangler login`
@@ -30,6 +36,7 @@ import {
   downloadFiles,
   sampleNameCcnZip,
   sampleNameDobEmail,
+  sampleNamePhoneSsn,
   sampleNameSsnDob,
 } from "@/data/sample-data";
 import { sanitizeForSpreadsheet } from "@/lib/data-generator";
@@ -43,7 +50,7 @@ const XLSX = createRequire(import.meta.url)("xlsx") as typeof import("xlsx");
 const BUCKET = "dlptest-downloads";
 
 interface Dataset {
-  group: "ssndob" | "ccnzip" | "dobemail";
+  group: "ssndob" | "ccnzip" | "dobemail" | "phonessn";
   title: string;
   columns: string[];
   rows: string[][];
@@ -67,6 +74,12 @@ const DATASETS: Dataset[] = [
     title: "Name + Date of Birth + Email",
     columns: ["First Name", "Last Name", "Date of Birth", "Email"],
     rows: sampleNameDobEmail.map((r) => [r.first, r.last, r.dob, r.email]),
+  },
+  {
+    group: "phonessn",
+    title: "Name + Phone Number + SSN",
+    columns: ["First and Last Name", "Phone Number", "SSN"],
+    rows: sampleNamePhoneSsn.map((r) => [r.name, r.phone, r.ssn]),
   },
 ];
 
@@ -159,16 +172,21 @@ async function build(ext: string, ds: Dataset): Promise<Uint8Array> {
 async function main() {
   const args = process.argv.slice(2);
   const upload = args.includes("--upload");
-  const outArg = args.find((a) => !a.startsWith("--"));
-  if (!outArg) {
-    console.error("Usage: npx --yes tsx scripts/build-sample-tab-downloads.ts <out-dir> [--upload]");
+  const onlyIdx = args.indexOf("--only");
+  const only = onlyIdx >= 0 ? args[onlyIdx + 1] : undefined;
+  const outArg = args.find((a, i) => !a.startsWith("--") && i !== onlyIdx + 1);
+  if (!outArg || (onlyIdx >= 0 && !DATASETS.some((d) => d.group === only))) {
+    console.error(
+      "Usage: npx --yes tsx scripts/build-sample-tab-downloads.ts <out-dir> [--only <group>] [--upload]\n" +
+      `Groups: ${DATASETS.map((d) => d.group).join(", ")}`,
+    );
     process.exit(2);
   }
   const outDir = resolve(outArg);
   mkdirSync(outDir, { recursive: true });
 
   const built: { key: string; path: string }[] = [];
-  for (const ds of DATASETS) {
+  for (const ds of DATASETS.filter((d) => !only || d.group === only)) {
     const files = downloadFiles.filter((f) => f.group === ds.group);
     if (files.length === 0) throw new Error(`No downloadFiles in group ${ds.group}`);
     for (const { key } of files) {

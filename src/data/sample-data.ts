@@ -200,11 +200,53 @@ export const sampleNameDobEmail: NameDobEmailRow[] = [
   { first: "Sharon", last: "Collins", dob: "2/4/1968", email: "SharonCollins@facebook.com" },
 ];
 
+// /sample-data/namephonessn/ — Name + Phone + SSN. Added 2026-11 (issue #294),
+// not from the legacy site. Names and SSNs are the same fabricated rows as the
+// SSN tabs above. Every phone number is in 555-0100 through 555-0199, the range
+// reserved for fictional use, so none of them can ring a real person.
+export interface NamePhoneSsnRow {
+  name: string;
+  phone: string;
+  ssn: string;
+}
+export const sampleNamePhoneSsn: NamePhoneSsnRow[] = [
+  { name: "Robert Aragon", phone: "(212) 555-0147", ssn: "489-36-8350" },
+  { name: "Ashley Borden", phone: "(312) 555-0182", ssn: "514-14-8905" },
+  { name: "Thomas Conley", phone: "(415) 555-0119", ssn: "690-05-5315" },
+  { name: "Susan Davis", phone: "(617) 555-0163", ssn: "421-37-1396" },
+  { name: "Christopher Diaz", phone: "(713) 555-0134", ssn: "458-02-6124" },
+  { name: "Rick Edwards", phone: "(305) 555-0178", ssn: "612-20-6833" },
+  { name: "Victor Faulkner", phone: "(404) 555-0125", ssn: "300-62-3266" },
+  { name: "Lisa Garrison", phone: "(206) 555-0191", ssn: "660-03-8360" },
+  { name: "Marjorie Green", phone: "(303) 555-0156", ssn: "213-46-8915" },
+  { name: "Mark Hall", phone: "(602) 555-0108", ssn: "449-48-3135" },
+  { name: "James Heard", phone: "(215) 555-0173", ssn: "559-81-1301" },
+  { name: "Albert Iorio", phone: "(214) 555-0140", ssn: "322-84-2281" },
+  { name: "Charles Jackson", phone: "(702) 555-0129", ssn: "646-44-9061" },
+  { name: "Teresa Kaminski", phone: "(503) 555-0187", ssn: "465-73-5022" },
+  { name: "Tim Lowe", phone: "(612) 555-0112", ssn: "044-34-6954" },
+  { name: "Monte Mceachern", phone: "(314) 555-0165", ssn: "477-36-0282" },
+  { name: "Adriane Morrison", phone: "(412) 555-0151", ssn: "421-90-3440" },
+  { name: "Jerome Munsch", phone: "(513) 555-0194", ssn: "524-02-7657" },
+  { name: "Agnes Nelson", phone: "(216) 555-0137", ssn: "205-52-0027" },
+  { name: "Lynette Oyola", phone: "(704) 555-0103", ssn: "587-03-2682" },
+  { name: "Stacey Peacock", phone: "(919) 555-0176", ssn: "687-05-8365" },
+  { name: "Julie Renfro", phone: "(615) 555-0148", ssn: "751-01-2327" },
+  { name: "Danny Reyes", phone: "(504) 555-0121", ssn: "624-84-9181" },
+  { name: "Jacki Russell", phone: "(801) 555-0169", ssn: "514-30-2668" },
+  { name: "Thomas Santos", phone: "(317) 555-0115", ssn: "451-80-3526" },
+  { name: "Mireille Townsend", phone: "(414) 555-0183", ssn: "404-12-2154" },
+  { name: "Lillian Venson", phone: "(916) 555-0131", ssn: "505-88-5714" },
+  { name: "Gail Watson", phone: "(816) 555-0158", ssn: "461-97-5660" },
+  { name: "Johnson White", phone: "(502) 555-0144", ssn: "172-32-1176" },
+  { name: "Rebecca Zwick", phone: "(207) 555-0172", ssn: "151-32-2558" },
+];
+
 export interface DownloadFile {
   /** R2 object key, served at /downloads/?file=<key>. The old root path /<key> 301s to /sample-data/. */
   key: string;
   label: string;
-  group: "sample" | "office" | "csv" | "ftp" | "state" | "ssndob" | "ccnzip" | "dobemail";
+  group: "sample" | "office" | "csv" | "ftp" | "state" | "ssndob" | "ccnzip" | "dobemail" | "phonessn";
   /** Rough size, for display only */
   approxBytes: number;
 }
@@ -225,8 +267,8 @@ export const downloadFiles: DownloadFile[] = [
   { key: "AIP_Test_Doc.docx", label: "AIP (Azure Info Protection) test document", group: "office", approxBytes: 30_000 },
   { key: "DLP_Test_FTP_FileZilla.xml", label: "FileZilla FTP profile", group: "ftp", approxBytes: 2_000 },
   { key: "DLP-Test-State-Data.zip", label: "State PII/PCI/Bank/PHI bundle (via dev2prog/DLP)", group: "state", approxBytes: 50_000_000 },
-  // The ssndob, ccnzip and dobemail files are built from the tables above by
-  // scripts/build-sample-tab-downloads.ts.
+  // The ssndob, ccnzip, dobemail and phonessn files are built from the tables
+  // above by scripts/build-sample-tab-downloads.ts.
   { key: "sample-ssndob.csv",  label: "Sample SSN & DOB (CSV)",  group: "ssndob",   approxBytes: 1_143 },
   { key: "sample-ssndob.xls",  label: "Sample SSN & DOB (XLS)",  group: "ssndob",   approxBytes: 7_168 },
   { key: "sample-ssndob.xlsx", label: "Sample SSN & DOB (XLSX)", group: "ssndob",   approxBytes: 11_931 },
@@ -239,6 +281,10 @@ export const downloadFiles: DownloadFile[] = [
   { key: "sample-dobemail.xls",  label: "Sample DOB & Email (XLS)",  group: "dobemail", approxBytes: 10_752 },
   { key: "sample-dobemail.xlsx", label: "Sample DOB & Email (XLSX)", group: "dobemail", approxBytes: 14_047 },
   { key: "sample-dobemail.pdf",  label: "Sample DOB & Email (PDF)",  group: "dobemail", approxBytes: 6_439 },
+  { key: "sample-phonessn.csv",  label: "Sample Phone & SSN (CSV)",  group: "phonessn", approxBytes: 1_298 },
+  { key: "sample-phonessn.xls",  label: "Sample Phone & SSN (XLS)",  group: "phonessn", approxBytes: 7_680 },
+  { key: "sample-phonessn.xlsx", label: "Sample Phone & SSN (XLSX)", group: "phonessn", approxBytes: 11_940 },
+  { key: "sample-phonessn.pdf",  label: "Sample Phone & SSN (PDF)",  group: "phonessn", approxBytes: 3_875 },
 ];
 
 export function humanSize(bytes: number): string {

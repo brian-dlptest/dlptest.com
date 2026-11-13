@@ -33,6 +33,10 @@ export const DOWNLOAD_KEYS: ReadonlySet<string> = new Set([
   "sample-dobemail.xls",
   "sample-dobemail.xlsx",
   "sample-dobemail.pdf",
+  "sample-phonessn.csv",
+  "sample-phonessn.xls",
+  "sample-phonessn.xlsx",
+  "sample-phonessn.pdf",
 
   // Test plans and guides. Not legacy — these are served only at
   // /downloads/?file=<key>, never at a root path.
