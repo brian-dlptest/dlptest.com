@@ -44,6 +44,14 @@ export const prerender = true;
       next.
     </li>
     <li>
+      When an app or AI assistant uses our MCP server, we record which tool it
+      called, whether the call worked, the name the app sends when it connects,
+      the first part of its user agent, and the country and network the request
+      came from. We don't store what you send to the tools or what they return,
+      and we don't store your IP address. We keep the same daily-changing hash
+      as for page views, to count unique callers.
+    </li>
+    <li>
       Sponsored ads are images hosted on this site. When at least half of an ad
       is on your screen for one second, or when you click it, we record the
       same details along with which ad it was. We may share summaries of this
