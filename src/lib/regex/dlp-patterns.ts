@@ -577,9 +577,10 @@ export const DLP_PATTERNS: DlpPattern[] = [
     id: "aws-access-key-id",
     name: "AWS Access Key ID",
     category: "Credentials / Secrets",
-    pattern: String.raw`\b(?:AKIA|ASIA|AGPA|AIDA)[A-Z0-9]{16}\b`,
+    pattern: String.raw`\b(?:AKIA|ASIA)[A-Z0-9]{16}\b`,
     flags: "g",
     example: syn("AKIA", "IOSFODNN7EXAMPLE"),
+    description: "AKIA = long-term key, ASIA = temporary (STS) key. AIDA, AROA, AGPA and ANPA look the same but are IAM user, role, group and policy IDs, not keys.",
   },
   {
     id: "aws-secret-key",

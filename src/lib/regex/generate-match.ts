@@ -221,6 +221,69 @@ function generate(node: Node, rng: () => number): string {
   }
 }
 
+// ─── Seeded per-value generator (the /generate/ page's Custom Regex field) ────
+//
+// generateMatchingStrings() always uses the same internal seeds, so it returns
+// the same samples every time. The data generator needs one value per row from
+// its own seeded stream instead, so a seed reproduces the dataset.
+//
+// Values are verified with RE2, not ECMAScript: this runs in the Worker on a
+// visitor's pattern, and RE2 runs in linear time, so a pathological pattern
+// can't hang the request. A value counts only if the pattern matches all of it.
+
+export const MAX_CUSTOM_PATTERN_LENGTH = 200;
+const CUSTOM_VALUE_MAX_LENGTH = 200;
+const CUSTOM_ATTEMPTS = 20;
+
+export type MatchGenerator =
+  | { ok: true; next: (rand: () => number) => string | null }
+  | { ok: false; error: string };
+
+export function makeMatchGenerator(pattern: string): MatchGenerator {
+  if (!pattern) return { ok: false, error: "enter a regex pattern" };
+  if (pattern.length > MAX_CUSTOM_PATTERN_LENGTH) {
+    return { ok: false, error: `pattern is longer than ${MAX_CUSTOM_PATTERN_LENGTH} characters` };
+  }
+  // Our parser first: its messages ("look-around is not supported") read better than RE2's.
+  let ast: Node;
+  try {
+    ast = parse(pattern);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+  const compiled = runMatch("re2", pattern, "", "", { maxMatches: 1 });
+  if (!compiled.ok) return { ok: false, error: compiled.error ?? "pattern doesn't compile" };
+
+  const matchesWhole = (s: string): boolean => {
+    const r = runMatch("re2", pattern, "", s, { maxMatches: 1, maxInputLength: CUSTOM_VALUE_MAX_LENGTH });
+    const m = r.ok ? r.matches[0] : undefined;
+    return m !== undefined && m.start === 0 && m.end === s.length;
+  };
+
+  const next = (rand: () => number): string | null => {
+    for (let attempt = 0; attempt < CUSTOM_ATTEMPTS; attempt++) {
+      let s: string;
+      try {
+        s = generate(ast, rand);
+      } catch {
+        return null;
+      }
+      if (s.length > 0 && s.length <= CUSTOM_VALUE_MAX_LENGTH && matchesWhole(s)) return s;
+    }
+    return null;
+  };
+
+  // Prove the pattern can produce a value before anyone builds a dataset on it.
+  // A throwaway stream, so the caller's seeded stream is untouched.
+  if (next(makeRng(1)) === null) {
+    return {
+      ok: false,
+      error: `couldn't generate a value that fully matches this pattern (keep it to literals, classes like [A-Z] or \\d, groups, | and {n,m}; values are capped at ${CUSTOM_VALUE_MAX_LENGTH} characters)`,
+    };
+  }
+  return { ok: true, next };
+}
+
 export function generateMatchingStrings(
   pattern: string,
   flags: string,
