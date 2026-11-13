@@ -1644,8 +1644,12 @@ export const NEAR_MISS_TYPES: readonly FieldTypeKey[] = Object.keys(NEAR_MISS_GE
 
 /** Thrown when a field can't be generated (e.g. a Custom Regex pattern that doesn't work). */
 export class CustomFieldError extends Error {
-  constructor(readonly field: string, message: string) {
+  // A plain field, not a constructor parameter property: Node's type stripping (which
+  // scripts/generator.test.mjs uses to load this file) can't erase those.
+  readonly field: string;
+  constructor(field: string, message: string) {
     super(`${field}: ${message}`);
+    this.field = field;
   }
 }
 
@@ -1739,6 +1743,8 @@ export function generateCustom(
     dataset: "custom",
     seed,
     count,
-    ...(fields.some((f) => f.nearMissPct && f.nearMissPct > 0) && { nearMisses }),
+    // Only when a field that has a near miss asked for one. A Near-miss % on a phone
+    // or email field does nothing, so it shouldn't produce an (empty) answer key either.
+    ...(fields.some((f) => NEAR_MISS_GENERATORS[f.type] && f.nearMissPct && f.nearMissPct > 0) && { nearMisses }),
   };
 }
