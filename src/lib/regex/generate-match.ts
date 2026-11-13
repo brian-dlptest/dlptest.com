@@ -8,9 +8,11 @@
 //   2. Otherwise, a bounded generic generator handles a safe ECMAScript subset
 //      (literals, ., \d\w\s and friends, character classes, groups, alternation,
 //      and bounded quantifiers). Backreferences and look-around are rejected.
-//   3. Every produced string is verified against the pattern (ECMAScript engine)
-//      before being returned. If verification fails, we return an honest error
-//      rather than a wrong answer.
+//   3. Every produced string is verified against the pattern with RE2 before
+//      being returned. If verification fails, we return an honest error rather
+//      than a wrong answer. RE2, not JavaScript's RegExp, because this runs on the
+//      server with a caller's pattern, and RegExp can backtrack exponentially:
+//      (a|aa){40}\x62 hung the public MCP tool. RE2 runs in linear time.
 
 import { DLP_PATTERNS } from "./dlp-patterns";
 import { runMatch } from "./engines";
@@ -314,7 +316,7 @@ export function generateMatchingStrings(
   const verify = (s: string): boolean => {
     // A non-anchored pattern can match a substring; require the WHOLE generated
     // string to be produced by the pattern by checking it matches.
-    const r = runMatch("ecmascript", pattern, flags.replace(/g/g, ""), s, { maxMatches: 1 });
+    const r = runMatch("re2", pattern, flags.replace(/g/g, ""), s, { maxMatches: 1 });
     return r.ok && r.matches.length > 0;
   };
 
