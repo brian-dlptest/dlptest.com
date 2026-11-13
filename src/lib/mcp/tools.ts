@@ -28,7 +28,7 @@ import {
   type DlpCategory,
   type DlpPattern,
 } from "@/lib/regex/dlp-patterns";
-import { runMatch, type RegexEngine } from "@/lib/regex/engines";
+import { runMatch } from "@/lib/regex/engines";
 import {
   MAX_CUSTOM_PATTERN_LENGTH,
   generateMatchingStrings,
@@ -590,9 +590,11 @@ const listDlpPatternsTool: ToolDefinition = {
   },
 };
 
-// regex_test: evaluate a pattern against text. Defaults to the RE2 engine,
-// which is linear-time (ReDoS-safe) — important because this runs server-side on
-// caller-supplied patterns. Input/pattern length are capped for the same reason.
+// regex_test: evaluate a pattern against text. RE2 only. It runs in linear time, and
+// this runs server-side on caller-supplied patterns: JavaScript's RegExp can backtrack
+// exponentially (a 14-character pattern hung it), and the `ecmascript` engine this
+// tool used to offer let any caller do that. The /regex/ page still runs JavaScript
+// and PCRE, in the visitor's browser. Input/pattern length are capped as well.
 const REGEX_TEST_MAX_INPUT = 25_000;
 const REGEX_TEST_MAX_PATTERN = 1_000;
 const REGEX_TEST_MAX_MATCHES = 1_000;
@@ -600,7 +602,7 @@ const REGEX_TEST_MAX_MATCHES = 1_000;
 const regexTestTool: ToolDefinition = {
   name: "regex_test",
   description:
-    "Test a regular expression against a string and return every match with its capture groups and character offsets — the building block for authoring and validating DLP detection rules. Choose the `engine`: 're2' (default; the linear-time RE2/Go engine used by many DLP products — ReDoS-safe) or 'ecmascript' (JavaScript `RegExp`). `flags` is a JS-style string (g, i, m, s; plus u, y for ecmascript). Pair it with list_dlp_patterns to validate library patterns against your own sample data. Matching happens server-side; nothing is stored.",
+    "Test a regular expression against a string and return every match with its capture groups and character offsets — the building block for authoring and validating DLP detection rules. Runs on RE2, the linear-time engine (also used by Go and many DLP products), so no pattern can hang it. RE2 has no look-around or backreferences; for those, use the Regex Test page at https://dlptest.com/regex/, which runs JavaScript and PCRE in your browser. `flags` is a JS-style string (g, i, m, s). Pair it with list_dlp_patterns to validate library patterns against your own sample data. Matching happens server-side; nothing is stored.",
   inputSchema: {
     type: "object",
     required: ["pattern", "text"],
@@ -620,14 +622,14 @@ const regexTestTool: ToolDefinition = {
         maxLength: 10,
         default: "g",
         description:
-          "JS-style flag string: g (find all), i (ignore case), m (multiline), s (dotall); u and y apply to the ecmascript engine only. Default 'g'.",
+          "JS-style flag string: g (find all), i (ignore case), m (multiline), s (dotall). Default 'g'.",
       },
       engine: {
         type: "string",
-        enum: ["re2", "ecmascript"],
+        enum: ["re2"],
         default: "re2",
         description:
-          "Matching engine. 're2' is linear-time and ReDoS-safe (default); 'ecmascript' uses JavaScript RegExp semantics (supports lookbehind, backreferences, sticky/unicode flags).",
+          "Matching engine. Only 're2' is available. Kept so callers that pass it keep working.",
       },
     },
     additionalProperties: false,
@@ -636,13 +638,25 @@ const regexTestTool: ToolDefinition = {
     const pattern = typeof args["pattern"] === "string" ? args["pattern"] : "";
     const text = typeof args["text"] === "string" ? args["text"] : "";
     const flags = typeof args["flags"] === "string" ? args["flags"] : "g";
-    const engine: RegexEngine = args["engine"] === "ecmascript" ? "ecmascript" : "re2";
+    const engine = args["engine"];
+    if (engine !== undefined && engine !== "re2") {
+      throw new Error(
+        `engine '${String(engine).slice(0, 20)}' isn't available: this server runs RE2 only, so no pattern can hang it. ` +
+          "For JavaScript or PCRE regexes, use https://dlptest.com/regex/, which runs them in your browser.",
+      );
+    }
 
-    const result = runMatch(engine, pattern, flags, text, {
+    const result = runMatch("re2", pattern, flags, text, {
       maxInputLength: REGEX_TEST_MAX_INPUT,
       maxPatternLength: REGEX_TEST_MAX_PATTERN,
       maxMatches: REGEX_TEST_MAX_MATCHES,
     });
+    // RE2's own message for these is cryptic (look-behind reads "invalid named capture").
+    if (!result.ok && /\(\?<?[=!]|\\[1-9]/.test(pattern)) {
+      result.error =
+        `${result.error} (RE2 has no look-around or backreferences. ` +
+        "https://dlptest.com/regex/ runs JavaScript and PCRE in your browser.)";
+    }
 
     return JSON.stringify(
       {
@@ -683,7 +697,7 @@ const REGEX_GEN_MAX_COUNT = 25;
 const regexGenerateMatchesTool: ToolDefinition = {
   name: "regex_generate_matches",
   description:
-    "Generate synthetic strings that MATCH a given regular expression — the reverse of regex_test, useful for turning a DLP detection rule into sample test data. Handles a bounded ECMAScript subset (literals, ., \\d \\w \\s and friends, character classes, groups, alternation, and bounded quantifiers); backreferences and look-around are not supported. If the pattern is one of dlptest.com's curated DLP library patterns, its known-good example is used. Every returned string is verified to actually match the pattern — if none can be produced, the tool returns an error rather than a wrong answer. Generated data is synthetic and structurally shaped only; it does not correspond to any real person or account.",
+    "Generate synthetic strings that MATCH a given regular expression — the reverse of regex_test, useful for turning a DLP detection rule into sample test data. Handles a bounded subset (literals, ., \\d \\w \\s and friends, character classes, groups, alternation, and bounded quantifiers); backreferences and look-around are not supported. If the pattern is one of dlptest.com's curated DLP library patterns, its known-good example is used. Every returned string is verified with RE2 to actually match the pattern — if none can be produced, the tool returns an error rather than a wrong answer. Generated data is synthetic and structurally shaped only; it does not correspond to any real person or account.",
   inputSchema: {
     type: "object",
     required: ["pattern"],
