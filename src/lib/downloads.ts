@@ -66,22 +66,40 @@ export async function serveR2Object(
   request: Request,
 ): Promise<Response> {
   // R2 supports Range natively via the options.range parameter on get().
+  // Suffix ranges ("bytes=-500") and anything else we don't parse are ignored,
+  // which serves the whole file: allowed by the spec and what callers expect.
   const rangeHeader = request.headers.get("range");
   let rangeOpt: { offset: number; length?: number } | undefined;
+  let unsatisfiable = false;
   if (rangeHeader) {
     const match = /^bytes=(\d+)-(\d+)?$/i.exec(rangeHeader);
     if (match) {
       const offset = Number(match[1]);
       const end = match[2] !== undefined ? Number(match[2]) : undefined;
-      rangeOpt = end !== undefined
-        ? { offset, length: end - offset + 1 }
-        : { offset };
+      if (end !== undefined && end < offset) unsatisfiable = true;
+      else rangeOpt = end !== undefined ? { offset, length: end - offset + 1 } : { offset };
     }
   }
 
-  const obj = rangeOpt
-    ? await bucket.get(key, { range: rangeOpt })
-    : await bucket.get(key);
+  // R2 throws on a range that starts past the end of the object, which used to
+  // surface as a 500. Answer 416 with the real size instead.
+  let obj: R2ObjectBody | null = null;
+  if (!unsatisfiable) {
+    try {
+      obj = rangeOpt ? await bucket.get(key, { range: rangeOpt }) : await bucket.get(key);
+    } catch (error) {
+      if (!rangeOpt) throw error;
+      unsatisfiable = true;
+    }
+  }
+  if (unsatisfiable) {
+    const head = await bucket.head(key);
+    if (!head) return new Response("Not found", { status: 404 });
+    return new Response("Requested range not satisfiable", {
+      status: 416,
+      headers: { "content-range": `bytes */${head.size}` },
+    });
+  }
 
   if (!obj) {
     return new Response("Not found", { status: 404 });
@@ -97,13 +115,12 @@ export async function serveR2Object(
   // and clients trust the etag.
   headers.set("cache-control", "public, max-age=31536000, immutable");
 
-  // If a range was requested, emit a 206 Partial Content response. R2 also
-  // accepts `suffix` ranges (e.g. "bytes=-500"), but we don't support those
-  // here — callers virtually never send them for static download URLs.
   if (rangeOpt) {
+    // Clamp to the object: a range that runs past the end is served up to the
+    // last byte, and the headers have to describe what was actually sent.
     const total = obj.size;
     const start = rangeOpt.offset;
-    const length = rangeOpt.length ?? total - start;
+    const length = Math.min(rangeOpt.length ?? total - start, total - start);
     headers.set("content-range", `bytes ${start}-${start + length - 1}/${total}`);
     headers.set("content-length", String(length));
     return new Response(obj.body, { status: 206, headers });

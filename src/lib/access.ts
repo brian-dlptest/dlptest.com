@@ -39,8 +39,8 @@ function decodeJson(segment: string): Record<string, unknown> {
   return JSON.parse(new TextDecoder().decode(b64urlToBytes(segment)));
 }
 
-async function getJwks(teamDomain: string): Promise<Jwk[]> {
-  if (jwksCache && jwksCache.domain === teamDomain && Date.now() - jwksCache.fetchedAt < JWKS_TTL_MS) {
+async function getJwks(teamDomain: string, refresh = false): Promise<Jwk[]> {
+  if (!refresh && jwksCache && jwksCache.domain === teamDomain && Date.now() - jwksCache.fetchedAt < JWKS_TTL_MS) {
     return jwksCache.keys;
   }
   const res = await fetch(`https://${teamDomain}/cdn-cgi/access/certs`);
@@ -104,19 +104,22 @@ export async function verifyAccess(request: Request): Promise<AccessResult> {
   const audList = Array.isArray(audClaim) ? audClaim : [audClaim];
   if (!audList.includes(aud)) return { ok: false, status: 401, reason: "bad_audience" };
   const now = Math.floor(Date.now() / 1000);
-  if (typeof payload.exp === "number" && payload.exp < now) {
+  // Access always sets exp, so a token without one isn't one of its tokens.
+  if (typeof payload.exp !== "number" || payload.exp < now) {
     return { ok: false, status: 401, reason: "expired" };
   }
 
   // Signature verification against the matching JWKS key.
-  let keys: Jwk[];
+  // Only the key the token names. Access rotates keys, so a kid that isn't in
+  // the cached set gets one fresh fetch before the token is refused.
+  let jwk: Jwk | undefined;
   try {
-    keys = await getJwks(teamDomain);
+    const byKid = (keys: Jwk[]) => keys.find((k) => k.kid !== undefined && k.kid === header.kid);
+    jwk = byKid(await getJwks(teamDomain)) ?? byKid(await getJwks(teamDomain, true));
   } catch (error) {
     console.error("[access] JWKS fetch failed:", error);
     return { ok: false, status: 503, reason: "jwks_unavailable" };
   }
-  const jwk = keys.find((k) => k.kid === header.kid) ?? keys[0];
   if (!jwk) return { ok: false, status: 401, reason: "no_signing_key" };
 
   let valid = false;

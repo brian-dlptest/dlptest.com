@@ -5,6 +5,12 @@ import { addSubscriber } from "@/lib/subscribe";
 
 export const prerender = false;
 
+// Generous for a real message, small enough that one submission can't push
+// megabytes through Graph into the inbox.
+const MAX_SHORT_FIELD = 200;
+const MAX_EMAIL = 254;
+const MAX_MESSAGE = 10_000;
+
 export const POST: APIRoute = async ({ request }) => {
   let form: FormData;
   try {
@@ -28,6 +34,19 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!name || !email || !subject || !message) {
     return jsonResponse({ ok: false, error: "missing_field" }, 400);
+  }
+  if (
+    name.length > MAX_SHORT_FIELD ||
+    company.length > MAX_SHORT_FIELD ||
+    subject.length > MAX_SHORT_FIELD ||
+    email.length > MAX_EMAIL ||
+    message.length > MAX_MESSAGE
+  ) {
+    return jsonResponse({ ok: false, error: "field_too_long", message: "One of the fields is too long. Please shorten it and try again." }, 400);
+  }
+  // Goes out as the Reply-To address, so it has to look like one.
+  if (!/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(email)) {
+    return jsonResponse({ ok: false, error: "invalid_email", message: "That email address doesn't look right. Please check it and try again." }, 400);
   }
 
   // Verify Cloudflare Turnstile token to block form-spam bots.
