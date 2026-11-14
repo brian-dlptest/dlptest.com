@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS mcp_calls (
   ts        TEXT NOT NULL,                 -- ISO 8601, UTC
   day       TEXT NOT NULL,                 -- YYYY-MM-DD, UTC
   env       TEXT NOT NULL,                 -- production | staging | development
-  method    TEXT NOT NULL,                 -- initialize | tools/list | tools/call | ping | other
+  method    TEXT NOT NULL,                 -- an MCP spec method name (list in mcp-calls.ts), 'other' or '(invalid)'
   tool      TEXT,                          -- tools/call only: a tool name we serve, or '(unknown)'
   ok        INTEGER NOT NULL,              -- 1 = answered without an error
   client    TEXT,                          -- initialize only: clientInfo.name the client sent

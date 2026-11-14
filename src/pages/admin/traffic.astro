@@ -88,6 +88,13 @@ const mcpTables: { title: string; hint?: string; rows: McpCountRow[]; mono?: boo
   ? [
       { title: "Tools", rows: mcp.tools, mono: true, count: "Calls" },
       {
+        title: "Methods",
+        hint: "Every request, by JSON-RPC method. The server answers initialize, ping, tools/list and tools/call; any other method is an error. \"other\" is a method that isn't in the MCP spec, and \"(invalid)\" a request that isn't valid JSON-RPC.",
+        rows: mcp.methods,
+        mono: true,
+        count: "Requests",
+      },
+      {
         title: "Clients",
         hint: "The name a client sends when it connects (initialize). Most connect once per session.",
         rows: mcp.clients,

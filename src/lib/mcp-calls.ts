@@ -7,11 +7,41 @@ import { cfFields, visitorHash } from "./visitor";
 // One row per JSON-RPC request; notifications aren't recorded. Same model as page
 // views: no raw IP, and a visitor hash that resets every UTC day.
 //
-// Nothing a caller sends is stored except the method, the tool name (only if it's
-// one of ours) and the client name from `initialize`. Arguments, results and error
-// text never leave the request. Every query binds its values.
+// Nothing a caller sends is stored except the method (only if it's a name from the
+// MCP spec), the tool name (only if it's one of ours) and the client name from
+// `initialize`. Arguments, results and error text never leave the request. Every
+// query binds its values.
 
-const METHODS = new Set(["initialize", "tools/list", "tools/call", "ping"]);
+// Every request method in the MCP spec (2025-06-18, plus tasks/* from 2025-11-25),
+// whether or not this server answers it. The server answers initialize, ping,
+// tools/list and tools/call; the rest get "method not found", and recording them by
+// name shows which ones clients want. The server-to-client ones (sampling, roots,
+// elicitation) are here because a confused client can still send them. Any other
+// string is stored as "other", and a request that isn't valid JSON-RPC (no method,
+// or jsonrpc isn't "2.0") as "(invalid)". Rows recorded before this list existed
+// stored both of those, and every unsupported method, as "other".
+const METHODS = new Set([
+  "initialize",
+  "ping",
+  "tools/list",
+  "tools/call",
+  "resources/list",
+  "resources/templates/list",
+  "resources/read",
+  "resources/subscribe",
+  "resources/unsubscribe",
+  "prompts/list",
+  "prompts/get",
+  "completion/complete",
+  "logging/setLevel",
+  "tasks/get",
+  "tasks/result",
+  "tasks/list",
+  "tasks/cancel",
+  "sampling/createMessage",
+  "roots/list",
+  "elicitation/create",
+]);
 const TOOL_NAMES = new Set(TOOLS.map((t) => t.name));
 
 export interface McpCall {
@@ -31,7 +61,12 @@ export function describeCall(request: unknown, response: unknown): McpCall | nul
     ? (request as Record<string, unknown>)
     : {};
   const params = req.params && typeof req.params === "object" ? (req.params as Record<string, unknown>) : {};
-  const method = typeof req.method === "string" && METHODS.has(req.method) ? req.method : "other";
+  const method =
+    req.jsonrpc !== "2.0" || typeof req.method !== "string"
+      ? "(invalid)"
+      : METHODS.has(req.method)
+        ? req.method
+        : "other";
 
   let tool: string | null = null;
   if (method === "tools/call") {
@@ -109,6 +144,8 @@ export interface McpSummary {
   dailyCallers: number;
   daily: { day: string; toolCalls: number; callers: number }[];
   tools: McpCountRow[];
+  /** Every request by method, unsupported ones included. */
+  methods: McpCountRow[];
   clients: McpCountRow[];
   agents: McpCountRow[];
   networks: McpCountRow[];
@@ -122,7 +159,7 @@ export async function loadMcpSummary(envName: string, days: number): Promise<Mcp
   const where = "env = ?1 AND day >= ?2";
   const counts =
     "COUNT(*) AS calls, COUNT(DISTINCT day || visitor) AS callers, SUM(CASE WHEN ok = 0 THEN 1 ELSE 0 END) AS errors";
-  const top = (col: "tool" | "client" | "agent" | "as_org" | "country", extra: string, limit = 20) =>
+  const top = (col: "method" | "tool" | "client" | "agent" | "as_org" | "country", extra: string, limit = 20) =>
     d
       .prepare(
         `SELECT COALESCE(${col}, '(unknown)') AS key, ${counts}
@@ -152,6 +189,7 @@ export async function loadMcpSummary(envName: string, days: number): Promise<Mcp
     top("agent", ""),
     top("as_org", ""),
     top("country", ""),
+    top("method", "", 30),
   ]);
 
   const rows = <T,>(i: number) => (results[i].results ?? []) as T[];
@@ -181,5 +219,6 @@ export async function loadMcpSummary(envName: string, days: number): Promise<Mcp
     agents: countRows(4),
     networks: countRows(5),
     countries: countRows(6),
+    methods: countRows(7),
   };
 }
