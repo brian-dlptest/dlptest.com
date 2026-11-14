@@ -6,7 +6,7 @@ import CopyRowScript from "@/components/CopyRowScript.astro";
 import { sampleNamePhoneSsn, downloadFiles, humanSize } from "@/data/sample-data";
 export const prerender = true;
 ---
-<BaseLayout title="Sample Data — Names + Phone + SSN" description="Fake PII test data: names, phone numbers, and Social Security Numbers for DLP testing.">
+<BaseLayout breadcrumbs={[{ name: "Sample Data Library", href: "/sample-data/" }]} title="Sample Data — Names + Phone + SSN" description="Fake PII test data: names, phone numbers, and Social Security Numbers for DLP testing.">
   <h1>Name + Phone Number + SSN</h1>
   <p>
     Fake PII test rows. Use these to check if your DLP catches combinations,

@@ -60,6 +60,7 @@ const articleJsonLd = JSON.stringify({
     title={entry.data.title}
     description={entry.data.description}
     ogType="article"
+    breadcrumbs={[{ name: "Blog", href: "/blog/" }]}
     publishedTime={entry.data.pubDate}
     modifiedTime={entry.data.updatedDate}
   >
@@ -91,6 +92,7 @@ const articleJsonLd = JSON.stringify({
     title={entry.data.title}
     description={entry.data.excerpt || undefined}
     ogType="article"
+    breadcrumbs={[{ name: "Blog", href: "/blog/" }]}
     publishedTime={entry.data.pubDate}
   >
     <script type="application/ld+json" set:html={articleJsonLd} />

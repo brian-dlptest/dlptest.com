@@ -13,12 +13,14 @@
 
 - [Sample Data Library](https://dlptest.com/sample-data/): Curated fake PII/PCI datasets (names + SSNs, credit cards + ZIPs, DOBs + emails) that pass the structural checks DLP engines use (Luhn, SSN area-group-serial). Downloadable as CSV, XLSX, PDF, and DOCX.
 - [Data Generator](https://dlptest.com/generate/): Build custom synthetic datasets from PII, PCI, HIPAA, and international field types, with seedable reproducibility. API: POST to https://dlptest.com/api/generate-custom/
+- [Endpoint DLP Test Plan](https://dlptest.com/endpoint-dlp-test-plan/): A free, vendor-neutral endpoint DLP test plan as a scored Excel workbook, with test cases across classification, policy, investigations, and usability, plus the test files each case uses.
 - [Regex Test](https://dlptest.com/regex/): A regex workbench for DLP rule authoring — ECMAScript, RE2, and PCRE engines, live match highlighting, and a searchable library of common DLP detection patterns.
 
 ## Guides
 
 - [What is Data Loss Prevention (DLP)? Complete Guide](https://dlptest.com/what-is-data-loss-prevention-dlp/)
 - [How to Deploy Endpoint DLP: A Practitioner's Guide](https://dlptest.com/endpoint-dlp-deployment-guide/)
+- [Top 10 Endpoint DLP Tests to Run If You Only Have an Hour](https://dlptest.com/top-10-endpoint-dlp-tests/)
 - [DLP Solutions Directory](https://dlptest.com/dlp-solutions-directory/)
 - [Blog & data-security news](https://dlptest.com/blog/)
 
