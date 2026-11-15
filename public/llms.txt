@@ -26,6 +26,7 @@
 
 ## Optional
 
+- [About](https://dlptest.com/about/): Who runs DLP Test. Created and maintained by Brian Hileman.
 - [Contact](https://dlptest.com/contact/)
 - [Security / vulnerability disclosure policy](https://dlptest.com/security-policy/)
 - [RSS feed](https://dlptest.com/feed.xml)

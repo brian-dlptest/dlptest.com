@@ -50,7 +50,17 @@ const articleJsonLd = JSON.stringify({
   dateModified: (updated ?? entry.data.pubDate).toISOString(),
   mainEntityOfPage: pageUrl,
   url: pageUrl,
-  author: { "@type": "Organization", name: "DLP Test", url: "https://dlptest.com/" },
+  // Guides are Brian's; the Person is described in full on /about/. News posts
+  // come from the drafting pipeline, so they stay under the site's name.
+  author:
+    type === "guide"
+      ? {
+          "@type": "Person",
+          "@id": "https://dlptest.com/about/#brian-hileman",
+          name: "Brian Hileman",
+          url: "https://dlptest.com/about/",
+        }
+      : { "@type": "Organization", name: "DLP Test", url: "https://dlptest.com/" },
   publisher: { "@id": "https://dlptest.com/#organization" },
   ...(type === "news" && entry.data.heroImage ? { image: entry.data.heroImage } : {}),
 });
