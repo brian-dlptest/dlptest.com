@@ -48,6 +48,22 @@ const datasetCards = [
   },
 ];
 
+// Secrets aren't stored as files: a committed file of key-shaped strings trips
+// GitHub push protection. These cards open the matching Quick Start template on
+// /generate/ instead (the keys are the PRESETS ids in generate/index.astro).
+const secretCards = [
+  {
+    template: "api-keys",
+    label: "API Keys",
+    description: "AWS, GitHub, Slack, Stripe, Google, OpenAI",
+  },
+  {
+    template: "credentials",
+    label: "Credentials",
+    description: "Username + Email + Password",
+  },
+];
+
 // Serialize for client-side JS
 const datasetsJson = Object.fromEntries(
   datasetCards.map((d) => [d.id, { label: d.label, columns: d.columns, rows: d.rows, subpage: d.subpage }])
@@ -69,7 +85,7 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
 ---
 <BaseLayout
   title="Sample Data Library"
-  description="Fake PII and PCI test data for DLP testing. Download it as CSV, XLSX, PDF, or DOCX, or grab identity document images for OCR testing."
+  description="Fake PII and PCI test data for DLP testing, plus fake API keys. Download it as CSV, XLSX, PDF, or DOCX, or grab identity document images for OCR testing."
 >
   <h1>Sample Data Library</h1>
   <p>
@@ -156,6 +172,27 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
           <span class="card-desc">{cat.description}</span>
           <span class="card-count muted">{cat.files.length} files</span>
         </button>
+      ))}
+    </div>
+  </section>
+
+  <section class="lib-section">
+    <h2 class="section-heading">API Keys and Credentials</h2>
+    <p class="muted small">Fake API keys and logins for testing secret detection. They use the real formats, but none of them work. These open in the data generator, where you can change the fields and download the file.</p>
+    <div class="card-grid">
+      {secretCards.map((card) => (
+        <a class="lib-card" href={`/generate/?template=${card.template}`}>
+          <span class="card-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="15" r="4"/>
+              <line x1="11" y1="12" x2="20" y2="3"/>
+              <line x1="16" y1="7" x2="19" y2="10"/>
+            </svg>
+          </span>
+          <span class="card-label">{card.label}</span>
+          <span class="card-desc">{card.description}</span>
+          <span class="card-count muted">Open in generator</span>
+        </a>
       ))}
     </div>
   </section>
@@ -248,6 +285,9 @@ const toJsonIsland = (obj: unknown) => JSON.stringify(obj).replace(/</g, "\\u003
     transition: box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
     color: var(--text);
     font: inherit;
+  }
+  a.lib-card {
+    text-decoration: none;
   }
   .lib-card:hover {
     box-shadow: 0 4px 16px rgba(0,0,0,0.08);

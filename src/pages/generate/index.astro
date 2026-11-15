@@ -23,6 +23,7 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
 ---
 <BaseLayout
   title="Data Generator"
+  webApp
   description="Build a custom dataset from any combination of PII, PCI, HIPAA, and other field types. Generate synthetic test data for DLP testing."
 >
   <h1>Data Generator</h1>
@@ -1235,4 +1236,13 @@ const defaultFields: { name: string; type: FieldTypeKey }[] = [
       exportBtn.disabled = false;
     }
   });
+
+  // /generate/?template=<key> opens with that Quick Start template loaded, so
+  // other pages (the Sample Data Library's API key cards) can link straight to one.
+  // Runs last: applyPreset needs the builder table, which is set up above.
+  const linkedTemplate = new URLSearchParams(window.location.search).get("template");
+  if (linkedTemplate && Object.hasOwn(PRESETS, linkedTemplate)) {
+    presetSelect.value = linkedTemplate;
+    applyPreset(PRESETS[linkedTemplate]);
+  }
 </script>
