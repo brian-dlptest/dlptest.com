@@ -143,7 +143,13 @@ const nav: Array<NavLink | { label: string; children: NavLink[] }> = [
   // Classification Test (/inspect-data/) is hidden from nav until the real UI
   // ships — page still exists (noindex) but is unlinked. Tracked in issue #44.
   { href: "/blog/", label: "Blog" },
-  { href: "/contact/", label: "Contact" },
+  {
+    label: "Contact",
+    children: [
+      { href: "/about/", label: "About" },
+      { href: "/contact/", label: "Contact" },
+    ],
+  },
 ];
 
 // Known top-level routes. Blog posts (news + guides) live at /<slug>/ (legacy
@@ -158,6 +164,7 @@ const TOP_LEVEL_PATHS = new Set<string>([
   "/inspect-data",
   "/blog",
   "/contact",
+  "/about",
   "/privacy-policy",
   "/terms-and-conditions",
   "/generate",
