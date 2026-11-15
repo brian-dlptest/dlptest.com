@@ -25,6 +25,11 @@ export const prerender = false;
 // request-body limit.
 const MAX_BODY_BYTES = 1 * 1024 * 1024;
 
+// Every entry in a batch runs a tool and writes an analytics row, so a 1 MB
+// body of tiny tools/call entries is thousands of calls for one request. Real
+// clients send one request at a time, or a handful.
+const MAX_BATCH = 20;
+
 function corsHeaders(): HeadersInit {
   return {
     "Access-Control-Allow-Origin": "*",
@@ -112,6 +117,13 @@ export const POST: APIRoute = async (context) => {
   if (isBatch && requests.length === 0) {
     return jsonResponse(
       rpcError(null, ERR.INVALID_REQUEST, "empty batch"),
+      400,
+    );
+  }
+
+  if (requests.length > MAX_BATCH) {
+    return jsonResponse(
+      rpcError(null, ERR.INVALID_REQUEST, `batch exceeds ${MAX_BATCH} requests`),
       400,
     );
   }

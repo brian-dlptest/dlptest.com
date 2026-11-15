@@ -19,23 +19,23 @@ const siteKey = env.CF_TURNSTILE_SITE_KEY?.trim() || "1x00000000000000000000AA";
     <form id="contact-form" method="POST" action="/api/contact/">
       <div class="field">
         <label for="c-name">Name</label>
-        <input id="c-name" name="name" type="text" autocomplete="name" required />
+        <input id="c-name" name="name" type="text" maxlength="200" autocomplete="name" required />
       </div>
       <div class="field">
         <label for="c-email">Email</label>
-        <input id="c-email" name="email" type="email" autocomplete="email" required />
+        <input id="c-email" name="email" type="email" maxlength="254" autocomplete="email" required />
       </div>
       <div class="field">
         <label for="c-company">Company <span class="optional">(optional)</span></label>
-        <input id="c-company" name="company" type="text" autocomplete="organization" />
+        <input id="c-company" name="company" type="text" maxlength="200" autocomplete="organization" />
       </div>
       <div class="field">
         <label for="c-subject">Subject</label>
-        <input id="c-subject" name="subject" type="text" required />
+        <input id="c-subject" name="subject" type="text" maxlength="200" required />
       </div>
       <div class="field">
         <label for="c-message">Message</label>
-        <textarea id="c-message" name="message" required></textarea>
+        <textarea id="c-message" name="message" maxlength="10000" required></textarea>
       </div>
       <div class="field field--checkbox">
         <label class="checkbox-label" for="c-subscribe">
