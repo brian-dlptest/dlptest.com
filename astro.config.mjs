@@ -44,11 +44,13 @@ export default defineConfig({
   output: "server",
   integrations: [
     sitemap({
-      // Filter out pages we don't want crawlers to land on. The Classification
+      // Filter out pages we don't want crawlers to land on. /admin/ is behind
+      // Cloudflare Access, so listing it only wastes crawl. The Classification
       // Test stub is intentionally noindex on production until the real page
       // ships; the legal pages are reachable from the footer but don't need
       // to compete in search results.
       filter: (page) =>
+        !page.includes("/admin/") &&
         !page.includes("/inspect-data") &&
         !page.includes("/privacy-policy") &&
         !page.includes("/terms-and-conditions"),

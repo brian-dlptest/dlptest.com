@@ -1,11 +1,11 @@
 ---
 title: "Bedrock Data raises $25M Series A"
-slug: "5680676-2"
+slug: "bedrock-data-raises-25m-series-a"
 pubDate: 2025-12-10T23:37:48+00:00
 categories: ["News", "Data Discovery", "data protection", "Data Security Posture Management", "DSPM"]
 excerpt: "Bedrock Data, a DSPM vendor, raised a $25 million Series A led by Greylock Partners and announced ArgusAI, which shows what data AI models and agents are accessing."
 heroImage: "https://dlptest.com/wp-content/uploads/bedrock_wordmark_dark_1.jpg"
-sourceUrl: "https://dlptest.com/5680676-2/"
+sourceUrl: "https://dlptest.com/bedrock-data-raises-25m-series-a/"
 ---
 
 **Bedrock Data**, a data security posture management (DSPM) vendor, announced a **$25 million Series A** led by Greylock Partners, with participation from Mangusta Capital, Mantis Venture Capital, Pier 88 Investment Partners, and others.

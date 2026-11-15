@@ -18,6 +18,10 @@
 /feed                               /feed.xml               301
 /comments/feed/                     /feed.xml               301
 /comments/feed                      /feed.xml               301
+
+# WordPress published this post under its numeric auto-slug. It now has a real one.
+/5680676-2/                         /bedrock-data-raises-25m-series-a/  301
+/5680676-2                          /bedrock-data-raises-25m-series-a/  301
 /wpautoterms/privacy-policy/        /privacy-policy/        301
 /wpautoterms/privacy-policy         /privacy-policy/        301
 /wpautoterms/terms-and-conditions/  /terms-and-conditions/  301

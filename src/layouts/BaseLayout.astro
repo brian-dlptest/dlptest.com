@@ -20,6 +20,10 @@ interface Props {
   modifiedTime?: Date;
   /** Path to the social-preview image (1200×630). Defaults to the site-wide card. */
   ogImage?: string;
+  /** Pages between Home and this one in the breadcrumb trail, e.g. Blog for a post. */
+  breadcrumbs?: { name: string; href: string }[];
+  /** Emit WebApplication structured data. For the interactive tool pages. */
+  webApp?: boolean;
 }
 
 const {
@@ -30,6 +34,8 @@ const {
   publishedTime,
   modifiedTime,
   ogImage = "/og-default.png",
+  breadcrumbs = [],
+  webApp = false,
 } = Astro.props;
 
 // Titles that already lead with the brand (e.g. the homepage's
@@ -74,6 +80,45 @@ const siteJsonLd =
         },
       ])
     : null;
+
+// Per-page structured data: a breadcrumb trail on every indexable page below
+// the homepage, plus WebApplication on the tool pages. Publisher resolves
+// against the Organization the homepage emits.
+const pageJsonLd =
+  currentPath === "/" || shouldNoindex
+    ? null
+    : JSON.stringify([
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { name: "Home", href: "/" },
+            ...breadcrumbs,
+            { name: title, href: Astro.url.pathname },
+          ].map((crumb, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: crumb.name,
+            item: new URL(crumb.href, "https://dlptest.com").toString(),
+          })),
+        },
+        ...(webApp
+          ? [
+              {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                name: title,
+                url: canonical,
+                description,
+                applicationCategory: "SecurityApplication",
+                operatingSystem: "Any",
+                isAccessibleForFree: true,
+                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+                publisher: { "@id": "https://dlptest.com/#organization" },
+              },
+            ]
+          : []),
+      ]);
 
 // Top level keeps the most-visited pages front and center (per GA4 the two
 // POST test pages dominate traffic); everything else lives under the
@@ -187,6 +232,7 @@ const headerNav: HeaderNavItem[] = nav.map((item) =>
     <meta name="theme-color" content="#f7f9fc" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
     {siteJsonLd && <script type="application/ld+json" set:html={siteJsonLd} />}
+    {pageJsonLd && <script type="application/ld+json" set:html={pageJsonLd} />}
     <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
     <link rel="icon" type="image/png" href="/apple-touch-icon.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

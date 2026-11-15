@@ -258,8 +258,21 @@ const faqs = [
       <p>Keep the evidence somewhere controlled, like a GRC tool or a SharePoint site with restricted access. Six months of trend data is the best thing you can show them.</p>`,
   },
 ];
+
+// FAQPage structured data for the questions rendered below. Answers keep
+// their HTML, which schema.org allows in acceptedAnswer text.
+const faqJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a.replace(/\s+/g, " ").trim() },
+  })),
+});
 ---
-<BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLPTest.com is a free testing resource for Data Loss Prevention (DLP) software. Sample data, HTTP POST test endpoints over both plain HTTP and HTTPS, and a public FTP server to verify your DLP is blocking what it should.">
+<BaseLayout title="DLP Test — Test Your Data Loss Prevention" description="DLP Test is a free resource for testing data loss prevention (DLP) software, with sample data, HTTP and HTTPS POST test pages, and a public FTP server.">
+  <script type="application/ld+json" set:html={faqJsonLd} />
   <section class="hero">
     <div class="hero-content">
       <h1>Does your DLP actually work?</h1>
