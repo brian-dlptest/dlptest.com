@@ -201,45 +201,50 @@ export const sampleNameDobEmail: NameDobEmailRow[] = [
 ];
 
 // /sample-data/namephonessn/ — Name + Phone + SSN. Added 2026-11 (issue #294),
-// not from the legacy site. Names and SSNs are the same fabricated rows as the
-// SSN tabs above. Every phone number is in 555-0100 through 555-0199, the range
-// reserved for fictional use, so none of them can ring a real person.
+// not from the legacy site. Every phone number is in 555-0100 through 555-0199,
+// the range reserved for fictional use, so none of them can ring a real person.
+//
+// The names and SSNs here are this tab's own and appear in no other tab. The
+// tab first reused the Name + SSN rows above, and Google Search Console then
+// flagged a page as "Duplicate, Google chose different canonical than user"
+// (2026-11-26). Keep new tabs' rows unique for the same reason. SSNs use
+// areas 100-665 so detectors that still apply pre-2011 area rules match them.
 export interface NamePhoneSsnRow {
   name: string;
   phone: string;
   ssn: string;
 }
 export const sampleNamePhoneSsn: NamePhoneSsnRow[] = [
-  { name: "Robert Aragon", phone: "(212) 555-0147", ssn: "489-36-8350" },
-  { name: "Ashley Borden", phone: "(312) 555-0182", ssn: "514-14-8905" },
-  { name: "Thomas Conley", phone: "(415) 555-0119", ssn: "690-05-5315" },
-  { name: "Susan Davis", phone: "(617) 555-0163", ssn: "421-37-1396" },
-  { name: "Christopher Diaz", phone: "(713) 555-0134", ssn: "458-02-6124" },
-  { name: "Rick Edwards", phone: "(305) 555-0178", ssn: "612-20-6833" },
-  { name: "Victor Faulkner", phone: "(404) 555-0125", ssn: "300-62-3266" },
-  { name: "Lisa Garrison", phone: "(206) 555-0191", ssn: "660-03-8360" },
-  { name: "Marjorie Green", phone: "(303) 555-0156", ssn: "213-46-8915" },
-  { name: "Mark Hall", phone: "(602) 555-0108", ssn: "449-48-3135" },
-  { name: "James Heard", phone: "(215) 555-0173", ssn: "559-81-1301" },
-  { name: "Albert Iorio", phone: "(214) 555-0140", ssn: "322-84-2281" },
-  { name: "Charles Jackson", phone: "(702) 555-0129", ssn: "646-44-9061" },
-  { name: "Teresa Kaminski", phone: "(503) 555-0187", ssn: "465-73-5022" },
-  { name: "Tim Lowe", phone: "(612) 555-0112", ssn: "044-34-6954" },
-  { name: "Monte Mceachern", phone: "(314) 555-0165", ssn: "477-36-0282" },
-  { name: "Adriane Morrison", phone: "(412) 555-0151", ssn: "421-90-3440" },
-  { name: "Jerome Munsch", phone: "(513) 555-0194", ssn: "524-02-7657" },
-  { name: "Agnes Nelson", phone: "(216) 555-0137", ssn: "205-52-0027" },
-  { name: "Lynette Oyola", phone: "(704) 555-0103", ssn: "587-03-2682" },
-  { name: "Stacey Peacock", phone: "(919) 555-0176", ssn: "687-05-8365" },
-  { name: "Julie Renfro", phone: "(615) 555-0148", ssn: "751-01-2327" },
-  { name: "Danny Reyes", phone: "(504) 555-0121", ssn: "624-84-9181" },
-  { name: "Jacki Russell", phone: "(801) 555-0169", ssn: "514-30-2668" },
-  { name: "Thomas Santos", phone: "(317) 555-0115", ssn: "451-80-3526" },
-  { name: "Mireille Townsend", phone: "(414) 555-0183", ssn: "404-12-2154" },
-  { name: "Lillian Venson", phone: "(916) 555-0131", ssn: "505-88-5714" },
-  { name: "Gail Watson", phone: "(816) 555-0158", ssn: "461-97-5660" },
-  { name: "Johnson White", phone: "(502) 555-0144", ssn: "172-32-1176" },
-  { name: "Rebecca Zwick", phone: "(207) 555-0172", ssn: "151-32-2558" },
+  { name: "Nadia Abernathy", phone: "(212) 555-0147", ssn: "137-76-4287" },
+  { name: "Marcus Bellamy", phone: "(312) 555-0182", ssn: "409-70-2411" },
+  { name: "Curtis Brennan", phone: "(415) 555-0119", ssn: "270-37-6449" },
+  { name: "Delia Carmichael", phone: "(617) 555-0163", ssn: "342-35-1418" },
+  { name: "Priya Castellano", phone: "(713) 555-0134", ssn: "265-60-0560" },
+  { name: "Owen Delacroix", phone: "(305) 555-0178", ssn: "267-96-3343" },
+  { name: "Hannah Ellison", phone: "(404) 555-0125", ssn: "141-75-8031" },
+  { name: "Simone Ferraro", phone: "(206) 555-0191", ssn: "254-92-0458" },
+  { name: "Raymond Fitzgerald", phone: "(303) 555-0156", ssn: "155-58-8467" },
+  { name: "Celeste Gutierrez", phone: "(602) 555-0108", ssn: "658-96-4493" },
+  { name: "Ingrid Halvorsen", phone: "(215) 555-0173", ssn: "585-90-0565" },
+  { name: "Darnell Hutchins", phone: "(214) 555-0140", ssn: "638-05-7795" },
+  { name: "Wesley Jardine", phone: "(702) 555-0129", ssn: "346-66-2769" },
+  { name: "Abel Kowalczyk", phone: "(503) 555-0187", ssn: "493-33-2537" },
+  { name: "Keiko Lindqvist", phone: "(612) 555-0112", ssn: "381-92-6702" },
+  { name: "Gordon Maddox", phone: "(314) 555-0165", ssn: "623-18-7501" },
+  { name: "Rosalind Navarro", phone: "(412) 555-0151", ssn: "341-37-8344" },
+  { name: "Tobias Okafor", phone: "(513) 555-0194", ssn: "639-14-4366" },
+  { name: "Nora Pemberton", phone: "(216) 555-0137", ssn: "198-18-5140" },
+  { name: "Vanessa Pruitt", phone: "(704) 555-0103", ssn: "181-63-2758" },
+  { name: "Leonard Quintero", phone: "(919) 555-0176", ssn: "184-10-0404" },
+  { name: "Bianca Rasmussen", phone: "(615) 555-0148", ssn: "141-38-3589" },
+  { name: "Douglas Sheffield", phone: "(504) 555-0121", ssn: "384-43-7272" },
+  { name: "Imani Thornton", phone: "(801) 555-0169", ssn: "359-32-0197" },
+  { name: "Felix Underwood", phone: "(317) 555-0115", ssn: "195-78-5123" },
+  { name: "Paloma Vance", phone: "(414) 555-0183", ssn: "214-99-7987" },
+  { name: "Grant Whitaker", phone: "(916) 555-0131", ssn: "644-66-7685" },
+  { name: "Yolanda Xiong", phone: "(816) 555-0158", ssn: "403-23-6986" },
+  { name: "Malcolm Yarbrough", phone: "(502) 555-0144", ssn: "332-33-1636" },
+  { name: "Esther Zamora", phone: "(207) 555-0172", ssn: "201-42-0661" },
 ];
 
 export interface DownloadFile {
@@ -281,10 +286,10 @@ export const downloadFiles: DownloadFile[] = [
   { key: "sample-dobemail.xls",  label: "Sample DOB & Email (XLS)",  group: "dobemail", approxBytes: 10_752 },
   { key: "sample-dobemail.xlsx", label: "Sample DOB & Email (XLSX)", group: "dobemail", approxBytes: 14_047 },
   { key: "sample-dobemail.pdf",  label: "Sample DOB & Email (PDF)",  group: "dobemail", approxBytes: 6_439 },
-  { key: "sample-phonessn.csv",  label: "Sample Phone & SSN (CSV)",  group: "phonessn", approxBytes: 1_298 },
+  { key: "sample-phonessn.csv",  label: "Sample Phone & SSN (CSV)",  group: "phonessn", approxBytes: 1_352 },
   { key: "sample-phonessn.xls",  label: "Sample Phone & SSN (XLS)",  group: "phonessn", approxBytes: 7_680 },
-  { key: "sample-phonessn.xlsx", label: "Sample Phone & SSN (XLSX)", group: "phonessn", approxBytes: 11_940 },
-  { key: "sample-phonessn.pdf",  label: "Sample Phone & SSN (PDF)",  group: "phonessn", approxBytes: 3_875 },
+  { key: "sample-phonessn.xlsx", label: "Sample Phone & SSN (XLSX)", group: "phonessn", approxBytes: 11_990 },
+  { key: "sample-phonessn.pdf",  label: "Sample Phone & SSN (PDF)",  group: "phonessn", approxBytes: 3_943 },
 ];
 
 export function humanSize(bytes: number): string {
