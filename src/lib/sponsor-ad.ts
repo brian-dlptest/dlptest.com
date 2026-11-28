@@ -12,12 +12,17 @@
  * with a 2x file (1940x500, 320x1200). Name files without "@" (e.g.
  * 970x250-2x.webp): Cloudflare's static assets 307-redirect "@" to "%40",
  * which costs every image an extra round trip.
+ *
+ * Off since 2026-11-27: Ent's Nov 19 webinar campaign is over, and Brian is
+ * asking Ent whether they want to run something new. The creatives and the
+ * report data (/admin/sponsors/) stay in place for the next campaign.
  */
-export const ADS_ENABLED = true;
+export const ADS_ENABLED = false;
 
 /**
- * Current campaign: Ent + SACR "Beyond EDR" webinar on 2026-11-19. The
- * creative is dated, so swap or switch it off once the webinar has happened.
+ * Last campaign: Ent + SACR "Beyond EDR" webinar on 2026-11-19 (ran
+ * 2026-11-07 to 2026-11-27). Replace the href, campaign and creatives below
+ * with the next one before turning ADS_ENABLED back on.
  */
 export const SPONSOR = {
   id: "ent",
